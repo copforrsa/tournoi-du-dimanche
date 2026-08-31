@@ -209,7 +209,7 @@ async function authState(){
   $('#resetPasswordCard').classList.add('hidden');
   $('#auth').classList.toggle('hidden',!!S.session);
   $('#main').classList.toggle('hidden',!S.session);
-  if(S.session)await boot();
+  if(S.session){try{await boot()}catch(error){toast('Connexion OK, mais chargement impossible : '+(error?.message||error))}}
 }
 $('#login').onclick=async()=>{const {error}=await sb.auth.signInWithPassword({email:$('#email').value.trim(),password:$('#password').value});error?toast(friendlyAuthError(error)):authState()};
 $('#signup').onclick=async()=>{const {data,error}=await sb.auth.signUp({email:$('#email').value.trim(),password:$('#password').value,options:{emailRedirectTo:APP_URL}});if(error)return toast(friendlyAuthError(error));toast(data.session?'Compte créé.':'Compte créé : vérifie ton email puis reconnecte-toi.')};
@@ -286,20 +286,17 @@ function renderPlayers(){const box=$('#playersList');box.innerHTML='';S.players.
 async function ensureWorkspace(){
   if(S.workspace)return S.workspace;
   const name=$('#newWorkspace').value.trim()||'Tournoi du dimanche';
-  const {error}=await sb.rpc('create_workspace',{p_name:name});
+  const {data:workspaceId,error}=await sb.rpc('create_workspace',{p_name:name});
   if(error)throw error;
-  const {data,error:memberError}=await sb.from('workspace_members').select('workspace_id,role,workspaces(name)').limit(1);
-  if(memberError)throw memberError;
-  if(!data?.length)throw new Error('Espace créé mais non retrouvé. Recharge la page.');
-  S.workspace={id:data[0].workspace_id,name:data[0].workspaces?.name||name,role:data[0].role};
+  if(!workspaceId)throw new Error('Impossible de créer l’espace.');
+  S.workspace={id:workspaceId,name,role:'admin'};
   $('#workspaceSetup').classList.add('hidden');
-  $('#workspaceName').textContent=S.workspace.name+' • '+(S.workspace.role==='admin'?'Administrateur':'Co-organisateur');
+  $('#workspaceName').textContent=name+' • Administrateur';
   return S.workspace;
 }
 $('#addPlayers').onclick=async()=>{
   const btn=$('#addPlayers');
-  const names=[...new Set($('#playersInput').value.split(/[,;
-]/).map(x=>x.trim()).filter(Boolean))];
+  const names=[...new Set($('#playersInput').value.split(/[,;\n]/).map(x=>x.trim()).filter(Boolean))];
   if(!names.length)return toast('Entre au moins un joueur.');
   btn.disabled=true;btn.textContent='Enregistrement…';
   try{
