@@ -312,7 +312,10 @@ $('#addPlayers').onclick=async()=>{
     const {error}=await sb.from('players').upsert(rows,{onConflict:'workspace_id,name',ignoreDuplicates:true});
     if(error)throw error;
     $('#playersInput').value='';
-    await loadAll();
+    const {data:freshPlayers,error:playersError}=await sb.from('players').select('*').eq('workspace_id',workspace.id).order('name');
+    if(playersError)throw playersError;
+    S.players=freshPlayers||[];
+    renderPlayers();
     toast(names.length+' joueur'+(names.length>1?'s':'')+' enregistré'+(names.length>1?'s':'')+' ✅');
   }catch(error){toast(friendlyAuthError(error))}
   finally{btn.disabled=false;btn.textContent='Enregistrer les joueurs'}
