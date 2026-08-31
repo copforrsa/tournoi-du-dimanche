@@ -38,17 +38,29 @@
 <div class="app">
   <section id="auth" class="auth">
     <div class="top"><h1>⚽ Tournoi du Dimanche</h1><p class="muted">Gestion partagée des tournois.</p></div>
-    <div class="card">
+    <div id="loginCard" class="card">
       <h2 class="sectiontitle">Connexion</h2>
-      <input id="email" type="email" placeholder="Email">
+      <input id="email" type="email" placeholder="Email" autocomplete="email">
       <div class="space"></div>
-      <input id="password" type="password" placeholder="Mot de passe">
+      <input id="password" type="password" placeholder="Mot de passe" autocomplete="current-password">
       <div class="space"></div>
       <div class="row">
         <button id="login" class="primary">Se connecter</button>
         <button id="signup">Créer mon compte</button>
       </div>
+      <div class="space"></div>
+      <button id="forgotPassword" type="button">Mot de passe oublié ?</button>
       <p class="muted">À la première inscription, confirme ton adresse email si Supabase te le demande.</p>
+    </div>
+
+    <div id="resetPasswordCard" class="card hidden">
+      <h2 class="sectiontitle">Choisir un nouveau mot de passe</h2>
+      <p class="muted">Le lien de récupération a été validé. Saisis maintenant ton nouveau mot de passe.</p>
+      <input id="newPassword" type="password" placeholder="Nouveau mot de passe" autocomplete="new-password">
+      <div class="space"></div>
+      <input id="confirmNewPassword" type="password" placeholder="Confirmer le nouveau mot de passe" autocomplete="new-password">
+      <div class="space"></div>
+      <button id="updatePassword" class="primary">Enregistrer le nouveau mot de passe</button>
     </div>
   </section>
 
@@ -98,7 +110,7 @@
       <div class="card">
         <h2 class="sectiontitle">Joueurs du groupe</h2>
         <textarea id="playersInput" rows="3" placeholder="Charly, Mika, Miguel..."></textarea>
-        <div class="space"></div><button id="addPlayers" class="primary">Ajouter</button>
+        <div class="space"></div><button id="addPlayers" class="primary">Enregistrer les joueurs</button><p class="muted">Les joueurs sont enregistrés dans ton groupe et restent disponibles chaque dimanche.</p>
       </div>
       <div class="card"><div id="playersList"></div></div>
     </div>
@@ -173,9 +185,57 @@ const toast=t=>{const x=$('#toast');x.textContent=t;x.style.display='block';setT
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const today=()=>new Date().toISOString().slice(0,10); $('#tourDate').value=today();
 function setView(v){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id==='view-'+v));document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.view===v));if(v==='ranking')renderRanking()}
-async function authState(){const {data}=await sb.auth.getSession();S.session=data.session;$('#auth').classList.toggle('hidden',!!S.session);$('#main').classList.toggle('hidden',!S.session);if(S.session)await boot()}
-$('#login').onclick=async()=>{const {error}=await sb.auth.signInWithPassword({email:$('#email').value.trim(),password:$('#password').value});error?toast(error.message):authState()};
-$('#signup').onclick=async()=>{const {data,error}=await sb.auth.signUp({email:$('#email').value.trim(),password:$('#password').value});if(error)return toast(error.message);toast(data.session?'Compte créé.':'Compte créé : vérifie ton email puis reconnecte-toi.')};
+let recoveryMode=/type=recovery/i.test(location.hash+location.search);
+const APP_URL='https://copforrsa.github.io/tournoi-du-dimanche/';
+function showRecoveryForm(){
+  recoveryMode=true;
+  $('#auth').classList.remove('hidden');
+  $('#main').classList.add('hidden');
+  $('#loginCard').classList.add('hidden');
+  $('#resetPasswordCard').classList.remove('hidden');
+}
+function friendlyAuthError(error){
+  const m=(error?.message||String(error||'')).toLowerCase();
+  if(m.includes('rate limit')) return 'Trop de demandes d’e-mail. Attends environ 1 heure avant de réessayer.';
+  if(m.includes('invalid login credentials')) return 'Email ou mot de passe incorrect.';
+  if(m.includes('expired')) return 'Ce lien a expiré. Demande un nouveau lien de récupération.';
+  return error?.message||'Une erreur est survenue.';
+}
+async function authState(){
+  const {data}=await sb.auth.getSession();
+  S.session=data.session;
+  if(recoveryMode){showRecoveryForm();return}
+  $('#loginCard').classList.remove('hidden');
+  $('#resetPasswordCard').classList.add('hidden');
+  $('#auth').classList.toggle('hidden',!!S.session);
+  $('#main').classList.toggle('hidden',!S.session);
+  if(S.session)await boot();
+}
+$('#login').onclick=async()=>{const {error}=await sb.auth.signInWithPassword({email:$('#email').value.trim(),password:$('#password').value});error?toast(friendlyAuthError(error)):authState()};
+$('#signup').onclick=async()=>{const {data,error}=await sb.auth.signUp({email:$('#email').value.trim(),password:$('#password').value,options:{emailRedirectTo:APP_URL}});if(error)return toast(friendlyAuthError(error));toast(data.session?'Compte créé.':'Compte créé : vérifie ton email puis reconnecte-toi.')};
+$('#forgotPassword').onclick=async()=>{
+  const email=$('#email').value.trim();
+  if(!email)return toast('Entre d’abord ton adresse email.');
+  $('#forgotPassword').disabled=true;
+  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:APP_URL});
+  $('#forgotPassword').disabled=false;
+  if(error)return toast(friendlyAuthError(error));
+  toast('Email envoyé. Ouvre le lien reçu pour choisir un nouveau mot de passe.');
+};
+$('#updatePassword').onclick=async()=>{
+  const p1=$('#newPassword').value,p2=$('#confirmNewPassword').value;
+  if(p1.length<8)return toast('Le mot de passe doit contenir au moins 8 caractères.');
+  if(p1!==p2)return toast('Les deux mots de passe ne correspondent pas.');
+  $('#updatePassword').disabled=true;
+  const {error}=await sb.auth.updateUser({password:p1});
+  $('#updatePassword').disabled=false;
+  if(error)return toast(friendlyAuthError(error));
+  recoveryMode=false;
+  $('#newPassword').value='';$('#confirmNewPassword').value='';
+  history.replaceState({},'',location.pathname);
+  toast('Mot de passe modifié avec succès.');
+  await authState();
+};
 $('#logout').onclick=async()=>{await sb.auth.signOut();location.reload()};
 
 async function boot(){
@@ -188,7 +248,12 @@ async function boot(){
   $('#workspaceName').textContent=S.workspace.name+' • '+(S.workspace.role==='admin'?'Administrateur':'Co-organisateur');
   await loadAll(); subscribeRealtime();
 }
-$('#createWorkspace').onclick=async()=>{const {error}=await sb.rpc('create_workspace',{p_name:$('#newWorkspace').value.trim()||'Tournoi du dimanche'});if(error)return toast(error.message);toast('Espace créé');await boot()};
+$('#createWorkspace').onclick=async()=>{
+  const btn=$('#createWorkspace');btn.disabled=true;btn.textContent='Création…';
+  try{await ensureWorkspace();toast('Espace créé ✅');await loadAll();subscribeRealtime()}
+  catch(error){toast(friendlyAuthError(error))}
+  finally{btn.disabled=false;btn.textContent="Créer l'espace"}
+};
 
 async function loadInvites(){
   const {data}=await sb.from('workspace_invites').select('id,email,role,workspaces(name)').is('accepted_at',null);
@@ -218,7 +283,36 @@ function renderHome(){const t=currentTour();$('#activeTourLabel').textContent=t?
 $('#sendInvite').onclick=async()=>{if(!S.workspace||S.workspace.role!=='admin')return toast('Seul l’administrateur peut inviter.');const email=$('#inviteEmail').value.trim().toLowerCase();if(!email)return;const {error}=await sb.from('workspace_invites').upsert({workspace_id:S.workspace.id,email,role:'coorganizer',invited_by:S.session.user.id},{onConflict:'workspace_id,email'});if(error)return toast(error.message);$('#inviteEmail').value='';toast('Invitation enregistrée.')};
 
 function renderPlayers(){const box=$('#playersList');box.innerHTML='';S.players.forEach(x=>{const d=document.createElement('div');d.className='player row';d.innerHTML='<span style="flex:1"><b>'+esc(x.name)+'</b><div class="muted">'+(x.active?'Actif':'Inactif')+'</div></span>';const b=document.createElement('button');b.textContent=x.active?'Désactiver':'Réactiver';b.onclick=async()=>{await sb.from('players').update({active:!x.active}).eq('id',x.id)};d.appendChild(b);box.appendChild(d)})}
-$('#addPlayers').onclick=async()=>{if(!S.workspace)return;const names=$('#playersInput').value.split(/[,;\n]/).map(x=>x.trim()).filter(Boolean);if(!names.length)return;const rows=names.map(name=>({workspace_id:S.workspace.id,name,active:true}));const {error}=await sb.from('players').upsert(rows,{onConflict:'workspace_id,name',ignoreDuplicates:true});if(error)return toast(error.message);$('#playersInput').value='';toast('Joueurs ajoutés')};
+async function ensureWorkspace(){
+  if(S.workspace)return S.workspace;
+  const name=$('#newWorkspace').value.trim()||'Tournoi du dimanche';
+  const {error}=await sb.rpc('create_workspace',{p_name:name});
+  if(error)throw error;
+  const {data,error:memberError}=await sb.from('workspace_members').select('workspace_id,role,workspaces(name)').limit(1);
+  if(memberError)throw memberError;
+  if(!data?.length)throw new Error('Espace créé mais non retrouvé. Recharge la page.');
+  S.workspace={id:data[0].workspace_id,name:data[0].workspaces?.name||name,role:data[0].role};
+  $('#workspaceSetup').classList.add('hidden');
+  $('#workspaceName').textContent=S.workspace.name+' • '+(S.workspace.role==='admin'?'Administrateur':'Co-organisateur');
+  return S.workspace;
+}
+$('#addPlayers').onclick=async()=>{
+  const btn=$('#addPlayers');
+  const names=[...new Set($('#playersInput').value.split(/[,;
+]/).map(x=>x.trim()).filter(Boolean))];
+  if(!names.length)return toast('Entre au moins un joueur.');
+  btn.disabled=true;btn.textContent='Enregistrement…';
+  try{
+    const workspace=await ensureWorkspace();
+    const rows=names.map(name=>({workspace_id:workspace.id,name,active:true}));
+    const {error}=await sb.from('players').upsert(rows,{onConflict:'workspace_id,name',ignoreDuplicates:true});
+    if(error)throw error;
+    $('#playersInput').value='';
+    await loadAll();
+    toast(names.length+' joueur'+(names.length>1?'s':'')+' enregistré'+(names.length>1?'s':'')+' ✅');
+  }catch(error){toast(friendlyAuthError(error))}
+  finally{btn.disabled=false;btn.textContent='Enregistrer les joueurs'}
+};
 
 function renderTournaments(){const ss=$('#seasonSelect');ss.innerHTML='<option value="">Sans saison</option>'+S.seasons.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');const box=$('#tournamentList');box.innerHTML='';S.tournaments.forEach(t=>{const d=document.createElement('div');d.className='player row';d.innerHTML='<span style="flex:1"><b>'+esc(t.name||('Tournoi du '+t.tournament_date))+'</b><div class="muted">'+t.tournament_date+' • '+(t.format==='king_of_pitch'?'Roi du terrain':'Classique')+'</div></span>';const b=document.createElement('button');b.textContent=t.id===S.activeTour?'Actif':'Ouvrir';if(t.id===S.activeTour)b.className='green';b.onclick=async()=>{S.activeTour=t.id;await loadTournament();renderAll();toast('Tournoi sélectionné')};d.appendChild(b);box.appendChild(d)})}
 $('#newSeasonBtn').onclick=()=>$('#newSeasonBox').classList.toggle('hidden');
@@ -245,6 +339,6 @@ $('#shareWhatsapp').onclick=async()=>{const text=$('#shareText').value;if(naviga
 function subscribeRealtime(){if(S.channel)sb.removeChannel(S.channel);let timer;const reload=()=>{clearTimeout(timer);timer=setTimeout(async()=>await loadAll(),250)};S.channel=sb.channel('tournoi-manager').on('postgres_changes',{event:'*',schema:'public',table:'players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'seasons'},reload).on('postgres_changes',{event:'*',schema:'public',table:'tournaments'},reload).on('postgres_changes',{event:'*',schema:'public',table:'tournament_players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'teams'},reload).on('postgres_changes',{event:'*',schema:'public',table:'team_players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'matches'},reload).on('postgres_changes',{event:'*',schema:'public',table:'goals'},reload).subscribe()}
 document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>setView(b.dataset.view));document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>setView(b.dataset.go));
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
-sb.auth.onAuthStateChange(()=>setTimeout(authState,0));authState();
+sb.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){S.session=session;showRecoveryForm();return}setTimeout(authState,0)});authState();
 </script>
 </body></html>
