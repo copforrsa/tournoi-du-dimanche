@@ -136,7 +136,7 @@
     <div id="view-teams" class="view">
       <div class="card"><h2 class="sectiontitle">Présents</h2><div id="attendanceList"></div></div>
       <div class="card">
-        <h2 class="sectiontitle">Équipes</h2>
+        <h2 class="sectiontitle">Équipes</h2><p class="muted">Les équipes sont propres à chaque tournoi. Tu peux les supprimer et en recréer de nouvelles chaque dimanche.</p>
         <div class="row"><input id="teamName" placeholder="Rouges, Bleus..." style="flex:1"><button id="addTeam">Ajouter</button><button id="autoTeams" class="primary">Répartition auto</button></div>
         <div id="teamList" style="margin-top:10px"></div>
       </div>
@@ -327,7 +327,30 @@ $('#createSeason').onclick=async()=>{const name=$('#seasonName').value.trim();if
 $('#createTournament').onclick=async()=>{const date=$('#tourDate').value;if(!date)return toast('Choisis une date');const row={workspace_id:S.workspace.id,season_id:$('#seasonSelect').value||null,name:$('#tourName').value.trim()||null,tournament_date:date,format:$('#tourFormat').value,status:'draft'};const {data,error}=await sb.from('tournaments').insert(row).select().single();if(error)return toast(error.message);S.activeTour=data.id;$('#tourName').value='';await loadAll();toast('Tournoi créé')};
 
 function presentIds(){return new Set(S.tPlayers.filter(x=>x.present).map(x=>x.player_id))} function teamPlayerIds(teamId){return S.teamPlayers.filter(x=>x.team_id===teamId).map(x=>x.player_id)}
-function renderTeams(){const t=currentTour(),att=$('#attendanceList'),box=$('#teamList');att.innerHTML='';box.innerHTML='';if(!t){att.innerHTML='<p class="muted">Crée ou ouvre un tournoi.</p>';return}const prs=presentIds();S.players.filter(x=>x.active).forEach(x=>{const l=document.createElement('label');l.className='player row';const c=document.createElement('input');c.type='checkbox';c.style.width='auto';c.checked=prs.has(x.id);c.onchange=async()=>{await sb.from('tournament_players').upsert({tournament_id:t.id,player_id:x.id,present:c.checked},{onConflict:'tournament_id,player_id'})};l.append(c,document.createTextNode(x.name));att.appendChild(l)});S.teams.forEach(team=>{const d=document.createElement('div');d.className='team';d.innerHTML='<b>'+esc(team.name)+'</b>';const ids=new Set(teamPlayerIds(team.id));const sel=document.createElement('select');sel.innerHTML='<option value="">Ajouter un joueur...</option>'+S.players.filter(x=>prs.has(x.id)&&!S.teamPlayers.some(tp=>tp.player_id===x.id)).map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('');sel.onchange=async()=>{if(sel.value)await sb.from('team_players').insert({team_id:team.id,player_id:sel.value})};d.appendChild(sel);ids.forEach(id=>{const pl=p(id);if(!pl)return;const r=document.createElement('div');r.className='row small';r.innerHTML='<span style="flex:1">'+esc(pl.name)+'</span>';const b=document.createElement('button');b.textContent='×';b.onclick=async()=>await sb.from('team_players').delete().eq('team_id',team.id).eq('player_id',id);r.appendChild(b);d.appendChild(r)});box.appendChild(d)})}
+function renderTeams(){const t=currentTour(),att=$('#attendanceList'),box=$('#teamList');att.innerHTML='';box.innerHTML='';if(!t){att.innerHTML='<p class="muted">Crée ou ouvre un tournoi.</p>';return}const prs=presentIds();S.players.filter(x=>x.active).forEach(x=>{const l=document.createElement('label');l.className='player row';const c=document.createElement('input');c.type='checkbox';c.style.width='auto';c.checked=prs.has(x.id);c.onchange=async()=>{await sb.from('tournament_players').upsert({tournament_id:t.id,player_id:x.id,present:c.checked},{onConflict:'tournament_id,player_id'})};l.append(c,document.createTextNode(x.name));att.appendChild(l)});S.teams.forEach(team=>{
+  const d=document.createElement('div');d.className='team';
+  const head=document.createElement('div');head.className='row';head.style.justifyContent='space-between';
+  const title=document.createElement('b');title.textContent=team.name;
+  const del=document.createElement('button');del.textContent='Supprimer';del.className='danger';
+  del.onclick=async()=>{
+    const hasMatches=S.matches.some(m=>m.home_team_id===team.id||m.away_team_id===team.id);
+    const msg=hasMatches
+      ? 'Supprimer cette équipe ? Les matchs, buts et statistiques liés à cette équipe seront aussi supprimés.'
+      : 'Supprimer cette équipe ?';
+    if(!confirm(msg))return;
+    del.disabled=true;
+    const {error}=await sb.from('teams').delete().eq('id',team.id);
+    if(error){del.disabled=false;return toast(error.message)}
+    S.teams=S.teams.filter(x=>x.id!==team.id);
+    S.teamPlayers=S.teamPlayers.filter(x=>x.team_id!==team.id);
+    S.matches=S.matches.filter(m=>m.home_team_id!==team.id&&m.away_team_id!==team.id);
+    const validMatchIds=new Set(S.matches.map(m=>m.id));
+    S.goals=S.goals.filter(g=>validMatchIds.has(g.match_id));
+    renderAll();
+    toast('Équipe supprimée ✅');
+  };
+  head.append(title,del);d.appendChild(head);
+  const ids=new Set(teamPlayerIds(team.id));const sel=document.createElement('select');sel.innerHTML='<option value="">Ajouter un joueur...</option>'+S.players.filter(x=>prs.has(x.id)&&!S.teamPlayers.some(tp=>tp.player_id===x.id)).map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('');sel.onchange=async()=>{if(sel.value)await sb.from('team_players').insert({team_id:team.id,player_id:sel.value})};d.appendChild(sel);ids.forEach(id=>{const pl=p(id);if(!pl)return;const r=document.createElement('div');r.className='row small';r.innerHTML='<span style="flex:1">'+esc(pl.name)+'</span>';const b=document.createElement('button');b.textContent='×';b.onclick=async()=>await sb.from('team_players').delete().eq('team_id',team.id).eq('player_id',id);r.appendChild(b);d.appendChild(r)});box.appendChild(d)})}
 $('#addTeam').onclick=async()=>{const t=currentTour(),name=$('#teamName').value.trim();if(!t||!name)return;const {error}=await sb.from('teams').insert({tournament_id:t.id,name});if(error)return toast(error.message);$('#teamName').value=''};
 $('#autoTeams').onclick=async()=>{const ids=[...presentIds()];if(S.teams.length<2||!ids.length)return toast('Il faut au moins 2 équipes et des présents.');for(const x of S.teamPlayers)await sb.from('team_players').delete().eq('team_id',x.team_id).eq('player_id',x.player_id);ids.sort(()=>Math.random()-.5);const rows=ids.map((id,i)=>({team_id:S.teams[i%S.teams.length].id,player_id:id}));const {error}=await sb.from('team_players').insert(rows);error?toast(error.message):toast('Répartition effectuée')};
 
