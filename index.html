@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101827">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Tournoi Foot">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <title>Tournoi du Dimanche</title>
+  <style>
+    :root{--bg:#f4f7fb;--card:#fff;--text:#172033;--muted:#70809b;--border:#e4e9f1;--nav:#101827;--accent:#2359c4}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+    .app{max-width:960px;margin:auto;padding:14px 14px 92px}
+    .top{background:linear-gradient(135deg,#101827,#253b66);color:#fff;border-radius:20px;padding:18px;margin-bottom:12px}
+    .top h1{margin:0;font-size:22px} .top .muted{color:#d7e0ef}
+    .muted{color:var(--muted);font-size:13px} .small{font-size:12px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:15px;margin:10px 0;box-shadow:0 6px 18px rgba(23,32,51,.04)}
+    button,input,select,textarea{font:inherit} button{min-height:44px;border:0;border-radius:12px;padding:10px 14px;font-weight:700;background:#edf2f8;color:var(--text);cursor:pointer}
+    .primary{background:var(--accent);color:white} .green{background:#e9f8ef;color:#176c3c} .danger{background:#fff1f1;color:#a42727}
+    input,select,textarea{width:100%;min-height:44px;border:1px solid #dbe2ec;border-radius:12px;padding:10px;background:#fff;color:var(--text)}
+    .row{display:flex;gap:9px;align-items:center;flex-wrap:wrap} .grid{display:grid;gap:10px} .g2{grid-template-columns:repeat(2,minmax(0,1fr))} .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .hidden{display:none!important} .view{display:none} .view.active{display:block}
+    .tabs{position:fixed;bottom:0;left:0;right:0;z-index:10;display:flex;justify-content:center;gap:2px;background:rgba(255,255,255,.97);border-top:1px solid #dfe5ee;padding:7px 5px calc(7px + env(safe-area-inset-bottom))}
+    .tabs button{background:transparent;font-size:11px;padding:7px 8px} .tabs button.active{background:#172033;color:#fff}
+    .player,.team,.match{border:1px solid #e2e7ef;border-radius:14px;padding:11px;margin:7px 0}
+    .score{font-size:25px;font-weight:900} .rank{display:grid;grid-template-columns:42px 1fr 65px;gap:8px;padding:9px 0;border-bottom:1px solid #edf0f5}
+    .rank:last-child{border-bottom:0} .right{text-align:right} .toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:50;background:#172033;color:#fff;padding:10px 15px;border-radius:12px;display:none;max-width:92%}
+    .auth{max-width:440px;margin:8vh auto} .space{height:8px} .sectiontitle{font-size:17px;margin:0 0 10px}
+    @media(max-width:650px){.g2,.g3{grid-template-columns:1fr}.top{border-radius:0;margin:-14px -14px 12px}.tabs{overflow-x:auto;justify-content:flex-start}}
+  </style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+<div class="app">
+  <section id="auth" class="auth">
+    <div class="top"><h1>⚽ Tournoi du Dimanche</h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="card">
+      <h2 class="sectiontitle">Connexion</h2>
+      <input id="email" type="email" placeholder="Email">
+      <div class="space"></div>
+      <input id="password" type="password" placeholder="Mot de passe">
+      <div class="space"></div>
+      <div class="row">
+        <button id="login" class="primary">Se connecter</button>
+        <button id="signup">Créer mon compte</button>
+      </div>
+      <p class="muted">À la première inscription, confirme ton adresse email si Supabase te le demande.</p>
+    </div>
+  </section>
+
+  <section id="main" class="hidden">
+    <header class="top">
+      <div class="row" style="justify-content:space-between">
+        <div><h1>⚽ Tournoi du Dimanche</h1><div id="workspaceName" class="muted"></div></div>
+        <button id="logout">Déconnexion</button>
+      </div>
+    </header>
+
+    <div id="workspaceSetup" class="card hidden">
+      <h2 class="sectiontitle">Créer ton espace</h2>
+      <input id="newWorkspace" value="Tournoi du dimanche">
+      <div class="space"></div>
+      <button id="createWorkspace" class="primary">Créer l'espace</button>
+    </div>
+
+    <div id="inviteBox" class="card hidden"><h2 class="sectiontitle">Invitation reçue</h2><div id="inviteList"></div></div>
+
+    <div id="view-home" class="view active">
+      <div class="card">
+        <h2 class="sectiontitle">Tournoi actif</h2>
+        <div id="activeTourLabel" class="muted">Aucun tournoi</div>
+        <div id="homeStats" class="grid g3" style="margin-top:12px"></div>
+      </div>
+      <div class="card">
+        <h2 class="sectiontitle">Actions rapides</h2>
+        <div class="grid g2">
+          <button data-go="players">👥 Gérer les joueurs</button>
+          <button data-go="tournaments">📅 Nouveau tournoi</button>
+          <button data-go="matches">⚽ Saisir les matchs</button>
+          <button data-go="ranking">🏆 Classements</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2 class="sectiontitle">Co-organisateur</h2>
+        <div class="row">
+          <input id="inviteEmail" type="email" placeholder="Email du co-organisateur" style="flex:1">
+          <button id="sendInvite" class="primary">Inviter</button>
+        </div>
+        <div id="memberList" class="muted" style="margin-top:10px"></div>
+      </div>
+    </div>
+
+    <div id="view-players" class="view">
+      <div class="card">
+        <h2 class="sectiontitle">Joueurs du groupe</h2>
+        <textarea id="playersInput" rows="3" placeholder="Charly, Mika, Miguel..."></textarea>
+        <div class="space"></div><button id="addPlayers" class="primary">Ajouter</button>
+      </div>
+      <div class="card"><div id="playersList"></div></div>
+    </div>
+
+    <div id="view-tournaments" class="view">
+      <div class="card">
+        <h2 class="sectiontitle">Saison</h2>
+        <div class="row"><select id="seasonSelect" style="flex:1"></select><button id="newSeasonBtn">+ Saison</button></div>
+        <div id="newSeasonBox" class="hidden" style="margin-top:10px">
+          <input id="seasonName" placeholder="Ex. Saison 2026-2027"><div class="space"></div>
+          <button id="createSeason" class="primary">Créer</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2 class="sectiontitle">Créer un tournoi</h2>
+        <div class="grid g2"><input id="tourDate" type="date"><select id="tourFormat"><option value="classic">Classique</option><option value="king_of_pitch">Roi du terrain</option></select></div>
+        <div class="space"></div><input id="tourName" placeholder="Nom facultatif"><div class="space"></div>
+        <button id="createTournament" class="primary">Créer le tournoi</button>
+      </div>
+      <div class="card"><h2 class="sectiontitle">Historique</h2><div id="tournamentList"></div></div>
+    </div>
+
+    <div id="view-teams" class="view">
+      <div class="card"><h2 class="sectiontitle">Présents</h2><div id="attendanceList"></div></div>
+      <div class="card">
+        <h2 class="sectiontitle">Équipes</h2>
+        <div class="row"><input id="teamName" placeholder="Rouges, Bleus..." style="flex:1"><button id="addTeam">Ajouter</button><button id="autoTeams" class="primary">Répartition auto</button></div>
+        <div id="teamList" style="margin-top:10px"></div>
+      </div>
+    </div>
+
+    <div id="view-matches" class="view">
+      <div class="card">
+        <h2 class="sectiontitle">Créer les matchs</h2>
+        <button id="roundRobin">Générer tous les matchs</button>
+        <div class="space"></div>
+        <div class="grid g2"><select id="homeTeam"></select><select id="awayTeam"></select></div>
+        <div class="space"></div>
+        <div class="grid g2"><input id="pitch" placeholder="Terrain"><input id="roundLabel" placeholder="Tour / étape"></div>
+        <div class="space"></div><button id="addMatch" class="primary">Ajouter le match</button>
+      </div>
+      <div id="matchesList"></div>
+    </div>
+
+    <div id="view-ranking" class="view">
+      <div class="card"><div class="row"><button class="rankMode primary" data-mode="day">Tournoi</button><button class="rankMode" data-mode="season">Saison</button></div></div>
+      <div class="grid g2">
+        <div class="card"><h2 class="sectiontitle">⚽ Buteurs</h2><div id="scorerRank"></div></div>
+        <div class="card"><h2 class="sectiontitle">🎯 Passeurs</h2><div id="assistRank"></div></div>
+      </div>
+      <div class="card"><h2 class="sectiontitle">🏆 Classement équipes</h2><div id="teamRank"></div></div>
+      <div class="card"><h2 class="sectiontitle">Partager</h2><textarea id="shareText" rows="10" readonly></textarea><div class="space"></div><button id="shareWhatsapp" class="primary">Partager le résumé</button></div>
+    </div>
+
+    <nav class="tabs">
+      <button class="tab active" data-view="home">Accueil</button>
+      <button class="tab" data-view="players">Joueurs</button>
+      <button class="tab" data-view="tournaments">Tournois</button>
+      <button class="tab" data-view="teams">Équipes</button>
+      <button class="tab" data-view="matches">Matchs</button>
+      <button class="tab" data-view="ranking">Classements</button>
+    </nav>
+  </section>
+</div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
+const sb=createClient('https://fbppesfxkvledwjemwsn.supabase.co','sb_publishable_Kl3HDD4S08YC1EB-cWJKaQ_e9gCbygp');
+const S={session:null,workspace:null,members:[],players:[],seasons:[],tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matches:[],goals:[],rankMode:'day',channel:null};
+const $=s=>document.querySelector(s);
+const toast=t=>{const x=$('#toast');x.textContent=t;x.style.display='block';setTimeout(()=>x.style.display='none',2600)};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const today=()=>new Date().toISOString().slice(0,10); $('#tourDate').value=today();
+function setView(v){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id==='view-'+v));document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.view===v));if(v==='ranking')renderRanking()}
+async function authState(){const {data}=await sb.auth.getSession();S.session=data.session;$('#auth').classList.toggle('hidden',!!S.session);$('#main').classList.toggle('hidden',!S.session);if(S.session)await boot()}
+$('#login').onclick=async()=>{const {error}=await sb.auth.signInWithPassword({email:$('#email').value.trim(),password:$('#password').value});error?toast(error.message):authState()};
+$('#signup').onclick=async()=>{const {data,error}=await sb.auth.signUp({email:$('#email').value.trim(),password:$('#password').value});if(error)return toast(error.message);toast(data.session?'Compte créé.':'Compte créé : vérifie ton email puis reconnecte-toi.')};
+$('#logout').onclick=async()=>{await sb.auth.signOut();location.reload()};
+
+async function boot(){
+  await loadInvites();
+  const {data,error}=await sb.from('workspace_members').select('workspace_id,role,workspaces(name)').limit(10);
+  if(error)return toast(error.message);
+  if(!data?.length){$('#workspaceSetup').classList.remove('hidden');return}
+  S.workspace={id:data[0].workspace_id,name:data[0].workspaces?.name||'Tournoi du dimanche',role:data[0].role};
+  $('#workspaceSetup').classList.add('hidden');
+  $('#workspaceName').textContent=S.workspace.name+' • '+(S.workspace.role==='admin'?'Administrateur':'Co-organisateur');
+  await loadAll(); subscribeRealtime();
+}
+$('#createWorkspace').onclick=async()=>{const {error}=await sb.rpc('create_workspace',{p_name:$('#newWorkspace').value.trim()||'Tournoi du dimanche'});if(error)return toast(error.message);toast('Espace créé');await boot()};
+
+async function loadInvites(){
+  const {data}=await sb.from('workspace_invites').select('id,email,role,workspaces(name)').is('accepted_at',null);
+  const box=$('#inviteList');box.innerHTML='';$('#inviteBox').classList.toggle('hidden',!data?.length);
+  (data||[]).forEach(i=>{const d=document.createElement('div');d.className='player row';d.innerHTML='<span style="flex:1">Invitation : <b>'+esc(i.workspaces?.name||'Tournoi')+'</b></span>';const b=document.createElement('button');b.textContent='Accepter';b.onclick=async()=>{const {error}=await sb.rpc('accept_workspace_invite',{p_invite_id:i.id});if(error)return toast(error.message);toast('Invitation acceptée');await boot()};d.appendChild(b);box.appendChild(d)})
+}
+async function loadAll(){
+  if(!S.workspace)return;const w=S.workspace.id;let r;
+  r=await sb.from('workspace_members').select('user_id,role').eq('workspace_id',w);S.members=r.data||[];
+  r=await sb.from('players').select('*').eq('workspace_id',w).order('name');S.players=r.data||[];
+  r=await sb.from('seasons').select('*').eq('workspace_id',w).order('starts_on',{ascending:false});S.seasons=r.data||[];
+  r=await sb.from('tournaments').select('*').eq('workspace_id',w).order('tournament_date',{ascending:false});S.tournaments=r.data||[];
+  if(!S.activeTour&&S.tournaments.length)S.activeTour=S.tournaments[0].id;
+  await loadTournament();renderAll()
+}
+async function loadTournament(){
+  const t=currentTour();if(!t){S.tPlayers=[];S.teams=[];S.teamPlayers=[];S.matches=[];S.goals=[];return}let r;
+  r=await sb.from('tournament_players').select('*').eq('tournament_id',t.id);S.tPlayers=r.data||[];
+  r=await sb.from('teams').select('*').eq('tournament_id',t.id).order('created_at');S.teams=r.data||[];
+  const tids=S.teams.map(x=>x.id);if(tids.length){r=await sb.from('team_players').select('*').in('team_id',tids);S.teamPlayers=r.data||[]}else S.teamPlayers=[];
+  r=await sb.from('matches').select('*').eq('tournament_id',t.id).order('match_order');S.matches=r.data||[];
+  const mids=S.matches.map(x=>x.id);if(mids.length){r=await sb.from('goals').select('*').in('match_id',mids).order('created_at');S.goals=r.data||[]}else S.goals=[]
+}
+function currentTour(){return S.tournaments.find(x=>x.id===S.activeTour)} function p(id){return S.players.find(x=>x.id===id)} function tm(id){return S.teams.find(x=>x.id===id)}
+function renderAll(){renderHome();renderPlayers();renderTournaments();renderTeams();renderMatches();renderRanking();$('#memberList').textContent=S.members.length+' organisateur'+(S.members.length>1?'s':'')+' autorisé'+(S.members.length>1?'s':'')}
+function renderHome(){const t=currentTour();$('#activeTourLabel').textContent=t?((t.name||'Tournoi')+' • '+t.tournament_date+' • '+(t.format==='king_of_pitch'?'Roi du terrain':'Classique')):'Aucun tournoi';const present=S.tPlayers.filter(x=>x.present).length;$('#homeStats').innerHTML='<div class="player"><b>'+present+'</b><div class="muted">présents</div></div><div class="player"><b>'+S.teams.length+'</b><div class="muted">équipes</div></div><div class="player"><b>'+S.matches.length+'</b><div class="muted">matchs</div></div>'}
+$('#sendInvite').onclick=async()=>{if(!S.workspace||S.workspace.role!=='admin')return toast('Seul l’administrateur peut inviter.');const email=$('#inviteEmail').value.trim().toLowerCase();if(!email)return;const {error}=await sb.from('workspace_invites').upsert({workspace_id:S.workspace.id,email,role:'coorganizer',invited_by:S.session.user.id},{onConflict:'workspace_id,email'});if(error)return toast(error.message);$('#inviteEmail').value='';toast('Invitation enregistrée.')};
+
+function renderPlayers(){const box=$('#playersList');box.innerHTML='';S.players.forEach(x=>{const d=document.createElement('div');d.className='player row';d.innerHTML='<span style="flex:1"><b>'+esc(x.name)+'</b><div class="muted">'+(x.active?'Actif':'Inactif')+'</div></span>';const b=document.createElement('button');b.textContent=x.active?'Désactiver':'Réactiver';b.onclick=async()=>{await sb.from('players').update({active:!x.active}).eq('id',x.id)};d.appendChild(b);box.appendChild(d)})}
+$('#addPlayers').onclick=async()=>{if(!S.workspace)return;const names=$('#playersInput').value.split(/[,;\n]/).map(x=>x.trim()).filter(Boolean);if(!names.length)return;const rows=names.map(name=>({workspace_id:S.workspace.id,name,active:true}));const {error}=await sb.from('players').upsert(rows,{onConflict:'workspace_id,name',ignoreDuplicates:true});if(error)return toast(error.message);$('#playersInput').value='';toast('Joueurs ajoutés')};
+
+function renderTournaments(){const ss=$('#seasonSelect');ss.innerHTML='<option value="">Sans saison</option>'+S.seasons.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');const box=$('#tournamentList');box.innerHTML='';S.tournaments.forEach(t=>{const d=document.createElement('div');d.className='player row';d.innerHTML='<span style="flex:1"><b>'+esc(t.name||('Tournoi du '+t.tournament_date))+'</b><div class="muted">'+t.tournament_date+' • '+(t.format==='king_of_pitch'?'Roi du terrain':'Classique')+'</div></span>';const b=document.createElement('button');b.textContent=t.id===S.activeTour?'Actif':'Ouvrir';if(t.id===S.activeTour)b.className='green';b.onclick=async()=>{S.activeTour=t.id;await loadTournament();renderAll();toast('Tournoi sélectionné')};d.appendChild(b);box.appendChild(d)})}
+$('#newSeasonBtn').onclick=()=>$('#newSeasonBox').classList.toggle('hidden');
+$('#createSeason').onclick=async()=>{const name=$('#seasonName').value.trim();if(!name)return;const {error}=await sb.from('seasons').insert({workspace_id:S.workspace.id,name,starts_on:today(),is_active:true});if(error)return toast(error.message);$('#seasonName').value='';$('#newSeasonBox').classList.add('hidden');toast('Saison créée')};
+$('#createTournament').onclick=async()=>{const date=$('#tourDate').value;if(!date)return toast('Choisis une date');const row={workspace_id:S.workspace.id,season_id:$('#seasonSelect').value||null,name:$('#tourName').value.trim()||null,tournament_date:date,format:$('#tourFormat').value,status:'draft'};const {data,error}=await sb.from('tournaments').insert(row).select().single();if(error)return toast(error.message);S.activeTour=data.id;$('#tourName').value='';await loadAll();toast('Tournoi créé')};
+
+function presentIds(){return new Set(S.tPlayers.filter(x=>x.present).map(x=>x.player_id))} function teamPlayerIds(teamId){return S.teamPlayers.filter(x=>x.team_id===teamId).map(x=>x.player_id)}
+function renderTeams(){const t=currentTour(),att=$('#attendanceList'),box=$('#teamList');att.innerHTML='';box.innerHTML='';if(!t){att.innerHTML='<p class="muted">Crée ou ouvre un tournoi.</p>';return}const prs=presentIds();S.players.filter(x=>x.active).forEach(x=>{const l=document.createElement('label');l.className='player row';const c=document.createElement('input');c.type='checkbox';c.style.width='auto';c.checked=prs.has(x.id);c.onchange=async()=>{await sb.from('tournament_players').upsert({tournament_id:t.id,player_id:x.id,present:c.checked},{onConflict:'tournament_id,player_id'})};l.append(c,document.createTextNode(x.name));att.appendChild(l)});S.teams.forEach(team=>{const d=document.createElement('div');d.className='team';d.innerHTML='<b>'+esc(team.name)+'</b>';const ids=new Set(teamPlayerIds(team.id));const sel=document.createElement('select');sel.innerHTML='<option value="">Ajouter un joueur...</option>'+S.players.filter(x=>prs.has(x.id)&&!S.teamPlayers.some(tp=>tp.player_id===x.id)).map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('');sel.onchange=async()=>{if(sel.value)await sb.from('team_players').insert({team_id:team.id,player_id:sel.value})};d.appendChild(sel);ids.forEach(id=>{const pl=p(id);if(!pl)return;const r=document.createElement('div');r.className='row small';r.innerHTML='<span style="flex:1">'+esc(pl.name)+'</span>';const b=document.createElement('button');b.textContent='×';b.onclick=async()=>await sb.from('team_players').delete().eq('team_id',team.id).eq('player_id',id);r.appendChild(b);d.appendChild(r)});box.appendChild(d)})}
+$('#addTeam').onclick=async()=>{const t=currentTour(),name=$('#teamName').value.trim();if(!t||!name)return;const {error}=await sb.from('teams').insert({tournament_id:t.id,name});if(error)return toast(error.message);$('#teamName').value=''};
+$('#autoTeams').onclick=async()=>{const ids=[...presentIds()];if(S.teams.length<2||!ids.length)return toast('Il faut au moins 2 équipes et des présents.');for(const x of S.teamPlayers)await sb.from('team_players').delete().eq('team_id',x.team_id).eq('player_id',x.player_id);ids.sort(()=>Math.random()-.5);const rows=ids.map((id,i)=>({team_id:S.teams[i%S.teams.length].id,player_id:id}));const {error}=await sb.from('team_players').insert(rows);error?toast(error.message):toast('Répartition effectuée')};
+
+function matchOptions(){return '<option value="">Choisir</option>'+S.teams.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')}
+function renderMatches(){$('#homeTeam').innerHTML=matchOptions();$('#awayTeam').innerHTML=matchOptions();const box=$('#matchesList');box.innerHTML='';S.matches.forEach((m,i)=>{const home=tm(m.home_team_id),away=tm(m.away_team_id);if(!home||!away)return;const d=document.createElement('div');d.className='card match';d.innerHTML='<div class="muted">Match '+(i+1)+(m.pitch?' • '+esc(m.pitch):'')+'</div><div class="row" style="justify-content:space-between"><b>'+esc(home.name)+'</b><span class="score">'+m.home_score+' - '+m.away_score+'</span><b>'+esc(away.name)+'</b></div>';const form=document.createElement('div');form.className='grid g3';const team=document.createElement('select'),sc=document.createElement('select'),as=document.createElement('select');team.innerHTML='<option value="'+home.id+'">'+esc(home.name)+'</option><option value="'+away.id+'">'+esc(away.name)+'</option>';function fill(){const ids=teamPlayerIds(team.value);sc.innerHTML='<option value="">Buteur</option>'+ids.map(id=>'<option value="'+id+'">'+esc(p(id)?.name||'')+'</option>').join('');as.innerHTML='<option value="">Sans passe</option>'+ids.map(id=>'<option value="'+id+'">'+esc(p(id)?.name||'')+'</option>').join('')}fill();team.onchange=fill;form.append(team,sc,as);const b=document.createElement('button');b.textContent='+ But';b.className='primary';b.onclick=async()=>{if(!sc.value)return toast('Choisis le buteur');if(as.value===sc.value)return toast('Buteur et passeur différents');const {error}=await sb.from('goals').insert({match_id:m.id,team_id:team.value,scorer_player_id:sc.value,assister_player_id:as.value||null});if(error)toast(error.message)};d.append(form,b);const hist=document.createElement('div');hist.style.marginTop='8px';S.goals.filter(g=>g.match_id===m.id).forEach(g=>{const r=document.createElement('div');r.className='row small';r.innerHTML='<span style="flex:1">⚽ '+esc(p(g.scorer_player_id)?.name||'?')+(g.assister_player_id?' ← '+esc(p(g.assister_player_id)?.name||''):'')+'</span>';const x=document.createElement('button');x.textContent='Annuler';x.onclick=async()=>await sb.from('goals').delete().eq('id',g.id);r.appendChild(x);hist.appendChild(r)});d.appendChild(hist);box.appendChild(d)})}
+$('#addMatch').onclick=async()=>{const t=currentTour(),home=$('#homeTeam').value,away=$('#awayTeam').value;if(!t||!home||!away||home===away)return toast('Choisis deux équipes différentes');const {error}=await sb.from('matches').insert({tournament_id:t.id,home_team_id:home,away_team_id:away,match_order:S.matches.length+1,pitch:$('#pitch').value.trim()||null,round_label:$('#roundLabel').value.trim()||null});if(error)toast(error.message);else{$('#pitch').value='';$('#roundLabel').value=''}};
+$('#roundRobin').onclick=async()=>{const t=currentTour();if(!t||S.teams.length<2)return toast('Crée les équipes d’abord');const existing=new Set(S.matches.map(m=>[m.home_team_id,m.away_team_id].sort().join('|'))),rows=[];let n=S.matches.length+1;for(let i=0;i<S.teams.length;i++)for(let j=i+1;j<S.teams.length;j++){const key=[S.teams[i].id,S.teams[j].id].sort().join('|');if(!existing.has(key))rows.push({tournament_id:t.id,home_team_id:S.teams[i].id,away_team_id:S.teams[j].id,match_order:n++})}if(!rows.length)return toast('Tous les matchs existent déjà');const {error}=await sb.from('matches').insert(rows);error?toast(error.message):toast(rows.length+' matchs générés')};
+
+async function seasonGoals(){const t=currentTour();if(S.rankMode==='day')return S.goals;if(!t?.season_id)return S.goals;const tids=S.tournaments.filter(x=>x.season_id===t.season_id).map(x=>x.id);if(!tids.length)return[];const mr=await sb.from('matches').select('id').in('tournament_id',tids);const mids=(mr.data||[]).map(x=>x.id);if(!mids.length)return[];const gr=await sb.from('goals').select('*').in('match_id',mids);return gr.data||[]}
+function competitionRanks(arr,key){let prev=null,rank=0;return arr.map((x,i)=>{if(x[key]!==prev){rank=i+1;prev=x[key]}return {...x,rank}})}
+async function renderRanking(){const goals=await seasonGoals(),stats=new Map(S.players.map(x=>[x.id,{name:x.name,g:0,a:0}]));goals.forEach(g=>{if(stats.has(g.scorer_player_id))stats.get(g.scorer_player_id).g++;if(g.assister_player_id&&stats.has(g.assister_player_id))stats.get(g.assister_player_id).a++});let scor=[...stats.values()].filter(x=>x.g).sort((a,b)=>b.g-a.g||b.a-a.a||a.name.localeCompare(b.name));let ass=[...stats.values()].filter(x=>x.a).sort((a,b)=>b.a-a.a||b.g-a.g||a.name.localeCompare(b.name));scor=competitionRanks(scor,'g');ass=competitionRanks(ass,'a');const list=(arr,key)=>arr.map(x=>'<div class="rank"><b>'+x.rank+'</b><span>'+esc(x.name)+'</span><b class="right">'+x[key]+'</b></div>').join('')||'<p class="muted">Aucune donnée</p>';$('#scorerRank').innerHTML=list(scor,'g');$('#assistRank').innerHTML=list(ass,'a');renderTeamRanking();let txt='⚽ '+(S.rankMode==='season'?'CLASSEMENT DE LA SAISON':'CLASSEMENT DU TOURNOI')+'\n\n🏆 BUTEURS\n';scor.forEach(x=>txt+=x.rank+'. '+x.name+' — '+x.g+' but'+(x.g>1?'s':'')+'\n');txt+='\n🎯 PASSEURS\n';ass.forEach(x=>txt+=x.rank+'. '+x.name+' — '+x.a+' passe'+(x.a>1?'s':'')+'\n');$('#shareText').value=txt}
+function renderTeamRanking(){const r=S.teams.map(x=>({id:x.id,name:x.name,mj:0,v:0,n:0,d:0,bp:0,bc:0,pts:0})),map=new Map(r.map(x=>[x.id,x]));S.matches.forEach(m=>{const h=map.get(m.home_team_id),a=map.get(m.away_team_id);if(!h||!a)return;h.mj++;a.mj++;h.bp+=m.home_score;h.bc+=m.away_score;a.bp+=m.away_score;a.bc+=m.home_score;if(m.home_score>m.away_score){h.v++;a.d++;h.pts+=3}else if(m.away_score>m.home_score){a.v++;h.d++;a.pts+=3}else{h.n++;a.n++;h.pts++;a.pts++}});r.sort((a,b)=>b.pts-a.pts||(b.bp-b.bc)-(a.bp-a.bc)||b.bp-a.bp);$('#teamRank').innerHTML=r.map((x,i)=>'<div class="rank"><b>'+(i+1)+'</b><span>'+esc(x.name)+' <span class="muted">('+x.mj+' MJ)</span></span><b class="right">'+x.pts+' pts</b></div>').join('')||'<p class="muted">Aucune équipe</p>'}
+document.querySelectorAll('.rankMode').forEach(b=>b.onclick=()=>{S.rankMode=b.dataset.mode;document.querySelectorAll('.rankMode').forEach(x=>x.classList.toggle('primary',x===b));renderRanking()});
+$('#shareWhatsapp').onclick=async()=>{const text=$('#shareText').value;if(navigator.share){try{await navigator.share({title:'Classement du tournoi',text});return}catch{}}await navigator.clipboard.writeText(text);toast('Résumé copié')};
+
+function subscribeRealtime(){if(S.channel)sb.removeChannel(S.channel);let timer;const reload=()=>{clearTimeout(timer);timer=setTimeout(async()=>await loadAll(),250)};S.channel=sb.channel('tournoi-manager').on('postgres_changes',{event:'*',schema:'public',table:'players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'seasons'},reload).on('postgres_changes',{event:'*',schema:'public',table:'tournaments'},reload).on('postgres_changes',{event:'*',schema:'public',table:'tournament_players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'teams'},reload).on('postgres_changes',{event:'*',schema:'public',table:'team_players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'matches'},reload).on('postgres_changes',{event:'*',schema:'public',table:'goals'},reload).subscribe()}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>setView(b.dataset.view));document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>setView(b.dataset.go));
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+sb.auth.onAuthStateChange(()=>setTimeout(authState,0));authState();
+</script>
+</body></html>
