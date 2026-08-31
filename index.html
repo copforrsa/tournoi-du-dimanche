@@ -186,7 +186,7 @@ window.addEventListener('error', (e) => {
   if(t){t.textContent='Erreur de chargement de l’application. Recharge la page.';t.style.display='block';}
 });
 
-const S={session:null,workspace:null,members:[],players:[],seasons:[],tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matches:[],goals:[],rankMode:'day',channel:null};
+const S={session:null,workspace:null,members:[],players:[],seasons:[],tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matches:[],goals:[],rankMode:'day',channel:null,goalTeamSelections:{}};
 const $=s=>document.querySelector(s);
 const toast=t=>{const x=$('#toast');x.textContent=t;x.style.display='block';setTimeout(()=>x.style.display='none',2600)};
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -342,6 +342,7 @@ function renderTeams(){const t=currentTour(),att=$('#attendanceList'),box=$('#te
     const {error}=await sb.from('teams').delete().eq('id',team.id);
     if(error){del.disabled=false;return toast(error.message)}
     S.teams=S.teams.filter(x=>x.id!==team.id);
+    Object.keys(S.goalTeamSelections).forEach(mid=>{if(S.goalTeamSelections[mid]===team.id)delete S.goalTeamSelections[mid]});
     S.teamPlayers=S.teamPlayers.filter(x=>x.team_id!==team.id);
     S.matches=S.matches.filter(m=>m.home_team_id!==team.id&&m.away_team_id!==team.id);
     const validMatchIds=new Set(S.matches.map(m=>m.id));
@@ -355,7 +356,29 @@ $('#addTeam').onclick=async()=>{const t=currentTour(),name=$('#teamName').value.
 $('#autoTeams').onclick=async()=>{const ids=[...presentIds()];if(S.teams.length<2||!ids.length)return toast('Il faut au moins 2 équipes et des présents.');for(const x of S.teamPlayers)await sb.from('team_players').delete().eq('team_id',x.team_id).eq('player_id',x.player_id);ids.sort(()=>Math.random()-.5);const rows=ids.map((id,i)=>({team_id:S.teams[i%S.teams.length].id,player_id:id}));const {error}=await sb.from('team_players').insert(rows);error?toast(error.message):toast('Répartition effectuée')};
 
 function matchOptions(){return '<option value="">Choisir</option>'+S.teams.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')}
-function renderMatches(){$('#homeTeam').innerHTML=matchOptions();$('#awayTeam').innerHTML=matchOptions();const box=$('#matchesList');box.innerHTML='';S.matches.forEach((m,i)=>{const home=tm(m.home_team_id),away=tm(m.away_team_id);if(!home||!away)return;const d=document.createElement('div');d.className='card match';d.innerHTML='<div class="muted">Match '+(i+1)+(m.pitch?' • '+esc(m.pitch):'')+'</div><div class="row" style="justify-content:space-between"><b>'+esc(home.name)+'</b><span class="score">'+m.home_score+' - '+m.away_score+'</span><b>'+esc(away.name)+'</b></div>';const form=document.createElement('div');form.className='grid g3';const team=document.createElement('select'),sc=document.createElement('select'),as=document.createElement('select');team.innerHTML='<option value="'+home.id+'">'+esc(home.name)+'</option><option value="'+away.id+'">'+esc(away.name)+'</option>';function fill(){const ids=teamPlayerIds(team.value);sc.innerHTML='<option value="">Buteur</option>'+ids.map(id=>'<option value="'+id+'">'+esc(p(id)?.name||'')+'</option>').join('');as.innerHTML='<option value="">Sans passe</option>'+ids.map(id=>'<option value="'+id+'">'+esc(p(id)?.name||'')+'</option>').join('')}fill();team.onchange=fill;form.append(team,sc,as);const b=document.createElement('button');b.textContent='+ But';b.className='primary';b.onclick=async()=>{if(!sc.value)return toast('Choisis le buteur');if(as.value===sc.value)return toast('Buteur et passeur différents');const {error}=await sb.from('goals').insert({match_id:m.id,team_id:team.value,scorer_player_id:sc.value,assister_player_id:as.value||null});if(error)toast(error.message)};d.append(form,b);const hist=document.createElement('div');hist.style.marginTop='8px';S.goals.filter(g=>g.match_id===m.id).forEach(g=>{const r=document.createElement('div');r.className='row small';r.innerHTML='<span style="flex:1">⚽ '+esc(p(g.scorer_player_id)?.name||'?')+(g.assister_player_id?' ← '+esc(p(g.assister_player_id)?.name||''):'')+'</span>';const x=document.createElement('button');x.textContent='Annuler';x.onclick=async()=>await sb.from('goals').delete().eq('id',g.id);r.appendChild(x);hist.appendChild(r)});d.appendChild(hist);box.appendChild(d)})}
+function renderMatches(){$('#homeTeam').innerHTML=matchOptions();$('#awayTeam').innerHTML=matchOptions();const box=$('#matchesList');box.innerHTML='';S.matches.forEach((m,i)=>{const home=tm(m.home_team_id),away=tm(m.away_team_id);if(!home||!away)return;const d=document.createElement('div');d.className='card match';d.innerHTML='<div class="muted">Match '+(i+1)+(m.pitch?' • '+esc(m.pitch):'')+'</div><div class="row" style="justify-content:space-between"><b>'+esc(home.name)+'</b><span class="score">'+m.home_score+' - '+m.away_score+'</span><b>'+esc(away.name)+'</b></div>';const form=document.createElement('div');form.className='grid g3';const team=document.createElement('select'),sc=document.createElement('select'),as=document.createElement('select');team.innerHTML='<option value="'+home.id+'">'+esc(home.name)+'</option><option value="'+away.id+'">'+esc(away.name)+'</option>';
+const savedTeam=S.goalTeamSelections[m.id];
+if(savedTeam===home.id||savedTeam===away.id)team.value=savedTeam;
+function fill(){
+  S.goalTeamSelections[m.id]=team.value;
+  const ids=teamPlayerIds(team.value);
+  sc.innerHTML='<option value="">Buteur</option>'+ids.map(id=>'<option value="'+id+'">'+esc(p(id)?.name||'')+'</option>').join('');
+  as.innerHTML='<option value="">Sans passe</option>'+ids.map(id=>'<option value="'+id+'">'+esc(p(id)?.name||'')+'</option>').join('')
+}
+fill();
+team.onchange=fill;form.append(team,sc,as);const b=document.createElement('button');b.textContent='+ But';b.className='primary';b.onclick=async()=>{
+  if(!sc.value)return toast('Choisis le buteur');
+  if(as.value===sc.value)return toast('Buteur et passeur différents');
+  const selectedTeam=team.value;
+  S.goalTeamSelections[m.id]=selectedTeam;
+  b.disabled=true;
+  const {error}=await sb.from('goals').insert({match_id:m.id,team_id:selectedTeam,scorer_player_id:sc.value,assister_player_id:as.value||null});
+  b.disabled=false;
+  if(error)return toast(error.message);
+  sc.value='';
+  as.value='';
+  toast('But ajouté ✅');
+};d.append(form,b);const hist=document.createElement('div');hist.style.marginTop='8px';S.goals.filter(g=>g.match_id===m.id).forEach(g=>{const r=document.createElement('div');r.className='row small';r.innerHTML='<span style="flex:1">⚽ '+esc(p(g.scorer_player_id)?.name||'?')+(g.assister_player_id?' ← '+esc(p(g.assister_player_id)?.name||''):'')+'</span>';const x=document.createElement('button');x.textContent='Annuler';x.onclick=async()=>await sb.from('goals').delete().eq('id',g.id);r.appendChild(x);hist.appendChild(r)});d.appendChild(hist);box.appendChild(d)})}
 $('#addMatch').onclick=async()=>{const t=currentTour(),home=$('#homeTeam').value,away=$('#awayTeam').value;if(!t||!home||!away||home===away)return toast('Choisis deux équipes différentes');const {error}=await sb.from('matches').insert({tournament_id:t.id,home_team_id:home,away_team_id:away,match_order:S.matches.length+1,pitch:$('#pitch').value.trim()||null,round_label:$('#roundLabel').value.trim()||null});if(error)toast(error.message);else{$('#pitch').value='';$('#roundLabel').value=''}};
 $('#roundRobin').onclick=async()=>{const t=currentTour();if(!t||S.teams.length<2)return toast('Crée les équipes d’abord');const existing=new Set(S.matches.map(m=>[m.home_team_id,m.away_team_id].sort().join('|'))),rows=[];let n=S.matches.length+1;for(let i=0;i<S.teams.length;i++)for(let j=i+1;j<S.teams.length;j++){const key=[S.teams[i].id,S.teams[j].id].sort().join('|');if(!existing.has(key))rows.push({tournament_id:t.id,home_team_id:S.teams[i].id,away_team_id:S.teams[j].id,match_order:n++})}if(!rows.length)return toast('Tous les matchs existent déjà');const {error}=await sb.from('matches').insert(rows);error?toast(error.message):toast(rows.length+' matchs générés')};
 
