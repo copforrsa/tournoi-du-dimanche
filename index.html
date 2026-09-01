@@ -535,7 +535,7 @@ async function showTournamentHistory(t){
   const teamRows=stats.map((x,i)=>'<div class="rank"><b>'+(i+1)+'</b><span>'+esc(x.name)+' <span class="muted">('+x.mj+' MJ • '+(x.bp-x.bc>=0?'+':'')+(x.bp-x.bc)+')</span></span><b class="right">'+x.pts+' pts</b></div>').join('');
   const scorerRows=scor.map(x=>'<div class="rank '+(x.is_group_member===false?'guest-row':'')+'"><b>'+x.rank+'</b><span>'+esc(x.name)+(x.is_group_member===false?' <span class="guest-badge">'+esc(guestLabel(p(x.id)))+'</span>':'')+'</span><b class="right">'+x.g+' but'+(x.g>1?'s':'')+'</b></div>').join('');
   const assistRows=ass.map(x=>'<div class="rank '+(x.is_group_member===false?'guest-row':'')+'"><b>'+x.rank+'</b><span>'+esc(x.name)+(x.is_group_member===false?' <span class="guest-badge">'+esc(guestLabel(p(x.id)))+'</span>':'')+'</span><b class="right">'+x.a+' passe'+(x.a>1?'s':'')+'</b></div>').join('');
-  const matchRows=(matches||[]).map((m,i)=>'<div class="rank"><b>Match '+(i+1)+'</b><span>'+esc(teamMap.get(m.home_team_id)||'?')+' <b>'+m.home_score+' - '+m.away_score+'</b> '+esc(teamMap.get(m.away_team_id)||'?')+'</span></div>').join('');
+  const matchRows=(matches||[]).map((m,i)=>'<div class="player" style="padding:10px 0"><div class="muted" style="font-weight:700;margin-bottom:4px">Match '+(i+1)+'</div><div style="font-size:1.05rem">'+esc(teamMap.get(m.home_team_id)||'?')+' <b>'+m.home_score+' - '+m.away_score+'</b> '+esc(teamMap.get(m.away_team_id)||'?')+'</div></div>').join('');
 
   panel.innerHTML=
     '<div class="row" style="justify-content:space-between"><div><h2 class="sectiontitle" style="margin:0">'+esc(t.name||('Tournoi du '+t.tournament_date))+'</h2><div class="muted">'+t.tournament_date+'</div></div><button id="closeHistoryPanel">Fermer</button></div>'+
