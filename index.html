@@ -711,7 +711,30 @@ async function showTournamentHistory(t){
 
 $('#newSeasonBtn').onclick=()=>$('#newSeasonBox').classList.toggle('hidden');
 $('#createSeason').onclick=async()=>{const name=$('#seasonName').value.trim();if(!name)return;const {error}=await sb.from('seasons').insert({workspace_id:S.workspace.id,name,starts_on:today(),is_active:true});if(error)return toast(error.message);$('#seasonName').value='';$('#newSeasonBox').classList.add('hidden');toast('Saison créée')};
-$('#createTournament').onclick=async()=>{const date=$('#tourDate').value;if(!date)return toast('Choisis une date');const row={workspace_id:S.workspace.id,season_id:$('#seasonSelect').value||null,name:$('#tourName').value.trim()||null,tournament_date:date,format:$('#tourFormat').value,status:'draft'};const {data,error}=await sb.from('tournaments').insert(row).select().single();if(error)return toast(error.message);S.activeTour=data.id;$('#tourName').value='';await loadAll();toast('Nouveau tournoi créé et activé ✅')};
+$('#createTournament').onclick=async()=>{
+  const btn=$('#createTournament');
+  const date=$('#tourDate').value;
+  if(!date)return toast('Choisis une date');
+  btn.disabled=true;btn.textContent='Création…';
+  try{
+    const row={workspace_id:S.workspace.id,season_id:$('#seasonSelect').value||null,name:$('#tourName').value.trim()||null,tournament_date:date,format:$('#tourFormat').value,status:'draft'};
+    const {data,error}=await sb.from('tournaments').insert(row).select().single();
+    if(error)throw error;
+    S.activeTour=data.id;
+    S.tournaments=[data,...S.tournaments.filter(t=>t.id!==data.id)].sort((a,b)=>String(b.tournament_date).localeCompare(String(a.tournament_date)));
+    S.tPlayers=[];S.teams=[];S.teamPlayers=[];S.matches=[];S.goals=[];
+    $('#tourName').value='';
+    renderAll();
+    setView('tournaments');
+    await loadAll();
+    setView('tournaments');
+    toast('Nouveau tournoi créé et activé ✅');
+  }catch(error){
+    toast(error.message||'Impossible de créer le tournoi');
+  }finally{
+    btn.disabled=false;btn.textContent='Créer le tournoi';
+  }
+};
 
 function presentIds(){return new Set(S.tPlayers.filter(x=>x.present).map(x=>x.player_id))} function teamPlayerIds(teamId){return S.teamPlayers.filter(x=>x.team_id===teamId).map(x=>x.player_id)}
 function renderTeams(){const t=currentTour(),att=$('#attendanceList'),box=$('#teamList');att.innerHTML='';box.innerHTML='';if(!t){att.innerHTML='<p class="muted">Crée ou ouvre un tournoi.</p>';return}
