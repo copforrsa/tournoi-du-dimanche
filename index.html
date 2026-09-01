@@ -273,7 +273,7 @@ async function loadAll(){
   r=await sb.from('players').select('*').eq('workspace_id',w).order('name');S.players=r.data||[];
   r=await sb.from('seasons').select('*').eq('workspace_id',w).order('starts_on',{ascending:false});S.seasons=r.data||[];
   r=await sb.from('tournaments').select('*').eq('workspace_id',w).order('tournament_date',{ascending:false});S.tournaments=r.data||[];
-  if(!S.activeTour&&S.tournaments.length)S.activeTour=S.tournaments[0].id;
+  if(!S.activeTour){const next=S.tournaments.find(t=>t.status!=='finished');S.activeTour=next?next.id:null;}
   await loadTournament();renderAll()
 }
 async function loadTournament(){
@@ -321,10 +321,88 @@ $('#addPlayers').onclick=async()=>{
   finally{btn.disabled=false;btn.textContent='Enregistrer les joueurs'}
 };
 
-function renderTournaments(){const ss=$('#seasonSelect');ss.innerHTML='<option value="">Sans saison</option>'+S.seasons.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');const box=$('#tournamentList');box.innerHTML='';S.tournaments.forEach(t=>{const d=document.createElement('div');d.className='player row';d.innerHTML='<span style="flex:1"><b>'+esc(t.name||('Tournoi du '+t.tournament_date))+'</b><div class="muted">'+t.tournament_date+' • '+(t.format==='king_of_pitch'?'Roi du terrain':'Classique')+'</div></span>';const b=document.createElement('button');b.textContent=t.id===S.activeTour?'Actif':'Ouvrir';if(t.id===S.activeTour)b.className='green';b.onclick=async()=>{S.activeTour=t.id;await loadTournament();renderAll();toast('Tournoi sélectionné')};d.appendChild(b);box.appendChild(d)})}
+function renderTournaments(){
+  const ss=$('#seasonSelect');
+  ss.innerHTML='<option value="">Sans saison</option>'+S.seasons.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');
+  const box=$('#tournamentList');box.innerHTML='';
+
+  const current=S.tournaments.filter(t=>t.status!=='finished');
+  const finished=S.tournaments.filter(t=>t.status==='finished');
+
+  if(current.length){
+    const h=document.createElement('div');h.className='muted';h.style.marginBottom='8px';h.textContent='Tournois en cours';box.appendChild(h);
+  }
+  current.forEach(t=>{
+    const d=document.createElement('div');d.className='player';
+    const top=document.createElement('div');top.className='row';
+    top.innerHTML='<span style="flex:1"><b>'+esc(t.name||('Tournoi du '+t.tournament_date))+'</b><div class="muted">'+t.tournament_date+' • '+(t.format==='king_of_pitch'?'Roi du terrain':'Classique')+'</div></span>';
+    const open=document.createElement('button');open.textContent=t.id===S.activeTour?'Actif':'Ouvrir';if(t.id===S.activeTour)open.className='green';
+    open.onclick=async()=>{S.activeTour=t.id;await loadTournament();renderAll();toast('Tournoi sélectionné')};
+    top.appendChild(open);d.appendChild(top);
+
+    const finish=document.createElement('button');finish.textContent='Terminer le tournoi';finish.style.marginTop='8px';
+    finish.onclick=async()=>{
+      if(!confirm('Déclarer ce tournoi terminé ? Il restera disponible dans l’historique.'))return;
+      finish.disabled=true;
+      const {error}=await sb.from('tournaments').update({status:'finished'}).eq('id',t.id);
+      if(error){finish.disabled=false;return toast(error.message)}
+      if(S.activeTour===t.id)S.activeTour=null;
+      await loadAll();
+      toast('Tournoi terminé ✅');
+    };
+    d.appendChild(finish);box.appendChild(d);
+  });
+
+  if(finished.length){
+    const h=document.createElement('div');h.className='muted';h.style.margin='14px 0 8px';h.textContent='Tournois terminés';box.appendChild(h);
+  }
+  finished.forEach(t=>{
+    const d=document.createElement('div');d.className='player row';
+    d.innerHTML='<span style="flex:1"><b>'+esc(t.name||('Tournoi du '+t.tournament_date))+'</b><div class="muted">'+t.tournament_date+' • Terminé</div></span>';
+    const view=document.createElement('button');view.textContent='Voir les résultats';view.className='primary';
+    view.onclick=async()=>await showTournamentHistory(t);
+    d.appendChild(view);box.appendChild(d);
+  });
+
+  if(!S.tournaments.length)box.innerHTML='<p class="muted">Aucun tournoi pour le moment.</p>';
+}
+
+async function showTournamentHistory(t){
+  const {data:teams,error:te}=await sb.from('teams').select('*').eq('tournament_id',t.id).order('created_at');
+  if(te)return toast(te.message);
+  const {data:matches,error:me}=await sb.from('matches').select('*').eq('tournament_id',t.id).order('match_order');
+  if(me)return toast(me.message);
+
+  const teamMap=new Map((teams||[]).map(x=>[x.id,x.name]));
+  const stats=(teams||[]).map(x=>({id:x.id,name:x.name,mj:0,v:0,n:0,d:0,bp:0,bc:0,pts:0}));
+  const sm=new Map(stats.map(x=>[x.id,x]));
+  (matches||[]).forEach(m=>{
+    const h=sm.get(m.home_team_id),a=sm.get(m.away_team_id);if(!h||!a)return;
+    h.mj++;a.mj++;h.bp+=m.home_score;h.bc+=m.away_score;a.bp+=m.away_score;a.bc+=m.home_score;
+    if(m.home_score>m.away_score){h.v++;a.d++;h.pts+=3}
+    else if(m.away_score>m.home_score){a.v++;h.d++;a.pts+=3}
+    else{h.n++;a.n++;h.pts++;a.pts++}
+  });
+  stats.sort((a,b)=>b.pts-a.pts||(b.bp-b.bc)-(a.bp-a.bc)||b.bp-a.bp);
+
+  let panel=$('#historyPanel');
+  if(!panel){
+    panel=document.createElement('div');panel.id='historyPanel';panel.className='card';panel.style.marginTop='12px';
+    $('#tournamentList').parentElement.appendChild(panel);
+  }
+  const matchRows=(matches||[]).map((m,i)=>'<div class="rank"><b>Match '+(i+1)+'</b><span>'+esc(teamMap.get(m.home_team_id)||'?')+' <b>'+m.home_score+' - '+m.away_score+'</b> '+esc(teamMap.get(m.away_team_id)||'?')+'</span></div>').join('');
+  const tableRows=stats.map((x,i)=>'<div class="rank"><b>'+(i+1)+'</b><span>'+esc(x.name)+' <span class="muted">('+x.mj+' MJ • '+(x.bp-x.bc>=0?'+':'')+(x.bp-x.bc)+')</span></span><b class="right">'+x.pts+' pts</b></div>').join('');
+  panel.innerHTML=
+    '<div class="row" style="justify-content:space-between"><div><h2 class="sectiontitle" style="margin:0">'+esc(t.name||('Tournoi du '+t.tournament_date))+'</h2><div class="muted">'+t.tournament_date+'</div></div><button id="closeHistoryPanel">Fermer</button></div>'+
+    '<h3>🏆 Classement final</h3>'+(tableRows||'<p class="muted">Aucun classement.</p>')+
+    '<h3 style="margin-top:16px">⚽ Résultats</h3>'+(matchRows||'<p class="muted">Aucun match enregistré.</p>');
+  $('#closeHistoryPanel').onclick=()=>panel.remove();
+  panel.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
 $('#newSeasonBtn').onclick=()=>$('#newSeasonBox').classList.toggle('hidden');
 $('#createSeason').onclick=async()=>{const name=$('#seasonName').value.trim();if(!name)return;const {error}=await sb.from('seasons').insert({workspace_id:S.workspace.id,name,starts_on:today(),is_active:true});if(error)return toast(error.message);$('#seasonName').value='';$('#newSeasonBox').classList.add('hidden');toast('Saison créée')};
-$('#createTournament').onclick=async()=>{const date=$('#tourDate').value;if(!date)return toast('Choisis une date');const row={workspace_id:S.workspace.id,season_id:$('#seasonSelect').value||null,name:$('#tourName').value.trim()||null,tournament_date:date,format:$('#tourFormat').value,status:'draft'};const {data,error}=await sb.from('tournaments').insert(row).select().single();if(error)return toast(error.message);S.activeTour=data.id;$('#tourName').value='';await loadAll();toast('Tournoi créé')};
+$('#createTournament').onclick=async()=>{const date=$('#tourDate').value;if(!date)return toast('Choisis une date');const row={workspace_id:S.workspace.id,season_id:$('#seasonSelect').value||null,name:$('#tourName').value.trim()||null,tournament_date:date,format:$('#tourFormat').value,status:'draft'};const {data,error}=await sb.from('tournaments').insert(row).select().single();if(error)return toast(error.message);S.activeTour=data.id;$('#tourName').value='';await loadAll();toast('Nouveau tournoi créé et activé ✅')};
 
 function presentIds(){return new Set(S.tPlayers.filter(x=>x.present).map(x=>x.player_id))} function teamPlayerIds(teamId){return S.teamPlayers.filter(x=>x.team_id===teamId).map(x=>x.player_id)}
 function renderTeams(){const t=currentTour(),att=$('#attendanceList'),box=$('#teamList');att.innerHTML='';box.innerHTML='';if(!t){att.innerHTML='<p class="muted">Crée ou ouvre un tournoi.</p>';return}const prs=presentIds();S.players.filter(x=>x.active).forEach(x=>{const l=document.createElement('label');l.className='player row';const c=document.createElement('input');c.type='checkbox';c.style.width='auto';c.checked=prs.has(x.id);c.onchange=async()=>{await sb.from('tournament_players').upsert({tournament_id:t.id,player_id:x.id,present:c.checked},{onConflict:'tournament_id,player_id'})};l.append(c,document.createTextNode(x.name));att.appendChild(l)});S.teams.forEach(team=>{
