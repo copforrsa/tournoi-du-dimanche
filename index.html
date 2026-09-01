@@ -370,9 +370,23 @@ $('#createWorkspace').onclick=async()=>{
 };
 
 async function loadInvites(){
-  const {data}=await sb.from('workspace_invites').select('id,email,role,workspaces(name)').is('accepted_at',null);
-  const box=$('#inviteList');box.innerHTML='';$('#inviteBox').classList.toggle('hidden',!data?.length);
-  (data||[]).forEach(i=>{const d=document.createElement('div');d.className='player row';d.innerHTML='<span style="flex:1">Invitation : <b>'+esc(i.workspaces?.name||'Tournoi')+'</b></span>';const b=document.createElement('button');b.textContent='Accepter';b.onclick=async()=>{const {error}=await sb.rpc('accept_workspace_invite',{p_invite_id:i.id});if(error)return toast(error.message);toast('Invitation acceptée');await boot()};d.appendChild(b);box.appendChild(d)})
+  const box=$('#inviteList');box.innerHTML='';
+  const userEmail=(S.session?.user?.email||'').trim().toLowerCase();
+  if(!userEmail){$('#inviteBox').classList.add('hidden');return}
+  const {data,error}=await sb.from('workspace_invites')
+    .select('id,email,role,workspaces(name)')
+    .is('accepted_at',null)
+    .ilike('email',userEmail);
+  if(error){$('#inviteBox').classList.add('hidden');return}
+  const mine=(data||[]).filter(i=>(i.email||'').trim().toLowerCase()===userEmail);
+  $('#inviteBox').classList.toggle('hidden',!mine.length);
+  mine.forEach(i=>{
+    const d=document.createElement('div');d.className='player row';
+    d.innerHTML='<span style="flex:1">Invitation : <b>'+esc(i.workspaces?.name||'Tournoi')+'</b></span>';
+    const b=document.createElement('button');b.textContent='Accepter';
+    b.onclick=async()=>{const {error}=await sb.rpc('accept_workspace_invite',{p_invite_id:i.id});if(error)return toast(error.message);toast('Invitation acceptée');await boot()};
+    d.appendChild(b);box.appendChild(d)
+  })
 }
 async function loadAll(){
   if(!S.workspace)return;const w=S.workspace.id;let r;
