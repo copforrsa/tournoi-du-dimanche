@@ -462,7 +462,7 @@ function renderAll(){
 function renderHome(){
   const t=currentTour();
   const lastFinished=S.tournaments.find(x=>x.status==='finished');
-  $('#activeTourLabel').textContent=t?((t.name||'Tournoi')+' • '+t.tournament_date+' • '+(t.format==='king_of_pitch'?'Roi du terrain':'Classique')):(lastFinished?'Aucun tournoi actif • dernier tournoi terminé le '+lastFinished.tournament_date:'Aucun tournoi');
+  $('#activeTourLabel').textContent=t?((t.name||'Tournoi')+' • '+t.tournament_date+' • '+(t.format==='king_of_pitch'?'Roi du terrain':'Classique')+' • '+seasonNameForTournament(t)):(lastFinished?'Aucun tournoi actif • dernier tournoi terminé le '+lastFinished.tournament_date+' • '+seasonNameForTournament(lastFinished):'Aucun tournoi');
   const present=S.tPlayers.filter(x=>x.present).length;
   $('#homeStats').innerHTML='<div class="player"><b>'+present+'</b><div class="muted">présents</div></div><div class="player"><b>'+S.teams.length+'</b><div class="muted">équipes</div></div><div class="player"><b>'+S.matches.length+'</b><div class="muted">matchs</div></div>';
 }
@@ -604,6 +604,11 @@ async function deleteTournament(t){
   toast('Tournoi supprimé ✅');
 }
 
+function seasonNameForTournament(t){
+  const s=S.seasons.find(x=>x.id===t.season_id);
+  return s?s.name:'Sans saison';
+}
+
 function renderTournaments(){
   const ss=$('#seasonSelect');
   ss.innerHTML='<option value="">Sans saison</option>'+S.seasons.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');
@@ -618,7 +623,7 @@ function renderTournaments(){
   current.forEach(t=>{
     const d=document.createElement('div');d.className='player';
     const top=document.createElement('div');top.className='row';
-    top.innerHTML='<span style="flex:1"><b>'+esc(t.name||('Tournoi du '+t.tournament_date))+'</b><div class="muted">'+t.tournament_date+' • '+(t.format==='king_of_pitch'?'Roi du terrain':'Classique')+'</div></span>';
+    top.innerHTML='<span style="flex:1"><b>'+esc(t.name||('Tournoi du '+t.tournament_date))+'</b><div class="muted">'+t.tournament_date+' • '+(t.format==='king_of_pitch'?'Roi du terrain':'Classique')+'</div><div class="muted">📅 '+esc(seasonNameForTournament(t))+'</div></span>';
     const open=document.createElement('button');open.textContent=t.id===S.activeTour?'Actif':'Ouvrir';if(t.id===S.activeTour)open.className='green';
     open.onclick=async()=>{S.activeTour=t.id;await loadTournament();renderAll();toast('Tournoi sélectionné')};
     top.appendChild(open);d.appendChild(top);
@@ -647,7 +652,7 @@ function renderTournaments(){
   }
   finished.forEach(t=>{
     const d=document.createElement('div');d.className='player row';
-    d.innerHTML='<span style="flex:1"><b>'+esc(t.name||('Tournoi du '+t.tournament_date))+'</b><div class="muted">'+t.tournament_date+' • Terminé</div></span>';
+    d.innerHTML='<span style="flex:1"><b>'+esc(t.name||('Tournoi du '+t.tournament_date))+'</b><div class="muted">'+t.tournament_date+' • Terminé</div><div class="muted">📅 '+esc(seasonNameForTournament(t))+'</div></span>';
     const actions=document.createElement('div');actions.className='row';
     const view=document.createElement('button');view.textContent='Voir les résultats';view.className='primary';
     view.onclick=async()=>await showTournamentHistory(t);
