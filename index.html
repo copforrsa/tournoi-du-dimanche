@@ -31,7 +31,12 @@
     .rank:last-child{border-bottom:0} .right{text-align:right} .toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:50;background:#172033;color:#fff;padding:10px 15px;border-radius:12px;display:none;max-width:92%}
     .auth{max-width:440px;margin:8vh auto} .space{height:8px} .sectiontitle{font-size:17px;margin:0 0 10px}
     @media(max-width:650px){.g2,.g3{grid-template-columns:1fr}.top{border-radius:0;margin:-14px -14px 12px}.tabs{overflow-x:auto;justify-content:flex-start}}
-  </style>
+  
+.guest-row{opacity:.58;filter:grayscale(.25)}
+.guest-badge{display:inline-block;font-size:.78rem;padding:2px 7px;border-radius:999px;background:#e5e7eb;color:#4b5563;margin-left:6px}
+.guest-note{font-size:.82rem;color:#6b7280}
+
+</style>
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -108,9 +113,21 @@
 
     <div id="view-players" class="view">
       <div class="card">
-        <h2 class="sectiontitle">Joueurs du groupe</h2>
+        <h2 class="sectiontitle">Joueurs</h2>
         <textarea id="playersInput" rows="3" placeholder="Charly, Mika, Miguel..."></textarea>
-        <div class="space"></div><button id="addPlayers" class="primary">Enregistrer les joueurs</button><p class="muted">Les joueurs sont enregistrés dans ton groupe et restent disponibles chaque dimanche.</p>
+        <div class="space"></div>
+        <div class="grid g2">
+          <select id="playerGroupStatus">
+            <option value="member">Membre du groupe</option>
+            <option value="guest">Guest / invité</option>
+          </select>
+          <select id="guestOfPlayer" class="hidden">
+            <option value="">Guest de… (facultatif)</option>
+          </select>
+        </div>
+        <div class="space"></div>
+        <button id="addPlayers" class="primary">Enregistrer les joueurs</button>
+        <p class="muted">Un Guest reste dans les statistiques mais sera grisé dans les classements. Tu peux aussi préciser de quel membre il est l’invité.</p>
       </div>
       <div class="card"><div id="playersList"></div></div>
     </div>
@@ -299,11 +316,11 @@ async function renderSeasonScorerSummary(){
   if(!mids.length){box.innerHTML='<p class="muted">Aucun match enregistré.</p>';return}
   const {data:goals,error:ge}=await sb.from('goals').select('*').in('match_id',mids);
   if(ge)throw ge;
-  const stats=new Map(S.players.map(x=>[x.id,{name:x.name,g:0}]));
+  const stats=new Map(S.players.map(x=>[x.id,{id:x.id,name:x.name,is_group_member:x.is_group_member,g:0}]));
   (goals||[]).forEach(g=>{if(stats.has(g.scorer_player_id))stats.get(g.scorer_player_id).g++});
   let arr=[...stats.values()].filter(x=>x.g).sort((a,b)=>b.g-a.g||a.name.localeCompare(b.name));
   arr=competitionRanks(arr,'g');
-  box.innerHTML=arr.map(x=>'<div class="rank"><b>'+x.rank+'</b><span>'+esc(x.name)+'</span><b class="right">'+x.g+' but'+(x.g>1?'s':'')+'</b></div>').join('')||'<p class="muted">Aucun but enregistré.</p>';
+  box.innerHTML=arr.map(x=>'<div class="rank '+(x.is_group_member===false?'guest-row':'')+'"><b>'+x.rank+'</b><span>'+esc(x.name)+(x.is_group_member===false?' <span class="guest-badge">'+esc(guestLabel(p(x.id)))+'</span>':'')+'</span><b class="right">'+x.g+' but'+(x.g>1?'s':'')+'</b></div>').join('')||'<p class="muted">Aucun but enregistré.</p>';
 }
 
 function renderAll(){
@@ -325,7 +342,65 @@ function renderHome(){
 }
 $('#sendInvite').onclick=async()=>{if(!S.workspace||S.workspace.role!=='admin')return toast('Seul l’administrateur peut inviter.');const email=$('#inviteEmail').value.trim().toLowerCase();if(!email)return;const {error}=await sb.from('workspace_invites').upsert({workspace_id:S.workspace.id,email,role:'coorganizer',invited_by:S.session.user.id},{onConflict:'workspace_id,email'});if(error)return toast(error.message);$('#inviteEmail').value='';toast('Invitation enregistrée.')};
 
-function renderPlayers(){const box=$('#playersList');box.innerHTML='';S.players.forEach(x=>{const d=document.createElement('div');d.className='player row';d.innerHTML='<span style="flex:1"><b>'+esc(x.name)+'</b><div class="muted">'+(x.active?'Actif':'Inactif')+'</div></span>';const b=document.createElement('button');b.textContent=x.active?'Désactiver':'Réactiver';b.onclick=async()=>{await sb.from('players').update({active:!x.active}).eq('id',x.id)};d.appendChild(b);box.appendChild(d)})}
+
+function guestLabel(pl){
+  if(!pl||pl.is_group_member!==false)return '';
+  const host=pl.guest_of_player_id?p(pl.guest_of_player_id):null;
+  return host?'Guest de '+host.name:'Guest';
+}
+function playerDisplayName(pl){
+  if(!pl)return '';
+  const g=guestLabel(pl);
+  return pl.name+(g?' — '+g:'');
+}
+function refreshGuestOfSelect(){
+  const sel=$('#guestOfPlayer');if(!sel)return;
+  const keep=sel.value;
+  sel.innerHTML='<option value="">Guest de… (facultatif)</option>'+S.players.filter(x=>x.active&&x.is_group_member!==false).map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('');
+  if([...sel.options].some(o=>o.value===keep))sel.value=keep;
+}
+function renderPlayers(){
+  const box=$('#playersList');box.innerHTML='';
+  refreshGuestOfSelect();
+  S.players.forEach(x=>{
+    const d=document.createElement('div');d.className='player'+(x.is_group_member===false?' guest-row':'');
+    const top=document.createElement('div');top.className='row';
+    const info=document.createElement('span');info.style.flex='1';
+    const g=guestLabel(x);
+    info.innerHTML='<b>'+esc(x.name)+'</b>'+(x.is_group_member===false?'<span class="guest-badge">Guest</span>':'')+
+      '<div class="muted">'+(x.active?'Actif':'Inactif')+(g?' • '+esc(g):' • Membre du groupe')+'</div>';
+    const toggle=document.createElement('button');toggle.textContent=x.active?'Désactiver':'Réactiver';
+    toggle.onclick=async()=>{await sb.from('players').update({active:!x.active}).eq('id',x.id)};
+    top.append(info,toggle);d.appendChild(top);
+
+    const edit=document.createElement('div');edit.className='row';edit.style.marginTop='8px';
+    const status=document.createElement('select');status.style.flex='1';
+    status.innerHTML='<option value="member">Membre</option><option value="guest">Guest</option>';
+    status.value=x.is_group_member===false?'guest':'member';
+
+    const host=document.createElement('select');host.style.flex='1';
+    host.innerHTML='<option value="">Guest de…</option>'+S.players.filter(y=>y.id!==x.id&&y.active&&y.is_group_member!==false).map(y=>'<option value="'+y.id+'">'+esc(y.name)+'</option>').join('');
+    host.value=x.guest_of_player_id||'';
+    host.classList.toggle('hidden',status.value!=='guest');
+
+    status.onchange=()=>host.classList.toggle('hidden',status.value!=='guest');
+    const save=document.createElement('button');save.textContent='Enregistrer';
+    save.onclick=async()=>{
+      const isMember=status.value==='member';
+      save.disabled=true;
+      const {error}=await sb.from('players').update({
+        is_group_member:isMember,
+        guest_of_player_id:isMember?null:(host.value||null)
+      }).eq('id',x.id);
+      save.disabled=false;
+      if(error)return toast(error.message);
+      const fresh=await sb.from('players').select('*').eq('workspace_id',S.workspace.id).order('name');
+      S.players=fresh.data||S.players;renderAll();toast('Statut du joueur mis à jour ✅');
+    };
+    edit.append(status,host,save);d.appendChild(edit);
+    box.appendChild(d);
+  })
+}
 async function ensureWorkspace(){
   if(S.workspace)return S.workspace;
   const name=$('#newWorkspace').value.trim()||'Tournoi du dimanche';
@@ -337,17 +412,32 @@ async function ensureWorkspace(){
   $('#workspaceName').textContent=name+' • Administrateur';
   return S.workspace;
 }
+$('#playerGroupStatus').onchange=()=>{
+  const isGuest=$('#playerGroupStatus').value==='guest';
+  $('#guestOfPlayer').classList.toggle('hidden',!isGuest);
+};
 $('#addPlayers').onclick=async()=>{
   const btn=$('#addPlayers');
   const names=[...new Set($('#playersInput').value.split(/[,;\n]/).map(x=>x.trim()).filter(Boolean))];
   if(!names.length)return toast('Entre au moins un joueur.');
+  const isMember=$('#playerGroupStatus').value!=='guest';
+  const guestOf=isMember?null:($('#guestOfPlayer').value||null);
   btn.disabled=true;btn.textContent='Enregistrement…';
   try{
     const workspace=await ensureWorkspace();
-    const rows=names.map(name=>({workspace_id:workspace.id,name,active:true}));
+    const rows=names.map(name=>({
+      workspace_id:workspace.id,
+      name,
+      active:true,
+      is_group_member:isMember,
+      guest_of_player_id:guestOf
+    }));
     const {error}=await sb.from('players').upsert(rows,{onConflict:'workspace_id,name',ignoreDuplicates:true});
     if(error)throw error;
     $('#playersInput').value='';
+    $('#playerGroupStatus').value='member';
+    $('#guestOfPlayer').value='';
+    $('#guestOfPlayer').classList.add('hidden');
     const {data:freshPlayers,error:playersError}=await sb.from('players').select('*').eq('workspace_id',workspace.id).order('name');
     if(playersError)throw playersError;
     S.players=freshPlayers||[];
@@ -427,7 +517,7 @@ async function showTournamentHistory(t){
   });
   stats.sort((a,b)=>b.pts-a.pts||(b.bp-b.bc)-(a.bp-a.bc)||b.bp-a.bp);
 
-  const ps=new Map(S.players.map(x=>[x.id,{name:x.name,g:0,a:0}]));
+  const ps=new Map(S.players.map(x=>[x.id,{id:x.id,name:x.name,is_group_member:x.is_group_member,g:0,a:0}]));
   goals.forEach(g=>{
     if(ps.has(g.scorer_player_id))ps.get(g.scorer_player_id).g++;
     if(g.assister_player_id&&ps.has(g.assister_player_id))ps.get(g.assister_player_id).a++;
@@ -443,8 +533,8 @@ async function showTournamentHistory(t){
   }
 
   const teamRows=stats.map((x,i)=>'<div class="rank"><b>'+(i+1)+'</b><span>'+esc(x.name)+' <span class="muted">('+x.mj+' MJ • '+(x.bp-x.bc>=0?'+':'')+(x.bp-x.bc)+')</span></span><b class="right">'+x.pts+' pts</b></div>').join('');
-  const scorerRows=scor.map(x=>'<div class="rank"><b>'+x.rank+'</b><span>'+esc(x.name)+'</span><b class="right">'+x.g+' but'+(x.g>1?'s':'')+'</b></div>').join('');
-  const assistRows=ass.map(x=>'<div class="rank"><b>'+x.rank+'</b><span>'+esc(x.name)+'</span><b class="right">'+x.a+' passe'+(x.a>1?'s':'')+'</b></div>').join('');
+  const scorerRows=scor.map(x=>'<div class="rank '+(x.is_group_member===false?'guest-row':'')+'"><b>'+x.rank+'</b><span>'+esc(x.name)+(x.is_group_member===false?' <span class="guest-badge">'+esc(guestLabel(p(x.id)))+'</span>':'')+'</span><b class="right">'+x.g+' but'+(x.g>1?'s':'')+'</b></div>').join('');
+  const assistRows=ass.map(x=>'<div class="rank '+(x.is_group_member===false?'guest-row':'')+'"><b>'+x.rank+'</b><span>'+esc(x.name)+(x.is_group_member===false?' <span class="guest-badge">'+esc(guestLabel(p(x.id)))+'</span>':'')+'</span><b class="right">'+x.a+' passe'+(x.a>1?'s':'')+'</b></div>').join('');
   const matchRows=(matches||[]).map((m,i)=>'<div class="rank"><b>Match '+(i+1)+'</b><span>'+esc(teamMap.get(m.home_team_id)||'?')+' <b>'+m.home_score+' - '+m.away_score+'</b> '+esc(teamMap.get(m.away_team_id)||'?')+'</span></div>').join('');
 
   panel.innerHTML=
@@ -462,7 +552,7 @@ $('#createSeason').onclick=async()=>{const name=$('#seasonName').value.trim();if
 $('#createTournament').onclick=async()=>{const date=$('#tourDate').value;if(!date)return toast('Choisis une date');const row={workspace_id:S.workspace.id,season_id:$('#seasonSelect').value||null,name:$('#tourName').value.trim()||null,tournament_date:date,format:$('#tourFormat').value,status:'draft'};const {data,error}=await sb.from('tournaments').insert(row).select().single();if(error)return toast(error.message);S.activeTour=data.id;$('#tourName').value='';await loadAll();toast('Nouveau tournoi créé et activé ✅')};
 
 function presentIds(){return new Set(S.tPlayers.filter(x=>x.present).map(x=>x.player_id))} function teamPlayerIds(teamId){return S.teamPlayers.filter(x=>x.team_id===teamId).map(x=>x.player_id)}
-function renderTeams(){const t=currentTour(),att=$('#attendanceList'),box=$('#teamList');att.innerHTML='';box.innerHTML='';if(!t){att.innerHTML='<p class="muted">Crée ou ouvre un tournoi.</p>';return}const prs=presentIds();S.players.filter(x=>x.active).forEach(x=>{const l=document.createElement('label');l.className='player row';const c=document.createElement('input');c.type='checkbox';c.style.width='auto';c.checked=prs.has(x.id);c.onchange=async()=>{await sb.from('tournament_players').upsert({tournament_id:t.id,player_id:x.id,present:c.checked},{onConflict:'tournament_id,player_id'})};l.append(c,document.createTextNode(x.name));att.appendChild(l)});S.teams.forEach(team=>{
+function renderTeams(){const t=currentTour(),att=$('#attendanceList'),box=$('#teamList');att.innerHTML='';box.innerHTML='';if(!t){att.innerHTML='<p class="muted">Crée ou ouvre un tournoi.</p>';return}const prs=presentIds();S.players.filter(x=>x.active).forEach(x=>{const l=document.createElement('label');l.className='player row';const c=document.createElement('input');c.type='checkbox';c.style.width='auto';c.checked=prs.has(x.id);c.onchange=async()=>{await sb.from('tournament_players').upsert({tournament_id:t.id,player_id:x.id,present:c.checked},{onConflict:'tournament_id,player_id'})};l.append(c,document.createTextNode(playerDisplayName(x)));att.appendChild(l)});S.teams.forEach(team=>{
   const d=document.createElement('div');d.className='team';
   const head=document.createElement('div');head.className='row';head.style.justifyContent='space-between';
   const title=document.createElement('b');title.textContent=team.name;
@@ -486,7 +576,7 @@ function renderTeams(){const t=currentTour(),att=$('#attendanceList'),box=$('#te
     toast('Équipe supprimée ✅');
   };
   head.append(title,del);d.appendChild(head);
-  const ids=new Set(teamPlayerIds(team.id));const sel=document.createElement('select');sel.innerHTML='<option value="">Ajouter un joueur...</option>'+S.players.filter(x=>prs.has(x.id)&&!S.teamPlayers.some(tp=>tp.player_id===x.id)).map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('');sel.onchange=async()=>{if(sel.value)await sb.from('team_players').insert({team_id:team.id,player_id:sel.value})};d.appendChild(sel);ids.forEach(id=>{const pl=p(id);if(!pl)return;const r=document.createElement('div');r.className='row small';r.innerHTML='<span style="flex:1">'+esc(pl.name)+'</span>';const b=document.createElement('button');b.textContent='×';b.onclick=async()=>await sb.from('team_players').delete().eq('team_id',team.id).eq('player_id',id);r.appendChild(b);d.appendChild(r)});box.appendChild(d)})}
+  const ids=new Set(teamPlayerIds(team.id));const sel=document.createElement('select');sel.innerHTML='<option value="">Ajouter un joueur...</option>'+S.players.filter(x=>prs.has(x.id)&&!S.teamPlayers.some(tp=>tp.player_id===x.id)).map(x=>'<option value="'+x.id+'">'+esc(playerDisplayName(x))+'</option>').join('');sel.onchange=async()=>{if(sel.value)await sb.from('team_players').insert({team_id:team.id,player_id:sel.value})};d.appendChild(sel);ids.forEach(id=>{const pl=p(id);if(!pl)return;const r=document.createElement('div');r.className='row small';r.className+=' '+(pl.is_group_member===false?'guest-row':'');r.innerHTML='<span style="flex:1">'+esc(playerDisplayName(pl))+(pl.is_group_member===false?' <span class="guest-badge">Guest</span>':'')+'</span>';const b=document.createElement('button');b.textContent='×';b.onclick=async()=>await sb.from('team_players').delete().eq('team_id',team.id).eq('player_id',id);r.appendChild(b);d.appendChild(r)});box.appendChild(d)})}
 $('#addTeam').onclick=async()=>{const t=currentTour(),name=$('#teamName').value.trim();if(!t||!name)return;const {error}=await sb.from('teams').insert({tournament_id:t.id,name});if(error)return toast(error.message);$('#teamName').value=''};
 $('#autoTeams').onclick=async()=>{const ids=[...presentIds()];if(S.teams.length<2||!ids.length)return toast('Il faut au moins 2 équipes et des présents.');for(const x of S.teamPlayers)await sb.from('team_players').delete().eq('team_id',x.team_id).eq('player_id',x.player_id);ids.sort(()=>Math.random()-.5);const rows=ids.map((id,i)=>({team_id:S.teams[i%S.teams.length].id,player_id:id}));const {error}=await sb.from('team_players').insert(rows);error?toast(error.message):toast('Répartition effectuée')};
 
@@ -497,8 +587,8 @@ if(savedTeam===home.id||savedTeam===away.id)team.value=savedTeam;
 function fill(){
   S.goalTeamSelections[m.id]=team.value;
   const ids=teamPlayerIds(team.value);
-  sc.innerHTML='<option value="">Buteur</option>'+ids.map(id=>'<option value="'+id+'">'+esc(p(id)?.name||'')+'</option>').join('');
-  as.innerHTML='<option value="">Sans passe</option>'+ids.map(id=>'<option value="'+id+'">'+esc(p(id)?.name||'')+'</option>').join('')
+  sc.innerHTML='<option value="">Buteur</option>'+ids.map(id=>'<option value="'+id+'">'+esc(playerDisplayName(p(id))||'')+'</option>').join('');
+  as.innerHTML='<option value="">Sans passe</option>'+ids.map(id=>'<option value="'+id+'">'+esc(playerDisplayName(p(id))||'')+'</option>').join('')
 }
 fill();
 team.onchange=fill;form.append(team,sc,as);const b=document.createElement('button');b.textContent='+ But';b.className='primary';b.onclick=async()=>{
@@ -544,7 +634,7 @@ function competitionRanks(arr,key){let prev=null,rank=0;return arr.map((x,i)=>{i
 
 async function renderRanking(){
   const ds=await rankingDataset(),goals=ds.goals,matches=ds.matches,tournaments=ds.tournaments;
-  const stats=new Map(S.players.map(x=>[x.id,{id:x.id,name:x.name,g:0,a:0,matchIds:new Set(),tournamentIds:new Set()}]));
+  const stats=new Map(S.players.map(x=>[x.id,{id:x.id,name:x.name,is_group_member:x.is_group_member,guest_of_player_id:x.guest_of_player_id,g:0,a:0,matchIds:new Set(),tournamentIds:new Set()}]));
   const matchMap=new Map(matches.map(m=>[m.id,m]));
   goals.forEach(g=>{
     const m=matchMap.get(g.match_id);
@@ -581,7 +671,7 @@ async function renderRanking(){
   scor=competitionRanks(scor,'g');ass=competitionRanks(ass,'a');
 
   $('#scorerRank').innerHTML=scor.map(x=>
-    '<div class="rank"><b>'+x.rank+'</b><span><b>'+esc(x.name)+'</b><div class="muted">'+x.tournamentIds.size+' tournoi'+(x.tournamentIds.size>1?'s':'')+' • '+x.matchIds.size+' match'+(x.matchIds.size>1?'s':'')+'</div></span><b class="right">'+x.g+' but'+(x.g>1?'s':'')+'</b></div>'
+    '<div class="rank '+(x.is_group_member===false?'guest-row':'')+'"><b>'+x.rank+'</b><span><b>'+esc(x.name)+'</b>'+(x.is_group_member===false?'<span class="guest-badge">'+esc(guestLabel(p(x.id)))+'</span>':'')+'<div class="muted">'+x.tournamentIds.size+' tournoi'+(x.tournamentIds.size>1?'s':'')+' • '+x.matchIds.size+' match'+(x.matchIds.size>1?'s':'')+'</div></span><b class="right">'+x.g+' but'+(x.g>1?'s':'')+'</b></div>'
   ).join('')||'<p class="muted">Aucune donnée</p>';
 
   $('#assistRank').innerHTML=ass.map(x=>
