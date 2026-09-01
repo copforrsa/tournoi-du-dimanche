@@ -156,7 +156,7 @@
     </div>
 
     <div id="view-ranking" class="view">
-      <div class="card"><div class="row"><button class="rankMode primary" data-mode="day">Tournoi</button><button class="rankMode" data-mode="season">Saison</button></div></div>
+      <div class="card"><div class="row"><button class="rankMode" data-mode="day">Tournoi</button><button class="rankMode primary" data-mode="season">Saison</button></div><p class="muted">Le classement Saison cumule tous les tournois de la saison en cours.</p></div>
       <div class="grid g2">
         <div class="card"><h2 class="sectiontitle">⚽ Buteurs</h2><div id="scorerRank"></div></div>
         <div class="card"><h2 class="sectiontitle">🎯 Passeurs</h2><div id="assistRank"></div></div>
@@ -186,7 +186,7 @@ window.addEventListener('error', (e) => {
   if(t){t.textContent='Erreur de chargement de l’application. Recharge la page.';t.style.display='block';}
 });
 
-const S={session:null,workspace:null,members:[],players:[],seasons:[],tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matches:[],goals:[],rankMode:'day',channel:null,goalTeamSelections:{}};
+const S={session:null,workspace:null,members:[],players:[],seasons:[],tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{}};
 const $=s=>document.querySelector(s);
 const toast=t=>{const x=$('#toast');x.textContent=t;x.style.display='block';setTimeout(()=>x.style.display='none',2600)};
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -460,9 +460,86 @@ team.onchange=fill;form.append(team,sc,as);const b=document.createElement('butto
 $('#addMatch').onclick=async()=>{const t=currentTour(),home=$('#homeTeam').value,away=$('#awayTeam').value;if(!t||!home||!away||home===away)return toast('Choisis deux équipes différentes');const {error}=await sb.from('matches').insert({tournament_id:t.id,home_team_id:home,away_team_id:away,match_order:S.matches.length+1,pitch:$('#pitch').value.trim()||null,round_label:$('#roundLabel').value.trim()||null});if(error)toast(error.message);else{$('#pitch').value='';$('#roundLabel').value=''}};
 $('#roundRobin').onclick=async()=>{const t=currentTour();if(!t||S.teams.length<2)return toast('Crée les équipes d’abord');const existing=new Set(S.matches.map(m=>[m.home_team_id,m.away_team_id].sort().join('|'))),rows=[];let n=S.matches.length+1;for(let i=0;i<S.teams.length;i++)for(let j=i+1;j<S.teams.length;j++){const key=[S.teams[i].id,S.teams[j].id].sort().join('|');if(!existing.has(key))rows.push({tournament_id:t.id,home_team_id:S.teams[i].id,away_team_id:S.teams[j].id,match_order:n++})}if(!rows.length)return toast('Tous les matchs existent déjà');const {error}=await sb.from('matches').insert(rows);error?toast(error.message):toast(rows.length+' matchs générés')};
 
-async function seasonGoals(){const t=currentTour();if(S.rankMode==='day')return S.goals;if(!t?.season_id)return S.goals;const tids=S.tournaments.filter(x=>x.season_id===t.season_id).map(x=>x.id);if(!tids.length)return[];const mr=await sb.from('matches').select('id').in('tournament_id',tids);const mids=(mr.data||[]).map(x=>x.id);if(!mids.length)return[];const gr=await sb.from('goals').select('*').in('match_id',mids);return gr.data||[]}
+async function rankingDataset(){
+  const t=currentTour();
+  if(S.rankMode==='day'){
+    const mids=S.matches.map(m=>m.id);
+    return {goals:S.goals||[],matches:S.matches||[],tournaments:t?[t]:[]};
+  }
+  let seasonId=t?.season_id||null;
+  if(!seasonId){
+    const activeSeason=S.seasons.find(s=>s.is_active);
+    seasonId=activeSeason?.id||null;
+  }
+  let tournaments=seasonId?S.tournaments.filter(x=>x.season_id===seasonId):S.tournaments;
+  tournaments=tournaments.filter(x=>x.status==='finished'||x.id===S.activeTour);
+  const tids=tournaments.map(x=>x.id);
+  if(!tids.length)return {goals:[],matches:[],tournaments:[]};
+  const mr=await sb.from('matches').select('*').in('tournament_id',tids);
+  const matches=mr.data||[];
+  const mids=matches.map(x=>x.id);
+  if(!mids.length)return {goals:[],matches,tournaments};
+  const gr=await sb.from('goals').select('*').in('match_id',mids);
+  return {goals:gr.data||[],matches,tournaments};
+}
+
 function competitionRanks(arr,key){let prev=null,rank=0;return arr.map((x,i)=>{if(x[key]!==prev){rank=i+1;prev=x[key]}return {...x,rank}})}
-async function renderRanking(){const goals=await seasonGoals(),stats=new Map(S.players.map(x=>[x.id,{name:x.name,g:0,a:0}]));goals.forEach(g=>{if(stats.has(g.scorer_player_id))stats.get(g.scorer_player_id).g++;if(g.assister_player_id&&stats.has(g.assister_player_id))stats.get(g.assister_player_id).a++});let scor=[...stats.values()].filter(x=>x.g).sort((a,b)=>b.g-a.g||b.a-a.a||a.name.localeCompare(b.name));let ass=[...stats.values()].filter(x=>x.a).sort((a,b)=>b.a-a.a||b.g-a.g||a.name.localeCompare(b.name));scor=competitionRanks(scor,'g');ass=competitionRanks(ass,'a');const list=(arr,key)=>arr.map(x=>'<div class="rank"><b>'+x.rank+'</b><span>'+esc(x.name)+'</span><b class="right">'+x[key]+'</b></div>').join('')||'<p class="muted">Aucune donnée</p>';$('#scorerRank').innerHTML=list(scor,'g');$('#assistRank').innerHTML=list(ass,'a');renderTeamRanking();let txt='⚽ '+(S.rankMode==='season'?'CLASSEMENT DE LA SAISON':'CLASSEMENT DU TOURNOI')+'\n\n🏆 BUTEURS\n';scor.forEach(x=>txt+=x.rank+'. '+x.name+' — '+x.g+' but'+(x.g>1?'s':'')+'\n');txt+='\n🎯 PASSEURS\n';ass.forEach(x=>txt+=x.rank+'. '+x.name+' — '+x.a+' passe'+(x.a>1?'s':'')+'\n');$('#shareText').value=txt}
+
+async function renderRanking(){
+  const ds=await rankingDataset(),goals=ds.goals,matches=ds.matches,tournaments=ds.tournaments;
+  const stats=new Map(S.players.map(x=>[x.id,{id:x.id,name:x.name,g:0,a:0,matchIds:new Set(),tournamentIds:new Set()}]));
+  const matchMap=new Map(matches.map(m=>[m.id,m]));
+  goals.forEach(g=>{
+    const m=matchMap.get(g.match_id);
+    if(stats.has(g.scorer_player_id)){
+      const s=stats.get(g.scorer_player_id);s.g++;s.matchIds.add(g.match_id);if(m)s.tournamentIds.add(m.tournament_id);
+    }
+    if(g.assister_player_id&&stats.has(g.assister_player_id)){
+      const a=stats.get(g.assister_player_id);a.a++;a.matchIds.add(g.match_id);if(m)a.tournamentIds.add(m.tournament_id);
+    }
+  });
+
+  // Count appearances even without a goal/assist, using team membership for each tournament.
+  for(const tour of tournaments){
+    const {data:teams}=await sb.from('teams').select('id').eq('tournament_id',tour.id);
+    const teamIds=(teams||[]).map(x=>x.id);
+    if(!teamIds.length)continue;
+    const {data:tp}=await sb.from('team_players').select('*').in('team_id',teamIds);
+    const playerTeam=new Map((tp||[]).map(x=>[x.player_id,x.team_id]));
+    const tourMatches=matches.filter(m=>m.tournament_id===tour.id);
+    for(const [playerId,teamId] of playerTeam.entries()){
+      const s=stats.get(playerId);if(!s)continue;
+      const played=tourMatches.filter(m=>m.home_team_id===teamId||m.away_team_id===teamId);
+      if(played.length){
+        s.tournamentIds.add(tour.id);
+        played.forEach(m=>s.matchIds.add(m.id));
+      }
+    }
+  }
+
+  let scor=[...stats.values()].filter(x=>x.g||x.matchIds.size||x.tournamentIds.size)
+    .sort((a,b)=>b.g-a.g||b.a-a.a||a.name.localeCompare(b.name));
+  let ass=[...stats.values()].filter(x=>x.a)
+    .sort((a,b)=>b.a-a.a||b.g-a.g||a.name.localeCompare(b.name));
+  scor=competitionRanks(scor,'g');ass=competitionRanks(ass,'a');
+
+  $('#scorerRank').innerHTML=scor.map(x=>
+    '<div class="rank"><b>'+x.rank+'</b><span><b>'+esc(x.name)+'</b><div class="muted">'+x.tournamentIds.size+' tournoi'+(x.tournamentIds.size>1?'s':'')+' • '+x.matchIds.size+' match'+(x.matchIds.size>1?'s':'')+'</div></span><b class="right">'+x.g+' but'+(x.g>1?'s':'')+'</b></div>'
+  ).join('')||'<p class="muted">Aucune donnée</p>';
+
+  $('#assistRank').innerHTML=ass.map(x=>
+    '<div class="rank"><b>'+x.rank+'</b><span>'+esc(x.name)+'</span><b class="right">'+x.a+' passe'+(x.a>1?'s':'')+'</b></div>'
+  ).join('')||'<p class="muted">Aucune donnée</p>';
+
+  renderTeamRanking();
+
+  let txt='⚽ '+(S.rankMode==='season'?'CLASSEMENT BUTEURS DE LA SAISON':'CLASSEMENT BUTEURS DU TOURNOI')+'\n\n';
+  scor.forEach(x=>txt+=x.rank+'. '+x.name+' — '+x.g+' but'+(x.g>1?'s':'')+' • '+x.tournamentIds.size+' tournoi'+(x.tournamentIds.size>1?'s':'')+' • '+x.matchIds.size+' match'+(x.matchIds.size>1?'s':'')+'\n');
+  txt+='\n🎯 PASSEURS\n';
+  ass.forEach(x=>txt+=x.rank+'. '+x.name+' — '+x.a+' passe'+(x.a>1?'s':'')+'\n');
+  $('#shareText').value=txt;
+}
+
 function renderTeamRanking(){const r=S.teams.map(x=>({id:x.id,name:x.name,mj:0,v:0,n:0,d:0,bp:0,bc:0,pts:0})),map=new Map(r.map(x=>[x.id,x]));S.matches.forEach(m=>{const h=map.get(m.home_team_id),a=map.get(m.away_team_id);if(!h||!a)return;h.mj++;a.mj++;h.bp+=m.home_score;h.bc+=m.away_score;a.bp+=m.away_score;a.bc+=m.home_score;if(m.home_score>m.away_score){h.v++;a.d++;h.pts+=3}else if(m.away_score>m.home_score){a.v++;h.d++;a.pts+=3}else{h.n++;a.n++;h.pts++;a.pts++}});r.sort((a,b)=>b.pts-a.pts||(b.bp-b.bc)-(a.bp-a.bc)||b.bp-a.bp);$('#teamRank').innerHTML=r.map((x,i)=>'<div class="rank"><b>'+(i+1)+'</b><span>'+esc(x.name)+' <span class="muted">('+x.mj+' MJ)</span></span><b class="right">'+x.pts+' pts</b></div>').join('')||'<p class="muted">Aucune équipe</p>'}
 document.querySelectorAll('.rankMode').forEach(b=>b.onclick=()=>{S.rankMode=b.dataset.mode;document.querySelectorAll('.rankMode').forEach(x=>x.classList.toggle('primary',x===b));renderRanking()});
 $('#shareWhatsapp').onclick=async()=>{const text=$('#shareText').value;if(navigator.share){try{await navigator.share({title:'Classement du tournoi',text});return}catch{}}await navigator.clipboard.writeText(text);toast('Résumé copié')};
