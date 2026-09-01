@@ -226,10 +226,6 @@
       <div id="publicSeasonScorers"></div>
     </div>
     <div class="card">
-      <h2 class="sectiontitle">🏆 Classement des équipes du dernier tournoi</h2>
-      <div id="publicTeamRanking"></div>
-    </div>
-    <div class="card">
       <h2 class="sectiontitle">👥 Équipes du dernier tournoi</h2>
       <div id="publicTeams"></div>
     </div>
@@ -618,7 +614,24 @@ async function showTournamentHistory(t){
   const teamRows=stats.map((x,i)=>'<div class="rank"><b>'+(i+1)+'</b><span>'+esc(x.name)+' <span class="muted">('+x.mj+' MJ • '+(x.bp-x.bc>=0?'+':'')+(x.bp-x.bc)+')</span></span><b class="right">'+x.pts+' pts</b></div>').join('');
   const scorerRows=scor.map(x=>'<div class="rank '+(x.is_group_member===false?'guest-row':'')+'"><b>'+x.rank+'</b><span>'+esc(x.name)+(x.is_group_member===false?' <span class="guest-badge">'+esc(guestLabel(p(x.id)))+'</span>':'')+'</span><b class="right">'+x.g+' but'+(x.g>1?'s':'')+'</b></div>').join('');
   const assistRows=ass.map(x=>'<div class="rank '+(x.is_group_member===false?'guest-row':'')+'"><b>'+x.rank+'</b><span>'+esc(x.name)+(x.is_group_member===false?' <span class="guest-badge">'+esc(guestLabel(p(x.id)))+'</span>':'')+'</span><b class="right">'+x.a+' passe'+(x.a>1?'s':'')+'</b></div>').join('');
-  const matchRows=(matches||[]).map((m,i)=>'<div class="player" style="padding:10px 0"><div class="muted" style="font-weight:700;margin-bottom:4px">Match '+(i+1)+'</div><div style="font-size:1.05rem">'+esc(teamMap.get(m.home_team_id)||'?')+' <b>'+m.home_score+' - '+m.away_score+'</b> '+esc(teamMap.get(m.away_team_id)||'?')+'</div></div>').join('');
+  const matchRows=(matches||[]).map((m,i)=>{
+    const mg=goals.filter(g=>g.match_id===m.id);
+    const scorersForTeam=(teamId)=>{
+      const counts=new Map();
+      mg.filter(g=>g.team_id===teamId).forEach(g=>{
+        const pl=p(g.scorer_player_id);
+        const name=pl?pl.name:'Buteur inconnu';
+        counts.set(name,(counts.get(name)||0)+1);
+      });
+      return [...counts.entries()].map(([name,n])=>esc(name)+(n>1?' ×'+n:'')).join(', ');
+    };
+    const homeScorers=scorersForTeam(m.home_team_id);
+    const awayScorers=scorersForTeam(m.away_team_id);
+    const scorerLines=
+      (homeScorers?'<div class="small" style="margin-top:6px">⚽ <b>'+esc(teamMap.get(m.home_team_id)||'?')+'</b> : '+homeScorers+'</div>':'')+
+      (awayScorers?'<div class="small" style="margin-top:3px">⚽ <b>'+esc(teamMap.get(m.away_team_id)||'?')+'</b> : '+awayScorers+'</div>':'');
+    return '<div class="player" style="padding:10px 0"><div class="muted" style="font-weight:700;margin-bottom:4px">Match '+(i+1)+'</div><div style="font-size:1.05rem">'+esc(teamMap.get(m.home_team_id)||'?')+' <b>'+m.home_score+' - '+m.away_score+'</b> '+esc(teamMap.get(m.away_team_id)||'?')+'</div>'+scorerLines+'</div>';
+  }).join('');
 
   panel.innerHTML=
     '<div class="row" style="justify-content:space-between"><div><h2 class="sectiontitle" style="margin:0">'+esc(t.name||('Tournoi du '+t.tournament_date))+'</h2><div class="muted">'+t.tournament_date+'</div></div><button id="closeHistoryPanel">Fermer</button></div>'+
@@ -848,23 +861,26 @@ async function bootPublic(token){
   const latest=tournaments[0];
   if(latest){
     const lteams=teams.filter(x=>x.tournament_id===latest.id);
-    const lm=matches.filter(m=>m.tournament_id===latest.id).sort((a,b)=>(a.match_order||0)-(b.match_order||0));
-    const trs=lteams.map(x=>({id:x.id,name:x.name,mj:0,v:0,n:0,d:0,bp:0,bc:0,pts:0}));
-    const trm=new Map(trs.map(x=>[x.id,x]));
-    lm.forEach(m=>{
-      const h=trm.get(m.home_team_id),a=trm.get(m.away_team_id);if(!h||!a)return;
-      h.mj++;a.mj++;h.bp+=m.home_score;h.bc+=m.away_score;a.bp+=m.away_score;a.bc+=m.home_score;
-      if(m.home_score>m.away_score){h.v++;a.d++;h.pts+=3}
-      else if(m.away_score>m.home_score){a.v++;h.d++;a.pts+=3}
-      else{h.n++;a.n++;h.pts++;a.pts++}
-    });
-    trs.sort((a,b)=>b.pts-a.pts||(b.bp-b.bc)-(a.bp-a.bc)||b.bp-a.bp||a.name.localeCompare(b.name));
-    $('#publicTeamRanking').innerHTML=trs.map((x,i)=>'<div class="rank"><b>'+(i+1)+'</b><span><b>'+esc(x.name)+'</b><div class="muted">'+x.mj+' MJ • '+x.v+' V • '+x.n+' N • '+x.d+' D • '+x.bp+' BP • '+x.bc+' BC • Diff '+((x.bp-x.bc)>=0?'+':'')+(x.bp-x.bc)+'</div></span><b class="right">'+x.pts+' pts</b></div>').join('')||'<p class="muted">Aucun classement disponible.</p>';
-
     $('#publicTeams').innerHTML=lteams.map(team=>'<div class="team"><b>'+esc(team.name)+'</b>'+teamPlayers.filter(tp=>tp.team_id===team.id).map(tp=>{const pl=pmap.get(tp.player_id);return pl?'<div class="small" style="margin-top:6px">'+esc(pl.name)+(pl.is_group_member===false?' <span class="guest-badge">Guest</span>':'')+'</div>':''}).join('')+'</div>').join('')||'<p class="muted">Aucune équipe.</p>';
-    $('#publicResults').innerHTML=lm.map((m,i)=>'<div class="player" style="padding:10px 0"><div class="muted" style="font-weight:700;margin-bottom:4px">Match '+(i+1)+'</div><div style="font-size:1.05rem">'+esc(tmap.get(m.home_team_id)?.name||'?')+' <b>'+m.home_score+' - '+m.away_score+'</b> '+esc(tmap.get(m.away_team_id)?.name||'?')+'</div></div>').join('')||'<p class="muted">Aucun résultat.</p>';
-  } else {
-    $('#publicTeamRanking').innerHTML='<p class="muted">Aucun tournoi disponible.</p>';
+    const lm=matches.filter(m=>m.tournament_id===latest.id).sort((a,b)=>(a.match_order||0)-(b.match_order||0));
+    $('#publicResults').innerHTML=lm.map((m,i)=>{
+      const mg=goals.filter(g=>g.match_id===m.id);
+      const scorerText=(teamId)=>{
+        const counts=new Map();
+        mg.filter(g=>g.team_id===teamId).forEach(g=>{
+          const pl=pmap.get(g.scorer_player_id);
+          const name=pl?pl.name:'Buteur inconnu';
+          counts.set(name,(counts.get(name)||0)+1);
+        });
+        return [...counts.entries()].map(([name,n])=>esc(name)+(n>1?' ×'+n:'')).join(', ');
+      };
+      const hs=scorerText(m.home_team_id);
+      const as=scorerText(m.away_team_id);
+      const scorerLines=
+        (hs?'<div class="small" style="margin-top:6px">⚽ <b>'+esc(tmap.get(m.home_team_id)?.name||'?')+'</b> : '+hs+'</div>':'')+
+        (as?'<div class="small" style="margin-top:3px">⚽ <b>'+esc(tmap.get(m.away_team_id)?.name||'?')+'</b> : '+as+'</div>':'');
+      return '<div class="player"><div class="muted">Match '+(i+1)+'</div><div><b>'+esc(tmap.get(m.home_team_id)?.name||'?')+'</b> '+m.home_score+' - '+m.away_score+' <b>'+esc(tmap.get(m.away_team_id)?.name||'?')+'</b></div>'+scorerLines+'</div>';
+    }).join('')||'<p class="muted">Aucun résultat.</p>';
   }
   $('#publicHistory').innerHTML=tournaments.map(t=>'<div class="player"><b>'+esc(t.name||('Tournoi du '+t.tournament_date))+'</b><div class="muted">'+t.tournament_date+' • '+(t.status==='finished'?'Terminé':'En cours')+'</div></div>').join('')||'<p class="muted">Aucun tournoi.</p>';
 }
