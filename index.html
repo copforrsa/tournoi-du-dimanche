@@ -116,7 +116,8 @@
           <input id="inviteEmail" type="email" placeholder="Email du co-organisateur" style="flex:1">
           <button id="sendInvite" class="primary">Inviter</button>
         </div>
-        <div id="memberList" class="muted" style="margin-top:10px"></div>
+        <div id="memberList" style="margin-top:12px"></div>
+        <div class="muted" style="margin-top:8px">🟠 En attente = invitation non acceptée • 🟢 Actif = invitation acceptée</div>
         <div class="space"></div>
         <label class="muted">Lien public — consultation uniquement</label>
         <div class="row">
@@ -274,7 +275,7 @@ window.addEventListener('error', (e) => {
   if(t){t.textContent='Erreur de chargement de l’application. Recharge la page.';t.style.display='block';}
 });
 
-const S={session:null,workspace:null,members:[],players:[],seasons:[],tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},publicMode:false,publicToken:null};
+const S={session:null,workspace:null,members:[],invites:[],players:[],seasons:[],tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},publicMode:false,publicToken:null};
 const $=s=>document.querySelector(s);
 const toast=t=>{const x=$('#toast');x.textContent=t;x.style.display='block';setTimeout(()=>x.style.display='none',2600)};
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -376,6 +377,7 @@ async function loadInvites(){
 async function loadAll(){
   if(!S.workspace)return;const w=S.workspace.id;let r;
   r=await sb.from('workspace_members').select('user_id,role').eq('workspace_id',w);S.members=r.data||[];
+  if(isAdmin()){r=await sb.from('workspace_invites').select('id,email,role,accepted_at,created_at').eq('workspace_id',w).order('created_at',{ascending:false});S.invites=r.data||[]}else S.invites=[];
   r=await sb.from('players').select('*').eq('workspace_id',w).order('name');S.players=r.data||[];
   r=await sb.from('seasons').select('*').eq('workspace_id',w).order('starts_on',{ascending:false});S.seasons=r.data||[];
   r=await sb.from('tournaments').select('*').eq('workspace_id',w).order('tournament_date',{ascending:false});S.tournaments=r.data||[];
@@ -412,6 +414,25 @@ async function renderSeasonScorerSummary(){
   box.innerHTML=arr.map(x=>'<div class="rank '+(x.is_group_member===false?'guest-row':'')+'"><b>'+x.rank+'</b><span>'+esc(x.name)+(x.is_group_member===false?' <span class="guest-badge">'+esc(guestLabel(p(x.id)))+'</span>':'')+'</span><b class="right">'+x.g+' but'+(x.g>1?'s':'')+'</b></div>').join('')||'<p class="muted">Aucun but enregistré.</p>';
 }
 
+function renderAccess(){
+  const box=$('#memberList');if(!box||!isAdmin())return;
+  const coCount=S.members.filter(x=>x.role==='coorganizer').length;
+  const pending=S.invites.filter(x=>!x.accepted_at);
+  const accepted=S.invites.filter(x=>x.accepted_at);
+  const fmt=d=>d?new Date(d).toLocaleDateString('fr-FR'):'';
+  const rows=[
+    ...pending.map(i=>'<div class="player row"><span style="flex:1"><b>'+esc(i.email)+'</b><div class="muted">Invitation envoyée le '+fmt(i.created_at)+'</div></span><span style="font-weight:700;color:#b45309">🟠 En attente</span><button class="danger smallbtn" data-cancel-invite="'+i.id+'">Annuler</button></div>'),
+    ...accepted.map(i=>'<div class="player row"><span style="flex:1"><b>'+esc(i.email)+'</b><div class="muted">Acceptée le '+fmt(i.accepted_at)+'</div></span><span style="font-weight:700;color:#15803d">🟢 Actif</span></div>')
+  ];
+  box.innerHTML='<div class="muted" style="margin-bottom:8px"><b>'+coCount+' / 3 co-organisateur'+(coCount>1?'s':'')+' actif'+(coCount>1?'s':'')+'</b> • '+pending.length+' invitation'+(pending.length>1?'s':'')+' en attente</div>'+(rows.join('')||'<div class="muted">Aucune invitation pour le moment.</div>');
+  box.querySelectorAll('[data-cancel-invite]').forEach(b=>b.onclick=async()=>{
+    if(!confirm("Annuler cette invitation ?"))return;
+    const {error}=await sb.from('workspace_invites').delete().eq('id',b.dataset.cancelInvite).eq('workspace_id',S.workspace.id).is('accepted_at',null);
+    if(error)return toast(error.message);
+    toast('Invitation annulée.');
+    await loadAll();
+  });
+}
 function renderAll(){
   renderHome();
   renderPlayers();
@@ -419,8 +440,7 @@ function renderAll(){
   renderTeams();
   renderMatches();
   applyPermissions();
-  const coCount=S.members.filter(x=>x.role==='coorganizer').length;
-  if($('#memberList'))$('#memberList').textContent=coCount+' / 3 co-organisateur'+(coCount>1?'s':'');
+  renderAccess();
   if($('#publicLink')&&S.workspace?.public_token)$('#publicLink').value=APP_URL+'?public='+S.workspace.public_token;
   renderRanking().catch(e=>console.error('ranking',e));
   renderSeasonScorerSummary().catch(e=>console.error('season ranking',e));
@@ -432,7 +452,16 @@ function renderHome(){
   const present=S.tPlayers.filter(x=>x.present).length;
   $('#homeStats').innerHTML='<div class="player"><b>'+present+'</b><div class="muted">présents</div></div><div class="player"><b>'+S.teams.length+'</b><div class="muted">équipes</div></div><div class="player"><b>'+S.matches.length+'</b><div class="muted">matchs</div></div>';
 }
-$('#sendInvite').onclick=async()=>{if(!S.workspace||S.workspace.role!=='admin')return toast('Seul l’administrateur peut inviter.');if(S.members.filter(x=>x.role==='coorganizer').length>=3)return toast('Maximum de 3 co-organisateurs atteint.');const email=$('#inviteEmail').value.trim().toLowerCase();if(!email)return;const {error}=await sb.from('workspace_invites').upsert({workspace_id:S.workspace.id,email,role:'coorganizer',invited_by:S.session.user.id},{onConflict:'workspace_id,email'});if(error)return toast(error.message);$('#inviteEmail').value='';toast('Invitation enregistrée.')};
+$('#sendInvite').onclick=async()=>{
+  if(!S.workspace||S.workspace.role!=='admin')return toast('Seul l’administrateur peut inviter.');
+  const active=S.members.filter(x=>x.role==='coorganizer').length;
+  const pending=S.invites.filter(x=>!x.accepted_at).length;
+  if(active+pending>=3)return toast('Maximum de 3 co-organisateurs / invitations atteint.');
+  const email=$('#inviteEmail').value.trim().toLowerCase();if(!email)return;
+  const {error}=await sb.from('workspace_invites').upsert({workspace_id:S.workspace.id,email,role:'coorganizer',invited_by:S.session.user.id},{onConflict:'workspace_id,email'});
+  if(error)return toast(error.message);
+  $('#inviteEmail').value='';toast('Invitation enregistrée.');await loadAll();
+};
 $('#copyPublicLink').onclick=async()=>{
   const link=$('#publicLink').value;if(!link)return;
   try{await navigator.clipboard.writeText(link);toast('Lien public copié ✅')}
