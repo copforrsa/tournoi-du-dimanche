@@ -228,16 +228,6 @@
     </div>
 
     <div class="card">
-      <h2 class="sectiontitle">⚽ Buteurs du dernier tournoi</h2>
-      <div id="publicTournamentScorers"></div>
-    </div>
-
-    <div class="card">
-      <h2 class="sectiontitle">🏆 Buteurs de la saison</h2>
-      <div id="publicSeasonScorers"></div>
-    </div>
-
-    <div class="card">
       <h2 class="sectiontitle">👥 Équipes du dernier tournoi</h2>
       <div id="publicTeams"></div>
     </div>
@@ -248,8 +238,28 @@
     </div>
 
     <div class="card">
+      <h2 class="sectiontitle">⚽ Buteurs du dernier tournoi</h2>
+      <div id="publicTournamentScorers"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="sectiontitle">🎯 Passeurs du dernier tournoi</h2>
+      <div id="publicTournamentAssists"></div>
+    </div>
+
+    <div class="card">
       <h2 class="sectiontitle">🗂 Historique</h2>
       <div id="publicHistory"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="sectiontitle">🏆 Buteurs de la saison</h2>
+      <div id="publicSeasonScorers"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="sectiontitle">🎯 Passeurs de la saison</h2>
+      <div id="publicSeasonAssists"></div>
     </div>
   </section>
 </div>
@@ -850,23 +860,31 @@ async function bootPublic(token){
   const activeSeason=seasons.find(x=>x.is_active)||seasons[0];
   const seasonTids=new Set(tournaments.filter(x=>!activeSeason||x.season_id===activeSeason.id).map(x=>x.id));
   const seasonMatchIds=new Set(matches.filter(x=>seasonTids.has(x.tournament_id)).map(x=>x.id));
-  const gs=new Map(players.map(x=>[x.id,{id:x.id,name:x.name,g:0,guest:x.is_group_member===false}]));
-  goals.filter(g=>seasonMatchIds.has(g.match_id)).forEach(g=>{if(gs.has(g.scorer_player_id))gs.get(g.scorer_player_id).g++});
-  let scor=[...gs.values()].filter(x=>x.g).sort((a,b)=>b.g-a.g||a.name.localeCompare(b.name));
+  const gs=new Map(players.map(x=>[x.id,{id:x.id,name:x.name,g:0,a:0,guest:x.is_group_member===false}]));
+  goals.filter(g=>seasonMatchIds.has(g.match_id)).forEach(g=>{
+    if(gs.has(g.scorer_player_id))gs.get(g.scorer_player_id).g++;
+    if(g.assister_player_id&&gs.has(g.assister_player_id))gs.get(g.assister_player_id).a++;
+  });
+  let scor=[...gs.values()].filter(x=>x.g).sort((a,b)=>b.g-a.g||b.a-a.a||a.name.localeCompare(b.name));
   let prev=null,rank=0;scor=scor.map((x,i)=>{if(x.g!==prev){rank=i+1;prev=x.g}return {...x,rank}});
   $('#publicSeasonScorers').innerHTML=scor.map(x=>'<div class="rank '+(x.guest?'guest-row':'')+'"><b>'+x.rank+'</b><span>'+esc(x.name)+(x.guest?' <span class="guest-badge">Guest</span>':'')+'</span><b class="right">'+x.g+' but'+(x.g>1?'s':'')+'</b></div>').join('')||'<p class="muted">Aucun but enregistré.</p>';
+
+  let seasonAss=[...gs.values()].filter(x=>x.a).sort((a,b)=>b.a-a.a||b.g-a.g||a.name.localeCompare(b.name));
+  let aprev=null,arank=0;seasonAss=seasonAss.map((x,i)=>{if(x.a!==aprev){arank=i+1;aprev=x.a}return {...x,rank:arank}});
+  $('#publicSeasonAssists').innerHTML=seasonAss.map(x=>'<div class="rank '+(x.guest?'guest-row':'')+'"><b>'+x.rank+'</b><span>'+esc(x.name)+(x.guest?' <span class="guest-badge">Guest</span>':'')+'</span><b class="right">'+x.a+' passe'+(x.a>1?'s':'')+'</b></div>').join('')||'<p class="muted">Aucune passe enregistrée.</p>';
   const latest=tournaments[0];
   if(latest){
     const lteams=teams.filter(x=>x.tournament_id===latest.id);
     const lm=matches.filter(m=>m.tournament_id===latest.id).sort((a,b)=>(a.match_order||0)-(b.match_order||0));
     const latestMatchIds=new Set(lm.map(m=>m.id));
 
-    const tournamentGoalStats=new Map(players.map(x=>[x.id,{id:x.id,name:x.name,g:0,guest:x.is_group_member===false}]));
+    const tournamentGoalStats=new Map(players.map(x=>[x.id,{id:x.id,name:x.name,g:0,a:0,guest:x.is_group_member===false}]));
     goals.filter(g=>latestMatchIds.has(g.match_id)).forEach(g=>{
       if(tournamentGoalStats.has(g.scorer_player_id))tournamentGoalStats.get(g.scorer_player_id).g++;
+      if(g.assister_player_id&&tournamentGoalStats.has(g.assister_player_id))tournamentGoalStats.get(g.assister_player_id).a++;
     });
     let tournamentScorers=[...tournamentGoalStats.values()].filter(x=>x.g)
-      .sort((a,b)=>b.g-a.g||a.name.localeCompare(b.name));
+      .sort((a,b)=>b.g-a.g||b.a-a.a||a.name.localeCompare(b.name));
     let tPrev=null,tRank=0;
     tournamentScorers=tournamentScorers.map((x,i)=>{
       if(x.g!==tPrev){tRank=i+1;tPrev=x.g}
@@ -875,6 +893,17 @@ async function bootPublic(token){
     $('#publicTournamentScorers').innerHTML=tournamentScorers.map(x=>
       '<div class="rank '+(x.guest?'guest-row':'')+'"><b>'+x.rank+'</b><span>'+esc(x.name)+(x.guest?' <span class="guest-badge">Guest</span>':'')+'</span><b class="right">'+x.g+' but'+(x.g>1?'s':'')+'</b></div>'
     ).join('')||'<p class="muted">Aucun but enregistré.</p>';
+
+    let tournamentAss=[...tournamentGoalStats.values()].filter(x=>x.a)
+      .sort((a,b)=>b.a-a.a||b.g-a.g||a.name.localeCompare(b.name));
+    let taPrev=null,taRank=0;
+    tournamentAss=tournamentAss.map((x,i)=>{
+      if(x.a!==taPrev){taRank=i+1;taPrev=x.a}
+      return {...x,rank:taRank};
+    });
+    $('#publicTournamentAssists').innerHTML=tournamentAss.map(x=>
+      '<div class="rank '+(x.guest?'guest-row':'')+'"><b>'+x.rank+'</b><span>'+esc(x.name)+(x.guest?' <span class="guest-badge">Guest</span>':'')+'</span><b class="right">'+x.a+' passe'+(x.a>1?'s':'')+'</b></div>'
+    ).join('')||'<p class="muted">Aucune passe enregistrée.</p>';
     const trs=lteams.map(x=>({id:x.id,name:x.name,mj:0,v:0,n:0,d:0,bp:0,bc:0,pts:0}));
     const trm=new Map(trs.map(x=>[x.id,x]));
     lm.forEach(m=>{
@@ -888,10 +917,19 @@ async function bootPublic(token){
     $('#publicTeamRanking').innerHTML=trs.map((x,i)=>'<div class="rank"><b>'+(i+1)+'</b><span><b>'+esc(x.name)+'</b><div class="muted">'+x.mj+' MJ • '+x.v+' V • '+x.n+' N • '+x.d+' D • '+x.bp+' BP • '+x.bc+' BC • Diff '+((x.bp-x.bc)>=0?'+':'')+(x.bp-x.bc)+'</div></span><b class="right">'+x.pts+' pts</b></div>').join('')||'<p class="muted">Aucun classement disponible.</p>';
 
     $('#publicTeams').innerHTML=lteams.map(team=>'<div class="team"><b>'+esc(team.name)+'</b>'+teamPlayers.filter(tp=>tp.team_id===team.id).map(tp=>{const pl=pmap.get(tp.player_id);return pl?'<div class="small" style="margin-top:6px">'+esc(pl.name)+(pl.is_group_member===false?' <span class="guest-badge">Guest</span>':'')+'</div>':''}).join('')+'</div>').join('')||'<p class="muted">Aucune équipe.</p>';
-    $('#publicResults').innerHTML=lm.map((m,i)=>'<div class="player" style="padding:10px 0"><div class="muted" style="font-weight:700;margin-bottom:4px">Match '+(i+1)+'</div><div style="font-size:1.05rem">'+esc(tmap.get(m.home_team_id)?.name||'?')+' <b>'+m.home_score+' - '+m.away_score+'</b> '+esc(tmap.get(m.away_team_id)?.name||'?')+'</div></div>').join('')||'<p class="muted">Aucun résultat.</p>';
+    $('#publicResults').innerHTML=lm.map((m,i)=>{
+      const mg=goals.filter(g=>g.match_id===m.id);
+      const goalLines=mg.map(g=>{
+        const scorer=pmap.get(g.scorer_player_id);
+        const assister=g.assister_player_id?pmap.get(g.assister_player_id):null;
+        const team=tmap.get(g.team_id);
+        return '<div class="small" style="margin-top:5px">⚽ '+esc(scorer?.name||'?')+(assister?' <span class="muted">← passe '+esc(assister.name)+'</span>':'')+(team?' <span class="muted">• '+esc(team.name)+'</span>':'')+'</div>';
+      }).join('');
+      return '<div class="player" style="padding:10px 0"><div class="muted" style="font-weight:700;margin-bottom:4px">Match '+(i+1)+'</div><div style="font-size:1.05rem">'+esc(tmap.get(m.home_team_id)?.name||'?')+' <b>'+m.home_score+' - '+m.away_score+'</b> '+esc(tmap.get(m.away_team_id)?.name||'?')+'</div>'+(goalLines||'<div class="small muted" style="margin-top:5px">Aucun buteur enregistré</div>')+'</div>';
+    }).join('')||'<p class="muted">Aucun résultat.</p>';
   } else {
     $('#publicTeamRanking').innerHTML='<p class="muted">Aucun tournoi disponible.</p>';
-    $('#publicTournamentScorers').innerHTML='<p class="muted">Aucun tournoi disponible.</p>';
+    $('#publicTournamentScorers').innerHTML='<p class="muted">Aucun tournoi disponible.</p>'; $('#publicTournamentAssists').innerHTML='<p class="muted">Aucun tournoi disponible.</p>';
     $('#publicTeams').innerHTML='<p class="muted">Aucune équipe.</p>';
     $('#publicResults').innerHTML='<p class="muted">Aucun résultat.</p>';
   }
