@@ -593,6 +593,17 @@ $('#addPlayers').onclick=async()=>{
   finally{btn.disabled=false;btn.textContent='Enregistrer les joueurs'}
 };
 
+async function deleteTournament(t){
+  if(!isAdmin())return toast('Seul l’administrateur peut supprimer un tournoi.');
+  const label=t.name||('Tournoi du '+t.tournament_date);
+  if(!confirm('Supprimer définitivement « '+label+' » ?\n\nLes équipes, matchs, buts et données liées à ce tournoi seront également supprimés. Cette action est irréversible.'))return;
+  const {error}=await sb.from('tournaments').delete().eq('id',t.id);
+  if(error)return toast(error.message);
+  if(S.activeTour===t.id)S.activeTour=null;
+  await loadAll();
+  toast('Tournoi supprimé ✅');
+}
+
 function renderTournaments(){
   const ss=$('#seasonSelect');
   ss.innerHTML='<option value="">Sans saison</option>'+S.seasons.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');
@@ -622,7 +633,13 @@ function renderTournaments(){
       await loadAll();
       toast('Tournoi terminé ✅');
     };
-    if(isAdmin())d.appendChild(finish);box.appendChild(d);
+    if(isAdmin()){
+      d.appendChild(finish);
+      const del=document.createElement('button');del.textContent='Supprimer';del.className='danger';del.style.margin='8px 0 0 8px';
+      del.onclick=async()=>await deleteTournament(t);
+      d.appendChild(del);
+    }
+    box.appendChild(d);
   });
 
   if(finished.length){
@@ -631,9 +648,16 @@ function renderTournaments(){
   finished.forEach(t=>{
     const d=document.createElement('div');d.className='player row';
     d.innerHTML='<span style="flex:1"><b>'+esc(t.name||('Tournoi du '+t.tournament_date))+'</b><div class="muted">'+t.tournament_date+' • Terminé</div></span>';
+    const actions=document.createElement('div');actions.className='row';
     const view=document.createElement('button');view.textContent='Voir les résultats';view.className='primary';
     view.onclick=async()=>await showTournamentHistory(t);
-    d.appendChild(view);box.appendChild(d);
+    actions.appendChild(view);
+    if(isAdmin()){
+      const del=document.createElement('button');del.textContent='Supprimer';del.className='danger';
+      del.onclick=async()=>await deleteTournament(t);
+      actions.appendChild(del);
+    }
+    d.appendChild(actions);box.appendChild(d);
   });
 
   if(!S.tournaments.length)box.innerHTML='<p class="muted">Aucun tournoi pour le moment.</p>';
