@@ -130,7 +130,7 @@
         <div class="space"></div><input id="tourName" placeholder="Nom facultatif"><div class="space"></div>
         <button id="createTournament" class="primary">Créer le tournoi</button>
       </div>
-      <div class="card"><h2 class="sectiontitle">Historique</h2><div id="tournamentList"></div></div>
+      <div class="card"><h2 class="sectiontitle">Historique</h2><div id="tournamentList"></div></div><div class="card"><h2 class="sectiontitle">🏆 Classement des buteurs de la saison</h2><div id="seasonScorerSummary"></div></div>
     </div>
 
     <div id="view-teams" class="view">
@@ -285,7 +285,27 @@ async function loadTournament(){
   const mids=S.matches.map(x=>x.id);if(mids.length){r=await sb.from('goals').select('*').in('match_id',mids).order('created_at');S.goals=r.data||[]}else S.goals=[]
 }
 function currentTour(){return S.tournaments.find(x=>x.id===S.activeTour)} function p(id){return S.players.find(x=>x.id===id)} function tm(id){return S.teams.find(x=>x.id===id)}
-function renderAll(){renderHome();renderPlayers();renderTournaments();renderTeams();renderMatches();renderRanking();$('#memberList').textContent=S.members.length+' organisateur'+(S.members.length>1?'s':'')+' autorisé'+(S.members.length>1?'s':'')}
+async function renderSeasonScorerSummary(){
+  const box=$('#seasonScorerSummary');if(!box)return;
+  const activeSeason=S.seasons.find(s=>s.is_active)||S.seasons[0];
+  if(!activeSeason){box.innerHTML='<p class="muted">Aucune saison active.</p>';return}
+  const tournaments=S.tournaments.filter(t=>t.season_id===activeSeason.id);
+  const tids=tournaments.map(t=>t.id);
+  if(!tids.length){box.innerHTML='<p class="muted">Aucun tournoi dans cette saison.</p>';return}
+  const {data:matches,error:me}=await sb.from('matches').select('*').in('tournament_id',tids);
+  if(me){box.innerHTML='<p class="muted">Impossible de charger le classement.</p>';return}
+  const mids=(matches||[]).map(m=>m.id);
+  if(!mids.length){box.innerHTML='<p class="muted">Aucun match enregistré.</p>';return}
+  const {data:goals,error:ge}=await sb.from('goals').select('*').in('match_id',mids);
+  if(ge){box.innerHTML='<p class="muted">Impossible de charger les buts.</p>';return}
+  const stats=new Map(S.players.map(x=>[x.id,{name:x.name,g:0}]));
+  (goals||[]).forEach(g=>{if(stats.has(g.scorer_player_id))stats.get(g.scorer_player_id).g++});
+  let arr=[...stats.values()].filter(x=>x.g).sort((a,b)=>b.g-a.g||a.name.localeCompare(b.name));
+  arr=competitionRanks(arr,'g');
+  box.innerHTML=arr.map(x=>'<div class="rank"><b>'+x.rank+'</b><span>'+esc(x.name)+'</span><b class="right">'+x.g+' but'+(x.g>1?'s':'')+'</b></div>').join('')||'<p class="muted">Aucun but enregistré.</p>';
+}
+
+function renderAll(){renderHome();renderPlayers();renderTournaments();renderTeams();renderMatches();renderRanking();renderSeasonScorerSummary();$('#memberList').textContent=S.members.length+' organisateur'+(S.members.length>1?'s':'')+' autorisé'+(S.members.length>1?'s':'')}
 function renderHome(){const t=currentTour();$('#activeTourLabel').textContent=t?((t.name||'Tournoi')+' • '+t.tournament_date+' • '+(t.format==='king_of_pitch'?'Roi du terrain':'Classique')):'Aucun tournoi';const present=S.tPlayers.filter(x=>x.present).length;$('#homeStats').innerHTML='<div class="player"><b>'+present+'</b><div class="muted">présents</div></div><div class="player"><b>'+S.teams.length+'</b><div class="muted">équipes</div></div><div class="player"><b>'+S.matches.length+'</b><div class="muted">matchs</div></div>'}
 $('#sendInvite').onclick=async()=>{if(!S.workspace||S.workspace.role!=='admin')return toast('Seul l’administrateur peut inviter.');const email=$('#inviteEmail').value.trim().toLowerCase();if(!email)return;const {error}=await sb.from('workspace_invites').upsert({workspace_id:S.workspace.id,email,role:'coorganizer',invited_by:S.session.user.id},{onConflict:'workspace_id,email'});if(error)return toast(error.message);$('#inviteEmail').value='';toast('Invitation enregistrée.')};
 
@@ -372,6 +392,13 @@ async function showTournamentHistory(t){
   if(te)return toast(te.message);
   const {data:matches,error:me}=await sb.from('matches').select('*').eq('tournament_id',t.id).order('match_order');
   if(me)return toast(me.message);
+  const mids=(matches||[]).map(m=>m.id);
+  let goals=[];
+  if(mids.length){
+    const {data,error}=await sb.from('goals').select('*').in('match_id',mids);
+    if(error)return toast(error.message);
+    goals=data||[];
+  }
 
   const teamMap=new Map((teams||[]).map(x=>[x.id,x.name]));
   const stats=(teams||[]).map(x=>({id:x.id,name:x.name,mj:0,v:0,n:0,d:0,bp:0,bc:0,pts:0}));
@@ -385,17 +412,32 @@ async function showTournamentHistory(t){
   });
   stats.sort((a,b)=>b.pts-a.pts||(b.bp-b.bc)-(a.bp-a.bc)||b.bp-a.bp);
 
+  const playerStats=new Map(S.players.map(x=>[x.id,{name:x.name,g:0,a:0}]));
+  goals.forEach(g=>{
+    if(playerStats.has(g.scorer_player_id))playerStats.get(g.scorer_player_id).g++;
+    if(g.assister_player_id&&playerStats.has(g.assister_player_id))playerStats.get(g.assister_player_id).a++;
+  });
+  let scor=[...playerStats.values()].filter(x=>x.g).sort((a,b)=>b.g-a.g||b.a-a.a||a.name.localeCompare(b.name));
+  let ass=[...playerStats.values()].filter(x=>x.a).sort((a,b)=>b.a-a.a||b.g-a.g||a.name.localeCompare(b.name));
+  scor=competitionRanks(scor,'g');ass=competitionRanks(ass,'a');
+
   let panel=$('#historyPanel');
   if(!panel){
     panel=document.createElement('div');panel.id='historyPanel';panel.className='card';panel.style.marginTop='12px';
     $('#tournamentList').parentElement.appendChild(panel);
   }
+
   const matchRows=(matches||[]).map((m,i)=>'<div class="rank"><b>Match '+(i+1)+'</b><span>'+esc(teamMap.get(m.home_team_id)||'?')+' <b>'+m.home_score+' - '+m.away_score+'</b> '+esc(teamMap.get(m.away_team_id)||'?')+'</span></div>').join('');
   const tableRows=stats.map((x,i)=>'<div class="rank"><b>'+(i+1)+'</b><span>'+esc(x.name)+' <span class="muted">('+x.mj+' MJ • '+(x.bp-x.bc>=0?'+':'')+(x.bp-x.bc)+')</span></span><b class="right">'+x.pts+' pts</b></div>').join('');
+  const scorerRows=scor.map(x=>'<div class="rank"><b>'+x.rank+'</b><span>'+esc(x.name)+'</span><b class="right">'+x.g+' but'+(x.g>1?'s':'')+'</b></div>').join('');
+  const assistRows=ass.map(x=>'<div class="rank"><b>'+x.rank+'</b><span>'+esc(x.name)+'</span><b class="right">'+x.a+' passe'+(x.a>1?'s':'')+'</b></div>').join('');
+
   panel.innerHTML=
     '<div class="row" style="justify-content:space-between"><div><h2 class="sectiontitle" style="margin:0">'+esc(t.name||('Tournoi du '+t.tournament_date))+'</h2><div class="muted">'+t.tournament_date+'</div></div><button id="closeHistoryPanel">Fermer</button></div>'+
     '<h3>🏆 Classement final</h3>'+(tableRows||'<p class="muted">Aucun classement.</p>')+
-    '<h3 style="margin-top:16px">⚽ Résultats</h3>'+(matchRows||'<p class="muted">Aucun match enregistré.</p>');
+    '<h3 style="margin-top:16px">⚽ Buteurs du tournoi</h3>'+(scorerRows||'<p class="muted">Aucun buteur.</p>')+
+    '<h3 style="margin-top:16px">🎯 Passeurs du tournoi</h3>'+(assistRows||'<p class="muted">Aucun passeur.</p>')+
+    '<h3 style="margin-top:16px">📋 Résultats</h3>'+(matchRows||'<p class="muted">Aucun match enregistré.</p>');
   $('#closeHistoryPanel').onclick=()=>panel.remove();
   panel.scrollIntoView({behavior:'smooth',block:'start'});
 }
