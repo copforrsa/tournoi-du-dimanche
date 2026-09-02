@@ -75,7 +75,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.17</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.18</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -118,7 +118,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.17</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.18</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -199,6 +199,7 @@ select{background-color:#fff} textarea{resize:vertical}
           </div>
           <span class="guest-badge">SWÉ TOURNAMENT 5/5</span>
         </div>
+        <div id="coorgMyRights" class="hidden" style="margin-top:12px"></div>
       </div>
       <div class="card">
         <h2 class="sectiontitle">Tournoi actif</h2>
@@ -654,9 +655,38 @@ function hostFirstName(){
   return 'à toi';
 }
 function renderHostWelcome(){
-  const title=$('#hostWelcomeTitle'),email=$('#hostWelcomeEmail');
+  const title=$('#hostWelcomeTitle'),email=$('#hostWelcomeEmail'),rights=$('#coorgMyRights');
   if(title)title.textContent='👋 Bonjour '+hostFirstName()+' !';
   if(email)email.textContent='Connecté avec : '+(S.session?.user?.email||'email indisponible');
+  if(!rights)return;
+  if(!isCoorg()){
+    rights.classList.add('hidden');
+    rights.innerHTML='';
+    return;
+  }
+  rights.classList.remove('hidden');
+  const defs=[
+    ['can_enter_scores','⚽ Saisir les scores pendant les matchs'],
+    ['can_generate_teams','👥 Générer les équipes'],
+    ['can_create_tournaments','📅 Créer des tournois'],
+    ['can_view_players','👤 Voir les joueurs'],
+    ['can_add_members','➕ Ajouter des membres'],
+    ['can_delete_members','🗑️ Supprimer des membres'],
+    ['can_invite_coorganizers','🔗 Inviter des co-organisateurs']
+  ];
+  const granted=defs.filter(([key])=>!!S.myPermissions?.[key]);
+  const temp=hasTemporaryAdmin();
+  rights.innerHTML=
+    '<div class="player" style="background:#f8fbf9">'+
+      '<div class="row" style="justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">'+
+        '<div><b>🔐 Mes autorisations</b><div class="muted" style="margin-top:3px">Droits accordés par l’administrateur</div></div>'+
+        '<span class="guest-badge">'+(temp?'Admin temporaire':'Co-gestionnaire')+'</span>'+
+      '</div>'+
+      '<div style="margin-top:10px">'+
+        (granted.length?granted.map(([,label])=>'<span class="guest-badge" style="margin:3px 5px 3px 0;background:#e7f6ec;color:#126b34">'+label+'</span>').join(''):'<span class="muted">Aucune autorisation particulière.</span>')+
+      '</div>'+
+      (S.myPermissions?.can_enter_scores?'<div class="muted" style="margin-top:9px">✅ Tu peux saisir et modifier les scores pendant les matchs en cours.</div>':'')+
+    '</div>';
 }
 
 function setView(v){
@@ -1101,7 +1131,7 @@ async function loadAll(){
     r=await sb.rpc('get_my_coorganizer_permissions',{p_workspace_id:w});
     if(r.error)console.error('permissions coorganisateur',r.error);
     const mp=Array.isArray(r.data)?(r.data[0]||null):r.data;
-    S.myPermissions={can_invite_coorganizers:false,can_enter_scores:true,can_add_members:true,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null,...(mp||{})};
+    S.myPermissions={can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:false,can_generate_teams:false,temporary_admin_until:null,...(mp||{})};
     r=await sb.rpc('get_my_player_skill_ratings',{p_workspace_id:w});
     if(!r.error)S.myRatings=Array.isArray(r.data)?r.data:[];
   }else{S.invites=[];S.coorgs=[];}
