@@ -60,7 +60,7 @@ select{background-color:#fff} textarea{resize:vertical}
 }
 @media(max-width:650px){
   body{background:#f3f7f4}.app{padding:0 12px 100px}.top{border-radius:0 0 24px 24px;margin:0 -12px 14px;padding:18px 16px 20px}.top h1{font-size:21px}.card{border-radius:17px;padding:14px;margin:10px 0}.g2,.g3{grid-template-columns:1fr}.sectiontitle{font-size:17px}
-  /* V39.33 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
+  /* V39.34 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
   .tabs{left:0;right:0;transform:none;width:100%;display:flex;grid-template-columns:none;justify-content:flex-start;gap:5px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;border-radius:18px 18px 0 0;padding:7px 10px calc(7px + env(safe-area-inset-bottom));scroll-snap-type:x proximity;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
   .tabs button{flex:0 0 74px;min-width:74px;font-size:10px;scroll-snap-align:center;padding:5px 6px}
@@ -81,7 +81,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.33</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.34</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -124,7 +124,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.33</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.34</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -1979,10 +1979,18 @@ function renderTournaments(){
       const editDetails=document.createElement('div');
       editDetails.style.marginTop='10px';
       const editBtn=document.createElement('button');
-      editBtn.textContent='✏️ Modifier terrain / heure / prix';
+      editBtn.type='button';
+      editBtn.textContent='✏️ Modifier date / terrain / heure / prix';
+
       const editBox=document.createElement('div');
       editBox.className='player hidden';
       editBox.style.marginTop='8px';
+      editBox.onclick=e=>e.stopPropagation();
+      editBox.onchange=e=>e.stopPropagation();
+
+      const dateInput=document.createElement('input');
+      dateInput.type='date';
+      dateInput.value=t.tournament_date||'';
 
       const complexSel=document.createElement('select');
       complexSel.innerHTML='<option value="">Choisir le complexe</option>'+S.sportsComplexes.filter(c=>c.active!==false).map(c=>'<option value="'+c.id+'">'+esc(c.name)+(c.city?' • '+esc(c.city):'')+'</option>').join('');
@@ -2006,55 +2014,105 @@ function renderTournaments(){
       refInput.placeholder='Nom ou n° de réservation (facultatif)';
       refInput.value=t.reservation_reference||'';
 
+      let selectedPitchIds=new Set((t.reserved_pitch_ids||[]).map(String));
+
       const renderEditPitches=()=>{
-        const selected=new Set((t.reserved_pitch_ids||[]).map(String));
-        const rows=S.sportsPitches.filter(p=>p.active!==false&&p.complex_id===complexSel.value);
+        const rows=S.sportsPitches.filter(p=>p.active!==false&&String(p.complex_id)===String(complexSel.value));
         pitchWrap.innerHTML='<div class="muted" style="margin-bottom:6px"><b>Terrains réservés</b> • 1 à 3 terrains</div>'+
-          (rows.length?rows.map(p=>'<label class="player row" style="justify-content:flex-start"><input class="editTourPitchCheck" type="checkbox" value="'+p.id+'" style="width:auto" '+(selected.has(String(p.id))?'checked':'')+'><span>'+esc(p.name)+'</span></label>').join(''):'<div class="muted">Aucun terrain disponible pour ce complexe.</div>');
+          (rows.length
+            ? rows.map(p=>'<label class="player row" style="justify-content:flex-start"><input class="editTourPitchCheck" type="checkbox" value="'+p.id+'" style="width:auto" '+(selectedPitchIds.has(String(p.id))?'checked':'')+'><span>'+esc(p.name)+'</span></label>').join('')
+            : '<div class="muted">Aucun terrain disponible pour ce complexe.</div>');
+
         pitchWrap.querySelectorAll('.editTourPitchCheck').forEach(cb=>{
-          cb.onchange=()=>{
+          cb.onchange=e=>{
+            e.stopPropagation();
             const checked=[...pitchWrap.querySelectorAll('.editTourPitchCheck:checked')];
-            if(checked.length>3){cb.checked=false;toast('Maximum 3 terrains pour un tournoi.');}
+            if(checked.length>3){
+              cb.checked=false;
+              toast('Maximum 3 terrains pour un tournoi.');
+            }
+            selectedPitchIds=new Set([...pitchWrap.querySelectorAll('.editTourPitchCheck:checked')].map(x=>String(x.value)));
           };
         });
       };
-      complexSel.onchange=()=>{
-        t={...t,complex_id:complexSel.value,reserved_pitch_ids:[]};
+
+      complexSel.onchange=e=>{
+        e.stopPropagation();
+        selectedPitchIds=new Set();
         renderEditPitches();
       };
+
       renderEditPitches();
 
       const saveDetails=document.createElement('button');
+      saveDetails.type='button';
       saveDetails.className='primary';
       saveDetails.textContent='💾 Enregistrer les modifications';
 
-      editBox.innerHTML='<div class="muted" style="margin-bottom:8px"><b>Modifier les informations de réservation de ce tournoi.</b></div>';
-      editBox.append(complexSel,pitchWrap);
+      const cancelDetails=document.createElement('button');
+      cancelDetails.type='button';
+      cancelDetails.textContent='Annuler';
+
+      editBox.innerHTML='<div class="muted" style="margin-bottom:8px"><b>Modifier ce tournoi</b><br>La fenêtre reste ouverte tant que tu n’enregistres pas ou que tu n’annules pas.</div>';
+
+      const firstGrid=document.createElement('div');
+      firstGrid.className='grid g2';
+      firstGrid.append(dateInput,complexSel);
+      editBox.appendChild(firstGrid);
+      editBox.appendChild(pitchWrap);
+
       const detailsGrid=document.createElement('div');
       detailsGrid.className='grid g3';
       detailsGrid.style.marginTop='8px';
       detailsGrid.append(timeInput,priceInput,refInput);
       editBox.appendChild(detailsGrid);
-      editBox.appendChild(saveDetails);
 
-      editBtn.onclick=()=>editBox.classList.toggle('hidden');
-      saveDetails.onclick=async()=>{
+      const editActions=document.createElement('div');
+      editActions.className='row';
+      editActions.style.marginTop='10px';
+      editActions.append(saveDetails,cancelDetails);
+      editBox.appendChild(editActions);
+
+      editBtn.onclick=e=>{
+        e.preventDefault();
+        e.stopPropagation();
+        editBox.classList.toggle('hidden');
+      };
+
+      cancelDetails.onclick=e=>{
+        e.preventDefault();
+        e.stopPropagation();
+        editBox.classList.add('hidden');
+      };
+
+      saveDetails.onclick=async e=>{
+        e.preventDefault();
+        e.stopPropagation();
+
+        const tournamentDate=dateInput.value;
         const complexId=complexSel.value;
         const pitchIds=[...pitchWrap.querySelectorAll('.editTourPitchCheck:checked')].map(x=>x.value);
         const startTime=timeInput.value;
         const price=Number(priceInput.value);
+
+        if(!tournamentDate)return toast('Choisis la date du tournoi.');
         if(!complexId)return toast('Choisis le complexe sportif.');
         if(!pitchIds.length)return toast('Choisis au moins 1 terrain réservé.');
         if(pitchIds.length>3)return toast('Maximum 3 terrains pour un tournoi.');
         if(!startTime)return toast('Indique l’heure de réservation.');
         if(!Number.isFinite(price)||price<0)return toast('Indique un prix valide.');
-        const complex=S.sportsComplexes.find(c=>c.id===complexId);
-        const selectedPitches=S.sportsPitches.filter(p=>pitchIds.includes(String(p.id))&&p.complex_id===complexId);
+
+        const complex=S.sportsComplexes.find(c=>String(c.id)===String(complexId));
+        const selectedPitches=S.sportsPitches.filter(p=>pitchIds.includes(String(p.id))&&String(p.complex_id)===String(complexId));
         if(selectedPitches.length!==pitchIds.length)return toast('Un terrain sélectionné est invalide.');
+
         const venue=[complex?.name,selectedPitches.map(p=>p.name).join(', ')].filter(Boolean).join(' — ');
+
         saveDetails.disabled=true;
         saveDetails.textContent='Enregistrement…';
+
         const {error}=await sb.from('tournaments').update({
+          tournament_date:tournamentDate,
           complex_id:complexId,
           reserved_pitch_ids:pitchIds,
           venue,
@@ -2062,12 +2120,16 @@ function renderTournaments(){
           entry_fee_cents:Math.round(price*100),
           reservation_reference:refInput.value.trim()||null
         }).eq('id',t.id);
-        saveDetails.disabled=false;
-        saveDetails.textContent='💾 Enregistrer les modifications';
-        if(error)return toast(error.message);
+
+        if(error){
+          saveDetails.disabled=false;
+          saveDetails.textContent='💾 Enregistrer les modifications';
+          return toast(error.message);
+        }
+
         await loadAll();
         setView('tournaments');
-        toast('Terrain(s), heure et prix du tournoi modifiés ✅');
+        toast('Date, terrain(s), heure et prix du tournoi modifiés ✅');
       };
 
       editDetails.append(editBtn,editBox);
@@ -2826,7 +2888,7 @@ async function renderLeague(){
   }
 
 
-  // V39.33 — Saisie du résultat directement depuis l'onglet Ligue.
+  // V39.34 — Saisie du résultat directement depuis l'onglet Ligue.
   const scoringCard=$('#leagueScoringCard'),scoringBody=$('#leagueScoringBody'),scoringLabel=$('#leagueScoringSessionLabel');
   if(scoringCard)scoringCard.classList.toggle('hidden',!canScoreLeague);
   if(canScoreLeague&&scoringBody){
@@ -3917,7 +3979,7 @@ async function bootPublic(token){
   const pmap=new Map(players.map(x=>[x.id,x]));
   const tmap=new Map(teams.map(x=>[x.id,x]));
 
-  // V39.33 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
+  // V39.34 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
   if(wantsLeagueSession&&regTour){
     const linkedLeague=leagues.find(l=>l.id===regTour.league_id)||null;
     const linkLeagueId=publicParams.get('league');
