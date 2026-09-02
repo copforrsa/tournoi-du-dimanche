@@ -67,7 +67,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.3</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.4</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -110,7 +110,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.3</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.4</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -1199,7 +1199,7 @@ function renderHome(){
       const url=registrationLink(t);
       share.classList.remove('hidden');
       share.innerHTML='<div class="player"><b>🔗 Inscriptions ouvertes</b><div class="muted" style="margin:4px 0 8px">Envoie ce lien aux joueurs pour qu’ils s’inscrivent.</div><div class="row"><input id="homeRegLink" readonly value="'+esc(url)+'" style="flex:1"><button id="homeCopyReg">Copier</button><button id="homeWaReg" class="primary">📲 WhatsApp</button></div></div>';
-      $('#homeCopyReg').onclick=async()=>{try{await navigator.clipboard.writeText(url);toast('Lien d’inscription copié ✅')}catch(e){$('#homeRegLink').select();toast('Lien sélectionné : copie-le.')}};
+      $('#homeCopyReg').onclick=async()=>{try{await navigator.clipboard.writeText(url);toast('Lien unique du tournoi copié ✅')}catch(e){$('#homeRegLink').select();toast('Lien sélectionné : copie-le.')}};
       $('#homeWaReg').onclick=()=>{const msg='⚽ '+(t.name||'SWÉ Tournament 5/5')+'\n📅 '+t.tournament_date+'\n\nInscriptions ouvertes :\n'+url;window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank','noopener')};
     }else{share.classList.add('hidden');share.innerHTML=''}
   }
@@ -1499,16 +1499,16 @@ function renderTournaments(){
       saveMax.onclick=async()=>{const n=Math.max(2,Math.min(100,Number(max.value)||20));const {error}=await sb.from('tournaments').update({max_players:n}).eq('id',t.id);if(error)return toast(error.message);await loadAll();toast('Nombre de places mis à jour ✅')};
       row.append(max,saveMax,toggle);reg.appendChild(row);
 
-      const publicUrl=S.workspace?.public_token?APP_URL+'?public='+S.workspace.public_token:'';
+      const publicUrl=registrationLink(t);
       const shareBox=document.createElement('div');shareBox.style.marginTop='10px';
-      shareBox.innerHTML='<div class="muted" style="margin-bottom:6px"><b>🔗 Lien d’inscription à envoyer aux joueurs</b></div>';
+      shareBox.innerHTML='<div class="muted" style="margin-bottom:6px"><b>🔗 Lien unique de ce tournoi</b></div>';
       const linkRow=document.createElement('div');linkRow.className='row';
-      const linkInput=document.createElement('input');linkInput.readOnly=true;linkInput.value=publicUrl;linkInput.style.flex='1';
+      const linkInput=document.createElement('input');linkInput.readOnly=true;linkInput.value=publicUrl;linkInput.style.flex='1';linkInput.title='Lien unique du tournoi '+(t.name||t.tournament_date);
       const copyBtn=document.createElement('button');copyBtn.textContent='Copier le lien';
       const waBtn=document.createElement('button');waBtn.textContent='📲 WhatsApp';waBtn.className='primary';
       copyBtn.onclick=async()=>{
         if(!publicUrl)return toast('Lien public indisponible.');
-        try{await navigator.clipboard.writeText(publicUrl);toast('Lien d’inscription copié ✅')}
+        try{await navigator.clipboard.writeText(publicUrl);toast('Lien unique du tournoi copié ✅')}
         catch(e){linkInput.focus();linkInput.select();toast('Lien sélectionné : copie-le.')}
       };
       waBtn.onclick=()=>{
