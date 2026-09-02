@@ -277,34 +277,43 @@ window.addEventListener('error', (e) => {
 
 const S={session:null,workspace:null,members:[],invites:[],players:[],seasons:[],tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},publicMode:false,publicToken:null};
 
-let mobileRefreshTimer=null;
-let mobileRefreshBusy=false;
+let safeSyncTimer=null;
+let safeSyncBusy=false;
 
-async function refreshVisibleApp(){
-  if(mobileRefreshBusy || S.publicMode || !S.session || !S.workspace) return;
-  if(document.visibilityState==='hidden') return;
-  mobileRefreshBusy=true;
+async function safeAppSync(){
+  if(safeSyncBusy || S.publicMode || !S.session || !S.workspace || document.visibilityState==='hidden') return;
+  safeSyncBusy=true;
   try{ await loadAll(); }
-  catch(e){ console.warn('refreshVisibleApp',e); }
-  finally{ mobileRefreshBusy=false; }
+  catch(e){ console.warn('safeAppSync',e); }
+  finally{ safeSyncBusy=false; }
 }
-
-function startMobileRefreshFallback(){
-  if(mobileRefreshTimer) clearInterval(mobileRefreshTimer);
-  mobileRefreshTimer=setInterval(()=>refreshVisibleApp(),15000);
+function startSafeAppSync(){
+  if(safeSyncTimer) clearInterval(safeSyncTimer);
+  safeSyncTimer=setInterval(safeAppSync,20000);
 }
-
 document.addEventListener('visibilitychange',()=>{
-  if(document.visibilityState==='visible') refreshVisibleApp();
+  if(document.visibilityState==='visible') setTimeout(safeAppSync,300);
 });
-window.addEventListener('focus',()=>refreshVisibleApp());
-window.addEventListener('pageshow',()=>refreshVisibleApp());
+window.addEventListener('pageshow',()=>setTimeout(safeAppSync,300));
 
 const $=s=>document.querySelector(s);
 const toast=t=>{const x=$('#toast');x.textContent=t;x.style.display='block';setTimeout(()=>x.style.display='none',2600)};
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const today=()=>new Date().toISOString().slice(0,10); $('#tourDate').value=today();
-function setView(v){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id==='view-'+v));document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.view===v));if(v==='ranking')renderRanking()}
+function setView(v){
+  document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id==='view-'+v));
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.view===v));
+  if(v==='ranking')renderRanking();
+}
+
+// Navigation attachée immédiatement : elle reste fonctionnelle même si une
+// autre partie de l'initialisation rencontre une erreur.
+document.addEventListener('click',e=>{
+  const tab=e.target.closest('.tab');
+  if(tab && tab.dataset.view){ e.preventDefault(); setView(tab.dataset.view); return; }
+  const go=e.target.closest('[data-go]');
+  if(go && go.dataset.go){ e.preventDefault(); setView(go.dataset.go); }
+});
 let recoveryMode=/type=recovery/i.test(location.hash+location.search);
 const APP_URL='https://copforrsa.github.io/tournoi-du-dimanche/';
 const publicTokenFromUrl=new URLSearchParams(location.search).get('public');
@@ -384,11 +393,11 @@ async function boot(){
   S.workspace={id:data[0].workspace_id,name:data[0].workspaces?.name||'Tournoi du dimanche',role:data[0].role,public_token:data[0].workspaces?.public_token||null,public_enabled:data[0].workspaces?.public_enabled!==false};
   $('#workspaceSetup').classList.add('hidden');
   $('#workspaceName').textContent=S.workspace.name+' • '+(S.workspace.role==='admin'?'Administrateur':'Co-organisateur');
-  await loadAll(); applyPermissions(); subscribeRealtime();
+  await loadAll(); applyPermissions(); subscribeRealtime(); startSafeAppSync();
 }
 $('#createWorkspace').onclick=async()=>{
   const btn=$('#createWorkspace');btn.disabled=true;btn.textContent='Création…';
-  try{await ensureWorkspace();toast('Espace créé ✅');await loadAll();subscribeRealtime();startMobileRefreshFallback()}
+  try{await ensureWorkspace();toast('Espace créé ✅');await loadAll();subscribeRealtime();startSafeAppSync()}
   catch(error){toast(friendlyAuthError(error))}
   finally{btn.disabled=false;btn.textContent="Créer l'espace"}
 };
@@ -940,19 +949,12 @@ function renderTeamRanking(){const r=S.teams.map(x=>({id:x.id,name:x.name,mj:0,v
 document.querySelectorAll('.rankMode').forEach(b=>b.onclick=()=>{S.rankMode=b.dataset.mode;document.querySelectorAll('.rankMode').forEach(x=>x.classList.toggle('primary',x===b));renderRanking()});
 $('#shareWhatsapp').onclick=async()=>{const text=$('#shareText').value;if(navigator.share){try{await navigator.share({title:'Classement du tournoi',text});return}catch{}}await navigator.clipboard.writeText(text);toast('Résumé copié')};
 
-function subscribeRealtime(){
-  if(S.channel){try{sb.removeChannel(S.channel)}catch(e){}}
-  if(!S.workspace)return;
-  S.channel=sb.channel('tournoi-'+S.workspace.id)
-    .on('postgres_changes',{event:'*',schema:'public',table:'players',filter:'workspace_id=eq.'+S.workspace.id},()=>refreshVisibleApp())
-    .on('postgres_changes',{event:'*',schema:'public',table:'seasons',filter:'workspace_id=eq.'+S.workspace.id},()=>refreshVisibleApp())
-    .on('postgres_changes',{event:'*',schema:'public',table:'tournaments',filter:'workspace_id=eq.'+S.workspace.id},()=>refreshVisibleApp())
-    .on('postgres_changes',{event:'*',schema:'public',table:'tournament_players'},()=>refreshVisibleApp())
-    .on('postgres_changes',{event:'*',schema:'public',table:'teams'},()=>refreshVisibleApp())
-    .on('postgres_changes',{event:'*',schema:'public',table:'team_players'},()=>refreshVisibleApp())
-    .on('postgres_changes',{event:'*',schema:'public',table:'matches'},()=>refreshVisibleApp())
-    .on('postgres_changes',{event:'*',schema:'public',table:'goals'},()=>refreshVisibleApp())
-    .subscribe();
+function subscribeRealtime(){if(S.channel)sb.removeChannel(S.channel);let timer;const reload=()=>{clearTimeout(timer);timer=setTimeout(async()=>await loadAll(),250)};S.channel=sb.channel('tournoi-manager').on('postgres_changes',{event:'*',schema:'public',table:'players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'seasons'},reload).on('postgres_changes',{event:'*',schema:'public',table:'tournaments'},reload).on('postgres_changes',{event:'*',schema:'public',table:'tournament_players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'teams'},reload).on('postgres_changes',{event:'*',schema:'public',table:'team_players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'matches'},reload).on('postgres_changes',{event:'*',schema:'public',table:'goals'},reload).subscribe()}
+
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+sb.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){S.session=session;showRecoveryForm();return}setTimeout(authState,0)});
+function latestTournamentForVisual(){
+  return currentTour()||S.tournaments[0]||null;
 }
 function visualPrompt(kind){
   const t=latestTournamentForVisual();
