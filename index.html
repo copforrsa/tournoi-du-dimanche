@@ -67,7 +67,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V36</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V36.1</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="loginCard" class="card">
       <h2 class="sectiontitle">Connexion</h2>
       <input id="email" type="email" placeholder="Email" autocomplete="email">
@@ -97,7 +97,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:700">V34</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:700">V36.2</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -116,6 +116,7 @@ select{background-color:#fff} textarea{resize:vertical}
         <h2 class="sectiontitle">Tournoi actif</h2>
         <div id="activeTourLabel" class="muted">Aucun tournoi</div>
         <div id="homeStats" class="grid g3" style="margin-top:12px"></div>
+        <div id="homeRegistrationShare" class="hidden" style="margin-top:12px"></div>
       </div>
       <div class="card">
         <h2 class="sectiontitle">Actions rapides</h2>
@@ -162,7 +163,7 @@ select{background-color:#fff} textarea{resize:vertical}
         <button id="addPlayers" class="primary">Enregistrer les joueurs</button>
         <p class="muted">Un Guest reste dans les statistiques mais sera grisé dans les classements. Tu peux aussi préciser de quel membre il est l’invité.</p>
       </div>
-      <div class="card"><div id="playersList"></div></div>
+      <div class="card"><div class="muted" style="margin-bottom:8px">💡 Le niveau est enregistré automatiquement dès que tu le modifies.</div><div id="playersList"></div></div>
     </div>
 
     <div id="view-tournaments" class="view">
@@ -540,6 +541,16 @@ function renderHome(){
   const present=S.tPlayers.filter(x=>x.present&&x.registration_status!=='waitlist').length;
   const wait=S.tPlayers.filter(x=>x.registration_status==='waitlist').length;
   $('#homeStats').innerHTML='<div class="player"><b>'+present+'</b><div class="muted">confirmés'+(t?.max_players?' / '+t.max_players:'')+'</div></div><div class="player"><b>'+wait+'</b><div class="muted">liste d’attente</div></div><div class="player"><b>'+S.teams.length+'</b><div class="muted">équipes</div></div><div class="player"><b>'+S.matches.length+'</b><div class="muted">matchs</div></div>';
+  const share=$('#homeRegistrationShare');
+  if(share){
+    if(t?.registration_open && S.workspace?.public_token){
+      const url=APP_URL+'?public='+S.workspace.public_token;
+      share.classList.remove('hidden');
+      share.innerHTML='<div class="player"><b>🔗 Inscriptions ouvertes</b><div class="muted" style="margin:4px 0 8px">Envoie ce lien aux joueurs pour qu’ils s’inscrivent.</div><div class="row"><input id="homeRegLink" readonly value="'+esc(url)+'" style="flex:1"><button id="homeCopyReg">Copier</button><button id="homeWaReg" class="primary">📲 WhatsApp</button></div></div>';
+      $('#homeCopyReg').onclick=async()=>{try{await navigator.clipboard.writeText(url);toast('Lien d’inscription copié ✅')}catch(e){$('#homeRegLink').select();toast('Lien sélectionné : copie-le.')}};
+      $('#homeWaReg').onclick=()=>{const msg='⚽ '+(t.name||'Tournoi du dimanche')+'\n📅 '+t.tournament_date+'\n\nInscriptions ouvertes :\n'+url;window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank','noopener')};
+    }else{share.classList.add('hidden');share.innerHTML=''}
+  }
 }
 $('#sendInvite').onclick=async()=>{
   if(!S.workspace||S.workspace.role!=='admin')return toast('Seul l’administrateur peut inviter.');
@@ -607,6 +618,19 @@ function renderPlayers(){
     const level=document.createElement('select');level.style.flex='1';
     level.innerHTML='<option value="1">Niveau 1 — Loisir</option><option value="2">Niveau 2 — Intermédiaire</option><option value="3">Niveau 3 — Bon</option><option value="4">Niveau 4 — Très bon</option>';
     level.value=String(x.skill_level||2);
+    level.title='Le niveau est enregistré automatiquement';
+    level.onchange=async()=>{
+      const newLevel=Number(level.value);
+      level.disabled=true;
+      const {data,error}=await sb.from('players').update({skill_level:newLevel}).eq('id',x.id).select('id,skill_level').single();
+      level.disabled=false;
+      if(error){
+        level.value=String(x.skill_level||2);
+        return toast(error.message);
+      }
+      x.skill_level=data?.skill_level||newLevel;
+      toast('Niveau de '+x.name+' enregistré ✅');
+    };
     const save=document.createElement('button');save.textContent='Enregistrer';
     save.onclick=async()=>{
       const isMember=status.value==='member';
@@ -717,7 +741,28 @@ function renderTournaments(){
       const saveMax=document.createElement('button');saveMax.textContent='Modifier places';
       toggle.onclick=async()=>{const {error}=await sb.from('tournaments').update({registration_open:!t.registration_open}).eq('id',t.id);if(error)return toast(error.message);await loadAll();toast(!t.registration_open?'Inscriptions ouvertes ✅':'Inscriptions fermées')};
       saveMax.onclick=async()=>{const n=Math.max(2,Math.min(100,Number(max.value)||20));const {error}=await sb.from('tournaments').update({max_players:n}).eq('id',t.id);if(error)return toast(error.message);await loadAll();toast('Nombre de places mis à jour ✅')};
-      row.append(max,saveMax,toggle);reg.appendChild(row);d.appendChild(reg);
+      row.append(max,saveMax,toggle);reg.appendChild(row);
+
+      const publicUrl=S.workspace?.public_token?APP_URL+'?public='+S.workspace.public_token:'';
+      const shareBox=document.createElement('div');shareBox.style.marginTop='10px';
+      shareBox.innerHTML='<div class="muted" style="margin-bottom:6px"><b>🔗 Lien d’inscription à envoyer aux joueurs</b></div>';
+      const linkRow=document.createElement('div');linkRow.className='row';
+      const linkInput=document.createElement('input');linkInput.readOnly=true;linkInput.value=publicUrl;linkInput.style.flex='1';
+      const copyBtn=document.createElement('button');copyBtn.textContent='Copier le lien';
+      const waBtn=document.createElement('button');waBtn.textContent='📲 WhatsApp';waBtn.className='primary';
+      copyBtn.onclick=async()=>{
+        if(!publicUrl)return toast('Lien public indisponible.');
+        try{await navigator.clipboard.writeText(publicUrl);toast('Lien d’inscription copié ✅')}
+        catch(e){linkInput.focus();linkInput.select();toast('Lien sélectionné : copie-le.')}
+      };
+      waBtn.onclick=()=>{
+        if(!publicUrl)return toast('Lien public indisponible.');
+        const title=t.name||('Tournoi du '+t.tournament_date);
+        const msg='⚽ '+title+'\n📅 '+t.tournament_date+'\n\nLes inscriptions sont ouvertes. Clique sur le lien, choisis ton nom puis indique si tu participes :\n'+publicUrl;
+        window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank','noopener');
+      };
+      linkRow.append(linkInput,copyBtn,waBtn);shareBox.appendChild(linkRow);reg.appendChild(shareBox);
+      d.appendChild(reg);
     }
 
     const finish=document.createElement('button');finish.textContent='Terminer le tournoi';finish.style.marginTop='8px';
