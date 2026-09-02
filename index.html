@@ -75,7 +75,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.8</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.9</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -118,7 +118,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.8</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.9</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -505,6 +505,12 @@ select{background-color:#fff} textarea{resize:vertical}
     <div class="card">
       <h2 class="sectiontitle">🎯 Passeurs de la saison</h2>
       <div id="publicSeasonAssists"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="sectiontitle">🏅 Victoires individuelles de la saison</h2>
+      <p class="muted">Chaque joueur cumule ses matchs gagnés avec son équipe et les tournois remportés pendant la saison.</p>
+      <div id="publicSeasonWins"></div>
     </div>
 
     <div class="card">
@@ -2825,6 +2831,22 @@ async function bootPublic(token){
 
   const pmap=new Map(players.map(x=>[x.id,x]));
   const tmap=new Map(teams.map(x=>[x.id,x]));
+
+  function tournamentStandings(tournamentId){
+    const tt=teams.filter(x=>x.tournament_id===tournamentId);
+    const rows=tt.map(x=>({id:x.id,name:x.name,mj:0,v:0,n:0,d:0,bp:0,bc:0,pts:0}));
+    const map=new Map(rows.map(x=>[x.id,x]));
+    matches.filter(m=>m.tournament_id===tournamentId).forEach(m=>{
+      const home=map.get(m.home_team_id),away=map.get(m.away_team_id); if(!home||!away)return;
+      home.mj++;away.mj++;home.bp+=Number(m.home_score||0);home.bc+=Number(m.away_score||0);away.bp+=Number(m.away_score||0);away.bc+=Number(m.home_score||0);
+      if(Number(m.home_score)>Number(m.away_score)){home.v++;away.d++;home.pts+=3}
+      else if(Number(m.away_score)>Number(m.home_score)){away.v++;home.d++;away.pts+=3}
+      else{home.n++;away.n++;home.pts++;away.pts++}
+    });
+    rows.sort((a,b)=>b.pts-a.pts||(b.bp-b.bc)-(a.bp-a.bc)||b.bp-a.bp||a.name.localeCompare(b.name));
+    return rows;
+  }
+
   const activeSeason=seasons.find(x=>x.is_active)||seasons[0];
   const seasonTids=new Set(tournaments.filter(x=>x.format!=='league'&&(!activeSeason||x.season_id===activeSeason.id)).map(x=>x.id));
   const seasonMatchIds=new Set(matches.filter(x=>seasonTids.has(x.tournament_id)).map(x=>x.id));
@@ -2840,6 +2862,34 @@ async function bootPublic(token){
   let seasonAss=[...gs.values()].filter(x=>x.a).sort((a,b)=>b.a-a.a||b.g-a.g||a.name.localeCompare(b.name));
   let aprev=null,arank=0;seasonAss=seasonAss.map((x,i)=>{if(x.a!==aprev){arank=i+1;aprev=x.a}return {...x,rank:arank}});
   $('#publicSeasonAssists').innerHTML=seasonAss.map(x=>'<div class="rank '+(x.guest?'guest-row':'')+'"><b>'+x.rank+'</b><span>'+esc(x.name)+(x.guest?' <span class="guest-badge">Guest</span>':'')+'</span><b class="right">'+x.a+' passe'+(x.a>1?'s':'')+'</b></div>').join('')||'<p class="muted">Aucune passe enregistrée.</p>';
+
+  const seasonWinStats=new Map(players.map(x=>[x.id,{id:x.id,name:x.name,matchWins:0,tournamentWins:0,guest:x.is_group_member===false}]));
+  const seasonTours=tournaments.filter(t=>t.format!=='league'&&t.status==='finished'&&(!activeSeason||t.season_id===activeSeason.id));
+  seasonTours.forEach(t=>{
+    const tTeams=teams.filter(tm=>tm.tournament_id===t.id);
+    const teamPlayerMap=new Map(tTeams.map(tm=>[tm.id,teamPlayers.filter(tp=>tp.team_id===tm.id).map(tp=>tp.player_id)]));
+    matches.filter(m=>m.tournament_id===t.id).forEach(m=>{
+      let winner=null;
+      if(Number(m.home_score)>Number(m.away_score))winner=m.home_team_id;
+      else if(Number(m.away_score)>Number(m.home_score))winner=m.away_team_id;
+      if(winner){
+        (teamPlayerMap.get(winner)||[]).forEach(pid=>{if(seasonWinStats.has(pid))seasonWinStats.get(pid).matchWins++});
+      }
+    });
+    const standings=tournamentStandings(t.id);
+    const champion=standings[0];
+    if(champion){
+      (teamPlayerMap.get(champion.id)||[]).forEach(pid=>{if(seasonWinStats.has(pid))seasonWinStats.get(pid).tournamentWins++});
+    }
+  });
+  const winRows=[...seasonWinStats.values()].filter(x=>x.matchWins||x.tournamentWins)
+    .sort((a,b)=>b.tournamentWins-a.tournamentWins||b.matchWins-a.matchWins||a.name.localeCompare(b.name));
+  $('#publicSeasonWins').innerHTML=winRows.map((x,i)=>
+    '<div class="rank '+(x.guest?'guest-row':'')+'"><b>'+(i+1)+'</b><span><b>'+esc(x.name)+'</b>'+(x.guest?' <span class="guest-badge">Guest</span>':'')+
+    '<div class="muted">'+x.matchWins+' match'+(x.matchWins>1?'s':'')+' gagné'+(x.matchWins>1?'s':'')+'</div></span>'+
+    '<b class="right">🏆 '+x.tournamentWins+' tournoi'+(x.tournamentWins>1?'s':'')+'</b></div>'
+  ).join('')||'<p class="muted">Aucune victoire enregistrée pour cette saison.</p>';
+
   const latest=tournaments.find(t=>t.format!=='league'&&t.status==='finished')||tournaments.find(t=>t.format!=='league');
   if(latest){
     const lteams=teams.filter(x=>x.tournament_id===latest.id);
@@ -2882,13 +2932,16 @@ async function bootPublic(token){
       else{h.n++;a.n++;h.pts++;a.pts++}
     });
     trs.sort((a,b)=>b.pts-a.pts||(b.bp-b.bc)-(a.bp-a.bc)||b.bp-a.bp||a.name.localeCompare(b.name));
-    $('#publicTeamRanking').innerHTML=trs.map((x,i)=>'<div class="rank"><b>'+(i+1)+'</b><span><b>'+esc(x.name)+'</b><div class="muted">'+x.mj+' MJ • '+x.v+' V • '+x.n+' N • '+x.d+' D • '+x.bp+' BP • '+x.bc+' BC • Diff '+((x.bp-x.bc)>=0?'+':'')+(x.bp-x.bc)+'</div></span><b class="right">'+x.pts+' pts</b></div>').join('')||'<p class="muted">Aucun classement disponible.</p>';
+    $('#publicTeamRanking').innerHTML=trs.map((x,i)=>'<div class="rank"><b>'+(i===0?'👑':(i+1))+'</b><span><b>'+esc(x.name)+'</b><div class="muted">'+x.mj+' MJ • '+x.v+' V • '+x.n+' N • '+x.d+' D • '+x.bp+' BP • '+x.bc+' BC • Diff '+((x.bp-x.bc)>=0?'+':'')+(x.bp-x.bc)+'</div></span><b class="right">'+x.pts+' pts</b></div>').join('')||'<p class="muted">Aucun classement disponible.</p>';
 
+    const championTeamId=trs.length?trs[0].id:null;
     $('#publicTeams').innerHTML=lteams.map(team=>{
       const bg=inferredTeamColor(team),fg=teamTextColor(bg),label=teamColorLabel(team);
       const colorNamed=Object.values(TEAM_COLOR_META).flat().some(n=>n.toLowerCase()===String(team.name||'').trim().toLowerCase());
       const playersHtml=teamPlayers.filter(tp=>tp.team_id===team.id).map(tp=>{const pl=pmap.get(tp.player_id);return pl?'<div class="public-team-player">'+esc(pl.name)+(pl.is_group_member===false?' <span class="guest-badge">Guest</span>':'')+'</div>':''}).join('');
-      return '<div class="public-team-card"><div class="public-team-head" style="background:'+bg+';color:'+fg+'"><div>'+esc(team.name)+'</div>'+(!colorNamed?'<div class="public-team-shirt">👕 Maillots : '+esc(label)+'</div>':'')+'</div><div class="public-team-players">'+(playersHtml||'<div class="muted">Aucun joueur</div>')+'</div></div>';
+      const crown=team.id===championTeamId?'👑 ':'';
+      const champ=team.id===championTeamId?'<div class="public-team-shirt">🏆 Équipe victorieuse</div>':'';
+      return '<div class="public-team-card"><div class="public-team-head" style="background:'+bg+';color:'+fg+'"><div>'+crown+esc(team.name)+'</div>'+champ+(!colorNamed?'<div class="public-team-shirt">👕 Maillots : '+esc(label)+'</div>':'')+'</div><div class="public-team-players">'+(playersHtml||'<div class="muted">Aucun joueur</div>')+'</div></div>';
     }).join('')||'<p class="muted">Aucune équipe.</p>';
     $('#publicResults').innerHTML=lm.map((m,i)=>{
       const mg=goals.filter(g=>g.match_id===m.id);
