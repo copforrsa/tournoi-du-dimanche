@@ -60,7 +60,7 @@ select{background-color:#fff} textarea{resize:vertical}
 }
 @media(max-width:650px){
   body{background:#f3f7f4}.app{padding:0 12px 100px}.top{border-radius:0 0 24px 24px;margin:0 -12px 14px;padding:18px 16px 20px}.top h1{font-size:21px}.card{border-radius:17px;padding:14px;margin:10px 0}.g2,.g3{grid-template-columns:1fr}.sectiontitle{font-size:17px}
-  /* V39.35 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
+  /* V39.36 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
   .tabs{left:0;right:0;transform:none;width:100%;display:flex;grid-template-columns:none;justify-content:flex-start;gap:5px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;border-radius:18px 18px 0 0;padding:7px 10px calc(7px + env(safe-area-inset-bottom));scroll-snap-type:x proximity;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
   .tabs button{flex:0 0 74px;min-width:74px;font-size:10px;scroll-snap-align:center;padding:5px 6px}
@@ -81,7 +81,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.35</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.36</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -124,7 +124,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.35</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.36</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -1942,7 +1942,7 @@ function seasonNameForTournament(t){
 }
 
 function renderTournaments(){
-  // V39.35 : l'éditeur de tournoi est protégé des synchronisations automatiques.
+  // V39.36 : l'éditeur de tournoi est protégé des synchronisations automatiques.
   const ss=$('#seasonSelect');
   ss.innerHTML='<option value="">Sans saison</option>'+S.seasons.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');
   const box=$('#tournamentList');box.innerHTML='';
@@ -2902,7 +2902,7 @@ async function renderLeague(){
   }
 
 
-  // V39.35 — Saisie du résultat directement depuis l'onglet Ligue.
+  // V39.36 — Saisie du résultat directement depuis l'onglet Ligue.
   const scoringCard=$('#leagueScoringCard'),scoringBody=$('#leagueScoringBody'),scoringLabel=$('#leagueScoringSessionLabel');
   if(scoringCard)scoringCard.classList.toggle('hidden',!canScoreLeague);
   if(canScoreLeague&&scoringBody){
@@ -3665,7 +3665,7 @@ async function bootPublic(token){
         ? '<div class="player" style="margin-top:12px;background:#eef8f2;border:1px solid #b7dfc4"><b>📍 Infos pratiques</b><div class="muted" style="margin-top:6px;line-height:1.7">Complexe / terrains : <b>'+esc(publicTerrainLabel)+'</b><br>Heure de réservation : <b>'+esc(publicTime)+'</b><br>Prix : <b>'+esc(publicFee)+' € / participant</b>'+(regTour.reservation_reference?'<br>Réservation : <b>'+esc(regTour.reservation_reference)+'</b>':'')+'</div><div class="muted" style="margin-top:8px;line-height:1.7"><b>Programme :</b><br>8h45 : arrivée, paiement + échauffement<br>9h00 : début du tournoi — les premières équipes arrivées commencent<br>11h00 : 3e mi-temps</div></div>'
         : '')+
       '<div class="player" style="margin-top:12px;background:#f8fbf9"><b>✅ Inscription</b><div class="muted" style="margin-top:6px;line-height:1.6">Inscris-toi en cliquant sur <b>« Je participe »</b>. Si tu viens accompagné, indique le nom de tes invités. Chaque membre peut ajouter jusqu’à <b>5 invités maximum</b>.</div></div>'+
-      '<div class="space"></div><select id="publicPlayerSelect"><option value="">Choisis ton nom</option>'+players.filter(x=>x.active&&x.is_group_member!==false).sort((a,b)=>a.name.localeCompare(b.name)).map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')+'</select>'+
+      '<div class="space"></div><select id="publicPlayerSelect"><option value="">Choisis ton nom</option></select>'+
       '<div id="publicSelectedStatus" class="muted" style="margin-top:7px">Choisis ton nom pour voir ton statut.</div>'+
       '<div class="space"></div><div class="row"><button id="publicJoin" class="primary">✅ Je participe</button><button id="publicLeave">❌ Je ne participe pas</button></div>'+
       (regTour.format==='league'
@@ -3688,24 +3688,65 @@ async function bootPublic(token){
       regBox.parentElement?.insertBefore(donorCard,regBox.nextSibling);
     }
 
+    const PUBLIC_GUEST_LIMIT=5;
+
+    function publicGuestUsage(hostId){
+      const used=registrations.filter(r=>
+        r.tournament_id===regTour.id &&
+        String(r.registered_by_player_id||'')===String(hostId||'')
+      ).length;
+      return {used,remaining:Math.max(0,PUBLIC_GUEST_LIMIT-used)};
+    }
+
+    function refreshPublicPlayerSelect(){
+      const sel=$('#publicPlayerSelect');
+      if(!sel)return;
+      const previous=sel.value;
+      const members=players.filter(x=>x.active&&x.is_group_member!==false).sort((a,b)=>a.name.localeCompare(b.name));
+      sel.innerHTML='<option value="">Choisis ton nom</option>'+members.map(x=>{
+        const reg=registrations.find(r=>r.tournament_id===regTour.id&&String(r.player_id)===String(x.id)&&r.present);
+        const usage=publicGuestUsage(x.id);
+        const state=reg
+          ? (reg.registration_status==='waitlist'?'🟠 Remplaçant':'✅ Déjà inscrit')
+          : '⚪ Non inscrit';
+        const guestInfo=usage.used
+          ? ' • '+usage.used+' invité'+(usage.used>1?'s':'')+' • '+usage.remaining+' restant'+(usage.remaining>1?'s':'')
+          : ' • '+PUBLIC_GUEST_LIMIT+' invités possibles';
+        return '<option value="'+x.id+'">'+esc(x.name)+' — '+state+guestInfo+'</option>';
+      }).join('');
+      if([...sel.options].some(o=>o.value===previous))sel.value=previous;
+    }
+
     function updateSelectedRegistrationStatus(){
       const pid=$('#publicPlayerSelect')?.value;
       const status=$('#publicSelectedStatus');
       if(!status)return;
-      if(!pid){status.textContent='Choisis ton nom pour voir ton statut.';return}
-      const reg=registrations.find(r=>r.tournament_id===regTour.id&&r.player_id===pid);
+      if(!pid){status.textContent='Choisis ton nom pour voir ton statut et le nombre d’invités qu’il te reste.';return}
+      const reg=registrations.find(r=>r.tournament_id===regTour.id&&String(r.player_id)===String(pid)&&r.present);
+      const usage=publicGuestUsage(pid);
+      const inviteText=usage.remaining>0
+        ?' • '+usage.used+'/'+PUBLIC_GUEST_LIMIT+' invité'+(usage.used>1?'s':'')+' utilisé'+(usage.used>1?'s':'')+' — '+usage.remaining+' restant'+(usage.remaining>1?'s':'')+'.'
+        :' • '+usage.used+'/'+PUBLIC_GUEST_LIMIT+' invités utilisés — aucune invitation restante.';
       if(!reg){
-        status.textContent=regTour.format==='league'
-          ?'⚪ Tu n’es pas encore inscrit à cette Ligue.'
-          :'⚪ Tu ne participes pas actuellement. Tu peux quand même inviter quelqu’un ci-dessous sans t’inscrire.';
-        return;
+        status.textContent=(regTour.format==='league'
+          ?'⚪ Tu n’es pas encore inscrit à ce Swé.'
+          :'⚪ Tu ne participes pas actuellement. Tu peux quand même inviter quelqu’un ci-dessous sans t’inscrire.')+inviteText;
+      }else{
+        const assignedTeamIds=new Set(teams.filter(t=>t.tournament_id===regTour.id).map(t=>t.id));
+        const inTeam=teamPlayers.some(tp=>String(tp.player_id)===String(pid)&&assignedTeamIds.has(tp.team_id));
+        status.textContent=(reg.registration_status==='waitlist'
+          ?'🟠 Tu es déjà inscrit comme remplaçant.'
+          :(inTeam?'🟢 Tu es déjà inscrit dans une équipe.':'🟢 Tu es déjà inscrit et confirmé.'))+inviteText;
       }
-      const assignedTeamIds=new Set(teams.filter(t=>t.tournament_id===regTour.id).map(t=>t.id));
-      const inTeam=teamPlayers.some(tp=>tp.player_id===pid&&assignedTeamIds.has(tp.team_id));
-      status.textContent=reg.registration_status==='waitlist'
-        ?'🟠 Tu es inscrit comme remplaçant. Tu peux tout de même ajouter des invités ci-dessous.'
-        :(inTeam?'🟢 Tu es déjà inscrit dans une équipe. Tu peux aussi ajouter jusqu’à 5 invités ci-dessous.':'🟢 Tu es déjà inscrit et confirmé. Tu peux ajouter jusqu’à 5 invités ci-dessous.');
+      const addGuestBtn=$('#publicAddGuest');
+      if(addGuestBtn){
+        addGuestBtn.disabled=usage.remaining<=0;
+        addGuestBtn.textContent=usage.remaining<=0
+          ?'Limite de 5 invités atteinte'
+          :'+ Ajouter mon invité ('+usage.remaining+' restant'+(usage.remaining>1?'s':'')+')';
+      }
     }
+    refreshPublicPlayerSelect();
     $('#publicPlayerSelect').onchange=updateSelectedRegistrationStatus;
     updateSelectedRegistrationStatus();
     $('#publicGuestMember').onchange=()=>{
@@ -3729,6 +3770,7 @@ async function bootPublic(token){
         teams=data.teams||teams;
         teamPlayers=data.team_players||teamPlayers;
         renderPublicRegistrationList();
+        refreshPublicPlayerSelect();
         updateSelectedRegistrationStatus();
         if(typeof renderPublicTeamBuilder==='function')renderPublicTeamBuilder();
       }catch(e){}
@@ -3768,6 +3810,8 @@ async function bootPublic(token){
       const guestName=$('#publicGuestName').value.trim();
       if(!host)return $('#publicRegStatus').textContent='Choisis d’abord ton nom dans la liste ci-dessus. Tu peux ajouter un invité même si tu es déjà inscrit.';
       if(!guestName)return $('#publicRegStatus').textContent='Entre le nom de ton invité.';
+      const usageBefore=publicGuestUsage(host);
+      if(usageBefore.remaining<=0)return $('#publicRegStatus').textContent='Tu as déjà utilisé tes 5 invitations pour ce tournoi.';
       const phone=$('#publicGuestPhone').value.trim();
       const addMember=$('#publicGuestMember').checked;
       if(addMember&&!phone)return $('#publicRegStatus').textContent='Pour ajouter ton invité comme membre du groupe, indique son numéro de mobile.';
@@ -3775,8 +3819,8 @@ async function bootPublic(token){
       const {data,error}=await sb.rpc('public_register_tournament_guest',{p_token:token,p_tournament_id:regTour.id,p_host_player_id:host,p_guest_name:guestName,p_phone_number:phone||null,p_add_as_member:addMember});
       b.disabled=false;if(error)return $('#publicRegStatus').textContent=error.message;
       $('#publicGuestName').value='';$('#publicGuestPhone').value='';$('#publicGuestMember').checked=false;
-      const used=registrations.filter(r=>r.tournament_id===regTour.id&&r.registered_by_player_id===host).length+1;
-      const remaining=Math.max(0,5-used);
+      const used=publicGuestUsage(host).used+1;
+      const remaining=Math.max(0,PUBLIC_GUEST_LIMIT-used);
       const hostIsRegistered=registrations.some(r=>r.tournament_id===regTour.id&&r.player_id===host&&r.present);
       $('#publicRegStatus').textContent=(data?.status==='waitlist'?'🟠 Quota atteint : l’invité est inscrit comme remplaçant.':'🟢 Invité ajouté et confirmé !')+(data?.member?' Il est aussi enregistré comme membre du groupe.':'')+(!hostIsRegistered&&regTour.format!=='league'?' Tu restes non inscrit au tournoi.':'')+' • '+remaining+' invitation'+(remaining>1?'s':'')+' restante'+(remaining>1?'s':'')+'.';
       await refreshPublicRegistration();
@@ -3993,7 +4037,7 @@ async function bootPublic(token){
   const pmap=new Map(players.map(x=>[x.id,x]));
   const tmap=new Map(teams.map(x=>[x.id,x]));
 
-  // V39.35 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
+  // V39.36 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
   if(wantsLeagueSession&&regTour){
     const linkedLeague=leagues.find(l=>l.id===regTour.league_id)||null;
     const linkLeagueId=publicParams.get('league');
