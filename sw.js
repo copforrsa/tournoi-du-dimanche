@@ -1,4 +1,4 @@
-const CACHE='tournoi-foot-v36-7';
+const CACHE='tournoi-foot-v36-8';
 const STATIC_ASSETS=['./','./index.html','./manifest.webmanifest','./favicon.png','./icon-192.png','./icon-512.png'];
 
 self.addEventListener('install',event=>{
