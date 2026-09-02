@@ -75,7 +75,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.16</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.17</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -118,7 +118,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.16</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.17</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -1296,8 +1296,22 @@ function renderPermissions(){
         p_can_generate_teams:!!vals.can_generate_teams,
         p_temporary_admin_until:tempUntil
       });
-      save.disabled=false;if(error)return toast(error.message);
-      Object.assign(c,vals,{temporary_admin_until:tempUntil});toast('Autorisations mises à jour ✅');await loadAll();setView('permissions');
+      if(error){save.disabled=false;return toast(error.message);}
+      // Conserve immédiatement l'état choisi à l'écran. Ne recharge pas toute l'application ici :
+      // le rechargement/realtime pouvait reconstruire le formulaire avec l'ancien snapshot et
+      // donner l'impression que la première sauvegarde avait été annulée.
+      Object.assign(c,vals,{temporary_admin_until:tempUntil});
+      save.disabled=false;
+      save.textContent='✓ Enregistré';
+      toast('Autorisations mises à jour ✅');
+      // Vérification serveur légère, sans quitter ni reconstruire l'onglet.
+      try{
+        const {data:fresh,error:freshError}=await sb.from('coorganizer_permissions')
+          .select('can_invite_coorganizers,can_enter_scores,can_add_members,can_delete_members,can_create_tournaments,can_view_players,can_generate_teams,temporary_admin_until')
+          .eq('workspace_id',S.workspace.id).eq('user_id',c.user_id).maybeSingle();
+        if(!freshError&&fresh)Object.assign(c,fresh);
+      }catch(e){console.warn('permission verification',e)}
+      setTimeout(()=>{if(save.isConnected)save.textContent='Enregistrer les autorisations';},1200);
     };
     card.appendChild(save);box.appendChild(card);
   });
