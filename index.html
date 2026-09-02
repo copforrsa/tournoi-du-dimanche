@@ -75,7 +75,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.10</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.11</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -118,7 +118,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.10</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.11</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -150,6 +150,12 @@ select{background-color:#fff} textarea{resize:vertical}
         </div>
         <div class="space"></div>
         <div class="grid g3">
+          <input id="saOwnerFirstName" placeholder="Prénom de l’administrateur">
+          <input id="saOwnerLastName" placeholder="Nom de l’administrateur">
+          <input id="saOwnerPhone" type="tel" inputmode="tel" placeholder="Téléphone de l’administrateur">
+        </div>
+        <div class="space"></div>
+        <div class="grid g3">
           <label class="player"><span class="muted">Co-organisateurs autorisés</span><input id="saMaxCoorg" type="number" min="0" max="100" value="3"></label>
           <label class="player row" style="justify-content:flex-start"><input id="saTournamentEnabled" type="checkbox" style="width:auto" checked><span><b>Module Tournoi</b></span></label>
           <label class="player row" style="justify-content:flex-start"><input id="saLeagueEnabled" type="checkbox" style="width:auto"><span><b>Module Ligue</b></span></label>
@@ -169,7 +175,7 @@ select{background-color:#fff} textarea{resize:vertical}
           <button id="saRefresh">Actualiser</button>
         </div>
         <div class="space"></div>
-        <input id="saSearchWorkspace" placeholder="🔎 Rechercher par espace ou email administrateur">
+        <input id="saSearchWorkspace" placeholder="🔎 Rechercher par espace, admin, email ou téléphone">
         <div class="space"></div>
         <div id="saWorkspaceList"></div>
       </div>
@@ -771,7 +777,12 @@ async function loadSuperAdminWorkspaces(){
 function renderSuperAdminWorkspaces(){
   const box=$('#saWorkspaceList');if(!box)return;
   const q=($('#saSearchWorkspace')?.value||'').trim().toLowerCase();
-  const rows=(S.superWorkspaces||[]).filter(w=>!q||String(w.workspace_name||'').toLowerCase().includes(q)||String(w.owner_email||'').toLowerCase().includes(q));
+  const rows=(S.superWorkspaces||[]).filter(w=>!q||
+    String(w.workspace_name||'').toLowerCase().includes(q)||
+    String(w.owner_email||'').toLowerCase().includes(q)||
+    String(w.admin_first_name||'').toLowerCase().includes(q)||
+    String(w.admin_last_name||'').toLowerCase().includes(q)||
+    String(w.admin_phone||'').toLowerCase().includes(q));
 
   const all=S.superWorkspaces||[];
   if($('#saTotalSpaces'))$('#saTotalSpaces').textContent=all.length;
@@ -788,7 +799,8 @@ function renderSuperAdminWorkspaces(){
       '<div class="row" style="align-items:flex-start;gap:12px;flex-wrap:wrap">'+
         '<span style="flex:1;min-width:220px">'+
           '<div class="row" style="justify-content:flex-start;gap:8px;flex-wrap:wrap"><b style="font-size:1.08rem">'+esc(w.workspace_name)+'</b><span class="guest-badge">'+(w.public_enabled?'ACTIF':'SUSPENDU')+'</span></div>'+
-          '<div class="muted" style="margin-top:4px">👤 Administrateur : <b>'+esc(w.owner_email||'Email indisponible')+'</b></div>'+
+          '<div class="muted" style="margin-top:4px">👤 Administrateur : <b>'+esc(([w.admin_first_name,w.admin_last_name].filter(Boolean).join(' ')||w.owner_email||'Non renseigné'))+'</b></div>'+
+          '<div class="muted">📧 '+esc(w.owner_email||'Email indisponible')+(w.admin_phone?' • 📱 '+esc(w.admin_phone):'')+'</div>'+
           '<div class="muted">Créé le '+esc(created)+'</div>'+
         '</span>'+
       '</div>'+
@@ -803,6 +815,11 @@ function renderSuperAdminWorkspaces(){
         '<label><span class="muted">Email administrateur</span><input readonly value="'+esc(w.owner_email||'')+'" style="opacity:.75"></label>'+
       '</div>'+
       '<div class="grid g3" style="margin-top:10px">'+
+        '<label><span class="muted">Prénom administrateur</span><input data-sa-first-name value="'+esc(w.admin_first_name||'')+'" placeholder="Prénom"></label>'+
+        '<label><span class="muted">Nom administrateur</span><input data-sa-last-name value="'+esc(w.admin_last_name||'')+'" placeholder="Nom"></label>'+
+        '<label><span class="muted">Téléphone administrateur</span><input data-sa-phone type="tel" inputmode="tel" value="'+esc(w.admin_phone||'')+'" placeholder="Téléphone"></label>'+
+      '</div>'+
+      '<div class="grid g3" style="margin-top:10px">'+
         '<label><span class="muted">Co-organisateurs autorisés</span><input data-sa-max type="number" min="0" max="'+Number(w.max_coorganizers_cap||100)+'" value="'+Number(w.max_coorganizers||0)+'"></label>'+
         '<label><span class="muted">Plafond commercial</span><input data-sa-cap type="number" min="0" max="100" value="'+Number(w.max_coorganizers_cap||100)+'"></label>'+
         '<label class="player row" style="justify-content:flex-start"><input data-sa-public type="checkbox" style="width:auto" '+(w.public_enabled?'checked':'')+'><span><b>Espace actif</b></span></label>'+
@@ -811,6 +828,15 @@ function renderSuperAdminWorkspaces(){
         '<label class="player row" style="justify-content:flex-start"><input data-sa-tournament type="checkbox" style="width:auto" '+(w.tournaments_enabled?'checked':'')+'><span><b>Tournoi</b></span></label>'+
         '<label class="player row" style="justify-content:flex-start"><input data-sa-league type="checkbox" style="width:auto" '+(w.league_enabled?'checked':'')+'><span><b>Ligue</b></span></label>'+
         '<label class="player row" style="justify-content:flex-start"><input data-sa-rankings type="checkbox" style="width:auto" '+(w.rankings_enabled?'checked':'')+'><span><b>Buteurs / passeurs</b></span></label>'+
+      '</div>'+
+      '<div class="player" style="margin-top:14px;background:#fffaf0;border:1px solid #f2d79a">'+
+        '<b>🔄 Transférer la gestion à un autre administrateur</b>'+
+        '<div class="muted" style="margin:5px 0 10px">Le nouveau compte doit déjà exister. Après validation, il devient immédiatement administrateur principal de cet espace.</div>'+
+        '<div class="grid g2"><input data-sa-transfer-email type="email" placeholder="Email du nouvel administrateur"><input data-sa-transfer-phone type="tel" inputmode="tel" placeholder="Téléphone du nouvel administrateur"></div>'+
+        '<div class="grid g2" style="margin-top:8px"><input data-sa-transfer-first placeholder="Prénom du nouvel administrateur"><input data-sa-transfer-last placeholder="Nom du nouvel administrateur"></div>'+
+        '<label class="row" style="justify-content:flex-start;margin-top:10px"><input data-sa-keep-old type="checkbox" style="width:auto"><span>Conserver l’ancien administrateur comme co-organisateur</span></label>'+
+        '<div class="muted" style="margin-top:5px">Sinon, son accès à cet espace sera désactivé. Son compte utilisateur n’est jamais supprimé.</div>'+
+        '<button data-sa-transfer class="danger" style="margin-top:10px">Transférer l’administration</button>'+
       '</div>';
 
     const actions=document.createElement('div');actions.className='row';actions.style.marginTop='12px';actions.style.flexWrap='wrap';
@@ -824,6 +850,12 @@ function renderSuperAdminWorkspaces(){
       if(max>cap)return toast('Le nombre autorisé ne peut pas dépasser le plafond commercial.');
       save.disabled=true;
       let r=await sb.rpc('super_admin_rename_workspace',{p_workspace_id:w.workspace_id,p_name:name});
+      if(!r.error)r=await sb.rpc('super_admin_update_admin_profile',{
+        p_workspace_id:w.workspace_id,
+        p_first_name:d.querySelector('[data-sa-first-name]').value.trim()||null,
+        p_last_name:d.querySelector('[data-sa-last-name]').value.trim()||null,
+        p_phone:d.querySelector('[data-sa-phone]').value.trim()||null
+      });
       if(!r.error)r=await sb.rpc('super_admin_set_workspace_options',{
         p_workspace_id:w.workspace_id,
         p_max_coorganizers:max,
@@ -857,6 +889,34 @@ function renderSuperAdminWorkspaces(){
       });
       toggle.disabled=false;if(error)return toast(error.message);
       toast(w.public_enabled?'Espace suspendu.':'Espace réactivé ✅');await loadSuperAdminWorkspaces();
+    };
+
+    const transferBtn=d.querySelector('[data-sa-transfer]');
+    transferBtn.onclick=async()=>{
+      const email=d.querySelector('[data-sa-transfer-email]').value.trim().toLowerCase();
+      const first=d.querySelector('[data-sa-transfer-first]').value.trim();
+      const last=d.querySelector('[data-sa-transfer-last]').value.trim();
+      const phone=d.querySelector('[data-sa-transfer-phone]').value.trim();
+      const keep=d.querySelector('[data-sa-keep-old]').checked;
+      if(!email)return toast('Indique l’email du nouvel administrateur.');
+      const display=[first,last].filter(Boolean).join(' ')||email;
+      const msg='TRANSFERT D’ADMINISTRATION\n\nEspace : '+w.workspace_name+'\nAdministrateur actuel : '+(w.owner_email||'—')+'\nNouvel administrateur : '+display+' ('+email+')\n\n'+(keep?'L’ancien administrateur restera co-organisateur.':'L’accès de l’ancien administrateur à cet espace sera désactivé.')+'\n\nConfirmer le transfert ?';
+      if(!confirm(msg))return;
+      const typed=prompt('Pour sécuriser le transfert, saisis exactement TRANSFERER');
+      if(typed!=='TRANSFERER')return toast('Transfert annulé.');
+      transferBtn.disabled=true;
+      const {error}=await sb.rpc('super_admin_transfer_workspace_admin',{
+        p_workspace_id:w.workspace_id,
+        p_new_owner_email:email,
+        p_first_name:first||null,
+        p_last_name:last||null,
+        p_phone:phone||null,
+        p_keep_previous_as_coorganizer:keep
+      });
+      transferBtn.disabled=false;
+      if(error)return toast(error.message);
+      toast('Administration transférée avec succès ✅');
+      await loadSuperAdminWorkspaces();
     };
 
     const del=document.createElement('button');del.className='danger';del.textContent='🗑 Supprimer l’espace';
@@ -895,16 +955,21 @@ document.addEventListener('click',async e=>{
   if(e.target?.id==='saCreateWorkspace'){
     const name=$('#saWorkspaceName').value.trim(),email=$('#saOwnerEmail').value.trim().toLowerCase();
     if(!name||!email)return toast('Indique le nom de l’espace et l’e-mail de son administrateur.');
+    const first=$('#saOwnerFirstName').value.trim(),last=$('#saOwnerLastName').value.trim(),phone=$('#saOwnerPhone').value.trim();
     const b=e.target;b.disabled=true;
-    const {error}=await sb.rpc('super_admin_create_workspace_for_admin',{
+    const created=await sb.rpc('super_admin_create_workspace_for_admin',{
       p_name:name,p_owner_email:email,
       p_max_coorganizers:Math.max(0,Math.min(100,Number($('#saMaxCoorg').value)||0)),
       p_tournaments_enabled:$('#saTournamentEnabled').checked,
       p_league_enabled:$('#saLeagueEnabled').checked,
       p_rankings_enabled:$('#saRankingsEnabled').checked
     });
-    b.disabled=false;if(error)return toast(error.message);
-    $('#saWorkspaceName').value='';$('#saOwnerEmail').value='';
+    if(created.error){b.disabled=false;return toast(created.error.message)}
+    const profile=await sb.rpc('super_admin_update_admin_profile',{
+      p_workspace_id:created.data,p_first_name:first||null,p_last_name:last||null,p_phone:phone||null
+    });
+    b.disabled=false;if(profile.error)return toast('Espace créé, mais fiche administrateur à compléter : '+profile.error.message);
+    $('#saWorkspaceName').value='';$('#saOwnerEmail').value='';$('#saOwnerFirstName').value='';$('#saOwnerLastName').value='';$('#saOwnerPhone').value='';
     toast('Espace administrateur créé ✅');await loadSuperAdminWorkspaces();
   }
 });
