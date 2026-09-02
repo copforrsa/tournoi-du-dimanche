@@ -54,7 +54,7 @@ select{background-color:#fff} textarea{resize:vertical}
 #tournamentList .player,#playersList .player,#teamList .team{padding:14px}
 #shareWhatsapp{background:#19a853;color:#fff}
 .tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:40;width:min(760px,calc(100% - 20px));display:grid;grid-template-columns:repeat(auto-fit,minmax(72px,1fr));gap:3px;background:rgba(7,27,18,.96);border:1px solid rgba(255,255,255,.08);border-radius:20px 20px 0 0;padding:7px 7px calc(7px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(7,27,18,.22);backdrop-filter:blur(14px)}
-.tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:51px;background:transparent;color:#b9cabf;border:0;font-size:10px;padding:5px 4px;border-radius:13px}.tabs button:before{font-size:19px;line-height:1}.tabs button[data-view="home"]:before{content:"⌂"}.tabs button[data-view="players"]:before{content:"♟"}.tabs button[data-view="permissions"]{display:none!important}.tabs.admin-mode button[data-view="permissions"]{display:flex!important}.tabs button[data-view="permissions"]:before{content:"🔐"}.tabs button[data-view="tournaments"]:before{content:"▣"}.tabs button[data-view="teams"]:before{content:"♙"}.tabs button[data-view="matches"]:before{content:"⚽"}.tabs button[data-view="ranking"]:before{content:"★"}.tabs button.active{background:linear-gradient(135deg,#17803d,#22a34a);color:#fff;box-shadow:0 5px 12px rgba(25,152,67,.26)}
+.tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:51px;background:transparent;color:#b9cabf;border:0;font-size:10px;padding:5px 4px;border-radius:13px}.tabs button:before{font-size:19px;line-height:1}.tabs button[data-view="home"]:before{content:"⌂"}.tabs button[data-view="players"]:before{content:"♟"}.tabs button[data-view="permissions"]:before{content:"🔐"}.tabs button[data-view="permissions"].disabled-tab{opacity:.35;filter:grayscale(1);cursor:not-allowed;pointer-events:none}.tabs button[data-view="tournaments"]:before{content:"▣"}.tabs button[data-view="teams"]:before{content:"♙"}.tabs button[data-view="matches"]:before{content:"⚽"}.tabs button[data-view="ranking"]:before{content:"★"}.tabs button.active{background:linear-gradient(135deg,#17803d,#22a34a);color:#fff;box-shadow:0 5px 12px rgba(25,152,67,.26)}
 @media(min-width:900px){
   .app{padding-left:224px;padding-bottom:28px}.tabs{left:max(20px,calc(50% - 590px));top:18px;bottom:18px;transform:none;width:190px;height:auto;display:flex;flex-direction:column;justify-content:flex-start;border-radius:22px;padding:18px 10px;background:#071b12}.tabs:before{content:"TOURNOI DU DIMANCHE";display:block;color:#fff;font-weight:900;font-size:14px;line-height:1.2;padding:4px 8px 18px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:8px}.tabs button{flex-direction:row;justify-content:flex-start;gap:10px;padding:10px 12px;font-size:13px;min-height:46px}.tabs button:before{font-size:17px;width:22px;text-align:center}.top{margin-top:0}.card{padding:19px 20px}
 }
@@ -67,7 +67,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V37.9</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V37.10</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -110,7 +110,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:700">V37.9</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:700">V37.10</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -441,6 +441,9 @@ function hasTemporaryAdmin(){
 }
 function hasAdminOps(){return isAdmin()||hasTemporaryAdmin()}
 function canEditCurrentMatches(){const t=currentTour();return !!t && t.status!=='finished' && (hasAdminOps()||(isCoorg()&&S.myPermissions.can_enter_scores))}
+function makeDisabledActionButton(label,title){
+  const b=document.createElement('button');b.textContent=label;b.disabled=true;b.className='danger';b.style.opacity='.38';b.style.filter='grayscale(1)';b.style.cursor='not-allowed';b.title=title||'Action non autorisée';return b;
+}
 function applyPermissions(){
   const admin=isAdmin();
   const coorg=isCoorg();
@@ -450,8 +453,13 @@ function applyPermissions(){
   const attendanceCard=$('#attendanceAdminCard');if(attendanceCard)attendanceCard.classList.toggle('hidden',!adminOps);
   const teamsCard=$('#teamsAdminCard');if(teamsCard)teamsCard.classList.toggle('hidden',!(adminOps||(coorg&&S.myPermissions.can_generate_teams)));
   const matchCreateCard=$('#matchCreateAdminCard');if(matchCreateCard)matchCreateCard.classList.toggle('hidden',!adminOps);
-  document.querySelectorAll('.tabs').forEach(nav=>nav.classList.toggle('admin-mode',admin));
-  document.querySelectorAll('.admin-permissions-tab').forEach(el=>el.classList.toggle('hidden',!admin));
+  document.querySelectorAll('.admin-permissions-tab').forEach(el=>{
+    el.classList.remove('hidden');
+    el.classList.toggle('disabled-tab',!admin);
+    el.disabled=!admin;
+    el.setAttribute('aria-disabled',!admin?'true':'false');
+    el.title=admin?'Gérer les autorisations':'Réservé à l’administrateur';
+  });
   const permView=$('#view-permissions');if(permView&&!admin)permView.classList.remove('active');
   const access=$('#adminAccessCard');if(access)access.classList.toggle('hidden',!(admin||coorg));
   const inviteControls=$('#adminInviteControls');if(inviteControls)inviteControls.classList.toggle('hidden',!(admin||(coorg&&S.myPermissions.can_invite_coorganizers)));
@@ -896,6 +904,8 @@ function renderPlayers(){
         toast(data==='archived'?'Joueur désactivé : son historique est conservé.':'Joueur supprimé.');
       };
       top.append(info,del);
+    }else if(isCoorg()){
+      top.append(info,makeDisabledActionButton('Supprimer','Suppression non autorisée par l’administrateur'));
     }else top.append(info);
     d.appendChild(top);
 
@@ -1130,6 +1140,9 @@ function renderTournaments(){
       const del=document.createElement('button');del.textContent='Supprimer';del.className='danger';del.style.margin='8px 0 0 8px';
       del.onclick=async()=>await deleteTournament(t);
       d.appendChild(del);
+    }else if(isCoorg()){
+      const del=makeDisabledActionButton('Supprimer','Seul l’administrateur ou un admin temporaire peut supprimer un tournoi');
+      del.style.margin='8px 0 0 8px';d.appendChild(del);
     }
     box.appendChild(d);
   });
@@ -1148,6 +1161,8 @@ function renderTournaments(){
       const del=document.createElement('button');del.textContent='Supprimer';del.className='danger';
       del.onclick=async()=>await deleteTournament(t);
       actions.appendChild(del);
+    }else if(isCoorg()){
+      actions.appendChild(makeDisabledActionButton('Supprimer','Seul l’administrateur ou un admin temporaire peut supprimer un tournoi'));
     }
     d.appendChild(actions);box.appendChild(d);
   });
