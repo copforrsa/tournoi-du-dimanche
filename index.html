@@ -75,7 +75,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.15</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.16</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -118,7 +118,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.15</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.16</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -410,11 +410,45 @@ select{background-color:#fff} textarea{resize:vertical}
         <div id="leagueDays"></div>
       </div>
 
-      <div class="card">
-        <h2 class="sectiontitle">⚡ Équipes du Swé sélectionné</h2>
-        <p class="muted">Pour un Swé de Ligue, tu peux générer 2 équipes à partir des joueurs confirmés. Le lien du Swé permet aussi l’inscription ponctuelle avec une équipe et le code fourni par l’administrateur.</p>
-        <button id="generateLeagueTeams" class="primary">Générer les 2 équipes</button>
-        <div id="leagueGenerationInfo" class="muted" style="margin-top:8px"></div>
+      <div class="card hidden" id="leagueAdminRegistrationCard">
+        <h2 class="sectiontitle">👥 Gestion des inscrits & équipes</h2>
+        <p class="muted">Réservé à l’administrateur. Sélectionne d’abord un Swé de cette Ligue.</p>
+
+        <div id="leagueAdminNoSession" class="readonly-note">Sélectionne un Swé de Ligue pour gérer ses inscrits.</div>
+
+        <div id="leagueAdminSessionTools" class="hidden">
+          <div class="player" style="background:#f8fbf9">
+            <b>➕ Ajouter un inscrit manuellement</b>
+            <div class="muted" style="margin:5px 0 8px">Tu peux ajouter ici un joueur déjà inscrit à cette Ligue mais pas encore inscrit à ce Swé.</div>
+            <div class="row">
+              <select id="leagueManualPlayerSelect" style="flex:1"><option value="">Choisir un inscrit de la Ligue</option></select>
+              <button id="leagueManualAddPlayer" class="primary">Ajouter</button>
+            </div>
+          </div>
+
+          <div class="space"></div>
+          <div>
+            <div class="row" style="justify-content:space-between;align-items:center">
+              <h3 style="margin:0">Liste des inscrits au Swé</h3>
+              <span id="leagueRegisteredCount" class="muted"></span>
+            </div>
+            <div id="leagueRegisteredPlayersList" style="margin-top:8px"></div>
+          </div>
+
+          <div class="space"></div>
+          <div id="leagueTeamsCreationBox" class="player">
+            <b>⚡ Création des équipes</b>
+            <div id="leagueTeamsCreationText" class="muted" style="margin:5px 0 8px"></div>
+            <button id="generateLeagueTeams" class="primary">Créer les équipes avec les inscrits</button>
+            <div id="leagueGenerationInfo" class="muted" style="margin-top:8px"></div>
+          </div>
+
+          <div class="space"></div>
+          <div>
+            <h3 style="margin-bottom:8px">Équipes enregistrées</h3>
+            <div id="leagueSavedTeams"></div>
+          </div>
+        </div>
       </div>
 
       <div class="grid g2">
@@ -2049,6 +2083,7 @@ async function renderLeague(){
   const canCreate=hasAdminOps()||(isCoorg()&&S.myPermissions.can_create_tournaments);
   createCard.classList.toggle('hidden',!enabled||!hasAdminOps());
   $('#leagueSessionCard')?.classList.toggle('hidden',!enabled||!canCreate);
+  $('#leagueAdminRegistrationCard')?.classList.toggle('hidden',!enabled||!hasAdminOps());
   document.querySelectorAll('#view-league .card').forEach(c=>{if(c!==disabled)c.style.opacity=enabled?'':'0.55'});
   if(!enabled)return;
 
@@ -2110,7 +2145,9 @@ async function renderLeague(){
     $('#leagueDays').innerHTML='<p class="muted">Aucun Swé de Ligue.</p>';
     $('#leagueScorers').innerHTML='<p class="muted">Aucune donnée.</p>';
     $('#leagueAssists').innerHTML='<p class="muted">Aucune donnée.</p>';
-    $('#generateLeagueTeams').disabled=true;
+    if($('#generateLeagueTeams'))$('#generateLeagueTeams').disabled=true;
+    if($('#leagueAdminSessionTools'))$('#leagueAdminSessionTools').classList.add('hidden');
+    if($('#leagueAdminNoSession'))$('#leagueAdminNoSession').classList.remove('hidden');
     return;
   }
   const members=S.leaguePlayers.filter(lp=>lp.league_id===league.id&&lp.status==='confirmed');
@@ -2165,9 +2202,58 @@ async function renderLeague(){
 
   const current=currentTour();
   const gen=$('#generateLeagueTeams');
-  const canGenerate=current?.format==='league'&&current?.league_id===league.id&&(hasAdminOps()||(isCoorg()&&S.myPermissions.can_generate_teams));
-  gen.disabled=!canGenerate;
-  gen.title=canGenerate?'Créer 2 équipes':'Sélectionne un Swé de cette Ligue';
+  const currentIsLeagueSession=current?.format==='league'&&current?.league_id===league.id;
+  if(gen){
+    gen.disabled=!(currentIsLeagueSession&&hasAdminOps());
+    gen.title=currentIsLeagueSession?'Créer 2 équipes avec les inscrits confirmés':'Sélectionne un Swé de cette Ligue';
+  }
+
+  if(hasAdminOps()){
+    const tools=$('#leagueAdminSessionTools'),noSession=$('#leagueAdminNoSession');
+    if(currentIsLeagueSession){
+      tools?.classList.remove('hidden');noSession?.classList.add('hidden');
+
+      const {data:registered,error:regError}=await sb.rpc('get_registered_players_for_tournament',{p_tournament_id:current.id});
+      const rows=regError?[]:(Array.isArray(registered)?registered:[]);
+      const presentRows=rows.filter(r=>r.present);
+      const regIds=new Set(presentRows.map(r=>r.player_id));
+      const confirmedLeagueIds=new Set(S.leaguePlayers.filter(lp=>lp.league_id===league.id&&lp.status==='confirmed').map(lp=>lp.player_id));
+      const available=S.players
+        .filter(p=>p.active&&confirmedLeagueIds.has(p.id)&&!regIds.has(p.id))
+        .sort((a,b)=>a.name.localeCompare(b.name));
+
+      const manualSel=$('#leagueManualPlayerSelect');
+      if(manualSel)manualSel.innerHTML='<option value="">Choisir un inscrit de la Ligue</option>'+available.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join('');
+
+      const count=$('#leagueRegisteredCount');
+      if(count)count.textContent=presentRows.length+' inscrit'+(presentRows.length>1?'s':'');
+      const list=$('#leagueRegisteredPlayersList');
+      if(list){
+        list.innerHTML=presentRows.length?presentRows.map((r,i)=>'<div class="player row"><b style="min-width:30px">'+(i+1)+'.</b><span style="flex:1">'+esc(r.player_name)+(r.is_group_member===false?' <span class="guest-badge">Invité</span>':'')+'</span><span class="guest-badge">'+(r.registration_status==='waitlist'?'Remplaçant':'Confirmé')+'</span></div>').join(''):'<p class="muted">Aucun inscrit pour ce Swé.</p>';
+      }
+
+      const saved=$('#leagueSavedTeams');
+      if(saved){
+        if(S.teams.length){
+          saved.innerHTML=S.teams.map(team=>{
+            const names=S.teamPlayers.filter(tp=>tp.team_id===team.id).map(tp=>S.players.find(p=>p.id===tp.player_id)?.name).filter(Boolean);
+            return '<div class="team" style="margin-bottom:8px"><div class="row"><span style="width:18px;height:18px;border-radius:50%;background:'+esc(team.color||'#64748b')+';border:1px solid #cbd5e1"></span><b>'+esc(team.name)+'</b></div><div class="muted" style="margin-top:6px">'+(names.length?names.map(esc).join(' • '):'Aucun joueur')+'</div></div>';
+          }).join('');
+        }else saved.innerHTML='<p class="muted">Les équipes ne sont pas encore créées.</p>';
+      }
+
+      const createText=$('#leagueTeamsCreationText');
+      if(createText)createText.textContent=S.teams.length
+        ? 'Les équipes de ce Swé sont déjà enregistrées. Tu peux les consulter ci-dessous.'
+        : 'Crée automatiquement 2 équipes à partir des joueurs confirmés inscrits à ce Swé.';
+      if(gen){
+        gen.classList.toggle('hidden',S.teams.length>0);
+      }
+    }else{
+      tools?.classList.add('hidden');noSession?.classList.remove('hidden');
+      if(noSession)noSession.textContent='Sélectionne un Swé de cette Ligue dans la liste ci-dessus pour gérer ses inscrits et ses équipes.';
+    }
+  }
 
   const {data,error}=await sb.rpc('get_league_rankings',{p_league_id:league.id});
   if(error){$('#leagueScorers').innerHTML='<p class="muted">'+esc(error.message)+'</p>';$('#leagueAssists').innerHTML='';return}
@@ -2218,17 +2304,32 @@ $('#createLeagueSession').onclick=async()=>{
   await loadAll();setView('league');toast('Swé créé dans « '+league.name+' » ✅');
 };
 
+$('#leagueManualAddPlayer').onclick=async()=>{
+  if(!hasAdminOps())return toast('Seul l’administrateur peut ajouter manuellement un inscrit.');
+  const t=currentTour();
+  const league=S.leagues.find(l=>l.id===S.activeLeague);
+  if(!t||t.format!=='league'||!league||t.league_id!==league.id)return toast('Sélectionne un Swé de cette Ligue.');
+  const pid=$('#leagueManualPlayerSelect')?.value;
+  if(!pid)return toast('Choisis un inscrit de la Ligue.');
+  const b=$('#leagueManualAddPlayer');b.disabled=true;
+  const {data,error}=await sb.rpc('admin_add_registered_member_to_league_session',{p_tournament_id:t.id,p_player_id:pid});
+  b.disabled=false;
+  if(error)return toast(error.message);
+  await loadTournament();await renderLeague();
+  toast(data==='waitlist'?'Joueur ajouté comme remplaçant.':'Joueur ajouté aux inscrits ✅');
+};
+
 $('#generateLeagueTeams').onclick=async()=>{
   const t=currentTour();if(!t||t.format!=='league')return toast('Ouvre une journée de Ligue.');
-  if(!(hasAdminOps()||(isCoorg()&&S.myPermissions.can_generate_teams)))return toast('Tu n’es pas autorisé à générer les équipes.');
-  if((S.teams.length||S.matches.length)&&!confirm('Les équipes et matchs actuels de cette journée seront remplacés. Continuer ?'))return;
-  const b=$('#generateLeagueTeams');b.disabled=true;b.textContent='Génération…';
+  if(!hasAdminOps())return toast('Seul l’administrateur peut créer les équipes depuis l’onglet Ligue.');
+  if(S.teams.length)return toast('Les équipes de ce Swé sont déjà enregistrées.');
+  const b=$('#generateLeagueTeams');b.disabled=true;b.textContent='Création…';
   const {data,error}=await sb.rpc('generate_league_two_teams',{p_tournament_id:t.id});
-  b.disabled=false;b.textContent='Générer les 2 équipes';
+  b.disabled=false;b.textContent='Créer les équipes avec les inscrits';
   if(error)return toast(error.message);
   await loadTournament();renderAll();
-  $('#leagueGenerationInfo').textContent='2 équipes créées avec '+Number(data?.player_count||0)+' joueurs confirmés. Le match a été créé automatiquement.';
-  toast('Équipes de Ligue générées ✅');
+  $('#leagueGenerationInfo').textContent='2 équipes créées avec '+Number(data?.player_count||0)+' joueurs confirmés.';
+  toast('Équipes de Ligue créées ✅');
 };
 
 
