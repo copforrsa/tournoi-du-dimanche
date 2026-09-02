@@ -67,7 +67,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V34</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V36</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="loginCard" class="card">
       <h2 class="sectiontitle">Connexion</h2>
       <input id="email" type="email" placeholder="Email" autocomplete="email">
@@ -178,7 +178,11 @@ select{background-color:#fff} textarea{resize:vertical}
         <h2 class="sectiontitle">Créer un tournoi</h2>
         <div class="grid g2"><input id="tourDate" type="date"><select id="tourFormat"><option value="classic">Classique</option><option value="king_of_pitch">Roi du terrain</option></select></div>
         <div class="space"></div><input id="tourName" placeholder="Nom facultatif"><div class="space"></div>
-        <button id="createTournament" class="primary">Créer le tournoi</button>
+        <div class="grid g2">
+          <label class="player"><span class="muted">Places maximum</span><input id="tourMaxPlayers" type="number" min="2" max="100" value="20"></label>
+          <label class="player row" style="justify-content:flex-start"><input id="tourRegistrationOpen" type="checkbox" style="width:auto" checked><span><b>Ouvrir les inscriptions</b><div class="muted">Les joueurs pourront s’inscrire via le lien public.</div></span></label>
+        </div>
+        <div class="space"></div><button id="createTournament" class="primary">Créer le tournoi</button>
       </div>
       <div class="card"><h2 class="sectiontitle">Historique</h2><div id="tournamentList"></div></div><div class="card"><h2 class="sectiontitle">🏆 Classement des buteurs de la saison</h2><div id="seasonScorerSummary"></div></div>
     </div>
@@ -186,8 +190,12 @@ select{background-color:#fff} textarea{resize:vertical}
     <div id="view-teams" class="view">
       <div class="card" id="attendanceAdminCard"><h2 class="sectiontitle">Présents</h2><div id="attendanceList"></div></div>
       <div class="card" id="teamsAdminCard">
-        <h2 class="sectiontitle">Équipes</h2><p class="muted">Les équipes sont propres à chaque tournoi. Tu peux les supprimer et en recréer de nouvelles chaque dimanche.</p>
-        <div class="row"><input id="teamName" placeholder="Rouges, Bleus..." style="flex:1"><button id="addTeam">Ajouter</button><button id="autoTeams" class="primary">Répartition auto</button></div>
+        <h2 class="sectiontitle">Équipes</h2><p class="muted">Crée-les manuellement ou laisse l’application générer des équipes équilibrées selon le niveau des joueurs.</p>
+        <div class="grid g2">
+          <div class="row"><input id="teamName" placeholder="Rouges, Bleus..." style="flex:1"><button id="addTeam">Ajouter</button></div>
+          <div class="row"><input id="playersPerTeam" type="number" min="2" max="11" value="5" style="max-width:120px"><button id="smartAutoTeams" class="primary">⚡ Générer équipes équilibrées</button></div>
+        </div>
+        <div id="teamBalanceInfo" class="muted" style="margin-top:8px"></div>
         <div id="teamList" style="margin-top:10px"></div>
       </div>
     </div>
@@ -214,12 +222,20 @@ select{background-color:#fff} textarea{resize:vertical}
       <div class="card"><h2 class="sectiontitle">🏆 Classement équipes</h2><div id="teamRank"></div></div>
       <div class="card"><h2 class="sectiontitle">Partager</h2><textarea id="shareText" rows="10" readonly></textarea><div class="space"></div><button id="shareWhatsapp" class="primary">Partager le résumé</button></div>
       <div class="card">
-        <h2 class="sectiontitle">🎨 Créer un visuel avec ChatGPT</h2>
-        <p class="muted">Le bouton prépare les données, les copie et ouvre ChatGPT. Il suffit ensuite de coller le texte.</p>
+        <h2 class="sectiontitle">🎨 Visuels automatiques</h2>
+        <p class="muted">Génère directement une image prête à partager sur WhatsApp, sans ChatGPT ni service payant.</p>
         <div class="grid g3 visual-actions">
-          <button id="visualTeams">👥 Visuel équipes</button>
-          <button id="visualResults">📋 Visuel résultats</button>
-          <button id="visualScorers">⚽ Visuel buteurs</button>
+          <button id="visualTeams">👥 Équipes</button>
+          <button id="visualResults">📋 Résultats</button>
+          <button id="visualScorers">⚽ Buteurs</button>
+        </div>
+        <div id="visualPreviewBox" class="hidden" style="margin-top:14px">
+          <canvas id="visualCanvas" width="1080" height="1350" style="width:100%;max-width:520px;border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.14);background:#0d2b1f"></canvas>
+          <div class="row" style="margin-top:12px;gap:8px;flex-wrap:wrap">
+            <button id="downloadVisual" class="primary">⬇️ Enregistrer l’image</button>
+            <button id="shareVisual">📲 Partager</button>
+            <button id="closeVisual">Fermer</button>
+          </div>
         </div>
       </div>
     </div>
@@ -239,6 +255,11 @@ select{background-color:#fff} textarea{resize:vertical}
       <h1 class="public-title">⚽ <span id="publicWorkspaceName">Tournoi du Dimanche</span></h1>
       <div class="public-sub">Consultation publique • lecture seule</div>
     </header>
+
+    <div class="card" id="publicRegistrationCard">
+      <h2 class="sectiontitle">✅ Inscription au prochain tournoi</h2>
+      <div id="publicRegistration"></div>
+    </div>
 
     <div class="card">
       <h2 class="sectiontitle">🏆 Classement des équipes du dernier tournoi</h2>
@@ -516,8 +537,9 @@ function renderHome(){
   const t=currentTour();
   const lastFinished=S.tournaments.find(x=>x.status==='finished');
   $('#activeTourLabel').textContent=t?((t.name||'Tournoi')+' • '+t.tournament_date+' • '+(t.format==='king_of_pitch'?'Roi du terrain':'Classique')+' • '+seasonNameForTournament(t)):(lastFinished?'Aucun tournoi actif • dernier tournoi terminé le '+lastFinished.tournament_date+' • '+seasonNameForTournament(lastFinished):'Aucun tournoi');
-  const present=S.tPlayers.filter(x=>x.present).length;
-  $('#homeStats').innerHTML='<div class="player"><b>'+present+'</b><div class="muted">présents</div></div><div class="player"><b>'+S.teams.length+'</b><div class="muted">équipes</div></div><div class="player"><b>'+S.matches.length+'</b><div class="muted">matchs</div></div>';
+  const present=S.tPlayers.filter(x=>x.present&&x.registration_status!=='waitlist').length;
+  const wait=S.tPlayers.filter(x=>x.registration_status==='waitlist').length;
+  $('#homeStats').innerHTML='<div class="player"><b>'+present+'</b><div class="muted">confirmés'+(t?.max_players?' / '+t.max_players:'')+'</div></div><div class="player"><b>'+wait+'</b><div class="muted">liste d’attente</div></div><div class="player"><b>'+S.teams.length+'</b><div class="muted">équipes</div></div><div class="player"><b>'+S.matches.length+'</b><div class="muted">matchs</div></div>';
 }
 $('#sendInvite').onclick=async()=>{
   if(!S.workspace||S.workspace.role!=='admin')return toast('Seul l’administrateur peut inviter.');
@@ -562,7 +584,7 @@ function renderPlayers(){
     const info=document.createElement('span');info.style.flex='1';
     const g=guestLabel(x);
     info.innerHTML='<b>'+esc(x.name)+'</b>'+(x.is_group_member===false?'<span class="guest-badge">Guest</span>':'')+
-      '<div class="muted">'+(x.active?'Actif':'Inactif')+(g?' • '+esc(g):' • Membre du groupe')+'</div>';
+      '<div class="muted">'+(x.active?'Actif':'Inactif')+(g?' • '+esc(g):' • Membre du groupe')+' • Niveau '+(x.skill_level||2)+'/4</div>';
     if(isAdmin()){
       const toggle=document.createElement('button');toggle.textContent=x.active?'Désactiver':'Réactiver';
       toggle.onclick=async()=>{await sb.from('players').update({active:!x.active}).eq('id',x.id)};
@@ -582,20 +604,24 @@ function renderPlayers(){
     host.classList.toggle('hidden',status.value!=='guest');
 
     status.onchange=()=>host.classList.toggle('hidden',status.value!=='guest');
+    const level=document.createElement('select');level.style.flex='1';
+    level.innerHTML='<option value="1">Niveau 1 — Loisir</option><option value="2">Niveau 2 — Intermédiaire</option><option value="3">Niveau 3 — Bon</option><option value="4">Niveau 4 — Très bon</option>';
+    level.value=String(x.skill_level||2);
     const save=document.createElement('button');save.textContent='Enregistrer';
     save.onclick=async()=>{
       const isMember=status.value==='member';
       save.disabled=true;
       const {error}=await sb.from('players').update({
         is_group_member:isMember,
-        guest_of_player_id:isMember?null:(host.value||null)
+        guest_of_player_id:isMember?null:(host.value||null),
+        skill_level:Number(level.value)
       }).eq('id',x.id);
       save.disabled=false;
       if(error)return toast(error.message);
       const fresh=await sb.from('players').select('*').eq('workspace_id',S.workspace.id).order('name');
       S.players=fresh.data||S.players;renderAll();toast('Statut du joueur mis à jour ✅');
     };
-    edit.append(status,host,save);d.appendChild(edit);
+    edit.append(status,host,level,save);d.appendChild(edit);
     }
     box.appendChild(d);
   })
@@ -680,6 +706,19 @@ function renderTournaments(){
     const open=document.createElement('button');open.textContent=t.id===S.activeTour?'Actif':'Ouvrir';if(t.id===S.activeTour)open.className='green';
     open.onclick=async()=>{S.activeTour=t.id;await loadTournament();renderAll();toast('Tournoi sélectionné')};
     top.appendChild(open);d.appendChild(top);
+
+    if(isAdmin()){
+      const reg=document.createElement('div');reg.className='player';reg.style.marginTop='8px';
+      const confirmed=S.activeTour===t.id?S.tPlayers.filter(x=>x.registration_status!=='waitlist'&&x.present).length:null;
+      reg.innerHTML='<div class="row"><span style="flex:1"><b>Inscriptions : '+(t.registration_open?'🟢 ouvertes':'🔴 fermées')+'</b><div class="muted">Maximum '+(t.max_players||20)+' joueurs'+(confirmed!==null?' • '+confirmed+' confirmé'+(confirmed>1?'s':''):'')+'</div></span></div>';
+      const row=document.createElement('div');row.className='row';row.style.marginTop='8px';
+      const max=document.createElement('input');max.type='number';max.min='2';max.max='100';max.value=t.max_players||20;max.style.maxWidth='105px';
+      const toggle=document.createElement('button');toggle.textContent=t.registration_open?'Fermer les inscriptions':'Ouvrir les inscriptions';toggle.className=t.registration_open?'danger':'primary';
+      const saveMax=document.createElement('button');saveMax.textContent='Modifier places';
+      toggle.onclick=async()=>{const {error}=await sb.from('tournaments').update({registration_open:!t.registration_open}).eq('id',t.id);if(error)return toast(error.message);await loadAll();toast(!t.registration_open?'Inscriptions ouvertes ✅':'Inscriptions fermées')};
+      saveMax.onclick=async()=>{const n=Math.max(2,Math.min(100,Number(max.value)||20));const {error}=await sb.from('tournaments').update({max_players:n}).eq('id',t.id);if(error)return toast(error.message);await loadAll();toast('Nombre de places mis à jour ✅')};
+      row.append(max,saveMax,toggle);reg.appendChild(row);d.appendChild(reg);
+    }
 
     const finish=document.createElement('button');finish.textContent='Terminer le tournoi';finish.style.marginTop='8px';
     finish.onclick=async()=>{
@@ -799,7 +838,7 @@ $('#createTournament').onclick=async()=>{
   if(!date)return toast('Choisis une date');
   btn.disabled=true;btn.textContent='Création…';
   try{
-    const row={workspace_id:S.workspace.id,season_id:$('#seasonSelect').value||null,name:$('#tourName').value.trim()||null,tournament_date:date,format:$('#tourFormat').value,status:'draft'};
+    const row={workspace_id:S.workspace.id,season_id:$('#seasonSelect').value||null,name:$('#tourName').value.trim()||null,tournament_date:date,format:$('#tourFormat').value,status:'draft',max_players:Math.max(2,Math.min(100,Number($('#tourMaxPlayers').value)||20)),registration_open:$('#tourRegistrationOpen').checked};
     const {data,error}=await sb.from('tournaments').insert(row).select().single();
     if(error)throw error;
     S.activeTour=data.id;
@@ -818,7 +857,7 @@ $('#createTournament').onclick=async()=>{
   }
 };
 
-function presentIds(){return new Set(S.tPlayers.filter(x=>x.present).map(x=>x.player_id))} function teamPlayerIds(teamId){return S.teamPlayers.filter(x=>x.team_id===teamId).map(x=>x.player_id)}
+function presentIds(){return new Set(S.tPlayers.filter(x=>x.present&&x.registration_status!=='waitlist').map(x=>x.player_id))} function teamPlayerIds(teamId){return S.teamPlayers.filter(x=>x.team_id===teamId).map(x=>x.player_id)}
 function renderTeams(){const t=currentTour(),att=$('#attendanceList'),box=$('#teamList');att.innerHTML='';box.innerHTML='';if(!t){att.innerHTML='<p class="muted">Crée ou ouvre un tournoi.</p>';return}
 if(!isAdmin()){
   att.innerHTML='<div class="readonly-note">Consultation uniquement. Seul l’administrateur gère les présences et les équipes.</div>';
@@ -830,7 +869,21 @@ if(!isAdmin()){
   });
   return;
 }
-const prs=presentIds();S.players.filter(x=>x.active).forEach(x=>{const l=document.createElement('label');l.className='player row';const c=document.createElement('input');c.type='checkbox';c.style.width='auto';c.checked=prs.has(x.id);c.onchange=async()=>{await sb.from('tournament_players').upsert({tournament_id:t.id,player_id:x.id,present:c.checked},{onConflict:'tournament_id,player_id'})};l.append(c,document.createTextNode(playerDisplayName(x)));att.appendChild(l)});S.teams.forEach(team=>{
+const prs=presentIds();S.players.filter(x=>x.active).forEach(x=>{const l=document.createElement('label');l.className='player row';const c=document.createElement('input');c.type='checkbox';c.style.width='auto';c.checked=prs.has(x.id);c.onchange=async()=>{
+  if(c.checked){
+    const confirmed=S.tPlayers.filter(tp=>tp.present&&tp.registration_status!=='waitlist'&&tp.player_id!==x.id).length;
+    const status=confirmed<(t.max_players||20)?'confirmed':'waitlist';
+    const {error}=await sb.from('tournament_players').upsert({tournament_id:t.id,player_id:x.id,present:true,registration_status:status,registered_at:new Date().toISOString()},{onConflict:'tournament_id,player_id'});
+    if(error)return toast(error.message);
+  }else{
+    const {error}=await sb.from('tournament_players').delete().eq('tournament_id',t.id).eq('player_id',x.id);
+    if(error)return toast(error.message);
+  }
+  await loadTournament();renderAll();
+};const tp=S.tPlayers.find(z=>z.player_id===x.id);
+const label=document.createElement('span');label.style.flex='1';label.textContent=playerDisplayName(x);
+if(tp?.registration_status==='waitlist'){const badge=document.createElement('span');badge.className='guest-badge';badge.textContent='Liste d’attente';label.appendChild(document.createTextNode(' '));label.appendChild(badge)}
+l.append(c,label);att.appendChild(l)});S.teams.forEach(team=>{
   const d=document.createElement('div');d.className='team';
   const head=document.createElement('div');head.className='row';head.style.justifyContent='space-between';
   const title=document.createElement('b');title.textContent=team.name;
@@ -856,7 +909,42 @@ const prs=presentIds();S.players.filter(x=>x.active).forEach(x=>{const l=documen
   head.append(title,del);d.appendChild(head);
   const ids=new Set(teamPlayerIds(team.id));const sel=document.createElement('select');sel.innerHTML='<option value="">Ajouter un joueur...</option>'+S.players.filter(x=>prs.has(x.id)&&!S.teamPlayers.some(tp=>tp.player_id===x.id)).map(x=>'<option value="'+x.id+'">'+esc(playerDisplayName(x))+'</option>').join('');sel.onchange=async()=>{if(sel.value)await sb.from('team_players').insert({team_id:team.id,player_id:sel.value})};d.appendChild(sel);ids.forEach(id=>{const pl=p(id);if(!pl)return;const r=document.createElement('div');r.className='row small';r.className+=' '+(pl.is_group_member===false?'guest-row':'');r.innerHTML='<span style="flex:1">'+esc(playerDisplayName(pl))+(pl.is_group_member===false?' <span class="guest-badge">Guest</span>':'')+'</span>';const b=document.createElement('button');b.textContent='×';b.onclick=async()=>await sb.from('team_players').delete().eq('team_id',team.id).eq('player_id',id);r.appendChild(b);d.appendChild(r)});box.appendChild(d)})}
 $('#addTeam').onclick=async()=>{const t=currentTour(),name=$('#teamName').value.trim();if(!t||!name)return;const {error}=await sb.from('teams').insert({tournament_id:t.id,name});if(error)return toast(error.message);$('#teamName').value=''};
-$('#autoTeams').onclick=async()=>{const ids=[...presentIds()];if(S.teams.length<2||!ids.length)return toast('Il faut au moins 2 équipes et des présents.');for(const x of S.teamPlayers)await sb.from('team_players').delete().eq('team_id',x.team_id).eq('player_id',x.player_id);ids.sort(()=>Math.random()-.5);const rows=ids.map((id,i)=>({team_id:S.teams[i%S.teams.length].id,player_id:id}));const {error}=await sb.from('team_players').insert(rows);error?toast(error.message):toast('Répartition effectuée')};
+$('#smartAutoTeams').onclick=async()=>{
+  const t=currentTour();if(!t)return toast('Ouvre un tournoi.');
+  const ids=[...presentIds()];if(ids.length<4)return toast('Il faut au moins 4 joueurs confirmés.');
+  const perTeam=Math.max(2,Math.min(11,Number($('#playersPerTeam').value)||5));
+  const teamCount=Math.max(2,Math.ceil(ids.length/perTeam));
+  if(S.matches.length && !confirm('Des matchs existent déjà. Régénérer les équipes supprimera les matchs et les buts associés. Continuer ?'))return;
+  if(S.teams.length && !confirm('Remplacer les équipes actuelles par '+teamCount+' équipes équilibrées ?'))return;
+  const btn=$('#smartAutoTeams');btn.disabled=true;btn.textContent='Génération…';
+  try{
+    for(const team of [...S.teams]){
+      const {error}=await sb.from('teams').delete().eq('id',team.id);
+      if(error)throw error;
+    }
+    const names=['Noirs','Bleus','Blancs','Rouges','Verts','Jaunes','Oranges','Violets'];
+    const colors=['#111827','#2563eb','#f8fafc','#dc2626','#16a34a','#eab308','#f97316','#7c3aed'];
+    const teamRows=Array.from({length:teamCount},(_,i)=>({tournament_id:t.id,name:names[i]||('Équipe '+(i+1)),color:colors[i%colors.length]}));
+    const {data:newTeams,error:te}=await sb.from('teams').insert(teamRows).select();
+    if(te)throw te;
+    const shuffled=ids.map(id=>({id,rand:Math.random(),level:Number(p(id)?.skill_level||2)}))
+      .sort((a,b)=>b.level-a.level||a.rand-b.rand);
+    const buckets=Array.from({length:teamCount},()=>[]);
+    shuffled.forEach((pl,i)=>{
+      const cycle=Math.floor(i/teamCount),pos=i%teamCount;
+      const idx=cycle%2===0?pos:(teamCount-1-pos);
+      buckets[idx].push(pl.id);
+    });
+    const rows=[];
+    (newTeams||[]).forEach((team,i)=>buckets[i].forEach(player_id=>rows.push({team_id:team.id,player_id})));
+    if(rows.length){const {error}=await sb.from('team_players').insert(rows);if(error)throw error}
+    await loadTournament();renderAll();
+    const totals=buckets.map((b,i)=>b.reduce((s,id)=>s+Number(p(id)?.skill_level||2),0));
+    $('#teamBalanceInfo').textContent='Équilibre des niveaux : '+totals.map((x,i)=>(newTeams?.[i]?.name||('Équipe '+(i+1)))+' '+x+' pts').join(' • ');
+    toast(teamCount+' équipes équilibrées générées ✅');
+  }catch(e){toast(e.message||'Impossible de générer les équipes')}
+  finally{btn.disabled=false;btn.textContent='⚡ Générer équipes équilibrées'}
+};
 
 function matchOptions(){return '<option value="">Choisir</option>'+S.teams.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')}
 function renderMatches(){
@@ -1035,31 +1123,169 @@ if('serviceWorker' in navigator){
     .catch(()=>{});
 }
 sb.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){S.session=session;showRecoveryForm();return}setTimeout(authState,0)});
+
 function latestTournamentForVisual(){
   return currentTour()||S.tournaments[0]||null;
 }
-function visualPrompt(kind){
-  const t=latestTournamentForVisual();
-  if(!t)return 'Aucun tournoi disponible.';
-  const teams=S.teams.map(team=>team.name+' : '+teamPlayerIds(team.id).map(id=>playerDisplayName(p(id))).filter(Boolean).join(', ')).join('\n');
-  const results=S.matches.map((m,i)=>'Match '+(i+1)+' : '+(tm(m.home_team_id)?.name||'?')+' '+m.home_score+' - '+m.away_score+' '+(tm(m.away_team_id)?.name||'?')).join('\n');
-  const stats=new Map(S.players.map(x=>[x.id,{name:x.name,g:0}]));
+
+const VISUAL_W=1080, VISUAL_H=1350;
+let currentVisualBlob=null;
+let currentVisualFilename='tournoi-du-dimanche.png';
+
+function vRoundRect(ctx,x,y,w,h,r,fill,stroke){
+  const rr=Math.min(r,w/2,h/2);
+  ctx.beginPath();
+  ctx.moveTo(x+rr,y);ctx.arcTo(x+w,y,x+w,y+h,rr);ctx.arcTo(x+w,y+h,x,y+h,rr);
+  ctx.arcTo(x,y+h,x,y,rr);ctx.arcTo(x,y,x+w,y,rr);ctx.closePath();
+  if(fill){ctx.fillStyle=fill;ctx.fill();}
+  if(stroke){ctx.strokeStyle=stroke;ctx.stroke();}
+}
+function vText(ctx,text,x,y,maxWidth,font,color,align='left'){
+  ctx.font=font;ctx.fillStyle=color;ctx.textAlign=align;ctx.textBaseline='alphabetic';
+  ctx.fillText(String(text),x,y,maxWidth);
+}
+function vWrap(ctx,text,maxWidth){
+  const words=String(text||'').split(/\s+/);const lines=[];let line='';
+  words.forEach(word=>{
+    const test=line?line+' '+word:word;
+    if(ctx.measureText(test).width>maxWidth && line){lines.push(line);line=word}else line=test;
+  });
+  if(line)lines.push(line);
+  return lines;
+}
+function vDrawWrapped(ctx,text,x,y,maxWidth,lineHeight,font,color,maxLines=3){
+  ctx.font=font;ctx.fillStyle=color;ctx.textAlign='left';
+  const lines=vWrap(ctx,text,maxWidth).slice(0,maxLines);
+  lines.forEach((line,i)=>ctx.fillText(line,x,y+i*lineHeight,maxWidth));
+  return y+lines.length*lineHeight;
+}
+function visualDate(t){
+  try{return new Date((t?.tournament_date||'')+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'})}
+  catch(e){return t?.tournament_date||''}
+}
+function visualTheme(ctx,title,t){
+  const g=ctx.createLinearGradient(0,0,1080,1350);
+  g.addColorStop(0,'#08291d');g.addColorStop(.6,'#0d3b29');g.addColorStop(1,'#061c14');
+  ctx.fillStyle=g;ctx.fillRect(0,0,VISUAL_W,VISUAL_H);
+  ctx.globalAlpha=.08;ctx.fillStyle='#ffffff';
+  for(let i=0;i<16;i++){ctx.beginPath();ctx.arc(80+i*75,110+(i%3)*42,22,0,Math.PI*2);ctx.fill()}
+  ctx.globalAlpha=1;
+  vText(ctx,'⚽ TOURNOI DU DIMANCHE',70,105,940,'700 34px Arial','#9ee6b8');
+  vText(ctx,title,70,180,940,'800 62px Arial','#ffffff');
+  vText(ctx,visualDate(t),70,228,940,'500 28px Arial','#c9e7d5');
+  ctx.fillStyle='#36c36c';ctx.fillRect(70,258,115,7);
+}
+function visualFooter(ctx,t){
+  vText(ctx,(t?.name||'Tournoi du Dimanche'),70,1292,760,'600 24px Arial','#a8c9b6');
+  vText(ctx,'Généré par l’app',1010,1292,300,'500 22px Arial','#7da28e','right');
+}
+
+function makeVisualTeams(ctx,t){
+  visualTheme(ctx,'ÉQUIPES',t);
+  let y=320;
+  const cards=S.teams.slice(0,8);
+  cards.forEach((team,idx)=>{
+    const ids=teamPlayerIds(team.id);
+    const names=ids.map(id=>playerDisplayName(p(id))).filter(Boolean);
+    const cardH=Math.max(118,78+Math.ceil(names.length/2)*38);
+    vRoundRect(ctx,70,y,940,cardH,24,'#ffffff');
+    vRoundRect(ctx,90,y+24,160,48,15,'#dff6e8');
+    vText(ctx,team.name,170,y+58,130,'800 25px Arial','#0c6b3d','center');
+    let tx=285,ty=y+50;
+    names.forEach((name,i)=>{
+      const col=i%2,row=Math.floor(i/2);
+      vText(ctx,'• '+name,tx+col*345,ty+row*38,320,'600 24px Arial','#183428');
+    });
+    y+=cardH+20;
+  });
+  if(!cards.length)vText(ctx,'Aucune équipe créée',70,390,940,'600 34px Arial','#ffffff');
+  visualFooter(ctx,t);
+}
+
+function makeVisualResults(ctx,t){
+  visualTheme(ctx,'RÉSULTATS',t);
+  let y=315;
+  const matches=S.matches.slice(0,12);
+  matches.forEach((m,i)=>{
+    const home=tm(m.home_team_id)?.name||'?';
+    const away=tm(m.away_team_id)?.name||'?';
+    vRoundRect(ctx,70,y,940,76,20,'#ffffff');
+    vText(ctx,'M'+(i+1),102,y+49,70,'800 22px Arial','#0c6b3d');
+    vText(ctx,home,205,y+49,270,'700 25px Arial','#183428','right');
+    vRoundRect(ctx,480,y+15,120,48,14,'#0d3b29');
+    vText(ctx,(m.home_score??0)+' - '+(m.away_score??0),540,y+49,105,'800 28px Arial','#ffffff','center');
+    vText(ctx,away,625,y+49,270,'700 25px Arial','#183428');
+    if(m.pitch)vText(ctx,m.pitch,975,y+49,120,'600 20px Arial','#6b8075','right');
+    y+=90;
+  });
+  if(!matches.length)vText(ctx,'Aucun match enregistré',70,390,940,'600 34px Arial','#ffffff');
+  visualFooter(ctx,t);
+}
+
+function tournamentScorerVisualData(){
+  const stats=new Map(S.players.map(x=>[x.id,{id:x.id,name:x.name,g:0,guest:x.is_group_member===false}]));
   S.goals.forEach(g=>{if(stats.has(g.scorer_player_id))stats.get(g.scorer_player_id).g++});
-  const scor=[...stats.values()].filter(x=>x.g).sort((a,b)=>b.g-a.g||a.name.localeCompare(b.name)).map((x,i)=>(i+1)+'. '+x.name+' — '+x.g+' but'+(x.g>1?'s':'')).join('\n');
-  const base='Crée-moi un visuel vertical, propre et lisible pour WhatsApp, pour le Tournoi du Dimanche. Style football moderne, très lisible sur téléphone. ';
-  if(kind==='teams')return base+'Titre : Équipes du tournoi. Voici les équipes :\n\n'+teams;
-  if(kind==='results')return base+'Titre : Résultats du tournoi. Voici les résultats :\n\n'+results;
-  return base+'Titre : Classement des buteurs. Respecte les ex-aequo. Voici les données :\n\n'+scor;
+  let arr=[...stats.values()].filter(x=>x.g).sort((a,b)=>b.g-a.g||a.name.localeCompare(b.name));
+  let prev=null,rank=0;
+  return arr.map((x,i)=>{if(x.g!==prev){rank=i+1;prev=x.g}return {...x,rank}});
 }
-async function openChatGPTVisual(kind){
-  const txt=visualPrompt(kind);
-  try{await navigator.clipboard.writeText(txt);toast('Données copiées. Colle-les dans ChatGPT ✅')}
-  catch(e){$('#shareText').value=txt;toast('Données placées dans la zone Partager.')}
-  window.open('https://chatgpt.com/','_blank','noopener');
+function makeVisualScorers(ctx,t){
+  visualTheme(ctx,'CLASSEMENT BUTEURS',t);
+  const arr=tournamentScorerVisualData().slice(0,14);
+  let y=315;
+  arr.forEach((x,i)=>{
+    const podium=x.rank<=3;
+    vRoundRect(ctx,70,y,940,64,18,podium?'#e9f8ef':'#ffffff');
+    const medal=x.rank===1?'🥇':x.rank===2?'🥈':x.rank===3?'🥉':String(x.rank);
+    vText(ctx,medal,105,y+43,60,'800 27px Arial','#0c6b3d');
+    vText(ctx,x.name+(x.guest?'  • Guest':''),190,y+43,630,'700 25px Arial',x.guest?'#718079':'#183428');
+    vText(ctx,x.g+' but'+(x.g>1?'s':''),955,y+43,160,'800 26px Arial','#0c6b3d','right');
+    y+=76;
+  });
+  if(!arr.length)vText(ctx,'Aucun but enregistré',70,390,940,'600 34px Arial','#ffffff');
+  visualFooter(ctx,t);
 }
-$('#visualTeams').onclick=()=>openChatGPTVisual('teams');
-$('#visualResults').onclick=()=>openChatGPTVisual('results');
-$('#visualScorers').onclick=()=>openChatGPTVisual('scorers');
+
+async function generateVisual(kind){
+  const t=latestTournamentForVisual();
+  if(!t)return toast('Aucun tournoi disponible.');
+  const canvas=$('#visualCanvas'),ctx=canvas.getContext('2d');
+  canvas.width=VISUAL_W;canvas.height=VISUAL_H;
+  if(kind==='teams')makeVisualTeams(ctx,t);
+  else if(kind==='results')makeVisualResults(ctx,t);
+  else makeVisualScorers(ctx,t);
+  currentVisualFilename='tournoi-'+kind+'-'+(t.tournament_date||'').replaceAll('-','')+'.png';
+  currentVisualBlob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png',1));
+  $('#visualPreviewBox').classList.remove('hidden');
+  $('#visualPreviewBox').scrollIntoView({behavior:'smooth',block:'center'});
+  toast('Visuel généré ✅');
+}
+
+async function saveCurrentVisual(){
+  if(!currentVisualBlob)return toast('Génère d’abord un visuel.');
+  const url=URL.createObjectURL(currentVisualBlob);
+  const a=document.createElement('a');a.href=url;a.download=currentVisualFilename;
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+}
+async function shareCurrentVisual(){
+  if(!currentVisualBlob)return toast('Génère d’abord un visuel.');
+  const file=new File([currentVisualBlob],currentVisualFilename,{type:'image/png'});
+  if(navigator.canShare && navigator.canShare({files:[file]}) && navigator.share){
+    try{
+      await navigator.share({files:[file],title:'Tournoi du Dimanche'});
+      return;
+    }catch(e){if(e.name==='AbortError')return;}
+  }
+  saveCurrentVisual();
+  toast('Partage de fichier non disponible : image enregistrée.');
+}
+$('#visualTeams').onclick=()=>generateVisual('teams');
+$('#visualResults').onclick=()=>generateVisual('results');
+$('#visualScorers').onclick=()=>generateVisual('scorers');
+$('#downloadVisual').onclick=saveCurrentVisual;
+$('#shareVisual').onclick=shareCurrentVisual;
+$('#closeVisual').onclick=()=>$('#visualPreviewBox').classList.add('hidden');
 
 async function bootPublic(token){
   S.publicMode=true;
@@ -1081,6 +1307,36 @@ async function bootPublic(token){
   $('#publicWorkspaceName').textContent=P.workspace?.name||'Tournoi du Dimanche';
   const players=P.players||[],seasons=P.seasons||[],tournaments=(P.tournaments||[]).sort((a,b)=>String(b.tournament_date).localeCompare(String(a.tournament_date)));
   const teams=P.teams||[],teamPlayers=P.team_players||[],matches=P.matches||[],goals=P.goals||[];
+  const registrations=P.tournament_players||[];
+  const openTours=[...tournaments].filter(t=>t.status!=='finished'&&t.registration_open).sort((a,b)=>String(a.tournament_date).localeCompare(String(b.tournament_date)));
+  const regTour=openTours[0];
+  const regBox=$('#publicRegistration');
+  if(regTour){
+    const regs=registrations.filter(r=>r.tournament_id===regTour.id);
+    const confirmed=regs.filter(r=>r.registration_status!=='waitlist'&&r.present).length;
+    const waiting=regs.filter(r=>r.registration_status==='waitlist').length;
+    regBox.innerHTML='<div class="player"><b>'+esc(regTour.name||('Tournoi du '+regTour.tournament_date))+'</b><div class="muted">'+regTour.tournament_date+' • '+confirmed+'/'+(regTour.max_players||20)+' confirmés'+(waiting?' • '+waiting+' en attente':'')+'</div></div>'+
+      '<div class="space"></div><select id="publicPlayerSelect"><option value="">Choisis ton nom</option>'+players.filter(x=>x.active).sort((a,b)=>a.name.localeCompare(b.name)).map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')+'</select>'+
+      '<div class="space"></div><div class="row"><button id="publicJoin" class="primary">✅ Je participe</button><button id="publicLeave">❌ Je ne participe pas</button></div><div id="publicRegStatus" class="muted" style="margin-top:8px">Les places sont attribuées dans l’ordre des inscriptions.</div>';
+    $('#publicJoin').onclick=async()=>{
+      const pid=$('#publicPlayerSelect').value;if(!pid)return $('#publicRegStatus').textContent='Choisis ton nom.';
+      const b=$('#publicJoin');b.disabled=true;
+      const {data,error}=await sb.rpc('public_tournament_registration',{p_token:token,p_tournament_id:regTour.id,p_player_id:pid,p_action:'join'});
+      b.disabled=false;if(error)return $('#publicRegStatus').textContent=error.message;
+      $('#publicRegStatus').textContent=data?.status==='waitlist'?'🟠 Tu es sur la liste d’attente.':'🟢 Inscription confirmée !';
+      setTimeout(()=>location.reload(),900);
+    };
+    $('#publicLeave').onclick=async()=>{
+      const pid=$('#publicPlayerSelect').value;if(!pid)return $('#publicRegStatus').textContent='Choisis ton nom.';
+      const b=$('#publicLeave');b.disabled=true;
+      const {error}=await sb.rpc('public_tournament_registration',{p_token:token,p_tournament_id:regTour.id,p_player_id:pid,p_action:'absent'});
+      b.disabled=false;if(error)return $('#publicRegStatus').textContent=error.message;
+      $('#publicRegStatus').textContent='Inscription retirée.';
+      setTimeout(()=>location.reload(),700);
+    };
+  }else{
+    regBox.innerHTML='<p class="muted">Aucune inscription ouverte actuellement.</p>';
+  }
   const pmap=new Map(players.map(x=>[x.id,x]));
   const tmap=new Map(teams.map(x=>[x.id,x]));
   const activeSeason=seasons.find(x=>x.is_active)||seasons[0];
