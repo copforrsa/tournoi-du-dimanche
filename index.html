@@ -75,7 +75,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.6</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.7</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -118,7 +118,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.6</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.7</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -342,6 +342,23 @@ select{background-color:#fff} textarea{resize:vertical}
         <div id="activeLeagueInfo"></div>
         <div class="space"></div>
         <div id="leagueRegistrationShare"></div>
+      </div>
+
+      <div class="card" id="leaguePrizesCard">
+        <h2 class="sectiontitle">🎁 Lots des meilleurs buteurs</h2>
+        <p class="muted">L’administrateur peut annoncer des lots pour les 3 meilleurs buteurs du classement final de cette Ligue.</p>
+        <label class="player row" style="justify-content:flex-start"><input id="leaguePrizesEnabled" type="checkbox" style="width:auto"><span><b>Prévoir des lots pour le Top 3</b><div class="muted">Si un lot n’est pas encore connu, laisse le champ vide : « Lot à définir ultérieurement » sera affiché.</div></span></label>
+        <div id="leaguePrizeFields" class="hidden">
+          <div class="space"></div>
+          <div class="grid g3">
+            <input id="leaguePrizeFirst" placeholder="🥇 Lot du 1er">
+            <input id="leaguePrizeSecond" placeholder="🥈 Lot du 2e">
+            <input id="leaguePrizeThird" placeholder="🥉 Lot du 3e">
+          </div>
+          <div class="space"></div>
+          <button id="saveLeaguePrizes" class="primary">Enregistrer les lots</button>
+        </div>
+        <div id="leaguePrizeReadonly" class="muted" style="margin-top:8px"></div>
       </div>
 
       <div class="card" id="leagueSessionCard">
@@ -1978,6 +1995,7 @@ async function renderLeague(){
   const info=$('#activeLeagueInfo'),shareBox=$('#leagueRegistrationShare');
   if(!league){
     info.innerHTML='<p class="muted">Sélectionne ou crée une Ligue.</p>';shareBox.innerHTML='';
+    $('#leaguePrizesCard')?.classList.add('hidden');
     $('#leagueDays').innerHTML='<p class="muted">Aucun Swé de Ligue.</p>';
     $('#leagueScorers').innerHTML='<p class="muted">Aucune donnée.</p>';
     $('#leagueAssists').innerHTML='<p class="muted">Aucune donnée.</p>';
@@ -1985,7 +2003,31 @@ async function renderLeague(){
     return;
   }
   const members=S.leaguePlayers.filter(lp=>lp.league_id===league.id&&lp.status==='confirmed');
-  info.innerHTML='<div class="player"><b>'+esc(league.name)+'</b><div class="muted">'+members.length+' membre'+(members.length>1?'s':'')+' de la communauté inscrit'+(members.length>1?'s':'')+'. Les statistiques ci-dessous appartiennent uniquement à cette Ligue.</div></div>';
+  info.innerHTML='<div class="player"><b>'+esc(league.name)+'</b><div class="muted">📅 Du '+esc(league.starts_on)+(league.ends_on?' au '+esc(league.ends_on):' • sans date de fin')+'</div><div class="muted">'+members.length+' membre'+(members.length>1?'s':'')+' de la communauté inscrit'+(members.length>1?'s':'')+'. Les statistiques ci-dessous appartiennent uniquement à cette Ligue.</div></div>';
+
+  const prizeCard=$('#leaguePrizesCard'),prizeToggle=$('#leaguePrizesEnabled'),prizeFields=$('#leaguePrizeFields'),prizeReadonly=$('#leaguePrizeReadonly');
+  if(prizeCard){
+    prizeCard.classList.toggle('hidden',!league);
+    const canPrizeAdmin=hasAdminOps();
+    if(prizeToggle){
+      prizeToggle.checked=!!league.prizes_enabled;
+      prizeToggle.disabled=!canPrizeAdmin;
+    }
+    if(prizeFields)prizeFields.classList.toggle('hidden',!league.prizes_enabled||!canPrizeAdmin);
+    if($('#leaguePrizeFirst'))$('#leaguePrizeFirst').value=league.prize_first||'';
+    if($('#leaguePrizeSecond'))$('#leaguePrizeSecond').value=league.prize_second||'';
+    if($('#leaguePrizeThird'))$('#leaguePrizeThird').value=league.prize_third||'';
+    if(prizeReadonly){
+      prizeReadonly.innerHTML=league.prizes_enabled
+        ? '🥇 '+esc(league.prize_first||'Lot à définir ultérieurement')+'<br>🥈 '+esc(league.prize_second||'Lot à définir ultérieurement')+'<br>🥉 '+esc(league.prize_third||'Lot à définir ultérieurement')
+        : 'Aucun lot annoncé pour cette Ligue.';
+    }
+    if(prizeToggle&&canPrizeAdmin){
+      prizeToggle.onchange=()=>{
+        if(prizeFields)prizeFields.classList.toggle('hidden',!prizeToggle.checked);
+      };
+    }
+  }
   if(league.registration_open&&S.workspace?.public_token){
     const url=leagueRegistrationLink(league);
     shareBox.innerHTML='<div class="row"><input id="leagueJoinLink" readonly value="'+esc(url)+'" style="flex:1"><button id="copyLeagueJoin">Copier</button><button id="waLeagueJoin" class="primary">📲 WhatsApp</button></div>';
@@ -2034,6 +2076,23 @@ $('#createLeague').onclick=async()=>{
   if(error)return toast(error.message);
   S.activeLeague=data;$('#leagueName').value='';$('#leagueEnd').value='';
   await loadAll();setView('league');toast('Ligue créée ✅');
+};
+
+$('#saveLeaguePrizes').onclick=async()=>{
+  if(!hasAdminOps())return toast('Seul l’administrateur peut définir les lots.');
+  const league=S.leagues.find(l=>l.id===S.activeLeague);
+  if(!league)return toast('Sélectionne une Ligue.');
+  const enabled=!!$('#leaguePrizesEnabled')?.checked;
+  const {error}=await sb.rpc('set_league_prizes',{
+    p_league_id:league.id,
+    p_enabled:enabled,
+    p_first:$('#leaguePrizeFirst')?.value.trim()||null,
+    p_second:$('#leaguePrizeSecond')?.value.trim()||null,
+    p_third:$('#leaguePrizeThird')?.value.trim()||null
+  });
+  if(error)return toast(error.message);
+  await loadAll();setView('league');
+  toast(enabled?'Lots du Top 3 enregistrés ✅':'Lots désactivés pour cette Ligue.');
 };
 
 $('#createLeagueSession').onclick=async()=>{
@@ -2347,13 +2406,46 @@ async function bootPublic(token){
       $('#publicView').innerHTML='<header class="top"><h1>⚽ SWÉ TOURNAMENT 5/5</h1></header><div class="card"><p>Ligue introuvable.</p></div>';return;
     }
     const members=players.filter(p=>p.active&&p.is_group_member!==false).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
-    const confirmed=new Set(leaguePlayers.filter(lp=>lp.league_id===league.id&&lp.status==='confirmed').map(lp=>lp.player_id));
+    const confirmedIds=new Set(leaguePlayers.filter(lp=>lp.league_id===league.id&&lp.status==='confirmed').map(lp=>lp.player_id));
+    const confirmedMembers=members.filter(p=>confirmedIds.has(p.id));
+
+    // Classements cumulés de la saison de CETTE Ligue uniquement.
+    const leagueTournamentIds=new Set(tournaments.filter(t=>t.format==='league'&&t.league_id===league.id).map(t=>t.id));
+    const leagueMatchIds=new Set(matches.filter(m=>leagueTournamentIds.has(m.tournament_id)).map(m=>m.id));
+    const leagueStats=new Map(confirmedMembers.map(p=>[p.id,{id:p.id,name:p.name,g:0,a:0}]));
+    goals.filter(g=>leagueMatchIds.has(g.match_id)).forEach(g=>{
+      if(leagueStats.has(g.scorer_player_id))leagueStats.get(g.scorer_player_id).g++;
+      if(g.assister_player_id&&leagueStats.has(g.assister_player_id))leagueStats.get(g.assister_player_id).a++;
+    });
+    let leagueScorers=[...leagueStats.values()].filter(x=>x.g>0).sort((a,b)=>b.g-a.g||b.a-a.a||a.name.localeCompare(b.name));
+    let prevGoals=null,goalRank=0;
+    leagueScorers=leagueScorers.map((x,i)=>{if(x.g!==prevGoals){goalRank=i+1;prevGoals=x.g}return {...x,rank:goalRank}});
+    let leagueAssists=[...leagueStats.values()].filter(x=>x.a>0).sort((a,b)=>b.a-a.a||b.g-a.g||a.name.localeCompare(b.name));
+    let prevAssists=null,assistRank=0;
+    leagueAssists=leagueAssists.map((x,i)=>{if(x.a!==prevAssists){assistRank=i+1;prevAssists=x.a}return {...x,rank:assistRank}});
+
+    const scorersHtml=leagueScorers.map(x=>'<div class="rank"><b>'+x.rank+'</b><span>'+esc(x.name)+'</span><b class="right">'+x.g+' but'+(x.g>1?'s':'')+'</b></div>').join('')||'<p class="muted">Aucun but enregistré pour le moment.</p>';
+    const assistsHtml=leagueAssists.map(x=>'<div class="rank"><b>'+x.rank+'</b><span>'+esc(x.name)+'</span><b class="right">'+x.a+' passe'+(x.a>1?'s':'')+'</b></div>').join('')||'<p class="muted">Aucune passe enregistrée pour le moment.</p>';
+    const memberHtml=confirmedMembers.map((p,i)=>'<div class="player row"><span style="flex:1"><b>'+esc(p.name)+'</b></span><span class="muted">#'+(i+1)+'</span></div>').join('')||'<p class="muted">Aucun membre inscrit pour le moment.</p>';
+
+    const prizeHtml=league.prizes_enabled
+      ? '<div class="card" style="background:linear-gradient(145deg,#fff8df,#fffdf5);border:1px solid #f4df9f"><h2 class="sectiontitle">🎁 Lots du Top 3 des buteurs</h2>'+
+        '<div class="player">🥇 <b>1er buteur :</b> '+esc(league.prize_first||'Lot à définir ultérieurement')+'</div>'+
+        '<div class="player">🥈 <b>2e buteur :</b> '+esc(league.prize_second||'Lot à définir ultérieurement')+'</div>'+
+        '<div class="player">🥉 <b>3e buteur :</b> '+esc(league.prize_third||'Lot à définir ultérieurement')+'</div></div>'
+      : '';
+
     $('#publicView').innerHTML=
       '<header class="top"><h1>🏁 '+esc(league.name)+'</h1><div class="public-sub">SWÉ TOURNAMENT 5/5 • Inscription à la Ligue</div></header>'+
+      '<div class="card"><h2 class="sectiontitle">📅 Saison de la Ligue</h2><div class="player"><b>Début :</b> '+esc(league.starts_on)+'</div><div class="player"><b>Fin :</b> '+esc(league.ends_on||'Non définie')+'</div></div>'+
+      prizeHtml+
       '<div class="card"><h2 class="sectiontitle">Rejoindre la Ligue</h2><p class="muted">Cette Ligue est réservée aux membres enregistrés par l’administrateur de la communauté. Sélectionne ton nom pour t’inscrire.</p>'+
-      '<select id="publicLeaguePlayer"><option value="">Choisis ton nom</option>'+members.map(p=>'<option value="'+p.id+'">'+esc(p.name)+(confirmed.has(p.id)?' • déjà inscrit':'')+'</option>').join('')+'</select>'+
+      '<select id="publicLeaguePlayer"><option value="">Choisis ton nom</option>'+members.map(p=>'<option value="'+p.id+'">'+esc(p.name)+(confirmedIds.has(p.id)?' • déjà inscrit':'')+'</option>').join('')+'</select>'+
       '<div class="space"></div><div class="row"><button id="publicLeagueJoin" class="primary">Je rejoins la Ligue</button><button id="publicLeagueLeave">Me retirer</button></div><div id="publicLeagueStatus" class="muted" style="margin-top:8px"></div></div>'+
-      '<div class="card"><h2 class="sectiontitle">Membres inscrits</h2><div id="publicLeagueMembers">'+members.filter(p=>confirmed.has(p.id)).map(p=>'<div class="player">'+esc(p.name)+'</div>').join('')+'</div></div>';
+      '<div class="card"><h2 class="sectiontitle">👥 Membres inscrits ('+confirmedMembers.length+')</h2><div id="publicLeagueMembers">'+memberHtml+'</div></div>'+
+      '<div class="grid g2"><div class="card"><h2 class="sectiontitle">⚽ Classement des buteurs de la Ligue</h2><div>'+scorersHtml+'</div></div>'+
+      '<div class="card"><h2 class="sectiontitle">🎯 Classement des passeurs de la Ligue</h2><div>'+assistsHtml+'</div></div></div>';
+
     $('#publicLeagueJoin').onclick=async()=>{const pid=$('#publicLeaguePlayer').value;if(!pid)return $('#publicLeagueStatus').textContent='Choisis ton nom.';const {error}=await sb.rpc('public_league_registration',{p_token:token,p_league_id:league.id,p_player_id:pid,p_action:'join'});if(error)return $('#publicLeagueStatus').textContent=error.message;$('#publicLeagueStatus').textContent='🟢 Inscription à la Ligue confirmée !';setTimeout(()=>location.reload(),500);};
     $('#publicLeagueLeave').onclick=async()=>{const pid=$('#publicLeaguePlayer').value;if(!pid)return $('#publicLeagueStatus').textContent='Choisis ton nom.';const {error}=await sb.rpc('public_league_registration',{p_token:token,p_league_id:league.id,p_player_id:pid,p_action:'leave'});if(error)return $('#publicLeagueStatus').textContent=error.message;$('#publicLeagueStatus').textContent='Inscription retirée.';setTimeout(()=>location.reload(),500);};
     return;
