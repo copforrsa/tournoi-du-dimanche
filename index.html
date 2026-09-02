@@ -75,7 +75,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.13</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.14</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -118,7 +118,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.13</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.14</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -2518,7 +2518,8 @@ async function bootPublic(token){
 
     // Classements cumulés de la saison de CETTE Ligue uniquement.
     const leagueTournamentIds=new Set(tournaments.filter(t=>t.format==='league'&&t.league_id===league.id).map(t=>t.id));
-    const leagueMatchIds=new Set(matches.filter(m=>leagueTournamentIds.has(m.tournament_id)).map(m=>m.id));
+    const leagueMatches=matches.filter(m=>leagueTournamentIds.has(m.tournament_id)&&m.status==='finished');
+    const leagueMatchIds=new Set(leagueMatches.map(m=>m.id));
     const leagueStats=new Map(confirmedMembers.map(p=>[p.id,{id:p.id,name:p.name,g:0,a:0}]));
     goals.filter(g=>leagueMatchIds.has(g.match_id)).forEach(g=>{
       if(leagueStats.has(g.scorer_player_id))leagueStats.get(g.scorer_player_id).g++;
@@ -2539,11 +2540,21 @@ async function bootPublic(token){
     }).join('')||'<p class="muted">Aucun membre inscrit pour le moment.</p>';
 
     const prizeHtml=league.prizes_enabled
-      ? '<div class="card" style="background:linear-gradient(145deg,#fff8df,#fffdf5);border:1px solid #f4df9f"><h2 class="sectiontitle">🎁 Lots du Top 3 des buteurs</h2>'+
+      ? '<div class="card" style="background:linear-gradient(145deg,#fff8df,#fffdf5);border:1px solid #f4df9f"><h2 class="sectiontitle">🎁 Lots de la Ligue</h2>'+
+        '<div class="muted" style="margin-bottom:8px">Des lots sont prévus pour le classement des buteurs.</div>'+
         '<div class="player">🥇 <b>1er buteur :</b> '+esc(league.prize_first||'Lot à définir ultérieurement')+'</div>'+
         '<div class="player">🥈 <b>2e buteur :</b> '+esc(league.prize_second||'Lot à définir ultérieurement')+'</div>'+
         '<div class="player">🥉 <b>3e buteur :</b> '+esc(league.prize_third||'Lot à définir ultérieurement')+'</div></div>'
-      : '';
+      : '<div class="card"><h2 class="sectiontitle">🎁 Lots de la Ligue</h2><p class="muted">Aucun lot n’est prévu pour le moment. L’administrateur pourra en ajouter ultérieurement.</p></div>';
+
+    const leagueResultsHtml=leagueMatches.length
+      ? '<div class="card"><h2 class="sectiontitle">📋 Résultats de la Ligue</h2>'+
+        leagueMatches.sort((a,b)=>String(a.finished_at||'').localeCompare(String(b.finished_at||''))).map((m,i)=>{
+          const home=teams.find(t=>t.id===m.home_team_id),away=teams.find(t=>t.id===m.away_team_id);
+          const session=tournaments.find(t=>t.id===m.tournament_id);
+          return '<div class="player"><div class="muted">'+esc(session?.name||('Journée '+(i+1)))+(m.pitch?' • '+esc(m.pitch):'')+'</div><div class="row" style="justify-content:space-between;gap:8px"><span>'+esc(home?.name||'Équipe')+'</span><b>'+Number(m.home_score||0)+' - '+Number(m.away_score||0)+'</b><span>'+esc(away?.name||'Équipe')+'</span></div></div>';
+        }).join('')+'</div>'
+      : '<div class="card" style="background:#f8fbf9"><h2 class="sectiontitle">🚀 La Ligue débute</h2><p class="muted" style="line-height:1.6">Il n’y a encore aucun résultat. Les résultats de la Ligue apparaîtront ici dès les premiers matchs. Le classement du <b>meilleur buteur</b> et du <b>meilleur passeur</b> va commencer.</p></div>';
 
     $('#publicView').innerHTML=
       '<header class="top"><h1>🏁 '+esc(league.name)+'</h1><div class="public-sub">SWÉ TOURNAMENT 5/5 • Inscription à la Ligue</div></header>'+
@@ -2554,6 +2565,7 @@ async function bootPublic(token){
       '<div class="space"></div><div class="row"><button id="publicLeagueJoin" class="primary">Je rejoins la Ligue</button><button id="publicLeagueLeave">Me retirer</button></div><div id="publicLeagueStatus" class="muted" style="margin-top:8px"></div>'+
       '<div class="player" style="margin-top:14px;background:#f8fbf9"><b>🆕 Première fois avec le groupe ?</b><div class="muted" style="margin:5px 0 8px">Entre ton nom pour t’inscrire à cette Ligue. Tu pourras te réinscrire pendant toute la saison si tu t’es retiré.</div><input id="publicNewLeaguePlayerName" maxlength="60" placeholder="Ton prénom / nom"><div class="space"></div><button id="publicNewLeagueJoin" class="primary">M’inscrire pour cette Ligue</button><div id="publicNewLeagueStatus" class="muted" style="margin-top:8px"></div></div></div>'+
       '<div class="card"><h2 class="sectiontitle">👥 Membres inscrits ('+confirmedMembers.length+')</h2><div id="publicLeagueMembers">'+memberHtml+'</div></div>'+
+      leagueResultsHtml+
       '<div class="grid g2"><div class="card"><h2 class="sectiontitle">⚽ Classement des buteurs de la Ligue</h2><div>'+scorersHtml+'</div></div>'+
       '<div class="card"><h2 class="sectiontitle">🎯 Classement des passeurs de la Ligue</h2><div>'+assistsHtml+'</div></div></div>';
 
