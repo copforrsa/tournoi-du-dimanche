@@ -59,7 +59,13 @@ select{background-color:#fff} textarea{resize:vertical}
   .app{padding-left:224px;padding-bottom:28px}.tabs{left:max(20px,calc(50% - 590px));top:18px;bottom:18px;transform:none;width:190px;height:auto;display:flex;flex-direction:column;justify-content:flex-start;border-radius:22px;padding:18px 10px;background:#071b12}.tabs:before{content:"SWÉ TOURNAMENT 5/5";display:block;color:#fff;font-weight:900;font-size:14px;line-height:1.2;padding:4px 8px 18px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:8px}.tabs button{flex-direction:row;justify-content:flex-start;gap:10px;padding:10px 12px;font-size:13px;min-height:46px}.tabs button:before{font-size:17px;width:22px;text-align:center}.top{margin-top:0}.card{padding:19px 20px}
 }
 @media(max-width:650px){
-  body{background:#f3f7f4}.app{padding:0 12px 94px}.top{border-radius:0 0 24px 24px;margin:0 -12px 14px;padding:18px 16px 20px}.top h1{font-size:21px}.card{border-radius:17px;padding:14px;margin:10px 0}.g2,.g3{grid-template-columns:1fr}.sectiontitle{font-size:17px}.tabs{width:100%;border-radius:18px 18px 0 0;grid-template-columns:repeat(auto-fit,minmax(50px,1fr));padding-left:4px;padding-right:4px}.tabs button{font-size:9.5px}.score{font-size:23px;min-width:78px}.match>.row{display:grid!important;grid-template-columns:1fr auto 1fr;gap:6px}.match>.row>b:last-child{text-align:right}.match button{min-height:48px}.match .row.small{display:flex!important}.rank{grid-template-columns:36px 1fr 76px}.auth{margin:0 auto}.auth .top{margin-top:0}
+  body{background:#f3f7f4}.app{padding:0 12px 100px}.top{border-radius:0 0 24px 24px;margin:0 -12px 14px;padding:18px 16px 20px}.top h1{font-size:21px}.card{border-radius:17px;padding:14px;margin:10px 0}.g2,.g3{grid-template-columns:1fr}.sectiontitle{font-size:17px}
+  /* V39.33 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
+  .tabs{left:0;right:0;transform:none;width:100%;display:flex;grid-template-columns:none;justify-content:flex-start;gap:5px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;border-radius:18px 18px 0 0;padding:7px 10px calc(7px + env(safe-area-inset-bottom));scroll-snap-type:x proximity;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tabs button{flex:0 0 74px;min-width:74px;font-size:10px;scroll-snap-align:center;padding:5px 6px}
+  .tabs button.active{flex-basis:82px}
+  .score{font-size:23px;min-width:78px}.match>.row{display:grid!important;grid-template-columns:1fr auto 1fr;gap:6px}.match>.row>b:last-child{text-align:right}.match button{min-height:48px}.match .row.small{display:flex!important}.rank{grid-template-columns:36px 1fr 76px}.auth{margin:0 auto}.auth .top{margin-top:0}
 }
 
 #publicTeams{display:flex;gap:12px;overflow-x:auto;align-items:stretch;padding:4px 2px 10px;scroll-snap-type:x proximity}
@@ -75,7 +81,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.31</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.33</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -118,7 +124,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.31</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.33</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -326,7 +332,7 @@ select{background-color:#fff} textarea{resize:vertical}
         </div>
       </div>
       <div class="card" id="tournamentAdminCard">
-        <h2 class="sectiontitle">Créer un tournoi</h2>
+        <h2 class="sectiontitle">Créer un tournoi</h2><p class="muted">Pour chaque nouveau tournoi, renseigne obligatoirement le complexe, 1 à 3 terrains réservés, l’heure de réservation et le prix par participant. Ces informations pourront ensuite être modifiées tant que le tournoi est en cours.</p>
         <div class="grid g2"><input id="tourDate" type="date"><select id="tourFormat"><option value="classic">Classique</option><option value="king_of_pitch">Roi du terrain</option></select></div>
         <div class="space"></div><input id="tourName" placeholder="Nom facultatif"><div class="space"></div>
         <div class="player" style="background:#f8fbf9">
@@ -839,6 +845,10 @@ function setView(v){
   if(v==='matches'&&isCoorg()&&!hasTemporaryAdmin()&&!S.myPermissions.can_enter_scores)v='home';
   document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id==='view-'+v));
   document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.view===v));
+  const activeTab=document.querySelector('.tab.active');
+  if(activeTab&&window.matchMedia('(max-width:650px)').matches){
+    requestAnimationFrame(()=>activeTab.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}));
+  }
   if(v==='ranking')renderRanking();
 }
 
@@ -1965,6 +1975,104 @@ function renderTournaments(){
       saveMax.onclick=async()=>{const n=Math.max(2,Math.min(100,Number(max.value)||20));const {error}=await sb.from('tournaments').update({max_players:n}).eq('id',t.id);if(error)return toast(error.message);await loadAll();toast('Nombre de places mis à jour ✅')};
       row.append(max,saveMax,toggle);reg.appendChild(row);
 
+
+      const editDetails=document.createElement('div');
+      editDetails.style.marginTop='10px';
+      const editBtn=document.createElement('button');
+      editBtn.textContent='✏️ Modifier terrain / heure / prix';
+      const editBox=document.createElement('div');
+      editBox.className='player hidden';
+      editBox.style.marginTop='8px';
+
+      const complexSel=document.createElement('select');
+      complexSel.innerHTML='<option value="">Choisir le complexe</option>'+S.sportsComplexes.filter(c=>c.active!==false).map(c=>'<option value="'+c.id+'">'+esc(c.name)+(c.city?' • '+esc(c.city):'')+'</option>').join('');
+      complexSel.value=t.complex_id||'';
+
+      const pitchWrap=document.createElement('div');
+      pitchWrap.style.marginTop='8px';
+
+      const timeInput=document.createElement('input');
+      timeInput.type='time';
+      timeInput.value=t.start_time?String(t.start_time).slice(0,5):'09:00';
+
+      const priceInput=document.createElement('input');
+      priceInput.type='number';
+      priceInput.min='0';
+      priceInput.step='0.50';
+      priceInput.placeholder='Prix / participant (€)';
+      priceInput.value=(Number(t.entry_fee_cents||0)/100).toFixed(2);
+
+      const refInput=document.createElement('input');
+      refInput.placeholder='Nom ou n° de réservation (facultatif)';
+      refInput.value=t.reservation_reference||'';
+
+      const renderEditPitches=()=>{
+        const selected=new Set((t.reserved_pitch_ids||[]).map(String));
+        const rows=S.sportsPitches.filter(p=>p.active!==false&&p.complex_id===complexSel.value);
+        pitchWrap.innerHTML='<div class="muted" style="margin-bottom:6px"><b>Terrains réservés</b> • 1 à 3 terrains</div>'+
+          (rows.length?rows.map(p=>'<label class="player row" style="justify-content:flex-start"><input class="editTourPitchCheck" type="checkbox" value="'+p.id+'" style="width:auto" '+(selected.has(String(p.id))?'checked':'')+'><span>'+esc(p.name)+'</span></label>').join(''):'<div class="muted">Aucun terrain disponible pour ce complexe.</div>');
+        pitchWrap.querySelectorAll('.editTourPitchCheck').forEach(cb=>{
+          cb.onchange=()=>{
+            const checked=[...pitchWrap.querySelectorAll('.editTourPitchCheck:checked')];
+            if(checked.length>3){cb.checked=false;toast('Maximum 3 terrains pour un tournoi.');}
+          };
+        });
+      };
+      complexSel.onchange=()=>{
+        t={...t,complex_id:complexSel.value,reserved_pitch_ids:[]};
+        renderEditPitches();
+      };
+      renderEditPitches();
+
+      const saveDetails=document.createElement('button');
+      saveDetails.className='primary';
+      saveDetails.textContent='💾 Enregistrer les modifications';
+
+      editBox.innerHTML='<div class="muted" style="margin-bottom:8px"><b>Modifier les informations de réservation de ce tournoi.</b></div>';
+      editBox.append(complexSel,pitchWrap);
+      const detailsGrid=document.createElement('div');
+      detailsGrid.className='grid g3';
+      detailsGrid.style.marginTop='8px';
+      detailsGrid.append(timeInput,priceInput,refInput);
+      editBox.appendChild(detailsGrid);
+      editBox.appendChild(saveDetails);
+
+      editBtn.onclick=()=>editBox.classList.toggle('hidden');
+      saveDetails.onclick=async()=>{
+        const complexId=complexSel.value;
+        const pitchIds=[...pitchWrap.querySelectorAll('.editTourPitchCheck:checked')].map(x=>x.value);
+        const startTime=timeInput.value;
+        const price=Number(priceInput.value);
+        if(!complexId)return toast('Choisis le complexe sportif.');
+        if(!pitchIds.length)return toast('Choisis au moins 1 terrain réservé.');
+        if(pitchIds.length>3)return toast('Maximum 3 terrains pour un tournoi.');
+        if(!startTime)return toast('Indique l’heure de réservation.');
+        if(!Number.isFinite(price)||price<0)return toast('Indique un prix valide.');
+        const complex=S.sportsComplexes.find(c=>c.id===complexId);
+        const selectedPitches=S.sportsPitches.filter(p=>pitchIds.includes(String(p.id))&&p.complex_id===complexId);
+        if(selectedPitches.length!==pitchIds.length)return toast('Un terrain sélectionné est invalide.');
+        const venue=[complex?.name,selectedPitches.map(p=>p.name).join(', ')].filter(Boolean).join(' — ');
+        saveDetails.disabled=true;
+        saveDetails.textContent='Enregistrement…';
+        const {error}=await sb.from('tournaments').update({
+          complex_id:complexId,
+          reserved_pitch_ids:pitchIds,
+          venue,
+          start_time:startTime,
+          entry_fee_cents:Math.round(price*100),
+          reservation_reference:refInput.value.trim()||null
+        }).eq('id',t.id);
+        saveDetails.disabled=false;
+        saveDetails.textContent='💾 Enregistrer les modifications';
+        if(error)return toast(error.message);
+        await loadAll();
+        setView('tournaments');
+        toast('Terrain(s), heure et prix du tournoi modifiés ✅');
+      };
+
+      editDetails.append(editBtn,editBox);
+      reg.appendChild(editDetails);
+
       const publicUrl=registrationLink(t);
       const shareBox=document.createElement('div');shareBox.style.marginTop='10px';
       shareBox.innerHTML='<div class="muted" style="margin-bottom:6px"><b>🔗 Lien unique de ce tournoi</b></div>';
@@ -2718,7 +2826,7 @@ async function renderLeague(){
   }
 
 
-  // V39.31 — Saisie du résultat directement depuis l'onglet Ligue.
+  // V39.33 — Saisie du résultat directement depuis l'onglet Ligue.
   const scoringCard=$('#leagueScoringCard'),scoringBody=$('#leagueScoringBody'),scoringLabel=$('#leagueScoringSessionLabel');
   if(scoringCard)scoringCard.classList.toggle('hidden',!canScoreLeague);
   if(canScoreLeague&&scoringBody){
@@ -3809,7 +3917,7 @@ async function bootPublic(token){
   const pmap=new Map(players.map(x=>[x.id,x]));
   const tmap=new Map(teams.map(x=>[x.id,x]));
 
-  // V39.31 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
+  // V39.33 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
   if(wantsLeagueSession&&regTour){
     const linkedLeague=leagues.find(l=>l.id===regTour.league_id)||null;
     const linkLeagueId=publicParams.get('league');
