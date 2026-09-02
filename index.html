@@ -97,7 +97,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:700">V36.3</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:700">V36.4</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -317,7 +317,7 @@ window.addEventListener('error', (e) => {
   if(t){t.textContent='Erreur de chargement de l’application. Recharge la page.';t.style.display='block';}
 });
 
-const S={session:null,workspace:null,members:[],invites:[],players:[],seasons:[],tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},publicMode:false,publicToken:null};
+const S={session:null,workspace:null,members:[],invites:[],players:[],contacts:[],seasons:[],tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},publicMode:false,publicToken:null};
 
 let safeSyncTimer=null;
 let safeSyncBusy=false;
@@ -468,6 +468,7 @@ async function loadAll(){
   r=await sb.from('workspace_members').select('user_id,role').eq('workspace_id',w);S.members=r.data||[];
   if(isAdmin()){r=await sb.from('workspace_invites').select('id,email,role,accepted_at,created_at').eq('workspace_id',w).order('created_at',{ascending:false});S.invites=r.data||[]}else S.invites=[];
   r=await sb.from('players').select('*').eq('workspace_id',w).order('name');S.players=r.data||[];
+  if(isAdmin()){r=await sb.from('player_private_contacts').select('player_id,phone_number').eq('workspace_id',w);S.contacts=r.data||[]}else S.contacts=[];
   r=await sb.from('seasons').select('*').eq('workspace_id',w).order('starts_on',{ascending:false});S.seasons=r.data||[];
   r=await sb.from('tournaments').select('*').eq('workspace_id',w).order('tournament_date',{ascending:false});S.tournaments=r.data||[];
   if(!S.activeTour){const next=S.tournaments.find(t=>t.status!=='finished');S.activeTour=next?next.id:null;}
@@ -618,6 +619,19 @@ function renderPlayers(){
     const level=document.createElement('select');level.style.flex='1';
     level.innerHTML='<option value="1">Niveau 1 — Loisir</option><option value="2">Niveau 2 — Intermédiaire</option><option value="3">Niveau 3 — Bon</option><option value="4">Niveau 4 — Très bon</option>';
     level.value=String(x.skill_level||2);
+
+    const phone=document.createElement('input');phone.type='tel';phone.inputMode='tel';phone.placeholder='Mobile (privé admin)';
+    phone.style.flex='1';phone.value=(S.contacts.find(c=>c.player_id===x.id)?.phone_number)||'';
+    phone.onchange=async()=>{
+      const value=phone.value.trim();
+      phone.disabled=true;
+      const {error}=await sb.from('player_private_contacts').upsert({player_id:x.id,workspace_id:S.workspace.id,phone_number:value||null},{onConflict:'player_id'});
+      phone.disabled=false;
+      if(error)return toast(error.message);
+      const found=S.contacts.find(c=>c.player_id===x.id);
+      if(found)found.phone_number=value||null;else S.contacts.push({player_id:x.id,phone_number:value||null});
+      toast('Numéro de '+x.name+' enregistré 🔒');
+    };
     level.title='Le niveau est enregistré automatiquement';
     level.onchange=async()=>{
       const newLevel=Number(level.value);
@@ -645,7 +659,7 @@ function renderPlayers(){
       const fresh=await sb.from('players').select('*').eq('workspace_id',S.workspace.id).order('name');
       S.players=fresh.data||S.players;renderAll();toast('Statut du joueur mis à jour ✅');
     };
-    edit.append(status,host,level,save);d.appendChild(edit);
+    edit.append(status,host,level,phone,save);d.appendChild(edit);
     }
     box.appendChild(d);
   })
@@ -1353,6 +1367,56 @@ async function bootPublic(token){
   let players=P.players||[],seasons=P.seasons||[],tournaments=(P.tournaments||[]).sort((a,b)=>String(b.tournament_date).localeCompare(String(a.tournament_date)));
   let teams=P.teams||[],teamPlayers=P.team_players||[],matches=P.matches||[],goals=P.goals||[];
   let registrations=P.tournament_players||[];
+  const historyId=new URLSearchParams(location.search).get('history');
+  if(historyId){
+    const ht=tournaments.find(x=>x.id===historyId);
+    if(!ht){
+      $('#publicView').innerHTML='<header class="top"><h1>⚽ Tournoi du Dimanche</h1></header><div class="card"><p>Tournoi introuvable.</p><button id="backPublic">← Retour</button></div>';
+      $('#backPublic').onclick=()=>location.href=APP_URL+'?public='+encodeURIComponent(token);
+      return;
+    }
+    const tteams=teams.filter(x=>x.tournament_id===ht.id);
+    const tmatches=matches.filter(x=>x.tournament_id===ht.id).sort((a,b)=>(a.match_order||0)-(b.match_order||0));
+    const mids=new Set(tmatches.map(m=>m.id));
+    const tgoals=goals.filter(g=>mids.has(g.match_id));
+    const tmap2=new Map(tteams.map(x=>[x.id,x.name]));
+    const pmap2=new Map(players.map(x=>[x.id,x]));
+    const standings=tteams.map(x=>({id:x.id,name:x.name,mj:0,v:0,n:0,d:0,bp:0,bc:0,pts:0}));
+    const sm=new Map(standings.map(x=>[x.id,x]));
+    tmatches.forEach(m=>{
+      const a=sm.get(m.home_team_id),z=sm.get(m.away_team_id);if(!a||!z)return;
+      a.mj++;z.mj++;a.bp+=m.home_score;a.bc+=m.away_score;z.bp+=m.away_score;z.bc+=m.home_score;
+      if(m.home_score>m.away_score){a.v++;z.d++;a.pts+=3}else if(m.away_score>m.home_score){z.v++;a.d++;z.pts+=3}else{a.n++;z.n++;a.pts++;z.pts++}
+    });
+    standings.sort((a,z)=>z.pts-a.pts||(z.bp-z.bc)-(a.bp-a.bc)||z.bp-a.bp);
+    const teamRows=standings.map((x,i)=>'<div class="rank"><b>'+(i+1)+'</b><span>'+esc(x.name)+' <span class="muted">('+x.mj+' MJ • '+(x.bp-x.bc>=0?'+':'')+(x.bp-x.bc)+')</span></span><b class="right">'+x.pts+' pts</b></div>').join('');
+    const stats=new Map(players.map(x=>[x.id,{id:x.id,name:x.name,g:0,a:0,guest:x.is_group_member===false,guest_of:x.guest_of_player_id}]));
+    tgoals.forEach(g=>{if(stats.has(g.scorer_player_id))stats.get(g.scorer_player_id).g++;if(g.assister_player_id&&stats.has(g.assister_player_id))stats.get(g.assister_player_id).a++});
+    let scor=[...stats.values()].filter(x=>x.g).sort((a,z)=>z.g-a.g||a.name.localeCompare(z.name));
+    let prev=null,rank=0;scor=scor.map((x,i)=>{if(x.g!==prev){rank=i+1;prev=x.g}return {...x,rank}});
+    let ass=[...stats.values()].filter(x=>x.a).sort((a,z)=>z.a-a.a||a.name.localeCompare(z.name));
+    let ap=null,ar=0;ass=ass.map((x,i)=>{if(x.a!==ap){ar=i+1;ap=x.a}return {...x,rank:ar}});
+    const scorRows=scor.map(x=>'<div class="rank '+(x.guest?'guest-row':'')+'"><b>'+x.rank+'</b><span>'+esc(x.name)+'</span><b class="right">'+x.g+' but'+(x.g>1?'s':'')+'</b></div>').join('');
+    const assRows=ass.map(x=>'<div class="rank '+(x.guest?'guest-row':'')+'"><b>'+x.rank+'</b><span>'+esc(x.name)+'</span><b class="right">'+x.a+' passe'+(x.a>1?'s':'')+'</b></div>').join('');
+    const matchRows=tmatches.map((m,i)=>{
+      const mg=tgoals.filter(g=>g.match_id===m.id);
+      const gl=mg.map(g=>{const sc=pmap2.get(g.scorer_player_id),as=g.assister_player_id?pmap2.get(g.assister_player_id):null;return '<div class="small" style="margin-top:5px">⚽ '+esc(sc?.name||'?')+(as?' <span class="muted">← passe '+esc(as.name)+'</span>':'')+'</div>'}).join('');
+      return '<div class="player"><div class="muted">Match '+(i+1)+(m.pitch?' • '+esc(m.pitch):'')+'</div><div><b>'+esc(tmap2.get(m.home_team_id)||'?')+' '+m.home_score+' - '+m.away_score+' '+esc(tmap2.get(m.away_team_id)||'?')+'</b></div>'+gl+'</div>';
+    }).join('');
+    const teamsRows=tteams.map(team=>{
+      const ids=teamPlayers.filter(tp=>tp.team_id===team.id).map(tp=>tp.player_id);
+      return '<div class="team"><b>'+esc(team.name)+'</b>'+ids.map(id=>'<div class="small" style="margin-top:6px">'+esc(pmap2.get(id)?.name||'?')+'</div>').join('')+'</div>';
+    }).join('');
+    $('#publicView').innerHTML=
+      '<header class="top"><div class="row" style="justify-content:space-between"><div><h1>⚽ '+esc(ht.name||'Tournoi du Dimanche')+'</h1><div class="public-sub">'+ht.tournament_date+' • Historique</div></div><button id="backPublic">← Retour</button></div></header>'+
+      '<div class="card"><h2 class="sectiontitle">👥 Équipes</h2>'+ (teamsRows||'<p class="muted">Aucune équipe.</p>') +'</div>'+
+      '<div class="card"><h2 class="sectiontitle">🏆 Classement final</h2>'+ (teamRows||'<p class="muted">Aucun classement.</p>') +'</div>'+
+      '<div class="card"><h2 class="sectiontitle">⚽ Buteurs</h2>'+ (scorRows||'<p class="muted">Aucun buteur.</p>') +'</div>'+
+      '<div class="card"><h2 class="sectiontitle">🎯 Passeurs</h2>'+ (assRows||'<p class="muted">Aucun passeur.</p>') +'</div>'+
+      '<div class="card"><h2 class="sectiontitle">📋 Résultats</h2>'+ (matchRows||'<p class="muted">Aucun match.</p>') +'</div>';
+    $('#backPublic').onclick=()=>location.href=APP_URL+'?public='+encodeURIComponent(token);
+    return;
+  }
   const openTours=[...tournaments].filter(t=>t.status!=='finished'&&t.registration_open).sort((a,b)=>String(a.tournament_date).localeCompare(String(b.tournament_date)));
   const regTour=openTours[0];
   const regBox=$('#publicRegistration');
@@ -1370,12 +1434,14 @@ async function bootPublic(token){
     const playerMap=new Map(players.map(x=>[x.id,x]));
     const listRows=confirmed.map((r,i)=>{
       const pl=playerMap.get(r.player_id);if(!pl)return '';
-      const guest=publicGuestLabel(pl);
-      return '<div class="player row '+(pl.is_group_member===false?'guest-row':'')+'"><b style="min-width:34px">'+(i+1)+'.</b><span style="flex:1">'+esc(pl.name)+(guest?' <span class="guest-badge">'+esc(guest)+'</span>':'')+'</span><span style="font-weight:700;color:#15803d">Confirmé</span></div>';
+      const host=r.registered_by_player_id?playerMap.get(r.registered_by_player_id):null;
+      const guest=host?('Guest de '+host.name):publicGuestLabel(pl);
+      return '<div class="player row '+(guest?'guest-row':'')+'"><b style="min-width:34px">'+(i+1)+'.</b><span style="flex:1">'+esc(pl.name)+(guest?' <span class="guest-badge">'+esc(guest)+'</span>':'')+'</span><span style="font-weight:700;color:#15803d">Confirmé</span></div>';
     }).join('');
     const waitRows=waiting.map((r,i)=>{
       const pl=playerMap.get(r.player_id);if(!pl)return '';
-      const guest=publicGuestLabel(pl);
+      const host=r.registered_by_player_id?playerMap.get(r.registered_by_player_id):null;
+      const guest=host?('Guest de '+host.name):publicGuestLabel(pl);
       return '<div class="player row guest-row"><b style="min-width:34px">'+(i+1)+'.</b><span style="flex:1">'+esc(pl.name)+(guest?' <span class="guest-badge">'+esc(guest)+'</span>':'')+'</span><span style="font-weight:700;color:#b45309">Attente</span></div>';
     }).join('');
     const count=$('#publicRegCount');if(count)count.textContent=confirmed.length+'/'+(regTour.max_players||20)+' confirmés'+(waiting.length?' • '+waiting.length+' en attente':'');
@@ -1391,7 +1457,7 @@ async function bootPublic(token){
       '<div class="player"><b>'+esc(regTour.name||('Tournoi du '+regTour.tournament_date))+'</b><div id="publicRegCount" class="muted">'+confirmed+'/'+(regTour.max_players||20)+' confirmés'+(waiting?' • '+waiting+' en attente':'')+'</div></div>'+
       '<div class="space"></div><select id="publicPlayerSelect"><option value="">Choisis ton nom</option>'+players.filter(x=>x.active&&x.is_group_member!==false).sort((a,b)=>a.name.localeCompare(b.name)).map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')+'</select>'+
       '<div class="space"></div><div class="row"><button id="publicJoin" class="primary">✅ Je participe</button><button id="publicLeave">❌ Je ne participe pas</button></div>'+
-      '<div class="player" style="margin-top:12px"><b>👤 Tu viens avec un invité ?</b><div class="muted" style="margin:4px 0 8px">Choisis d’abord ton nom ci-dessus, puis ajoute ton invité.</div><div class="row"><input id="publicGuestName" placeholder="Nom de l’invité" style="flex:1"><button id="publicAddGuest" class="primary">+ Ajouter mon invité</button></div></div>'+
+      '<div class="player" style="margin-top:12px"><b>👤 Tu viens avec un invité ?</b><div class="muted" style="margin:4px 0 8px">Choisis d’abord ton nom ci-dessus, puis ajoute ton invité.</div><div class="grid g2"><input id="publicGuestName" placeholder="Nom de l’invité"><input id="publicGuestPhone" type="tel" inputmode="tel" placeholder="Mobile (facultatif)"></div><label class="row" style="margin-top:8px;justify-content:flex-start"><input id="publicGuestMember" type="checkbox" style="width:auto"><span>Ajouter cet invité comme membre du groupe <span class="muted">(numéro requis)</span></span></label><div class="space"></div><button id="publicAddGuest" class="primary">+ Ajouter mon invité</button></div>'+
       '<div id="publicRegStatus" class="muted" style="margin-top:8px">Les places sont attribuées dans l’ordre des inscriptions.</div>'+
       '<h3 style="margin-top:18px">👥 Inscrits</h3><div id="publicRegisteredList"></div>'+
       '<div id="publicWaitWrap" class="'+(waiting?'':'hidden')+'"><h3 style="margin-top:14px">🟠 Liste d’attente</h3><div id="publicWaitList"></div></div>';
@@ -1428,11 +1494,14 @@ async function bootPublic(token){
       const guestName=$('#publicGuestName').value.trim();
       if(!host)return $('#publicRegStatus').textContent='Choisis d’abord ton nom pour rattacher ton invité.';
       if(!guestName)return $('#publicRegStatus').textContent='Entre le nom de ton invité.';
+      const phone=$('#publicGuestPhone').value.trim();
+      const addMember=$('#publicGuestMember').checked;
+      if(addMember&&!phone)return $('#publicRegStatus').textContent='Indique le numéro de mobile pour l’ajouter comme membre.';
       const b=$('#publicAddGuest');b.disabled=true;
-      const {data,error}=await sb.rpc('public_register_tournament_guest',{p_token:token,p_tournament_id:regTour.id,p_host_player_id:host,p_guest_name:guestName});
+      const {data,error}=await sb.rpc('public_register_tournament_guest',{p_token:token,p_tournament_id:regTour.id,p_host_player_id:host,p_guest_name:guestName,p_phone_number:phone||null,p_add_as_member:addMember});
       b.disabled=false;if(error)return $('#publicRegStatus').textContent=error.message;
-      $('#publicGuestName').value='';
-      $('#publicRegStatus').textContent=data?.status==='waitlist'?'🟠 Invité ajouté sur la liste d’attente.':'🟢 Invité ajouté et confirmé !';
+      $('#publicGuestName').value='';$('#publicGuestPhone').value='';$('#publicGuestMember').checked=false;
+      $('#publicRegStatus').textContent=(data?.status==='waitlist'?'🟠 Invité ajouté sur la liste d’attente.':'🟢 Invité ajouté et confirmé !')+(data?.member?' Il est aussi enregistré comme membre du groupe.':'');
       await refreshPublicRegistration();
     };
     window.setInterval(refreshPublicRegistration,8000);
@@ -1456,7 +1525,7 @@ async function bootPublic(token){
   let seasonAss=[...gs.values()].filter(x=>x.a).sort((a,b)=>b.a-a.a||b.g-a.g||a.name.localeCompare(b.name));
   let aprev=null,arank=0;seasonAss=seasonAss.map((x,i)=>{if(x.a!==aprev){arank=i+1;aprev=x.a}return {...x,rank:arank}});
   $('#publicSeasonAssists').innerHTML=seasonAss.map(x=>'<div class="rank '+(x.guest?'guest-row':'')+'"><b>'+x.rank+'</b><span>'+esc(x.name)+(x.guest?' <span class="guest-badge">Guest</span>':'')+'</span><b class="right">'+x.a+' passe'+(x.a>1?'s':'')+'</b></div>').join('')||'<p class="muted">Aucune passe enregistrée.</p>';
-  const latest=tournaments[0];
+  const latest=tournaments.find(t=>t.status==='finished')||tournaments[0];
   if(latest){
     const lteams=teams.filter(x=>x.tournament_id===latest.id);
     const lm=matches.filter(m=>m.tournament_id===latest.id).sort((a,b)=>(a.match_order||0)-(b.match_order||0));
@@ -1519,52 +1588,14 @@ async function bootPublic(token){
   }
   const pubHist=$('#publicHistory');
   pubHist.innerHTML='';
-  tournaments.forEach(t=>{
+  tournaments.filter(t=>t.status==='finished').forEach(t=>{
     const d=document.createElement('div');d.className='player row';
-    d.innerHTML='<span style="flex:1"><b>'+esc(t.name||('Tournoi du '+t.tournament_date))+'</b><div class="muted">'+t.tournament_date+' • '+(t.status==='finished'?'Terminé':'En cours')+'</div></span>';
-    const b=document.createElement('button');b.textContent='Voir';b.className='primary';
-    b.onclick=()=>{
-      const tteams=teams.filter(x=>x.tournament_id===t.id);
-      const tmatches=matches.filter(x=>x.tournament_id===t.id).sort((a,b)=>(a.match_order||0)-(b.match_order||0));
-      const mids=new Set(tmatches.map(m=>m.id));
-      const tgoals=goals.filter(g=>mids.has(g.match_id));
-      const tmap2=new Map(tteams.map(x=>[x.id,x.name]));
-      const pmap2=new Map(players.map(x=>[x.id,x]));
-
-      const standings=tteams.map(x=>({id:x.id,name:x.name,mj:0,v:0,n:0,d:0,bp:0,bc:0,pts:0}));
-      const sm=new Map(standings.map(x=>[x.id,x]));
-      tmatches.forEach(m=>{
-        const a=sm.get(m.home_team_id),z=sm.get(m.away_team_id);if(!a||!z)return;
-        a.mj++;z.mj++;a.bp+=m.home_score;a.bc+=m.away_score;z.bp+=m.away_score;z.bc+=m.home_score;
-        if(m.home_score>m.away_score){a.v++;z.d++;a.pts+=3}else if(m.away_score>m.home_score){z.v++;a.d++;z.pts+=3}else{a.n++;z.n++;a.pts++;z.pts++}
-      });
-      standings.sort((a,z)=>z.pts-a.pts||(z.bp-z.bc)-(a.bp-a.bc)||z.bp-a.bp);
-      const teamRows=standings.map((x,i)=>'<div class="rank"><b>'+(i+1)+'</b><span>'+esc(x.name)+' <span class="muted">('+x.mj+' MJ • '+(x.bp-x.bc>=0?'+':'')+(x.bp-x.bc)+')</span></span><b class="right">'+x.pts+' pts</b></div>').join('');
-
-      const stats=new Map(players.map(x=>[x.id,{id:x.id,name:x.name,g:0,a:0,guest:x.is_group_member===false,guest_of:x.guest_of_player_id}]));
-      tgoals.forEach(g=>{if(stats.has(g.scorer_player_id))stats.get(g.scorer_player_id).g++;if(g.assister_player_id&&stats.has(g.assister_player_id))stats.get(g.assister_player_id).a++});
-      let scor=[...stats.values()].filter(x=>x.g).sort((a,z)=>z.g-a.g||a.name.localeCompare(z.name));
-      let prev=null,rank=0;scor=scor.map((x,i)=>{if(x.g!==prev){rank=i+1;prev=x.g}return {...x,rank}});
-      const scorRows=scor.map(x=>{const host=x.guest?pmap2.get(x.guest_of):null;return '<div class="rank '+(x.guest?'guest-row':'')+'"><b>'+x.rank+'</b><span>'+esc(x.name)+(host?' <span class="guest-badge">Guest de '+esc(host.name)+'</span>':'')+'</span><b class="right">'+x.g+' but'+(x.g>1?'s':'')+'</b></div>'}).join('');
-
-      const matchRows=tmatches.map((m,i)=>{
-        const mg=tgoals.filter(g=>g.match_id===m.id);
-        const gl=mg.map(g=>{const sc=pmap2.get(g.scorer_player_id),as=g.assister_player_id?pmap2.get(g.assister_player_id):null;return '<div class="small" style="margin-top:5px">⚽ '+esc(sc?.name||'?')+(as?' <span class="muted">← passe '+esc(as.name)+'</span>':'')+'</div>'}).join('');
-        return '<div class="player"><div class="muted">Match '+(i+1)+(m.pitch?' • '+esc(m.pitch):'')+'</div><div><b>'+esc(tmap2.get(m.home_team_id)||'?')+' '+m.home_score+' - '+m.away_score+' '+esc(tmap2.get(m.away_team_id)||'?')+'</b></div>'+gl+'</div>';
-      }).join('');
-
-      let panel=$('#publicHistoryDetail');
-      if(!panel){panel=document.createElement('div');panel.id='publicHistoryDetail';panel.className='card';pubHist.parentElement.appendChild(panel)}
-      panel.innerHTML='<div class="row" style="justify-content:space-between"><div><h2 class="sectiontitle" style="margin:0">'+esc(t.name||('Tournoi du '+t.tournament_date))+'</h2><div class="muted">'+t.tournament_date+'</div></div><button id="closePublicHistory">Fermer</button></div>'+
-        '<h3>🏆 Classement final</h3>'+(teamRows||'<p class="muted">Aucun classement.</p>')+
-        '<h3 style="margin-top:14px">⚽ Buteurs</h3>'+(scorRows||'<p class="muted">Aucun buteur.</p>')+
-        '<h3 style="margin-top:14px">📋 Matchs</h3>'+(matchRows||'<p class="muted">Aucun match.</p>');
-      $('#closePublicHistory').onclick=()=>panel.remove();
-      panel.scrollIntoView({behavior:'smooth',block:'start'});
-    };
+    d.innerHTML='<span style="flex:1"><b>'+esc(t.name||('Tournoi du '+t.tournament_date))+'</b><div class="muted">'+t.tournament_date+' • Terminé</div></span>';
+    const b=document.createElement('button');b.textContent='Voir le tournoi';b.className='primary';
+    b.onclick=()=>{location.href=APP_URL+'?public='+encodeURIComponent(token)+'&history='+encodeURIComponent(t.id)};
     d.appendChild(b);pubHist.appendChild(d);
   });
-  if(!tournaments.length)pubHist.innerHTML='<p class="muted">Aucun tournoi.</p>';
+  if(!tournaments.some(t=>t.status==='finished'))pubHist.innerHTML='<p class="muted">Aucun tournoi terminé.</p>';
 }
 authState();
 </script>
