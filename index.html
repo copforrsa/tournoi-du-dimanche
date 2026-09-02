@@ -67,7 +67,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V37.0</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V37.1</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -110,7 +110,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:700">V37.0</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:700">V37.1</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -1694,6 +1694,7 @@ async function bootPublic(token){
       '<div class="space"></div><input id="publicTeamCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="Ton code équipe à 6 chiffres">'+
       '<div class="space"></div><input id="publicTeamName" maxlength="30" placeholder="Nom de ton équipe">'+
       '<div id="publicTeamMateBox" style="margin-top:12px"><p class="muted">Sélectionne d’abord ton nom.</p></div>'+
+      '<div class="player" style="margin-top:12px"><b>👥 Ajouter des invités</b><div class="muted" style="margin:4px 0 8px">Tu peux compléter ton équipe avec des membres du groupe et/ou jusqu’à 4 invités. Équipe limitée à 5 joueurs avec toi compris.</div><div id="publicTeamGuests"><input data-team-guest placeholder="Nom de l’invité 1"></div><div class="row" style="margin-top:8px"><button id="publicAddTeamGuest" type="button">+ Ajouter un invité</button></div></div>'+
       '<div class="space"></div><button id="publicCreateTeam" class="primary">🧩 Créer mon équipe</button>'+
       '<div id="publicTeamStatus" class="muted" style="margin-top:8px"></div>';
 
@@ -1710,10 +1711,22 @@ async function bootPublic(token){
         (available.map(pl=>'<label class="row" style="justify-content:flex-start;margin:5px 0"><input type="checkbox" data-team-mate="'+pl.id+'" style="width:auto"><span>'+esc(pl.name)+'</span></label>').join('')||'<p class="muted">Aucun autre joueur disponible.</p>');
       mateBox.querySelectorAll('[data-team-mate]').forEach(cb=>cb.onchange=()=>{
         const checked=[...mateBox.querySelectorAll('[data-team-mate]:checked')];
-        if(checked.length>4){cb.checked=false;toast('Maximum 4 coéquipiers + toi.')}
+        const guestCount=[...document.querySelectorAll('#publicTeamGuests [data-team-guest]')].map(x=>x.value.trim()).filter(Boolean).length;
+        if(checked.length+guestCount>4){cb.checked=false;toast('Maximum 4 coéquipiers au total avec toi.')}
       });
     }
     creatorSel.onchange=renderMates;
+    const guestsBox=$('#publicTeamGuests');
+    $('#publicAddTeamGuest').onclick=()=>{
+      const fields=[...guestsBox.querySelectorAll('[data-team-guest]')];
+      const mateCount=[...mateBox.querySelectorAll('[data-team-mate]:checked')].length;
+      if(fields.length+mateCount>=4)return toast('Maximum 4 coéquipiers au total avec toi.');
+      const input=document.createElement('input');
+      input.setAttribute('data-team-guest','');
+      input.placeholder='Nom de l’invité '+(fields.length+1);
+      input.style.marginTop='8px';
+      guestsBox.appendChild(input);
+    };
     $('#publicCreateTeam').onclick=async()=>{
       const creator=creatorSel.value;
       const code=$('#publicTeamCode').value.trim();
@@ -1723,9 +1736,11 @@ async function bootPublic(token){
       if(!code)return status.textContent='Entre ton code équipe personnel.';
       if(!name)return status.textContent='Donne un nom à ton équipe.';
       const mates=[...mateBox.querySelectorAll('[data-team-mate]:checked')].map(x=>x.dataset.teamMate);
+      const guests=[...guestsBox.querySelectorAll('[data-team-guest]')].map(x=>x.value.trim()).filter(Boolean);
+      if(mates.length+guests.length>4)return status.textContent='Tu peux choisir au maximum 4 coéquipiers au total avec toi.';
       const btn=$('#publicCreateTeam');btn.disabled=true;
       const {data,error}=await sb.rpc('public_create_team_with_member_code',{
-        p_token:token,p_tournament_id:regTour.id,p_player_id:creator,p_code:code,p_team_name:name,p_player_ids:mates
+        p_token:token,p_tournament_id:regTour.id,p_player_id:creator,p_code:code,p_team_name:name,p_player_ids:mates,p_guest_names:guests
       });
       btn.disabled=false;
       if(error)return status.textContent=error.message;
