@@ -53,13 +53,13 @@ select{background-color:#fff} textarea{resize:vertical}
 #matchesList .match .grid.g3{margin-top:12px}#matchesList .match .grid.g3 select{min-height:52px}#matchesList .match .primary{min-width:108px}
 #tournamentList .player,#playersList .player,#teamList .team{padding:14px}
 #shareWhatsapp{background:#19a853;color:#fff}
-.tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:40;width:min(760px,calc(100% - 20px));display:grid;grid-template-columns:repeat(6,1fr);gap:3px;background:rgba(7,27,18,.96);border:1px solid rgba(255,255,255,.08);border-radius:20px 20px 0 0;padding:7px 7px calc(7px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(7,27,18,.22);backdrop-filter:blur(14px)}
-.tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:51px;background:transparent;color:#b9cabf;border:0;font-size:10px;padding:5px 4px;border-radius:13px}.tabs button:before{font-size:19px;line-height:1}.tabs button[data-view="home"]:before{content:"⌂"}.tabs button[data-view="players"]:before{content:"♟"}.tabs button[data-view="tournaments"]:before{content:"▣"}.tabs button[data-view="teams"]:before{content:"♙"}.tabs button[data-view="matches"]:before{content:"⚽"}.tabs button[data-view="ranking"]:before{content:"★"}.tabs button.active{background:linear-gradient(135deg,#17803d,#22a34a);color:#fff;box-shadow:0 5px 12px rgba(25,152,67,.26)}
+.tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:40;width:min(760px,calc(100% - 20px));display:grid;grid-template-columns:repeat(auto-fit,minmax(72px,1fr));gap:3px;background:rgba(7,27,18,.96);border:1px solid rgba(255,255,255,.08);border-radius:20px 20px 0 0;padding:7px 7px calc(7px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(7,27,18,.22);backdrop-filter:blur(14px)}
+.tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:51px;background:transparent;color:#b9cabf;border:0;font-size:10px;padding:5px 4px;border-radius:13px}.tabs button:before{font-size:19px;line-height:1}.tabs button[data-view="home"]:before{content:"⌂"}.tabs button[data-view="players"]:before{content:"♟"}.tabs button[data-view="permissions"]:before{content:"🔐"}.tabs button[data-view="tournaments"]:before{content:"▣"}.tabs button[data-view="teams"]:before{content:"♙"}.tabs button[data-view="matches"]:before{content:"⚽"}.tabs button[data-view="ranking"]:before{content:"★"}.tabs button.active{background:linear-gradient(135deg,#17803d,#22a34a);color:#fff;box-shadow:0 5px 12px rgba(25,152,67,.26)}
 @media(min-width:900px){
   .app{padding-left:224px;padding-bottom:28px}.tabs{left:max(20px,calc(50% - 590px));top:18px;bottom:18px;transform:none;width:190px;height:auto;display:flex;flex-direction:column;justify-content:flex-start;border-radius:22px;padding:18px 10px;background:#071b12}.tabs:before{content:"TOURNOI DU DIMANCHE";display:block;color:#fff;font-weight:900;font-size:14px;line-height:1.2;padding:4px 8px 18px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:8px}.tabs button{flex-direction:row;justify-content:flex-start;gap:10px;padding:10px 12px;font-size:13px;min-height:46px}.tabs button:before{font-size:17px;width:22px;text-align:center}.top{margin-top:0}.card{padding:19px 20px}
 }
 @media(max-width:650px){
-  body{background:#f3f7f4}.app{padding:0 12px 94px}.top{border-radius:0 0 24px 24px;margin:0 -12px 14px;padding:18px 16px 20px}.top h1{font-size:21px}.card{border-radius:17px;padding:14px;margin:10px 0}.g2,.g3{grid-template-columns:1fr}.sectiontitle{font-size:17px}.tabs{width:100%;border-radius:18px 18px 0 0;grid-template-columns:repeat(6,1fr);padding-left:4px;padding-right:4px}.tabs button{font-size:9.5px}.score{font-size:23px;min-width:78px}.match>.row{display:grid!important;grid-template-columns:1fr auto 1fr;gap:6px}.match>.row>b:last-child{text-align:right}.match button{min-height:48px}.match .row.small{display:flex!important}.rank{grid-template-columns:36px 1fr 76px}.auth{margin:0 auto}.auth .top{margin-top:0}
+  body{background:#f3f7f4}.app{padding:0 12px 94px}.top{border-radius:0 0 24px 24px;margin:0 -12px 14px;padding:18px 16px 20px}.top h1{font-size:21px}.card{border-radius:17px;padding:14px;margin:10px 0}.g2,.g3{grid-template-columns:1fr}.sectiontitle{font-size:17px}.tabs{width:100%;border-radius:18px 18px 0 0;grid-template-columns:repeat(auto-fit,minmax(50px,1fr));padding-left:4px;padding-right:4px}.tabs button{font-size:9.5px}.score{font-size:23px;min-width:78px}.match>.row{display:grid!important;grid-template-columns:1fr auto 1fr;gap:6px}.match>.row>b:last-child{text-align:right}.match button{min-height:48px}.match .row.small{display:flex!important}.rank{grid-template-columns:36px 1fr 76px}.auth{margin:0 auto}.auth .top{margin-top:0}
 }
 </style>
 </head>
@@ -67,7 +67,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V37.4</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V37.5</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -110,7 +110,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:700">V37.4</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:700">V37.5</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -179,6 +179,14 @@ select{background-color:#fff} textarea{resize:vertical}
         <p class="muted">Un Guest reste dans les statistiques mais sera grisé dans les classements. Tu peux aussi préciser de quel membre il est l’invité.</p>
       </div>
       <div class="card"><div class="muted" style="margin-bottom:8px">💡 Le niveau est enregistré automatiquement dès que tu le modifies.</div><div id="playersList"></div></div>
+    </div>
+
+    <div id="view-permissions" class="view">
+      <div class="card">
+        <h2 class="sectiontitle">🔐 Autorisations des co-organisateurs</h2>
+        <p class="muted">Définis précisément ce que chaque co-organisateur peut faire. Les autorisations s’appliquent immédiatement et sont contrôlées côté serveur.</p>
+        <div id="permissionsList"></div>
+      </div>
     </div>
 
     <div id="view-tournaments" class="view">
@@ -259,6 +267,7 @@ select{background-color:#fff} textarea{resize:vertical}
     <nav class="tabs">
       <button class="tab active" data-view="home">Accueil</button>
       <button class="tab" data-view="players">Joueurs</button>
+      <button class="tab admin-permissions-tab" data-view="permissions">Autorisations</button>
       <button class="tab" data-view="tournaments">Tournois</button>
       <button class="tab" data-view="teams">Équipes</button>
       <button class="tab" data-view="matches">Matchs</button>
@@ -377,7 +386,7 @@ window.addEventListener('error', (e) => {
   if(t){t.textContent='Erreur de chargement de l’application. Recharge la page.';t.style.display='block';}
 });
 
-const S={session:null,workspace:null,members:[],coorgs:[],coorgCount:0,invites:[],players:[],contacts:[],skillReviews:[],teamCodes:[],seasons:[],tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},publicMode:false,publicToken:null};
+const S={session:null,workspace:null,members:[],coorgs:[],coorgCount:0,myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false},lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],teamCodes:[],seasons:[],tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},publicMode:false,publicToken:null};
 
 let safeSyncTimer=null;
 let safeSyncBusy=false;
@@ -424,16 +433,19 @@ const inviteIdFromUrl=urlParams.get('invite');
 const inviteEmailFromUrl=(urlParams.get('email')||'').trim().toLowerCase();
 function isAdmin(){return S.workspace?.role==='admin'}
 function isCoorg(){return S.workspace?.role==='coorganizer'}
-function canEditCurrentMatches(){const t=currentTour();return !!t && t.status!=='finished' && (isAdmin()||isCoorg())}
+function canEditCurrentMatches(){const t=currentTour();return !!t && t.status!=='finished' && (isAdmin()||(isCoorg()&&S.myPermissions.can_enter_scores))}
 function applyPermissions(){
   const admin=isAdmin();
   const coorg=isCoorg();
   ['#seasonAdminCard','#tournamentAdminCard','#attendanceAdminCard','#teamsAdminCard','#matchCreateAdminCard'].forEach(sel=>{
     const el=$(sel);if(el)el.classList.toggle('hidden',!admin);
   });
+  document.querySelectorAll('.admin-permissions-tab').forEach(el=>el.classList.toggle('hidden',!admin));
   const access=$('#adminAccessCard');if(access)access.classList.toggle('hidden',!(admin||coorg));
-  const inviteControls=$('#adminInviteControls');if(inviteControls)inviteControls.classList.toggle('hidden',!admin);
+  const inviteControls=$('#adminInviteControls');if(inviteControls)inviteControls.classList.toggle('hidden',!(admin||(coorg&&S.myPermissions.can_invite_coorganizers)));
   const accessLegend=$('#adminAccessLegend');if(accessLegend)accessLegend.classList.toggle('hidden',!admin);
+  const playerAddCard=$('#playersInput')?.closest('.card');
+  if(playerAddCard)playerAddCard.classList.toggle('hidden',coorg&&!S.myPermissions.can_add_members);
   document.querySelectorAll('[data-go="tournaments"]').forEach(b=>{b.textContent=admin?'📅 Nouveau tournoi':'📅 Tournois / historique'});
   document.querySelectorAll('[data-go="players"]').forEach(b=>{b.textContent=admin?'👥 Gérer les joueurs':'👥 Joueurs et avis'});
 }
@@ -562,8 +574,14 @@ async function loadAll(){
   r=await sb.from('workspace_members').select('user_id,role,active').eq('workspace_id',w);S.members=r.data||[];
   r=await sb.rpc('get_workspace_coorganizer_count',{p_workspace_id:w});S.coorgCount=Number(r.data||0);
   if(isAdmin()){
+    S.myPermissions={can_invite_coorganizers:true,can_enter_scores:true,can_add_members:true,can_delete_members:true};
     r=await sb.from('workspace_invites').select('id,email,role,accepted_at,created_at').eq('workspace_id',w).order('created_at',{ascending:false});S.invites=r.data||[];
-    r=await sb.rpc('get_workspace_coorganizers',{p_workspace_id:w});S.coorgs=r.data||[];
+    r=await sb.rpc('admin_get_coorganizer_permissions',{p_workspace_id:w});S.coorgs=r.data||[];
+  }else if(isCoorg()){
+    S.invites=[];S.coorgs=[];
+    r=await sb.rpc('get_my_coorganizer_permissions',{p_workspace_id:w});
+    const mp=Array.isArray(r.data)?r.data[0]:r.data;
+    S.myPermissions=mp||{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false};
   }else{S.invites=[];S.coorgs=[];}
   if(isAdmin()){
     r=await sb.rpc('get_admin_workspace_players',{p_workspace_id:w});S.players=r.data||[];
@@ -619,7 +637,19 @@ function coorgInviteMessage(inv){
 function renderAccess(){
   const box=$('#memberList');if(!box)return;
   if(isCoorg()){
-    box.innerHTML='<div class="player"><b>👥 Co-organisateurs</b><div class="muted" style="margin-top:5px">Il y a actuellement <b>'+S.coorgCount+'</b> co-organisateur'+(S.coorgCount>1?'s':'')+' dans l’espace. Seul l’administrateur peut inviter, suspendre ou supprimer un co-organisateur.</div></div>';
+    box.innerHTML='<div class="player"><b>👥 Co-organisateurs</b><div class="muted" style="margin-top:5px">Il y a actuellement <b>'+S.coorgCount+'</b> co-organisateur'+(S.coorgCount>1?'s':'')+' dans l’espace.'+(S.myPermissions.can_invite_coorganizers?' Tu es autorisé à envoyer des invitations.':' Seul un utilisateur autorisé par l’administrateur peut envoyer une invitation.')+'</div></div>';
+    if(S.lastCreatedInvite&&S.myPermissions.can_invite_coorganizers){
+      const i=S.lastCreatedInvite;
+      const d=document.createElement('div');d.className='player';
+      d.innerHTML='<b>Dernière invitation créée : '+esc(i.email||'')+'</b><div class="muted" style="margin-top:4px">Envoie ce lien à la personne concernée.</div>';
+      const row=document.createElement('div');row.className='row';row.style.marginTop='8px';
+      const copy=document.createElement('button');copy.textContent='🔗 Copier le lien';
+      const wa=document.createElement('button');wa.textContent='📲 WhatsApp';wa.className='primary';
+      const inv={id:i.id,email:i.email};
+      copy.onclick=async()=>{try{await navigator.clipboard.writeText(coorgInviteLink(inv));toast('Lien copié ✅')}catch(e){toast('Copie impossible.')}};
+      wa.onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent(coorgInviteMessage(inv)),'_blank','noopener');
+      row.append(copy,wa);d.appendChild(row);box.appendChild(d);
+    }
     return;
   }
   if(!isAdmin())return;
@@ -678,9 +708,45 @@ function renderAccess(){
 
   if(!S.coorgs.length&&!pending.length)box.innerHTML+='<div class="muted">Aucun co-organisateur pour le moment.</div>';
 }
+function renderPermissions(){
+  const box=$('#permissionsList');if(!box)return;
+  if(!isAdmin()){box.innerHTML='';return}
+  if(!S.coorgs.length){box.innerHTML='<p class="muted">Aucun co-organisateur à paramétrer.</p>';return}
+  box.innerHTML='';
+  const defs=[
+    ['can_invite_coorganizers','Inviter des co-organisateurs','Peut créer et partager une invitation.'],
+    ['can_enter_scores','Saisir les scores pendant les matchs','Peut modifier les scores et ajouter/annuler des buts pendant un tournoi en cours.'],
+    ['can_add_members','Ajouter des membres','Peut ajouter de nouveaux joueurs à la liste.'],
+    ['can_delete_members','Supprimer des membres','Peut retirer un joueur. Si le joueur possède déjà des statistiques, son historique est conservé et le joueur est désactivé.']
+  ];
+  S.coorgs.forEach(c=>{
+    const card=document.createElement('div');card.className='player';card.style.marginBottom='12px';
+    card.innerHTML='<div class="row"><span style="flex:1"><b>'+esc(c.email||'Co-organisateur')+'</b><div class="muted">'+(c.active?'🟢 Actif':'⏸️ Suspendu')+'</div></span></div>';
+    defs.forEach(([key,label,help])=>{
+      const row=document.createElement('label');row.className='row';row.style.justifyContent='flex-start';row.style.alignItems='flex-start';row.style.marginTop='10px';
+      const cb=document.createElement('input');cb.type='checkbox';cb.style.width='auto';cb.checked=!!c[key];cb.dataset.perm=key;
+      const txt=document.createElement('span');txt.style.flex='1';txt.innerHTML='<b>'+label+'</b><div class="muted">'+help+'</div>';
+      row.append(cb,txt);card.appendChild(row);
+    });
+    const save=document.createElement('button');save.className='primary';save.style.marginTop='12px';save.textContent='Enregistrer les autorisations';
+    save.onclick=async()=>{
+      const vals={};card.querySelectorAll('[data-perm]').forEach(cb=>vals[cb.dataset.perm]=cb.checked);
+      save.disabled=true;
+      const {error}=await sb.rpc('admin_set_coorganizer_permissions',{
+        p_workspace_id:S.workspace.id,p_user_id:c.user_id,
+        p_can_invite:!!vals.can_invite_coorganizers,p_can_scores:!!vals.can_enter_scores,
+        p_can_add:!!vals.can_add_members,p_can_delete:!!vals.can_delete_members
+      });
+      save.disabled=false;if(error)return toast(error.message);
+      Object.assign(c,vals);toast('Autorisations mises à jour ✅');
+    };
+    card.appendChild(save);box.appendChild(card);
+  });
+}
 function renderAll(){
   renderHome();
   renderPlayers();
+  renderPermissions();
   renderTournaments();
   renderTeams();
   renderMatches();
@@ -709,15 +775,16 @@ function renderHome(){
   }
 }
 $('#sendInvite').onclick=async()=>{
-  if(!S.workspace||S.workspace.role!=='admin')return toast('Seul l’administrateur peut inviter.');
-  const active=S.coorgs.filter(x=>x.active).length;
-  const pending=S.invites.filter(x=>!x.accepted_at).length;
-  if(active+pending>=3)return toast('Maximum de 3 co-organisateurs / invitations atteint.');
+  if(!S.workspace)return;
+  if(!(isAdmin()||(isCoorg()&&S.myPermissions.can_invite_coorganizers)))return toast('Tu n’es pas autorisé à inviter un co-organisateur.');
+  if(S.coorgCount>=3)return toast('Maximum de 3 co-organisateurs atteint.');
   const email=$('#inviteEmail').value.trim().toLowerCase();if(!email)return;
-  const {data,error}=await sb.from('workspace_invites').upsert({workspace_id:S.workspace.id,email,role:'coorganizer',invited_by:S.session.user.id},{onConflict:'workspace_id,email'}).select('id,email,role,accepted_at,created_at').single();
+  const {data,error}=await sb.rpc('create_coorganizer_invite',{p_workspace_id:S.workspace.id,p_email:email});
   if(error)return toast(error.message);
+  const inv=Array.isArray(data)?data[0]:data;
+  S.lastCreatedInvite=inv||null;
   $('#inviteEmail').value='';
-  await loadAll();
+  if(isAdmin())await loadAll();else renderAccess();
   toast('Invitation créée ✅ Utilise Copier le lien ou WhatsApp.');
 };
 $('#copyPublicLink').onclick=async()=>{
@@ -769,6 +836,16 @@ function renderPlayers(){
       const toggle=document.createElement('button');toggle.textContent=x.active?'Désactiver':'Réactiver';
       toggle.onclick=async()=>{const {error}=await sb.from('players').update({active:!x.active}).eq('id',x.id);if(error)return toast(error.message);await loadAll()};
       top.append(info,toggle);
+    }else if(isCoorg()&&S.myPermissions.can_delete_members){
+      const del=document.createElement('button');del.textContent='Supprimer';del.className='danger smallbtn';
+      del.onclick=async()=>{
+        if(!confirm('Retirer '+x.name+' de la liste des membres ?'))return;
+        const {data,error}=await sb.rpc('remove_player_member',{p_player_id:x.id});
+        if(error)return toast(error.message);
+        await loadAll();
+        toast(data==='archived'?'Joueur désactivé : son historique est conservé.':'Joueur supprimé.');
+      };
+      top.append(info,del);
     }else top.append(info);
     d.appendChild(top);
 
@@ -884,6 +961,7 @@ $('#playerGroupStatus').onchange=()=>{
   $('#guestOfPlayer').classList.toggle('hidden',!isGuest);
 };
 $('#addPlayers').onclick=async()=>{
+  if(isCoorg()&&!S.myPermissions.can_add_members)return toast('Tu n’es pas autorisé à ajouter des membres.');
   const btn=$('#addPlayers');
   const names=[...new Set($('#playersInput').value.split(/[,;\n]/).map(x=>x.trim()).filter(Boolean))];
   if(!names.length)return toast('Entre au moins un joueur.');
@@ -1295,7 +1373,7 @@ function renderMatches(){
   });
 }
 
-$('#addMatch').onclick=async()=>{const t=currentTour(),home=$('#homeTeam').value,away=$('#awayTeam').value;if(!t||!home||!away||home===away)return toast('Choisis deux équipes différentes');const {error}=await sb.from('matches').insert({tournament_id:t.id,home_team_id:home,away_team_id:away,match_order:S.matches.length+1,pitch:$('#pitch').value||null,round_label:$('#roundLabel').value.trim()||null});if(error)toast(error.message);else{$('#pitch').value='';$('#roundLabel').value=''}};
+$('#addMatch').onclick=async()=>{if(isCoorg()&&!S.myPermissions.can_enter_scores)return toast('Tu n’es pas autorisé à saisir les scores.');const t=currentTour(),home=$('#homeTeam').value,away=$('#awayTeam').value;if(!t||!home||!away||home===away)return toast('Choisis deux équipes différentes');const {error}=await sb.from('matches').insert({tournament_id:t.id,home_team_id:home,away_team_id:away,match_order:S.matches.length+1,pitch:$('#pitch').value||null,round_label:$('#roundLabel').value.trim()||null});if(error)toast(error.message);else{$('#pitch').value='';$('#roundLabel').value=''}};
 $('#roundRobin').onclick=async()=>{const t=currentTour();if(!t||S.teams.length<2)return toast('Crée les équipes d’abord');const existing=new Set(S.matches.map(m=>[m.home_team_id,m.away_team_id].sort().join('|'))),rows=[];let n=S.matches.length+1;for(let i=0;i<S.teams.length;i++)for(let j=i+1;j<S.teams.length;j++){const key=[S.teams[i].id,S.teams[j].id].sort().join('|');if(!existing.has(key))rows.push({tournament_id:t.id,home_team_id:S.teams[i].id,away_team_id:S.teams[j].id,match_order:n++})}if(!rows.length)return toast('Tous les matchs existent déjà');const {error}=await sb.from('matches').insert(rows);error?toast(error.message):toast(rows.length+' matchs générés')};
 
 async function rankingDataset(){
