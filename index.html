@@ -67,7 +67,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V38.0</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V38.1</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -115,6 +115,46 @@ select{background-color:#fff} textarea{resize:vertical}
       </div>
     </header>
 
+
+    <div id="superAdminPanel" class="hidden">
+      <div class="card" style="border:2px solid #d9eadf">
+        <div class="row" style="justify-content:space-between;align-items:flex-start">
+          <div>
+            <h2 class="sectiontitle">🛡️ Super Administration</h2>
+            <p class="muted">Gestion des espaces clients et des options commerciales de la plateforme.</p>
+          </div>
+          <span class="guest-badge" style="background:#111827;color:#fff">SUPER ADMIN</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="sectiontitle">Créer un espace client</h2>
+        <p class="muted">Le compte administrateur indiqué doit déjà avoir créé son compte dans l’application.</p>
+        <div class="grid g2">
+          <input id="saWorkspaceName" placeholder="Nom de l’espace">
+          <input id="saOwnerEmail" type="email" placeholder="Email de l’administrateur">
+        </div>
+        <div class="space"></div>
+        <div class="grid g3">
+          <label class="player"><span class="muted">Co-organisateurs</span><input id="saMaxCoorg" type="number" min="0" max="100" value="3"></label>
+          <label class="player row" style="justify-content:flex-start"><input id="saTournamentEnabled" type="checkbox" style="width:auto" checked><span><b>Module Tournoi</b></span></label>
+          <label class="player row" style="justify-content:flex-start"><input id="saLeagueEnabled" type="checkbox" style="width:auto"><span><b>Module Ligue</b></span></label>
+        </div>
+        <div class="space"></div>
+        <label class="player row" style="justify-content:flex-start"><input id="saRankingsEnabled" type="checkbox" style="width:auto" checked><span><b>Classements buteurs / passeurs</b></span></label>
+        <div class="space"></div>
+        <button id="saCreateWorkspace" class="primary">Créer l’espace administrateur</button>
+      </div>
+
+      <div class="card">
+        <div class="row" style="justify-content:space-between">
+          <h2 class="sectiontitle">Espaces clients</h2>
+          <button id="saRefresh">Actualiser</button>
+        </div>
+        <div id="saWorkspaceList"></div>
+      </div>
+    </div>
+
     <div id="workspaceSetup" class="card hidden">
       <h2 class="sectiontitle">Créer ton espace</h2>
       <input id="newWorkspace" value="Tournoi du dimanche">
@@ -143,7 +183,7 @@ select{background-color:#fff} textarea{resize:vertical}
       <div class="card" id="adminAccessCard">
         <h2 class="sectiontitle">Accès et co-organisateurs</h2>
         <div id="adminInviteControls">
-          <p class="muted">Maximum : 1 administrateur + 3 co-organisateurs. Après avoir créé l’invitation, envoie le lien par WhatsApp ou copie-le : aucun e-mail automatique n’est envoyé.</p>
+          <p class="muted">Le nombre de co-organisateurs dépend des options de l’espace. Après avoir créé l’invitation, envoie le lien par WhatsApp ou copie-le : aucun e-mail automatique n’est envoyé.</p>
           <div class="row">
             <input id="inviteEmail" type="email" placeholder="Email du co-organisateur" style="flex:1">
             <button id="sendInvite" class="primary">Inviter</button>
@@ -424,7 +464,7 @@ window.addEventListener('error', (e) => {
   if(t){t.textContent='Erreur de chargement de l’application. Recharge la page.';t.style.display='block';}
 });
 
-const S={session:null,workspace:null,members:[],coorgs:[],coorgCount:0,workspaceFeatures:{max_coorganizers:3,max_coorganizers_cap:100,rankings_enabled:true,league_enabled:true},myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null},myRatings:[],lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],teamCodes:[],seasons:[],tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},publicMode:false,publicToken:null};
+const S={session:null,isSuperAdmin:false,superWorkspaces:[],workspace:null,members:[],coorgs:[],coorgCount:0,workspaceFeatures:{max_coorganizers:3,max_coorganizers_cap:100,rankings_enabled:true,league_enabled:true,tournaments_enabled:true},myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null},myRatings:[],lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],teamCodes:[],seasons:[],tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},publicMode:false,publicToken:null};
 
 let safeSyncTimer=null;
 let safeSyncBusy=false;
@@ -452,6 +492,7 @@ const today=()=>new Date().toISOString().slice(0,10); $('#tourDate').value=today
 function setView(v){
   if(v==='permissions'&&!isAdmin())v='home';
   if(v==='players'&&isCoorg()&&!hasTemporaryAdmin()&&!S.myPermissions.can_view_players)v='home';
+  if(v==='tournaments'&&!S.workspaceFeatures.tournaments_enabled)v='home';
   if(v==='league'&&!S.workspaceFeatures.league_enabled)v='home';
   if(v==='ranking'&&!S.workspaceFeatures.rankings_enabled)v='home';
   document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id==='view-'+v));
@@ -513,6 +554,7 @@ function applyPermissions(){
   const accessLegend=$('#adminAccessLegend');if(accessLegend)accessLegend.classList.toggle('hidden',!admin);
   const playerAddCard=$('#playersInput')?.closest('.card');
   if(playerAddCard)playerAddCard.classList.toggle('hidden',coorg&&!S.myPermissions.can_add_members);
+  document.querySelectorAll('.tab[data-view="tournaments"]').forEach(el=>el.style.display=S.workspaceFeatures.tournaments_enabled?'':'none');
   document.querySelectorAll('.tab[data-view="league"]').forEach(el=>el.style.display=S.workspaceFeatures.league_enabled?'':'none');
   document.querySelectorAll('.tab[data-view="ranking"]').forEach(el=>el.style.display=S.workspaceFeatures.rankings_enabled?'':'none');
   document.querySelectorAll('.tab[data-view="players"]').forEach(el=>{
@@ -603,8 +645,87 @@ $('#updatePassword').onclick=async()=>{
 };
 $('#logout').onclick=async()=>{await sb.auth.signOut();location.reload()};
 
+
+async function loadSuperAdminWorkspaces(){
+  const {data,error}=await sb.rpc('super_admin_get_workspaces');
+  if(error){toast(error.message);return}
+  S.superWorkspaces=Array.isArray(data)?data:[];
+  renderSuperAdminWorkspaces();
+}
+function renderSuperAdminWorkspaces(){
+  const box=$('#saWorkspaceList');if(!box)return;
+  box.innerHTML='';
+  if(!S.superWorkspaces.length){box.innerHTML='<p class="muted">Aucun espace client.</p>';return}
+  S.superWorkspaces.forEach(w=>{
+    const d=document.createElement('div');d.className='player';d.style.marginBottom='12px';
+    d.innerHTML=
+      '<div class="row"><span style="flex:1"><b>'+esc(w.workspace_name)+'</b><div class="muted">'+Number(w.active_members||0)+' membre(s) • '+Number(w.active_coorganizers||0)+' co-organisateur(s)</div></span><span class="guest-badge">'+(w.public_enabled?'Actif':'Suspendu')+'</span></div>'+
+      '<div class="grid g3" style="margin-top:10px">'+
+        '<label><span class="muted">Co-organisateurs</span><input data-sa-max type="number" min="0" max="'+Number(w.max_coorganizers_cap||100)+'" value="'+Number(w.max_coorganizers||0)+'"></label>'+
+        '<label><span class="muted">Plafond commercial</span><input data-sa-cap type="number" min="0" max="100" value="'+Number(w.max_coorganizers_cap||100)+'"></label>'+
+        '<label class="player row" style="justify-content:flex-start"><input data-sa-public type="checkbox" style="width:auto" '+(w.public_enabled?'checked':'')+'><span><b>Espace actif</b></span></label>'+
+      '</div>'+
+      '<div class="grid g3" style="margin-top:10px">'+
+        '<label class="player row" style="justify-content:flex-start"><input data-sa-tournament type="checkbox" style="width:auto" '+(w.tournaments_enabled?'checked':'')+'><span><b>Tournoi</b></span></label>'+
+        '<label class="player row" style="justify-content:flex-start"><input data-sa-league type="checkbox" style="width:auto" '+(w.league_enabled?'checked':'')+'><span><b>Ligue</b></span></label>'+
+        '<label class="player row" style="justify-content:flex-start"><input data-sa-rankings type="checkbox" style="width:auto" '+(w.rankings_enabled?'checked':'')+'><span><b>Buteurs / passeurs</b></span></label>'+
+      '</div>';
+    const save=document.createElement('button');save.className='primary';save.style.marginTop='10px';save.textContent='Enregistrer les options';
+    save.onclick=async()=>{
+      const max=Number(d.querySelector('[data-sa-max]').value)||0;
+      const cap=Number(d.querySelector('[data-sa-cap]').value)||0;
+      if(max>cap)return toast('Le nombre autorisé ne peut pas dépasser le plafond commercial.');
+      save.disabled=true;
+      const {error}=await sb.rpc('super_admin_set_workspace_options',{
+        p_workspace_id:w.workspace_id,
+        p_max_coorganizers:max,
+        p_max_coorganizers_cap:cap,
+        p_tournaments_enabled:d.querySelector('[data-sa-tournament]').checked,
+        p_league_enabled:d.querySelector('[data-sa-league]').checked,
+        p_rankings_enabled:d.querySelector('[data-sa-rankings]').checked,
+        p_public_enabled:d.querySelector('[data-sa-public]').checked
+      });
+      save.disabled=false;if(error)return toast(error.message);
+      toast('Options enregistrées ✅');await loadSuperAdminWorkspaces();
+    };
+    d.appendChild(save);box.appendChild(d);
+  });
+}
+async function initSuperAdmin(){
+  const claim=await sb.rpc('claim_platform_super_admin');
+  if(claim.error)console.warn('claim super admin',claim.error);
+  const check=await sb.rpc('is_platform_super_admin');
+  S.isSuperAdmin=!check.error&&check.data===true;
+  if(!S.isSuperAdmin)return false;
+  $('#superAdminPanel').classList.remove('hidden');
+  $('#workspaceSetup').classList.add('hidden');
+  document.querySelectorAll('.view,.tabs').forEach(el=>el.classList.add('hidden'));
+  $('#workspaceName').textContent='Super administrateur de la plateforme';
+  await loadSuperAdminWorkspaces();
+  return true;
+}
+document.addEventListener('click',async e=>{
+  if(e.target?.id==='saRefresh')await loadSuperAdminWorkspaces();
+  if(e.target?.id==='saCreateWorkspace'){
+    const name=$('#saWorkspaceName').value.trim(),email=$('#saOwnerEmail').value.trim().toLowerCase();
+    if(!name||!email)return toast('Indique le nom de l’espace et l’e-mail de son administrateur.');
+    const b=e.target;b.disabled=true;
+    const {error}=await sb.rpc('super_admin_create_workspace_for_admin',{
+      p_name:name,p_owner_email:email,
+      p_max_coorganizers:Math.max(0,Math.min(100,Number($('#saMaxCoorg').value)||0)),
+      p_tournaments_enabled:$('#saTournamentEnabled').checked,
+      p_league_enabled:$('#saLeagueEnabled').checked,
+      p_rankings_enabled:$('#saRankingsEnabled').checked
+    });
+    b.disabled=false;if(error)return toast(error.message);
+    $('#saWorkspaceName').value='';$('#saOwnerEmail').value='';
+    toast('Espace administrateur créé ✅');await loadSuperAdminWorkspaces();
+  }
+});
+
 async function boot(){
   await loadInvites();
+  if(await initSuperAdmin())return;
   const currentUserId=S.session?.user?.id;
   if(!currentUserId)return toast('Session utilisateur introuvable.');
   const {data,error}=await sb.from('workspace_members')
