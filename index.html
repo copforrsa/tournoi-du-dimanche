@@ -75,7 +75,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.22</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.23</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -118,7 +118,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.22</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.23</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -159,6 +159,7 @@ select{background-color:#fff} textarea{resize:vertical}
           <label class="player"><span class="muted">Co-organisateurs autorisés</span><input id="saMaxCoorg" type="number" min="0" max="100" value="3"></label>
           <label class="player row" style="justify-content:flex-start"><input id="saTournamentEnabled" type="checkbox" style="width:auto" checked><span><b>Module Tournoi</b></span></label>
           <label class="player row" style="justify-content:flex-start"><input id="saLeagueEnabled" type="checkbox" style="width:auto"><span><b>Module Ligue</b></span></label>
+          <label class="player row" style="justify-content:flex-start"><input id="saThirdHalfEnabled" type="checkbox" style="width:auto" disabled><span><b>Module 3e mi-temps</b><div class="muted">Préparé • activation backend/Stripe à venir</div></span></label>
         </div>
         <div class="space"></div>
         <label class="player row" style="justify-content:flex-start"><input id="saRankingsEnabled" type="checkbox" style="width:auto" checked><span><b>Classements buteurs / passeurs</b></span></label>
@@ -227,6 +228,17 @@ select{background-color:#fff} textarea{resize:vertical}
         </div>
         <div class="space"></div>
         <div id="registeredPlayersAdminList"></div>
+      </div>
+
+      <div class="card hidden" id="thirdHalfAdminCard">
+        <div class="row" style="justify-content:space-between;gap:10px;flex-wrap:wrap">
+          <div>
+            <h2 class="sectiontitle">🧊 3e mi-temps & paiements</h2>
+            <div class="muted">Suivi préparé pour le paiement en ligne et le règlement direct à l’Arena.</div>
+          </div>
+          <span class="guest-badge">OPTION PAYANTE</span>
+        </div>
+        <div id="thirdHalfAdminSummary" class="muted" style="margin-top:10px">Le module est prêt mais aucune donnée de paiement n’est encore collectée tant que Stripe n’est pas raccordé.</div>
       </div>
 
       <div class="card">
@@ -303,6 +315,14 @@ select{background-color:#fff} textarea{resize:vertical}
         <div class="grid g2">
           <label class="player"><span class="muted">Places maximum</span><input id="tourMaxPlayers" type="number" min="2" max="100" value="20"></label>
           <label class="player row" style="justify-content:flex-start"><input id="tourRegistrationOpen" type="checkbox" style="width:auto" checked><span><b>Ouvrir les inscriptions</b><div class="muted">Les joueurs pourront s’inscrire via le lien public.</div></span></label>
+        </div>
+        <div id="thirdHalfTournamentCreate" class="player hidden" style="margin-top:12px;background:#fff8ed;border:1px solid #fed7aa">
+          <b>🧊 3e mi-temps & participation</b>
+          <div class="muted" style="margin:5px 0 10px">Option activée par le Super Admin. Définis le prix de participation au Swé. Le paiement en ligne sera raccordé à Stripe ultérieurement.</div>
+          <div class="grid g2">
+            <label><span class="muted">Prix par participant (€)</span><input id="tourEntryFee" type="number" min="0" step="0.50" value="0"></label>
+            <label><span class="muted">Participation glacière conseillée (€)</span><input id="tourCoolerSuggested" type="number" min="0" step="0.50" value="0"></label>
+          </div>
         </div>
         <div class="space"></div><button id="createTournament" class="primary">Créer le tournoi</button>
       </div>
@@ -406,6 +426,14 @@ select{background-color:#fff} textarea{resize:vertical}
           <div class="grid g2">
             <input id="leagueSessionDate" type="date">
             <input id="leagueSessionName" placeholder="Ex. Swé Ligue #1">
+          </div>
+          <div id="thirdHalfLeagueCreate" class="player hidden" style="margin-top:12px;background:#fff8ed;border:1px solid #fed7aa">
+            <b>🧊 3e mi-temps & participation</b>
+            <div class="muted" style="margin:5px 0 10px">Prix du Swé de Ligue et participation glacière. Le paiement en ligne sera activé avec Stripe dans une prochaine étape.</div>
+            <div class="grid g2">
+              <label><span class="muted">Prix par participant (€)</span><input id="leagueSessionEntryFee" type="number" min="0" step="0.50" value="0"></label>
+              <label><span class="muted">Participation glacière conseillée (€)</span><input id="leagueSessionCoolerSuggested" type="number" min="0" step="0.50" value="0"></label>
+            </div>
           </div>
           <div class="space"></div>
           <button id="createLeagueSession" class="primary">Créer le Swé de Ligue</button>
@@ -624,7 +652,7 @@ window.addEventListener('error', (e) => {
   if(t){t.textContent='Erreur de chargement de l’application. Recharge la page.';t.style.display='block';}
 });
 
-const S={session:null,isSuperAdmin:false,superWorkspaces:[],workspace:null,members:[],coorgs:[],coorgCount:0,workspaceFeatures:{max_coorganizers:3,max_coorganizers_cap:100,rankings_enabled:true,league_enabled:true,tournaments_enabled:true},myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null},myRatings:[],lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],teamCodes:[],seasons:[],leagues:[],leaguePlayers:[],activeLeague:null,tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},publicMode:false,publicToken:null};
+const S={session:null,isSuperAdmin:false,superWorkspaces:[],workspace:null,members:[],coorgs:[],coorgCount:0,workspaceFeatures:{max_coorganizers:3,max_coorganizers_cap:100,rankings_enabled:true,league_enabled:true,tournaments_enabled:true,third_half_enabled:false},myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null},myRatings:[],lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],teamCodes:[],seasons:[],leagues:[],leaguePlayers:[],activeLeague:null,tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},publicMode:false,publicToken:null};
 
 let safeSyncTimer=null;
 let safeSyncBusy=false;
@@ -763,6 +791,10 @@ function applyPermissions(){
   const canManageTeams=adminOps||(coorg&&S.myPermissions.can_generate_teams);
   if(teamControls)teamControls.classList.toggle('hidden',!canManageTeams);
   const matchCreateCard=$('#matchCreateAdminCard');if(matchCreateCard)matchCreateCard.classList.toggle('hidden',!adminOps);
+  const thirdHalf=!!S.workspaceFeatures.third_half_enabled;
+  $('#thirdHalfTournamentCreate')?.classList.toggle('hidden',!thirdHalf||!adminOps);
+  $('#thirdHalfLeagueCreate')?.classList.toggle('hidden',!thirdHalf||!adminOps);
+  $('#thirdHalfAdminCard')?.classList.toggle('hidden',!thirdHalf||!adminOps);
   const matchTabAllowed=adminOps||(coorg&&S.myPermissions.can_enter_scores);
   document.querySelectorAll('.tab[data-view="matches"]').forEach(el=>{
     el.style.display=matchTabAllowed?'':'none';
@@ -1184,6 +1216,12 @@ async function loadTournament(){
   r=await sb.from('matches').select('*').eq('tournament_id',t.id).order('match_order');S.matches=r.data||[];
   const mids=S.matches.map(x=>x.id);if(mids.length){r=await sb.from('goals').select('*').in('match_id',mids).order('created_at');S.goals=r.data||[]}else S.goals=[]
 }
+const THIRD_HALF_PAYMENT_MODES={
+  event_online:'Paiement en ligne',
+  event_arena:'Paiement direct à l’Arena',
+  cooler_online:'Participation en ligne à la glacière',
+  cooler_cash:'Participation main à main'
+};
 function currentTour(){return S.tournaments.find(x=>x.id===S.activeTour)} function p(id){return S.players.find(x=>x.id===id)} function tm(id){return S.teams.find(x=>x.id===id)}
 
 async function renderSeasonScorerSummary(){
@@ -1881,7 +1919,16 @@ $('#createTournament').onclick=async()=>{
   btn.disabled=true;btn.textContent='Création…';
   try{
     const row={workspace_id:S.workspace.id,season_id:$('#seasonSelect').value||null,name:$('#tourName').value.trim()||null,tournament_date:date,format:$('#tourFormat').value,status:'draft',max_players:Math.max(2,Math.min(100,Number($('#tourMaxPlayers').value)||20)),registration_open:$('#tourRegistrationOpen').checked};
-    const {data,error}=await sb.from('tournaments').insert(row).select().single();
+    if(S.workspaceFeatures.third_half_enabled){
+      row.entry_fee_cents=Math.round(Math.max(0,Number($('#tourEntryFee')?.value)||0)*100);
+      row.cooler_suggested_cents=Math.round(Math.max(0,Number($('#tourCoolerSuggested')?.value)||0)*100);
+    }
+    let created=await sb.from('tournaments').insert(row).select().single();
+    if(created.error&&S.workspaceFeatures.third_half_enabled&&(String(created.error.message||'').includes('entry_fee_cents')||String(created.error.message||'').includes('cooler_suggested_cents'))){
+      delete row.entry_fee_cents;delete row.cooler_suggested_cents;
+      created=await sb.from('tournaments').insert(row).select().single();
+    }
+    const {data,error}=created;
     if(error)throw error;
     S.activeTour=data.id;
     S.tournaments=[data,...S.tournaments.filter(t=>t.id!==data.id)].sort((a,b)=>String(b.tournament_date).localeCompare(String(a.tournament_date)));
@@ -2705,6 +2752,7 @@ async function bootPublic(token){
     return;
   }
   const P=parsed;
+  const publicThirdHalf=!!P.workspace?.third_half_enabled;
   $('#publicWorkspaceName').textContent=P.workspace?.name||'SWÉ TOURNAMENT 5/5';
   let players=P.players||[],seasons=P.seasons||[],leagues=P.leagues||[],leaguePlayers=P.league_players||[],tournaments=(P.tournaments||[]).sort((a,b)=>String(b.tournament_date).localeCompare(String(a.tournament_date)));
   let teams=P.teams||[],teamPlayers=P.team_players||[],matches=P.matches||[],goals=P.goals||[];
@@ -3011,6 +3059,13 @@ async function bootPublic(token){
       '<h3 style="margin-top:18px">👥 Inscrits</h3><div id="publicRegisteredList"></div>'+
       '<div id="publicWaitWrap" class="'+(waiting?'':'hidden')+'"><h3 style="margin-top:14px">🟠 Remplaçants</h3><div id="publicWaitList"></div></div>';
     renderPublicRegistrationList();
+
+    if(publicThirdHalf){
+      const donorCard=document.createElement('div');
+      donorCard.className='card';
+      donorCard.innerHTML='<h2 class="sectiontitle">🧊 Top donateurs de la 3e mi-temps</h2><p class="muted">Le classement apparaîtra ici dès que les participations à la glacière seront enregistrées. Les paiements en ligne seront raccordés à Stripe dans une prochaine étape.</p><div id="publicCoolerDonors"></div>';
+      regBox.parentElement?.insertBefore(donorCard,regBox.nextSibling);
+    }
 
     function updateSelectedRegistrationStatus(){
       const pid=$('#publicPlayerSelect')?.value;
