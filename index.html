@@ -97,7 +97,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:700">V36.2</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:700">V36.3</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -1350,26 +1350,70 @@ async function bootPublic(token){
   }
   const P=parsed;
   $('#publicWorkspaceName').textContent=P.workspace?.name||'Tournoi du Dimanche';
-  const players=P.players||[],seasons=P.seasons||[],tournaments=(P.tournaments||[]).sort((a,b)=>String(b.tournament_date).localeCompare(String(a.tournament_date)));
-  const teams=P.teams||[],teamPlayers=P.team_players||[],matches=P.matches||[],goals=P.goals||[];
-  const registrations=P.tournament_players||[];
+  let players=P.players||[],seasons=P.seasons||[],tournaments=(P.tournaments||[]).sort((a,b)=>String(b.tournament_date).localeCompare(String(a.tournament_date)));
+  let teams=P.teams||[],teamPlayers=P.team_players||[],matches=P.matches||[],goals=P.goals||[];
+  let registrations=P.tournament_players||[];
   const openTours=[...tournaments].filter(t=>t.status!=='finished'&&t.registration_open).sort((a,b)=>String(a.tournament_date).localeCompare(String(b.tournament_date)));
   const regTour=openTours[0];
   const regBox=$('#publicRegistration');
+
+  function publicGuestLabel(pl){
+    if(!pl||pl.is_group_member!==false)return '';
+    const host=players.find(x=>x.id===pl.guest_of_player_id);
+    return host?'Guest de '+host.name:'Guest';
+  }
+  function renderPublicRegistrationList(){
+    if(!regTour||!regBox)return;
+    const regs=registrations.filter(r=>r.tournament_id===regTour.id).sort((a,b)=>String(a.registered_at||'').localeCompare(String(b.registered_at||'')));
+    const confirmed=regs.filter(r=>r.registration_status!=='waitlist'&&r.present);
+    const waiting=regs.filter(r=>r.registration_status==='waitlist');
+    const playerMap=new Map(players.map(x=>[x.id,x]));
+    const listRows=confirmed.map((r,i)=>{
+      const pl=playerMap.get(r.player_id);if(!pl)return '';
+      const guest=publicGuestLabel(pl);
+      return '<div class="player row '+(pl.is_group_member===false?'guest-row':'')+'"><b style="min-width:34px">'+(i+1)+'.</b><span style="flex:1">'+esc(pl.name)+(guest?' <span class="guest-badge">'+esc(guest)+'</span>':'')+'</span><span style="font-weight:700;color:#15803d">Confirmé</span></div>';
+    }).join('');
+    const waitRows=waiting.map((r,i)=>{
+      const pl=playerMap.get(r.player_id);if(!pl)return '';
+      const guest=publicGuestLabel(pl);
+      return '<div class="player row guest-row"><b style="min-width:34px">'+(i+1)+'.</b><span style="flex:1">'+esc(pl.name)+(guest?' <span class="guest-badge">'+esc(guest)+'</span>':'')+'</span><span style="font-weight:700;color:#b45309">Attente</span></div>';
+    }).join('');
+    const count=$('#publicRegCount');if(count)count.textContent=confirmed.length+'/'+(regTour.max_players||20)+' confirmés'+(waiting.length?' • '+waiting.length+' en attente':'');
+    const list=$('#publicRegisteredList');if(list)list.innerHTML=listRows||'<p class="muted">Aucun inscrit pour le moment.</p>';
+    const wlist=$('#publicWaitList');if(wlist){wlist.innerHTML=waitRows;wlist.parentElement.classList.toggle('hidden',!waiting.length)}
+  }
+
   if(regTour){
     const regs=registrations.filter(r=>r.tournament_id===regTour.id);
     const confirmed=regs.filter(r=>r.registration_status!=='waitlist'&&r.present).length;
     const waiting=regs.filter(r=>r.registration_status==='waitlist').length;
-    regBox.innerHTML='<div class="player"><b>'+esc(regTour.name||('Tournoi du '+regTour.tournament_date))+'</b><div class="muted">'+regTour.tournament_date+' • '+confirmed+'/'+(regTour.max_players||20)+' confirmés'+(waiting?' • '+waiting+' en attente':'')+'</div></div>'+
-      '<div class="space"></div><select id="publicPlayerSelect"><option value="">Choisis ton nom</option>'+players.filter(x=>x.active).sort((a,b)=>a.name.localeCompare(b.name)).map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')+'</select>'+
-      '<div class="space"></div><div class="row"><button id="publicJoin" class="primary">✅ Je participe</button><button id="publicLeave">❌ Je ne participe pas</button></div><div id="publicRegStatus" class="muted" style="margin-top:8px">Les places sont attribuées dans l’ordre des inscriptions.</div>';
+    regBox.innerHTML=
+      '<div class="player"><b>'+esc(regTour.name||('Tournoi du '+regTour.tournament_date))+'</b><div id="publicRegCount" class="muted">'+confirmed+'/'+(regTour.max_players||20)+' confirmés'+(waiting?' • '+waiting+' en attente':'')+'</div></div>'+
+      '<div class="space"></div><select id="publicPlayerSelect"><option value="">Choisis ton nom</option>'+players.filter(x=>x.active&&x.is_group_member!==false).sort((a,b)=>a.name.localeCompare(b.name)).map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')+'</select>'+
+      '<div class="space"></div><div class="row"><button id="publicJoin" class="primary">✅ Je participe</button><button id="publicLeave">❌ Je ne participe pas</button></div>'+
+      '<div class="player" style="margin-top:12px"><b>👤 Tu viens avec un invité ?</b><div class="muted" style="margin:4px 0 8px">Choisis d’abord ton nom ci-dessus, puis ajoute ton invité.</div><div class="row"><input id="publicGuestName" placeholder="Nom de l’invité" style="flex:1"><button id="publicAddGuest" class="primary">+ Ajouter mon invité</button></div></div>'+
+      '<div id="publicRegStatus" class="muted" style="margin-top:8px">Les places sont attribuées dans l’ordre des inscriptions.</div>'+
+      '<h3 style="margin-top:18px">👥 Inscrits</h3><div id="publicRegisteredList"></div>'+
+      '<div id="publicWaitWrap" class="'+(waiting?'':'hidden')+'"><h3 style="margin-top:14px">🟠 Liste d’attente</h3><div id="publicWaitList"></div></div>';
+    renderPublicRegistrationList();
+
+    async function refreshPublicRegistration(){
+      try{
+        const {data,error}=await sb.rpc('get_public_workspace_snapshot',{p_token:token});
+        if(error||!data)return;
+        players=data.players||players;
+        registrations=data.tournament_players||registrations;
+        renderPublicRegistrationList();
+      }catch(e){}
+    }
+
     $('#publicJoin').onclick=async()=>{
       const pid=$('#publicPlayerSelect').value;if(!pid)return $('#publicRegStatus').textContent='Choisis ton nom.';
       const b=$('#publicJoin');b.disabled=true;
       const {data,error}=await sb.rpc('public_tournament_registration',{p_token:token,p_tournament_id:regTour.id,p_player_id:pid,p_action:'join'});
       b.disabled=false;if(error)return $('#publicRegStatus').textContent=error.message;
       $('#publicRegStatus').textContent=data?.status==='waitlist'?'🟠 Tu es sur la liste d’attente.':'🟢 Inscription confirmée !';
-      setTimeout(()=>location.reload(),900);
+      await refreshPublicRegistration();
     };
     $('#publicLeave').onclick=async()=>{
       const pid=$('#publicPlayerSelect').value;if(!pid)return $('#publicRegStatus').textContent='Choisis ton nom.';
@@ -1377,8 +1421,21 @@ async function bootPublic(token){
       const {error}=await sb.rpc('public_tournament_registration',{p_token:token,p_tournament_id:regTour.id,p_player_id:pid,p_action:'absent'});
       b.disabled=false;if(error)return $('#publicRegStatus').textContent=error.message;
       $('#publicRegStatus').textContent='Inscription retirée.';
-      setTimeout(()=>location.reload(),700);
+      await refreshPublicRegistration();
     };
+    $('#publicAddGuest').onclick=async()=>{
+      const host=$('#publicPlayerSelect').value;
+      const guestName=$('#publicGuestName').value.trim();
+      if(!host)return $('#publicRegStatus').textContent='Choisis d’abord ton nom pour rattacher ton invité.';
+      if(!guestName)return $('#publicRegStatus').textContent='Entre le nom de ton invité.';
+      const b=$('#publicAddGuest');b.disabled=true;
+      const {data,error}=await sb.rpc('public_register_tournament_guest',{p_token:token,p_tournament_id:regTour.id,p_host_player_id:host,p_guest_name:guestName});
+      b.disabled=false;if(error)return $('#publicRegStatus').textContent=error.message;
+      $('#publicGuestName').value='';
+      $('#publicRegStatus').textContent=data?.status==='waitlist'?'🟠 Invité ajouté sur la liste d’attente.':'🟢 Invité ajouté et confirmé !';
+      await refreshPublicRegistration();
+    };
+    window.setInterval(refreshPublicRegistration,8000);
   }else{
     regBox.innerHTML='<p class="muted">Aucune inscription ouverte actuellement.</p>';
   }
@@ -1460,7 +1517,54 @@ async function bootPublic(token){
     $('#publicTeams').innerHTML='<p class="muted">Aucune équipe.</p>';
     $('#publicResults').innerHTML='<p class="muted">Aucun résultat.</p>';
   }
-  $('#publicHistory').innerHTML=tournaments.map(t=>'<div class="player"><b>'+esc(t.name||('Tournoi du '+t.tournament_date))+'</b><div class="muted">'+t.tournament_date+' • '+(t.status==='finished'?'Terminé':'En cours')+'</div></div>').join('')||'<p class="muted">Aucun tournoi.</p>';
+  const pubHist=$('#publicHistory');
+  pubHist.innerHTML='';
+  tournaments.forEach(t=>{
+    const d=document.createElement('div');d.className='player row';
+    d.innerHTML='<span style="flex:1"><b>'+esc(t.name||('Tournoi du '+t.tournament_date))+'</b><div class="muted">'+t.tournament_date+' • '+(t.status==='finished'?'Terminé':'En cours')+'</div></span>';
+    const b=document.createElement('button');b.textContent='Voir';b.className='primary';
+    b.onclick=()=>{
+      const tteams=teams.filter(x=>x.tournament_id===t.id);
+      const tmatches=matches.filter(x=>x.tournament_id===t.id).sort((a,b)=>(a.match_order||0)-(b.match_order||0));
+      const mids=new Set(tmatches.map(m=>m.id));
+      const tgoals=goals.filter(g=>mids.has(g.match_id));
+      const tmap2=new Map(tteams.map(x=>[x.id,x.name]));
+      const pmap2=new Map(players.map(x=>[x.id,x]));
+
+      const standings=tteams.map(x=>({id:x.id,name:x.name,mj:0,v:0,n:0,d:0,bp:0,bc:0,pts:0}));
+      const sm=new Map(standings.map(x=>[x.id,x]));
+      tmatches.forEach(m=>{
+        const a=sm.get(m.home_team_id),z=sm.get(m.away_team_id);if(!a||!z)return;
+        a.mj++;z.mj++;a.bp+=m.home_score;a.bc+=m.away_score;z.bp+=m.away_score;z.bc+=m.home_score;
+        if(m.home_score>m.away_score){a.v++;z.d++;a.pts+=3}else if(m.away_score>m.home_score){z.v++;a.d++;z.pts+=3}else{a.n++;z.n++;a.pts++;z.pts++}
+      });
+      standings.sort((a,z)=>z.pts-a.pts||(z.bp-z.bc)-(a.bp-a.bc)||z.bp-a.bp);
+      const teamRows=standings.map((x,i)=>'<div class="rank"><b>'+(i+1)+'</b><span>'+esc(x.name)+' <span class="muted">('+x.mj+' MJ • '+(x.bp-x.bc>=0?'+':'')+(x.bp-x.bc)+')</span></span><b class="right">'+x.pts+' pts</b></div>').join('');
+
+      const stats=new Map(players.map(x=>[x.id,{id:x.id,name:x.name,g:0,a:0,guest:x.is_group_member===false,guest_of:x.guest_of_player_id}]));
+      tgoals.forEach(g=>{if(stats.has(g.scorer_player_id))stats.get(g.scorer_player_id).g++;if(g.assister_player_id&&stats.has(g.assister_player_id))stats.get(g.assister_player_id).a++});
+      let scor=[...stats.values()].filter(x=>x.g).sort((a,z)=>z.g-a.g||a.name.localeCompare(z.name));
+      let prev=null,rank=0;scor=scor.map((x,i)=>{if(x.g!==prev){rank=i+1;prev=x.g}return {...x,rank}});
+      const scorRows=scor.map(x=>{const host=x.guest?pmap2.get(x.guest_of):null;return '<div class="rank '+(x.guest?'guest-row':'')+'"><b>'+x.rank+'</b><span>'+esc(x.name)+(host?' <span class="guest-badge">Guest de '+esc(host.name)+'</span>':'')+'</span><b class="right">'+x.g+' but'+(x.g>1?'s':'')+'</b></div>'}).join('');
+
+      const matchRows=tmatches.map((m,i)=>{
+        const mg=tgoals.filter(g=>g.match_id===m.id);
+        const gl=mg.map(g=>{const sc=pmap2.get(g.scorer_player_id),as=g.assister_player_id?pmap2.get(g.assister_player_id):null;return '<div class="small" style="margin-top:5px">⚽ '+esc(sc?.name||'?')+(as?' <span class="muted">← passe '+esc(as.name)+'</span>':'')+'</div>'}).join('');
+        return '<div class="player"><div class="muted">Match '+(i+1)+(m.pitch?' • '+esc(m.pitch):'')+'</div><div><b>'+esc(tmap2.get(m.home_team_id)||'?')+' '+m.home_score+' - '+m.away_score+' '+esc(tmap2.get(m.away_team_id)||'?')+'</b></div>'+gl+'</div>';
+      }).join('');
+
+      let panel=$('#publicHistoryDetail');
+      if(!panel){panel=document.createElement('div');panel.id='publicHistoryDetail';panel.className='card';pubHist.parentElement.appendChild(panel)}
+      panel.innerHTML='<div class="row" style="justify-content:space-between"><div><h2 class="sectiontitle" style="margin:0">'+esc(t.name||('Tournoi du '+t.tournament_date))+'</h2><div class="muted">'+t.tournament_date+'</div></div><button id="closePublicHistory">Fermer</button></div>'+
+        '<h3>🏆 Classement final</h3>'+(teamRows||'<p class="muted">Aucun classement.</p>')+
+        '<h3 style="margin-top:14px">⚽ Buteurs</h3>'+(scorRows||'<p class="muted">Aucun buteur.</p>')+
+        '<h3 style="margin-top:14px">📋 Matchs</h3>'+(matchRows||'<p class="muted">Aucun match.</p>');
+      $('#closePublicHistory').onclick=()=>panel.remove();
+      panel.scrollIntoView({behavior:'smooth',block:'start'});
+    };
+    d.appendChild(b);pubHist.appendChild(d);
+  });
+  if(!tournaments.length)pubHist.innerHTML='<p class="muted">Aucun tournoi.</p>';
 }
 authState();
 </script>
