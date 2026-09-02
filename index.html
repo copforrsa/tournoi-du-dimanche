@@ -67,7 +67,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V37.1</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V37.3</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -110,7 +110,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:700">V37.1</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:700">V37.3</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -148,7 +148,7 @@ select{background-color:#fff} textarea{resize:vertical}
           <button id="sendInvite" class="primary">Inviter</button>
         </div>
         <div id="memberList" style="margin-top:12px"></div>
-        <div class="muted" style="margin-top:8px">🟠 En attente = invitation non acceptée • 🟢 Actif = invitation acceptée</div>
+        <div class="muted" style="margin-top:8px">🟠 En attente = invitation non acceptée • 🟢 Actif = accès autorisé • ⏸️ Suspendu = accès bloqué par l’admin</div>
         <div class="space"></div>
         <label class="muted">Lien public — consultation uniquement</label>
         <div class="row">
@@ -270,14 +270,51 @@ select{background-color:#fff} textarea{resize:vertical}
       <div class="public-sub">Consultation publique • lecture seule</div>
     </header>
 
-    <div class="card" id="publicRegistrationCard">
-      <h2 class="sectiontitle">✅ Inscription au prochain tournoi</h2>
-      <div id="publicRegistration"></div>
+    <div class="card" id="publicEntryChoiceCard">
+      <div style="text-align:center;margin-bottom:14px">
+        <h2 class="sectiontitle" style="font-size:1.35rem">⚽ Comment tu viens dimanche ?</h2>
+        <div class="muted">Choisis ton mode d’inscription. On ne t’affichera ensuite que ce dont tu as besoin.</div>
+      </div>
+      <div class="grid g2" style="gap:12px">
+        <button id="chooseSoloMode" type="button" style="padding:0;border:0;background:linear-gradient(145deg,#0f5132,#198754);color:white;border-radius:18px;overflow:hidden;text-align:left;box-shadow:0 10px 24px rgba(15,81,50,.18)">
+          <div style="padding:22px">
+            <div style="font-size:2.5rem;margin-bottom:8px">🙋🏽‍♂️⚽</div>
+            <div style="font-size:1.2rem;font-weight:800">Je viens seul</div>
+            <div style="font-size:.9rem;opacity:.9;margin-top:5px">« Je m’inscris, je joue, je profite. »</div>
+            <div style="margin-top:13px;font-weight:700">Choisir →</div>
+          </div>
+        </button>
+        <button id="chooseTeamMode" type="button" style="padding:0;border:0;background:linear-gradient(145deg,#173b67,#2463a9);color:white;border-radius:18px;overflow:hidden;text-align:left;box-shadow:0 10px 24px rgba(23,59,103,.18)">
+          <div style="padding:22px">
+            <div style="font-size:2.5rem;margin-bottom:8px">👥🔥</div>
+            <div style="font-size:1.2rem;font-weight:800">Je viens en équipe</div>
+            <div style="font-size:.9rem;opacity:.9;margin-top:5px">« On arrive ensemble, on joue ensemble. »</div>
+            <div style="margin-top:13px;font-weight:700">Créer mon équipe →</div>
+          </div>
+        </button>
+      </div>
     </div>
 
-    <div class="card" id="publicTeamBuilderCard">
-      <h2 class="sectiontitle">🧩 Créer mon équipe</h2>
-      <div id="publicTeamBuilder"></div>
+    <div class="card hidden" id="publicRegistrationCard">
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <div>
+          <h2 class="sectiontitle">🙋🏽‍♂️ Je viens seul</h2>
+          <div class="muted">« Je m’inscris, je joue, je profite. »</div>
+        </div>
+        <button id="backFromSoloMode" type="button">← Changer</button>
+      </div>
+      <div id="publicRegistration" style="margin-top:12px"></div>
+    </div>
+
+    <div class="card hidden" id="publicTeamBuilderCard">
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <div>
+          <h2 class="sectiontitle">👥 Je viens en équipe</h2>
+          <div class="muted">« On arrive ensemble, on joue ensemble. »</div>
+        </div>
+        <button id="backFromTeamMode" type="button">← Changer</button>
+      </div>
+      <div id="publicTeamBuilder" style="margin-top:12px"></div>
     </div>
 
     <div class="card">
@@ -338,7 +375,7 @@ window.addEventListener('error', (e) => {
   if(t){t.textContent='Erreur de chargement de l’application. Recharge la page.';t.style.display='block';}
 });
 
-const S={session:null,workspace:null,members:[],invites:[],players:[],contacts:[],skillReviews:[],teamCodes:[],seasons:[],tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},publicMode:false,publicToken:null};
+const S={session:null,workspace:null,members:[],coorgs:[],invites:[],players:[],contacts:[],skillReviews:[],teamCodes:[],seasons:[],tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},publicMode:false,publicToken:null};
 
 let safeSyncTimer=null;
 let safeSyncBusy=false;
@@ -516,8 +553,11 @@ async function loadInvites(){
 }
 async function loadAll(){
   if(!S.workspace)return;const w=S.workspace.id;let r;
-  r=await sb.from('workspace_members').select('user_id,role').eq('workspace_id',w);S.members=r.data||[];
-  if(isAdmin()){r=await sb.from('workspace_invites').select('id,email,role,accepted_at,created_at').eq('workspace_id',w).order('created_at',{ascending:false});S.invites=r.data||[]}else S.invites=[];
+  r=await sb.from('workspace_members').select('user_id,role,active').eq('workspace_id',w);S.members=r.data||[];
+  if(isAdmin()){
+    r=await sb.from('workspace_invites').select('id,email,role,accepted_at,created_at').eq('workspace_id',w).order('created_at',{ascending:false});S.invites=r.data||[];
+    r=await sb.rpc('get_workspace_coorganizers',{p_workspace_id:w});S.coorgs=r.data||[];
+  }else{S.invites=[];S.coorgs=[];}
   if(isAdmin()){
     r=await sb.rpc('get_admin_workspace_players',{p_workspace_id:w});S.players=r.data||[];
     r=await sb.from('player_private_contacts').select('player_id,phone_number').eq('workspace_id',w);S.contacts=r.data||[];
@@ -571,11 +611,37 @@ function coorgInviteMessage(inv){
 }
 function renderAccess(){
   const box=$('#memberList');if(!box||!isAdmin())return;
-  const coCount=S.members.filter(x=>x.role==='coorganizer').length;
+  const activeCo=S.coorgs.filter(x=>x.active);
+  const suspendedCo=S.coorgs.filter(x=>!x.active);
   const pending=S.invites.filter(x=>!x.accepted_at);
-  const accepted=S.invites.filter(x=>x.accepted_at);
   const fmt=d=>d?new Date(d).toLocaleDateString('fr-FR'):'';
-  box.innerHTML='<div class="muted" style="margin-bottom:8px"><b>'+coCount+' / 3 co-organisateur'+(coCount>1?'s':'')+' actif'+(coCount>1?'s':'')+'</b> • '+pending.length+' invitation'+(pending.length>1?'s':'')+' en attente</div>';
+
+  box.innerHTML='<div class="muted" style="margin-bottom:8px"><b>'+activeCo.length+' / 3 co-organisateur'+(activeCo.length>1?'s':'')+' actif'+(activeCo.length>1?'s':'')+'</b> • '+suspendedCo.length+' suspendu'+(suspendedCo.length>1?'s':'')+' • '+pending.length+' invitation'+(pending.length>1?'s':'')+' en attente</div>';
+
+  S.coorgs.forEach(c=>{
+    const d=document.createElement('div');d.className='player';
+    d.innerHTML='<div class="row"><span style="flex:1"><b>'+esc(c.email||'Co-organisateur')+'</b><div class="muted">Co-organisateur depuis le '+fmt(c.created_at)+'</div></span><span style="font-weight:700;color:'+(c.active?'#15803d':'#b45309')+'">'+(c.active?'🟢 Actif':'⏸️ Suspendu')+'</span></div>';
+    const actions=document.createElement('div');actions.className='row';actions.style.marginTop='8px';actions.style.flexWrap='wrap';
+    const suspend=document.createElement('button');suspend.textContent=c.active?'⏸️ Suspendre':'▶️ Réactiver';
+    suspend.onclick=async()=>{
+      if(!confirm(c.active?'Suspendre ce co-organisateur ? Il perdra immédiatement l’accès à l’espace.':'Réactiver ce co-organisateur ?'))return;
+      suspend.disabled=true;
+      const {error}=await sb.rpc('admin_set_coorganizer_active',{p_workspace_id:S.workspace.id,p_user_id:c.user_id,p_active:!c.active});
+      suspend.disabled=false;if(error)return toast(error.message);
+      toast(c.active?'Co-organisateur suspendu.':'Co-organisateur réactivé.');
+      await loadAll();
+    };
+    const del=document.createElement('button');del.className='danger smallbtn';del.textContent='🗑 Supprimer';
+    del.onclick=async()=>{
+      if(!confirm('Supprimer définitivement '+(c.email||'ce co-organisateur')+' de l’organisation ?\n\nIl n’aura plus accès à cet espace.'))return;
+      del.disabled=true;
+      const {error}=await sb.rpc('admin_remove_coorganizer',{p_workspace_id:S.workspace.id,p_user_id:c.user_id});
+      del.disabled=false;if(error)return toast(error.message);
+      toast('Co-organisateur supprimé.');
+      await loadAll();
+    };
+    actions.append(suspend,del);d.appendChild(actions);box.appendChild(d);
+  });
 
   pending.forEach(i=>{
     const d=document.createElement('div');d.className='player';
@@ -586,26 +652,19 @@ function renderAccess(){
     const cancel=document.createElement('button');cancel.textContent='Annuler';cancel.className='danger smallbtn';
     copy.onclick=async()=>{
       const link=coorgInviteLink(i);
-      try{await navigator.clipboard.writeText(link);toast('Lien d’invitation copié ✅')}
-      catch(e){toast('Impossible de copier automatiquement.')}
+      try{await navigator.clipboard.writeText(link);toast('Lien d’invitation copié ✅')}catch(e){toast('Impossible de copier automatiquement.')}
     };
     wa.onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent(coorgInviteMessage(i)),'_blank','noopener');
     cancel.onclick=async()=>{
       if(!confirm("Annuler cette invitation ?"))return;
       const {error}=await sb.from('workspace_invites').delete().eq('id',i.id).eq('workspace_id',S.workspace.id).is('accepted_at',null);
       if(error)return toast(error.message);
-      toast('Invitation annulée.');
-      await loadAll();
+      toast('Invitation annulée.');await loadAll();
     };
     actions.append(copy,wa,cancel);d.appendChild(actions);box.appendChild(d);
   });
 
-  accepted.forEach(i=>{
-    const d=document.createElement('div');d.className='player row';
-    d.innerHTML='<span style="flex:1"><b>'+esc(i.email)+'</b><div class="muted">Acceptée le '+fmt(i.accepted_at)+'</div></span><span style="font-weight:700;color:#15803d">🟢 Actif</span>';
-    box.appendChild(d);
-  });
-  if(!pending.length&&!accepted.length)box.innerHTML+='<div class="muted">Aucune invitation pour le moment.</div>';
+  if(!S.coorgs.length&&!pending.length)box.innerHTML+='<div class="muted">Aucun co-organisateur pour le moment.</div>';
 }
 function renderAll(){
   renderHome();
@@ -639,7 +698,7 @@ function renderHome(){
 }
 $('#sendInvite').onclick=async()=>{
   if(!S.workspace||S.workspace.role!=='admin')return toast('Seul l’administrateur peut inviter.');
-  const active=S.members.filter(x=>x.role==='coorganizer').length;
+  const active=S.coorgs.filter(x=>x.active).length;
   const pending=S.invites.filter(x=>!x.accepted_at).length;
   if(active+pending>=3)return toast('Maximum de 3 co-organisateurs / invitations atteint.');
   const email=$('#inviteEmail').value.trim().toLowerCase();if(!email)return;
@@ -1581,7 +1640,7 @@ async function bootPublic(token){
       const guest=host?('Guest de '+host.name):publicGuestLabel(pl);
       return '<div class="player row"><b style="min-width:34px">'+(i+1)+'.</b><span style="flex:1">'+esc(pl.name)+(guest?' <span class="guest-badge">'+esc(guest)+'</span>':'')+'</span><span style="font-weight:700;color:#b45309">Attente</span></div>';
     }).join('');
-    const count=$('#publicRegCount');if(count)count.textContent=confirmed.length+'/'+(regTour.max_players||20)+' confirmés'+(waiting.length?' • '+waiting.length+' en attente':'');
+    const count=$('#publicRegCount');if(count)count.textContent=confirmed.length+'/'+(regTour.max_players||20)+' confirmés'+(waiting.length?' • '+waiting.length+' remplaçant'+(waiting.length>1?'s':''):'');
     const list=$('#publicRegisteredList');if(list)list.innerHTML=listRows||'<p class="muted">Aucun inscrit pour le moment.</p>';
     const wlist=$('#publicWaitList');if(wlist){wlist.innerHTML=waitRows;wlist.parentElement.classList.toggle('hidden',!waiting.length)}
   }
@@ -1591,15 +1650,15 @@ async function bootPublic(token){
     const confirmed=regs.filter(r=>r.registration_status!=='waitlist'&&r.present).length;
     const waiting=regs.filter(r=>r.registration_status==='waitlist').length;
     regBox.innerHTML=
-      '<div class="player"><b>'+esc(regTour.name||('Tournoi du '+regTour.tournament_date))+'</b><div id="publicRegCount" class="muted">'+confirmed+'/'+(regTour.max_players||20)+' confirmés'+(waiting?' • '+waiting+' en attente':'')+'</div></div>'+
-      '<div class="player" style="margin-top:12px;background:#f8fbf9"><b>ℹ️ Comment ça marche ?</b><div class="muted" style="margin-top:8px;line-height:1.7"><div>1. Choisis ton nom dans la liste.</div><div>2. Pour t’inscrire toi-même, clique sur <b>Je participe</b>.</div><div>3. Pour ajouter un invité, sélectionne ton nom mais <b>ne clique pas sur “Je participe”</b>.</div><div>4. Va directement dans <b>Tu viens avec qui ?</b>, indique son nom puis ajoute-le.</div><div>5. Ton invité apparaîtra dans la liste comme <b>Guest de ton nom</b>.</div></div></div>'+
+      '<div class="player"><b>'+esc(regTour.name||('Tournoi du '+regTour.tournament_date))+'</b><div id="publicRegCount" class="muted">'+confirmed+'/'+(regTour.max_players||20)+' confirmés'+(waiting?' • '+waiting+' remplaçant'+(waiting>1?'s':''):'')+'</div></div>'+
+      '<div class="player" style="margin-top:12px;background:#f8fbf9"><b>⚡ Inscription rapide</b><div class="muted" style="margin-top:6px;line-height:1.6">Choisis ton nom puis confirme ta présence. Si tu viens avec une seule personne sans composer d’équipe complète, tu peux aussi l’ajouter comme invité.</div></div>'+
       '<div class="space"></div><select id="publicPlayerSelect"><option value="">Choisis ton nom</option>'+players.filter(x=>x.active&&x.is_group_member!==false).sort((a,b)=>a.name.localeCompare(b.name)).map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')+'</select>'+
       '<div id="publicSelectedStatus" class="muted" style="margin-top:7px">Choisis ton nom pour voir ton statut.</div>'+
       '<div class="space"></div><div class="row"><button id="publicJoin" class="primary">✅ Je participe</button><button id="publicLeave">❌ Je ne participe pas</button></div>'+
       '<div class="player" style="margin-top:12px"><b>👤 Tu viens avec qui ?</b><div class="muted" style="margin:4px 0 8px">Sélectionne ton nom ci-dessus. Pour ajouter un invité, ne clique pas sur « Je participe » : indique simplement son nom ici puis ajoute-le.</div><input id="publicGuestName" placeholder="Nom de l’invité"><label class="row" style="margin-top:8px;justify-content:flex-start"><input id="publicGuestMember" type="checkbox" style="width:auto"><span>Ajouter cet invité comme membre du groupe</span></label><div id="publicGuestPhoneWrap" class="hidden" style="margin-top:8px"><input id="publicGuestPhone" type="tel" inputmode="tel" placeholder="Numéro de mobile de l’invité"><div class="muted" style="margin-top:4px">Le numéro est demandé uniquement pour créer sa fiche membre. Il reste privé et visible uniquement par l’administrateur.</div></div><div class="space"></div><button id="publicAddGuest" class="primary">+ Ajouter mon invité</button></div>'+
-      '<div id="publicRegStatus" class="muted" style="margin-top:8px">Les places sont attribuées dans l’ordre des inscriptions.</div>'+
+      '<div id="publicRegStatus" class="muted" style="margin-top:8px">Les places sont attribuées dans l’ordre des inscriptions. Quand le quota est atteint, les inscriptions suivantes sont automatiquement inscrites comme remplaçants.</div>'+
       '<h3 style="margin-top:18px">👥 Inscrits</h3><div id="publicRegisteredList"></div>'+
-      '<div id="publicWaitWrap" class="'+(waiting?'':'hidden')+'"><h3 style="margin-top:14px">🟠 Liste d’attente</h3><div id="publicWaitList"></div></div>';
+      '<div id="publicWaitWrap" class="'+(waiting?'':'hidden')+'"><h3 style="margin-top:14px">🟠 Remplaçants</h3><div id="publicWaitList"></div></div>';
     renderPublicRegistrationList();
 
     function updateSelectedRegistrationStatus(){
@@ -1609,7 +1668,7 @@ async function bootPublic(token){
       if(!pid){status.textContent='Choisis ton nom pour voir ton statut.';return}
       const reg=registrations.find(r=>r.tournament_id===regTour.id&&r.player_id===pid);
       if(!reg){status.textContent='⚪ Tu n’es pas encore inscrit à ce tournoi.';return}
-      status.textContent=reg.registration_status==='waitlist'?'🟠 Tu es déjà sur la liste d’attente. Tu peux tout de même ajouter un invité ci-dessous.':'🟢 Tu es déjà inscrit et confirmé. Tu peux ajouter un invité directement ci-dessous.';
+      status.textContent=reg.registration_status==='waitlist'?'🟠 Tu es inscrit comme remplaçant. Tu peux tout de même ajouter un invité ci-dessous.':'🟢 Tu es déjà inscrit et confirmé. Tu peux ajouter un invité directement ci-dessous.';
     }
     $('#publicPlayerSelect').onchange=updateSelectedRegistrationStatus;
     updateSelectedRegistrationStatus();
@@ -1644,7 +1703,7 @@ async function bootPublic(token){
       const b=$('#publicJoin');b.disabled=true;
       const {data,error}=await sb.rpc('public_tournament_registration',{p_token:token,p_tournament_id:regTour.id,p_player_id:pid,p_action:'join'});
       b.disabled=false;if(error)return $('#publicRegStatus').textContent=error.message;
-      $('#publicRegStatus').textContent=data?.status==='waitlist'?'🟠 Tu es sur la liste d’attente.':'🟢 Inscription confirmée !';
+      $('#publicRegStatus').textContent=data?.status==='waitlist'?'🟠 Le quota est atteint : tu es inscrit comme remplaçant.':'🟢 Inscription confirmée !';
       await refreshPublicRegistration();
     };
     $('#publicLeave').onclick=async()=>{
@@ -1667,12 +1726,32 @@ async function bootPublic(token){
       const {data,error}=await sb.rpc('public_register_tournament_guest',{p_token:token,p_tournament_id:regTour.id,p_host_player_id:host,p_guest_name:guestName,p_phone_number:phone||null,p_add_as_member:addMember});
       b.disabled=false;if(error)return $('#publicRegStatus').textContent=error.message;
       $('#publicGuestName').value='';$('#publicGuestPhone').value='';$('#publicGuestMember').checked=false;
-      $('#publicRegStatus').textContent=(data?.status==='waitlist'?'🟠 Invité ajouté sur la liste d’attente.':'🟢 Invité ajouté et confirmé !')+(data?.member?' Il est aussi enregistré comme membre du groupe.':'');
+      $('#publicRegStatus').textContent=(data?.status==='waitlist'?'🟠 Quota atteint : l’invité est inscrit comme remplaçant.':'🟢 Invité ajouté et confirmé !')+(data?.member?' Il est aussi enregistré comme membre du groupe.':'');
       await refreshPublicRegistration();
     };
     window.setInterval(refreshPublicRegistration,8000);
   }else{
     regBox.innerHTML='<p class="muted">Aucune inscription ouverte actuellement.</p>';
+  }
+
+  const entryChoiceCard=$('#publicEntryChoiceCard');
+  const soloCard=$('#publicRegistrationCard');
+  const teamCard=$('#publicTeamBuilderCard');
+  function setPublicEntryMode(mode){
+    if(!entryChoiceCard||!soloCard||!teamCard)return;
+    entryChoiceCard.classList.toggle('hidden',!!mode);
+    soloCard.classList.toggle('hidden',mode!=='solo');
+    teamCard.classList.toggle('hidden',mode!=='team');
+    if(mode)window.scrollTo({top:0,behavior:'smooth'});
+  }
+  if(regTour){
+    $('#chooseSoloMode').onclick=()=>setPublicEntryMode('solo');
+    $('#chooseTeamMode').onclick=()=>setPublicEntryMode('team');
+    $('#backFromSoloMode').onclick=()=>setPublicEntryMode(null);
+    $('#backFromTeamMode').onclick=()=>setPublicEntryMode(null);
+    setPublicEntryMode(null);
+  }else if(entryChoiceCard){
+    entryChoiceCard.classList.add('hidden');
   }
 
   const teamBuilder=$('#publicTeamBuilder');
@@ -1682,20 +1761,16 @@ async function bootPublic(token){
     if(!regTour){
       teamBuilderCard.classList.add('hidden');return;
     }
-    teamBuilderCard.classList.remove('hidden');
     const regs=registrations.filter(r=>r.tournament_id===regTour.id&&r.present&&r.registration_status!=='waitlist');
     const confirmedIds=new Set(regs.map(r=>r.player_id));
     const currentTeamIds=new Set(teams.filter(t=>t.tournament_id===regTour.id).map(t=>t.id));
     const alreadyAssigned=new Set(teamPlayers.filter(tp=>currentTeamIds.has(tp.team_id)).map(tp=>tp.player_id));
-    const creators=players.filter(pl=>pl.active&&pl.is_group_member!==false&&confirmedIds.has(pl.id)).sort((a,b)=>a.name.localeCompare(b.name));
+    const creators=players.filter(pl=>pl.active&&pl.is_group_member!==false).sort((a,b)=>a.name.localeCompare(b.name));
     teamBuilder.innerHTML=
-      '<div class="player" style="background:#f8fbf9"><b>🔐 Réservé aux membres autorisés</b><div class="muted" style="margin-top:5px;line-height:1.6">Pour créer une équipe, sélectionne ton nom et saisis le code personnel obtenu auprès de l’administrateur. Ce code reste confidentiel.</div></div>'+
-      '<div class="space"></div><select id="publicTeamCreator"><option value="">Ton nom</option>'+creators.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')+'</select>'+
-      '<div class="space"></div><input id="publicTeamCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="Ton code équipe à 6 chiffres">'+
-      '<div class="space"></div><input id="publicTeamName" maxlength="30" placeholder="Nom de ton équipe">'+
-      '<div id="publicTeamMateBox" style="margin-top:12px"><p class="muted">Sélectionne d’abord ton nom.</p></div>'+
-      '<div class="player" style="margin-top:12px"><b>👥 Ajouter des invités</b><div class="muted" style="margin:4px 0 8px">Tu peux compléter ton équipe avec des membres du groupe et/ou jusqu’à 4 invités. Équipe limitée à 5 joueurs avec toi compris.</div><div id="publicTeamGuests"><input data-team-guest placeholder="Nom de l’invité 1"></div><div class="row" style="margin-top:8px"><button id="publicAddTeamGuest" type="button">+ Ajouter un invité</button></div></div>'+
-      '<div class="space"></div><button id="publicCreateTeam" class="primary">🧩 Créer mon équipe</button>'+
+      '<div class="player" style="background:linear-gradient(145deg,#eef5ff,#f8fbff);border:1px solid #d7e7fb"><div style="font-size:1.05rem;font-weight:800">🔐 Étape 1 — Identifie-toi</div><div class="muted" style="margin-top:5px;line-height:1.6">Tous les membres actifs du groupe sont disponibles. Ton code personnel confirme que l’administrateur t’autorise à composer une équipe.</div><div class="space"></div><select id="publicTeamCreator"><option value="">Choisis ton nom</option>'+creators.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')+'</select><div class="space"></div><input id="publicTeamCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="Code équipe à 6 chiffres"></div>'+
+      '<div class="player" style="margin-top:12px;background:#fbfcfd"><div style="font-size:1.05rem;font-weight:800">🛡️ Étape 2 — Donne une identité à ton équipe</div><div class="muted" style="margin-top:5px">Choisis un nom court et reconnaissable.</div><div class="space"></div><input id="publicTeamName" maxlength="30" placeholder="Ex. Les Lions, Team Nord, FC Poto..."></div>'+
+      '<div class="player" style="margin-top:12px"><div style="font-size:1.05rem;font-weight:800">👥 Étape 3 — Compose ton groupe</div><div class="muted" style="margin-top:5px">Choisis des membres du groupe et/ou ajoute des invités. Avec toi, l’équipe ne peut pas dépasser 5 joueurs.</div><div id="publicTeamMateBox" style="margin-top:12px"><p class="muted">Sélectionne d’abord ton nom.</p></div><div style="height:1px;background:#e8ecef;margin:14px 0"></div><b>➕ Ajouter des invités</b><div class="muted" style="margin:4px 0 8px">Tu peux ajouter jusqu’à 4 invités si tu ne sélectionnes aucun autre membre.</div><div id="publicTeamGuests"><input data-team-guest placeholder="Nom de l’invité 1"></div><div class="row" style="margin-top:8px"><button id="publicAddTeamGuest" type="button">+ Ajouter un invité</button></div></div>'+
+      '<div class="space"></div><button id="publicCreateTeam" class="primary" style="width:100%;padding:14px;font-size:1.05rem">🔥 Valider mon équipe</button>'+
       '<div id="publicTeamStatus" class="muted" style="margin-top:8px"></div>';
 
     const creatorSel=$('#publicTeamCreator');
@@ -1706,8 +1781,8 @@ async function bootPublic(token){
       if(alreadyAssigned.has(creator)){
         mateBox.innerHTML='<p class="muted">Tu appartiens déjà à une équipe pour ce tournoi.</p>';return;
       }
-      const available=players.filter(pl=>confirmedIds.has(pl.id)&&pl.id!==creator&&!alreadyAssigned.has(pl.id)).sort((a,b)=>a.name.localeCompare(b.name));
-      mateBox.innerHTML='<b>Choisis jusqu’à 4 coéquipiers</b><div class="muted" style="margin:3px 0 8px">Ton nom sera ajouté automatiquement à l’équipe.</div>'+
+      const available=players.filter(pl=>pl.active&&pl.is_group_member!==false&&pl.id!==creator&&!alreadyAssigned.has(pl.id)).sort((a,b)=>a.name.localeCompare(b.name));
+      mateBox.innerHTML='<b>Membres du groupe</b><div class="muted" style="margin:3px 0 8px">Choisis jusqu’à 4 joueurs. Les joueurs sélectionnés seront automatiquement inscrits au tournoi avec l’équipe.</div>'+
         (available.map(pl=>'<label class="row" style="justify-content:flex-start;margin:5px 0"><input type="checkbox" data-team-mate="'+pl.id+'" style="width:auto"><span>'+esc(pl.name)+'</span></label>').join('')||'<p class="muted">Aucun autre joueur disponible.</p>');
       mateBox.querySelectorAll('[data-team-mate]').forEach(cb=>cb.onchange=()=>{
         const checked=[...mateBox.querySelectorAll('[data-team-mate]:checked')];
@@ -1744,7 +1819,7 @@ async function bootPublic(token){
       });
       btn.disabled=false;
       if(error)return status.textContent=error.message;
-      status.textContent='🟢 Équipe créée avec succès !';
+      status.textContent='🟢 Équipe créée ! Les joueurs sélectionnés ont aussi été inscrits au tournoi.';
       $('#publicTeamCode').value='';$('#publicTeamName').value='';
       try{
         const snap=await sb.rpc('get_public_workspace_snapshot',{p_token:token});
