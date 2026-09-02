@@ -50,7 +50,7 @@
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V32</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V33</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="loginCard" class="card">
       <h2 class="sectiontitle">Connexion</h2>
       <input id="email" type="email" placeholder="Email" autocomplete="email">
@@ -842,32 +842,87 @@ $('#addTeam').onclick=async()=>{const t=currentTour(),name=$('#teamName').value.
 $('#autoTeams').onclick=async()=>{const ids=[...presentIds()];if(S.teams.length<2||!ids.length)return toast('Il faut au moins 2 équipes et des présents.');for(const x of S.teamPlayers)await sb.from('team_players').delete().eq('team_id',x.team_id).eq('player_id',x.player_id);ids.sort(()=>Math.random()-.5);const rows=ids.map((id,i)=>({team_id:S.teams[i%S.teams.length].id,player_id:id}));const {error}=await sb.from('team_players').insert(rows);error?toast(error.message):toast('Répartition effectuée')};
 
 function matchOptions(){return '<option value="">Choisir</option>'+S.teams.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')}
-function renderMatches(){$('#homeTeam').innerHTML=matchOptions();$('#awayTeam').innerHTML=matchOptions();const box=$('#matchesList');box.innerHTML='';S.matches.forEach((m,i)=>{const home=tm(m.home_team_id),away=tm(m.away_team_id);if(!home||!away)return;const d=document.createElement('div');d.className='card match';d.innerHTML='<div class="muted">Match '+(i+1)+(m.pitch?' • '+esc(m.pitch):'')+'</div><div class="row" style="justify-content:space-between"><b>'+esc(home.name)+'</b><span class="score">'+m.home_score+' - '+m.away_score+'</span><b>'+esc(away.name)+'</b></div>';const form=document.createElement('div');form.className='grid g3';const team=document.createElement('select'),sc=document.createElement('select'),as=document.createElement('select');team.innerHTML='<option value="'+home.id+'">'+esc(home.name)+'</option><option value="'+away.id+'">'+esc(away.name)+'</option>';
-const savedTeam=S.goalTeamSelections[m.id];
-if(savedTeam===home.id||savedTeam===away.id)team.value=savedTeam;
-function fill(){
-  S.goalTeamSelections[m.id]=team.value;
-  const ids=teamPlayerIds(team.value);
-  sc.innerHTML='<option value="">Buteur</option>'+ids.map(id=>'<option value="'+id+'">'+esc(playerDisplayName(p(id))||'')+'</option>').join('');
-  as.innerHTML='<option value="">Sans passe</option>'+ids.map(id=>'<option value="'+id+'">'+esc(playerDisplayName(p(id))||'')+'</option>').join('')
+function renderMatches(){
+  $('#homeTeam').innerHTML=matchOptions();
+  $('#awayTeam').innerHTML=matchOptions();
+  const box=$('#matchesList');box.innerHTML='';
+  S.matches.forEach((m,i)=>{
+    const home=tm(m.home_team_id),away=tm(m.away_team_id);if(!home||!away)return;
+    const d=document.createElement('div');d.className='card match';
+    d.innerHTML='<div class="muted">Match '+(i+1)+(m.pitch?' • '+esc(m.pitch):'')+(m.round_label?' • '+esc(m.round_label):'')+'</div><div class="row" style="justify-content:space-between"><b>'+esc(home.name)+'</b><span class="score">'+m.home_score+' - '+m.away_score+'</span><b>'+esc(away.name)+'</b></div>';
+
+    if(canEditCurrentMatches()){
+      const actions=document.createElement('div');actions.className='row';actions.style.marginTop='8px';
+      const edit=document.createElement('button');edit.textContent='Modifier';
+      const del=document.createElement('button');del.textContent='Supprimer';del.className='danger';
+      actions.append(edit,del);d.appendChild(actions);
+
+      edit.onclick=async()=>{
+        const editor=document.createElement('div');editor.className='grid g2';editor.style.marginTop='8px';
+        const hs=document.createElement('select'),as2=document.createElement('select'),ps=document.createElement('select'),rl=document.createElement('input');
+        hs.innerHTML=S.teams.map(t=>'<option value="'+t.id+'">'+esc(t.name)+'</option>').join('');
+        as2.innerHTML=S.teams.map(t=>'<option value="'+t.id+'">'+esc(t.name)+'</option>').join('');
+        ps.innerHTML='<option value="">Terrain</option><option value="Carrefour">Carrefour</option><option value="Mercedes">Mercedes</option><option value="Boulogne">Boulogne</option>';
+        hs.value=m.home_team_id;as2.value=m.away_team_id;ps.value=m.pitch||'';rl.value=m.round_label||'';rl.placeholder='Tour / phase (facultatif)';
+        const save=document.createElement('button');save.textContent='Enregistrer';save.className='primary';
+        const cancel=document.createElement('button');cancel.textContent='Annuler';
+        editor.append(hs,as2,ps,rl,save,cancel);
+        d.appendChild(editor);edit.disabled=true;
+        cancel.onclick=()=>{editor.remove();edit.disabled=false};
+        save.onclick=async()=>{
+          if(hs.value===as2.value)return toast('Choisis deux équipes différentes');
+          save.disabled=true;
+          const {error}=await sb.from('matches').update({home_team_id:hs.value,away_team_id:as2.value,pitch:ps.value||null,round_label:rl.value.trim()||null}).eq('id',m.id);
+          if(error){save.disabled=false;return toast(error.message)}
+          await loadTournament();renderAll();toast('Match modifié ✅');
+        };
+      };
+
+      del.onclick=async()=>{
+        const goalCount=S.goals.filter(g=>g.match_id===m.id).length;
+        const msg=goalCount?'Supprimer ce match ? Les '+goalCount+' but(s) liés seront aussi supprimés.':'Supprimer ce match ?';
+        if(!confirm(msg))return;
+        const {error}=await sb.from('matches').delete().eq('id',m.id);
+        if(error)return toast(error.message);
+        await loadTournament();renderAll();toast('Match supprimé ✅');
+      };
+    }
+
+    const form=document.createElement('div');form.className='grid g3';
+    const team=document.createElement('select'),sc=document.createElement('select'),as=document.createElement('select');
+    team.innerHTML='<option value="'+home.id+'">'+esc(home.name)+'</option><option value="'+away.id+'">'+esc(away.name)+'</option>';
+    const savedTeam=S.goalTeamSelections[m.id];
+    if(savedTeam===home.id||savedTeam===away.id)team.value=savedTeam;
+    function fill(){
+      S.goalTeamSelections[m.id]=team.value;
+      const ids=teamPlayerIds(team.value);
+      sc.innerHTML='<option value="">Buteur</option>'+ids.map(id=>'<option value="'+id+'">'+esc(playerDisplayName(p(id))||'')+'</option>').join('');
+      as.innerHTML='<option value="">Sans passe</option>'+ids.map(id=>'<option value="'+id+'">'+esc(playerDisplayName(p(id))||'')+'</option>').join('');
+    }
+    fill();team.onchange=fill;form.append(team,sc,as);
+    const b=document.createElement('button');b.textContent='+ But';b.className='primary';
+    b.onclick=async()=>{
+      if(!sc.value)return toast('Choisis le buteur');
+      if(as.value===sc.value)return toast('Buteur et passeur différents');
+      const selectedTeam=team.value;S.goalTeamSelections[m.id]=selectedTeam;b.disabled=true;
+      const {error}=await sb.from('goals').insert({match_id:m.id,team_id:selectedTeam,scorer_player_id:sc.value,assister_player_id:as.value||null});
+      b.disabled=false;if(error)return toast(error.message);
+      sc.value='';as.value='';await loadTournament();renderAll();toast('But ajouté ✅');
+    };
+    if(canEditCurrentMatches())d.append(form,b);
+
+    const hist=document.createElement('div');hist.style.marginTop='8px';
+    S.goals.filter(g=>g.match_id===m.id).forEach(g=>{
+      const r=document.createElement('div');r.className='row small';
+      r.innerHTML='<span style="flex:1">⚽ '+esc(p(g.scorer_player_id)?.name||'?')+(g.assister_player_id?' ← '+esc(p(g.assister_player_id)?.name||''):'')+'</span>';
+      const x=document.createElement('button');x.textContent='Annuler';
+      x.onclick=async()=>{const {error}=await sb.from('goals').delete().eq('id',g.id);if(error)return toast(error.message);await loadTournament();renderAll();toast('But annulé')};
+      if(canEditCurrentMatches())r.appendChild(x);hist.appendChild(r);
+    });
+    d.appendChild(hist);box.appendChild(d);
+  });
 }
-fill();
-team.onchange=fill;form.append(team,sc,as);const b=document.createElement('button');b.textContent='+ But';b.className='primary';b.onclick=async()=>{
-  if(!sc.value)return toast('Choisis le buteur');
-  if(as.value===sc.value)return toast('Buteur et passeur différents');
-  const selectedTeam=team.value;
-  S.goalTeamSelections[m.id]=selectedTeam;
-  b.disabled=true;
-  const {error}=await sb.from('goals').insert({match_id:m.id,team_id:selectedTeam,scorer_player_id:sc.value,assister_player_id:as.value||null});
-  b.disabled=false;
-  if(error)return toast(error.message);
-  sc.value='';
-  as.value='';
-  // Ne dépend plus du Realtime : on recharge immédiatement le tournoi.
-  await loadTournament();
-  renderAll();
-  toast('But ajouté ✅');
-};if(canEditCurrentMatches())d.append(form,b);const hist=document.createElement('div');hist.style.marginTop='8px';S.goals.filter(g=>g.match_id===m.id).forEach(g=>{const r=document.createElement('div');r.className='row small';r.innerHTML='<span style="flex:1">⚽ '+esc(p(g.scorer_player_id)?.name||'?')+(g.assister_player_id?' ← '+esc(p(g.assister_player_id)?.name||''):'')+'</span>';const x=document.createElement('button');x.textContent='Annuler';x.onclick=async()=>{const {error}=await sb.from('goals').delete().eq('id',g.id);if(error)return toast(error.message);await loadTournament();renderAll();toast('But annulé')};if(canEditCurrentMatches())r.appendChild(x);hist.appendChild(r)});d.appendChild(hist);box.appendChild(d)})}
+
 $('#addMatch').onclick=async()=>{const t=currentTour(),home=$('#homeTeam').value,away=$('#awayTeam').value;if(!t||!home||!away||home===away)return toast('Choisis deux équipes différentes');const {error}=await sb.from('matches').insert({tournament_id:t.id,home_team_id:home,away_team_id:away,match_order:S.matches.length+1,pitch:$('#pitch').value||null,round_label:$('#roundLabel').value.trim()||null});if(error)toast(error.message);else{$('#pitch').value='';$('#roundLabel').value=''}};
 $('#roundRobin').onclick=async()=>{const t=currentTour();if(!t||S.teams.length<2)return toast('Crée les équipes d’abord');const existing=new Set(S.matches.map(m=>[m.home_team_id,m.away_team_id].sort().join('|'))),rows=[];let n=S.matches.length+1;for(let i=0;i<S.teams.length;i++)for(let j=i+1;j<S.teams.length;j++){const key=[S.teams[i].id,S.teams[j].id].sort().join('|');if(!existing.has(key))rows.push({tournament_id:t.id,home_team_id:S.teams[i].id,away_team_id:S.teams[j].id,match_order:n++})}if(!rows.length)return toast('Tous les matchs existent déjà');const {error}=await sb.from('matches').insert(rows);error?toast(error.message):toast(rows.length+' matchs générés')};
 
