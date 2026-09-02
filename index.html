@@ -61,13 +61,21 @@ select{background-color:#fff} textarea{resize:vertical}
 @media(max-width:650px){
   body{background:#f3f7f4}.app{padding:0 12px 94px}.top{border-radius:0 0 24px 24px;margin:0 -12px 14px;padding:18px 16px 20px}.top h1{font-size:21px}.card{border-radius:17px;padding:14px;margin:10px 0}.g2,.g3{grid-template-columns:1fr}.sectiontitle{font-size:17px}.tabs{width:100%;border-radius:18px 18px 0 0;grid-template-columns:repeat(auto-fit,minmax(50px,1fr));padding-left:4px;padding-right:4px}.tabs button{font-size:9.5px}.score{font-size:23px;min-width:78px}.match>.row{display:grid!important;grid-template-columns:1fr auto 1fr;gap:6px}.match>.row>b:last-child{text-align:right}.match button{min-height:48px}.match .row.small{display:flex!important}.rank{grid-template-columns:36px 1fr 76px}.auth{margin:0 auto}.auth .top{margin-top:0}
 }
+
+#publicTeams{display:flex;gap:12px;overflow-x:auto;align-items:stretch;padding:4px 2px 10px;scroll-snap-type:x proximity}
+#publicTeams .public-team-card{flex:0 0 210px;min-width:210px;border-radius:18px;padding:0;overflow:hidden;scroll-snap-align:start;border:1px solid rgba(0,0,0,.08);box-shadow:0 6px 18px rgba(0,0,0,.08)}
+#publicTeams .public-team-head{padding:13px 14px;font-weight:900;font-size:1.05rem}
+#publicTeams .public-team-shirt{font-size:.78rem;font-weight:800;margin-top:3px;opacity:.92}
+#publicTeams .public-team-players{padding:10px 12px;background:rgba(255,255,255,.94);min-height:120px}
+#publicTeams .public-team-player{padding:7px 0;border-bottom:1px solid #edf2ef}
+#publicTeams .public-team-player:last-child{border-bottom:0}
 </style>
 </head>
 <body>
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.4</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.5</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -110,7 +118,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.4</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.5</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -280,7 +288,7 @@ select{background-color:#fff} textarea{resize:vertical}
         <div id="teamNoCreatePermission" class="readonly-note hidden"></div>
         <div id="teamManagementControls">
           <div class="grid g2">
-            <div class="row"><input id="teamName" placeholder="Rouges, Bleus..." style="flex:1"><button id="addTeam">Ajouter</button></div>
+            <div class="row"><input id="teamName" placeholder="Nom équipe" style="flex:1"><select id="teamColor" title="Couleur des maillots"><option value="#111827">Noir</option><option value="#2563eb">Bleu</option><option value="#f8fafc">Blanc</option><option value="#dc2626">Rouge</option><option value="#16a34a">Vert</option><option value="#eab308">Jaune</option><option value="#f97316">Orange</option><option value="#7c3aed">Violet</option><option value="#ec4899">Rose</option><option value="#78350f">Marron</option><option value="#64748b">Gris</option></select><button id="addTeam">Ajouter</button></div>
             <div class="row"><input id="playersPerTeam" type="number" min="2" max="11" value="5" style="max-width:120px"><button id="smartAutoTeams" class="primary">⚡ Générer équipes équilibrées</button></div>
           </div>
           <div id="teamBalanceInfo" class="muted" style="margin-top:8px"></div>
@@ -462,7 +470,7 @@ select{background-color:#fff} textarea{resize:vertical}
     </div>
 
     <div class="card">
-      <h2 class="sectiontitle">👥 Équipes du dernier tournoi</h2>
+      <h2 class="sectiontitle">👥 Équipes & couleurs des maillots</h2>
       <div id="publicTeams"></div>
     </div>
 
@@ -1777,7 +1785,7 @@ function renderTeams(){
     box.appendChild(d);
   });
 }
-$('#addTeam').onclick=async()=>{if(!(hasAdminOps()||(isCoorg()&&S.myPermissions.can_generate_teams)))return toast('Tu n’as pas l’autorisation de créer une équipe.');const t=currentTour(),name=$('#teamName').value.trim();if(!t||!name)return;const {error}=await sb.from('teams').insert({tournament_id:t.id,name});if(error)return toast(error.message);$('#teamName').value=''};
+$('#addTeam').onclick=async()=>{if(!(hasAdminOps()||(isCoorg()&&S.myPermissions.can_generate_teams)))return toast('Tu n’as pas l’autorisation de créer une équipe.');const t=currentTour(),name=$('#teamName').value.trim(),color=$('#teamColor').value;if(!t||!name)return;const {error}=await sb.from('teams').insert({tournament_id:t.id,name,color});if(error)return toast(error.message);$('#teamName').value=''};
 $('#smartAutoTeams').onclick=async()=>{
   if(isCoorg()&&!hasTemporaryAdmin()&&!S.myPermissions.can_generate_teams)return toast('Tu n’es pas autorisé à générer les équipes.');
   const t=currentTour();if(!t)return toast('Ouvre un tournoi.');
@@ -2525,7 +2533,7 @@ async function bootPublic(token){
     const creators=players.filter(pl=>pl.active&&pl.is_group_member!==false).sort((a,b)=>a.name.localeCompare(b.name));
     teamBuilder.innerHTML=
       '<div class="player" style="background:linear-gradient(145deg,#eef5ff,#f8fbff);border:1px solid #d7e7fb"><div style="font-size:1.05rem;font-weight:800">🔐 Étape 1 — Identifie-toi</div><div class="muted" style="margin-top:5px;line-height:1.6">Tous les membres actifs du groupe sont disponibles. Le code équipe fourni par l’administrateur du groupe confirme que tu es autorisé à composer une équipe.</div><div class="space"></div><select id="publicTeamCreator"><option value="">Choisis ton nom</option>'+creators.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')+'</select><div class="space"></div><input id="publicTeamCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="Code fourni par l’administrateur (6 chiffres)"></div>'+
-      '<div class="player" style="margin-top:12px;background:#fbfcfd"><div style="font-size:1.05rem;font-weight:800">🛡️ Étape 2 — Donne une identité à ton équipe</div><div class="muted" style="margin-top:5px">Choisis un nom court et reconnaissable.</div><div class="space"></div><input id="publicTeamName" maxlength="30" placeholder="Ex. Les Lions, Team Nord, FC Poto..."></div>'+
+      '<div class="player" style="margin-top:12px;background:#fbfcfd"><div style="font-size:1.05rem;font-weight:800">🛡️ Étape 2 — Donne une identité à ton équipe</div><div class="muted" style="margin-top:5px">Choisis un nom court et indique obligatoirement la couleur des maillots.</div><div class="space"></div><input id="publicTeamName" maxlength="30" placeholder="Ex. Les Lions, Team Nord, FC Poto..."><div class="space"></div><select id="publicTeamColor"><option value="">Couleur des maillots</option><option value="#111827">Noir</option><option value="#2563eb">Bleu</option><option value="#f8fafc">Blanc</option><option value="#dc2626">Rouge</option><option value="#16a34a">Vert</option><option value="#eab308">Jaune</option><option value="#f97316">Orange</option><option value="#7c3aed">Violet</option><option value="#ec4899">Rose</option><option value="#78350f">Marron</option><option value="#64748b">Gris</option></select></div>'+
       '<div class="player" style="margin-top:12px"><div style="font-size:1.05rem;font-weight:800">👥 Étape 3 — Compose ton groupe</div><div class="muted" style="margin-top:5px">Choisis des membres du groupe et/ou ajoute des invités. Avec toi, l’équipe ne peut pas dépasser 5 joueurs.</div><div id="publicTeamMateBox" style="margin-top:12px"><p class="muted">Sélectionne d’abord ton nom.</p></div><div style="height:1px;background:#e8ecef;margin:14px 0"></div><b>➕ Ajouter des invités</b><div class="muted" style="margin:4px 0 8px">Tu peux ajouter jusqu’à 4 invités si tu ne sélectionnes aucun autre membre.</div><div id="publicTeamGuests"><input data-team-guest placeholder="Nom de l’invité 1"></div><div class="row" style="margin-top:8px"><button id="publicAddTeamGuest" type="button">+ Ajouter un invité</button></div></div>'+
       '<div class="space"></div><button id="publicCreateTeam" class="primary" style="width:100%;padding:14px;font-size:1.05rem">🔥 Valider mon équipe</button>'+
       '<div id="publicTeamStatus" class="muted" style="margin-top:8px"></div>';
@@ -2563,16 +2571,18 @@ async function bootPublic(token){
       const creator=creatorSel.value;
       const code=$('#publicTeamCode').value.trim();
       const name=$('#publicTeamName').value.trim();
+      const color=$('#publicTeamColor').value;
       const status=$('#publicTeamStatus');
       if(!creator)return status.textContent='Choisis ton nom.';
       if(!code)return status.textContent='Entre le code équipe fourni par l’administrateur du groupe.';
       if(!name)return status.textContent='Donne un nom à ton équipe.';
+      if(!color)return status.textContent='Choisis la couleur des maillots de ton équipe.';
       const mates=[...mateBox.querySelectorAll('[data-team-mate]:checked')].map(x=>x.dataset.teamMate);
       const guests=[...guestsBox.querySelectorAll('[data-team-guest]')].map(x=>x.value.trim()).filter(Boolean);
       if(mates.length+guests.length>4)return status.textContent='Tu peux choisir au maximum 4 coéquipiers au total avec toi.';
       const btn=$('#publicCreateTeam');btn.disabled=true;
-      const {data,error}=await sb.rpc('public_create_team_with_member_code',{
-        p_token:token,p_tournament_id:regTour.id,p_player_id:creator,p_code:code,p_team_name:name,p_player_ids:mates,p_guest_names:guests
+      const {data,error}=await sb.rpc('public_create_team_with_member_code_v2',{
+        p_token:token,p_tournament_id:regTour.id,p_player_id:creator,p_code:code,p_team_name:name,p_team_color:color,p_player_ids:mates,p_guest_names:guests
       });
       btn.disabled=false;
       if(error)return status.textContent=error.message;
@@ -2589,6 +2599,37 @@ async function bootPublic(token){
     };
   }
   renderPublicTeamBuilder();
+
+
+  const TEAM_COLOR_META={
+    '#111827':['Noir','Noirs','Noire','Noires'],
+    '#2563eb':['Bleu','Bleus','Bleue','Bleues'],
+    '#f8fafc':['Blanc','Blancs','Blanche','Blanches'],
+    '#dc2626':['Rouge','Rouges'],
+    '#16a34a':['Vert','Verts','Verte','Vertes'],
+    '#eab308':['Jaune','Jaunes'],
+    '#f97316':['Orange','Oranges'],
+    '#7c3aed':['Violet','Violets','Violette','Violettes'],
+    '#ec4899':['Rose','Roses'],
+    '#78350f':['Marron','Marrons'],
+    '#64748b':['Gris','Grise','Grises']
+  };
+  function inferredTeamColor(team){
+    if(team?.color)return String(team.color).toLowerCase();
+    const name=String(team?.name||'').trim().toLowerCase();
+    for(const [hex,names] of Object.entries(TEAM_COLOR_META)){
+      if(names.some(n=>n.toLowerCase()===name))return hex;
+    }
+    return '#eef2f3';
+  }
+  function teamColorLabel(team){
+    const hex=inferredTeamColor(team);
+    const meta=TEAM_COLOR_META[hex];
+    return meta?meta[0]:'Non précisée';
+  }
+  function teamTextColor(hex){
+    return ['#f8fafc','#eab308'].includes(hex)?'#111827':'#ffffff';
+  }
 
   const pmap=new Map(players.map(x=>[x.id,x]));
   const tmap=new Map(teams.map(x=>[x.id,x]));
@@ -2651,7 +2692,12 @@ async function bootPublic(token){
     trs.sort((a,b)=>b.pts-a.pts||(b.bp-b.bc)-(a.bp-a.bc)||b.bp-a.bp||a.name.localeCompare(b.name));
     $('#publicTeamRanking').innerHTML=trs.map((x,i)=>'<div class="rank"><b>'+(i+1)+'</b><span><b>'+esc(x.name)+'</b><div class="muted">'+x.mj+' MJ • '+x.v+' V • '+x.n+' N • '+x.d+' D • '+x.bp+' BP • '+x.bc+' BC • Diff '+((x.bp-x.bc)>=0?'+':'')+(x.bp-x.bc)+'</div></span><b class="right">'+x.pts+' pts</b></div>').join('')||'<p class="muted">Aucun classement disponible.</p>';
 
-    $('#publicTeams').innerHTML=lteams.map(team=>'<div class="team"><b>'+esc(team.name)+'</b>'+teamPlayers.filter(tp=>tp.team_id===team.id).map(tp=>{const pl=pmap.get(tp.player_id);return pl?'<div class="small" style="margin-top:6px">'+esc(pl.name)+(pl.is_group_member===false?' <span class="guest-badge">Guest</span>':'')+'</div>':''}).join('')+'</div>').join('')||'<p class="muted">Aucune équipe.</p>';
+    $('#publicTeams').innerHTML=lteams.map(team=>{
+      const bg=inferredTeamColor(team),fg=teamTextColor(bg),label=teamColorLabel(team);
+      const colorNamed=Object.values(TEAM_COLOR_META).flat().some(n=>n.toLowerCase()===String(team.name||'').trim().toLowerCase());
+      const playersHtml=teamPlayers.filter(tp=>tp.team_id===team.id).map(tp=>{const pl=pmap.get(tp.player_id);return pl?'<div class="public-team-player">'+esc(pl.name)+(pl.is_group_member===false?' <span class="guest-badge">Guest</span>':'')+'</div>':''}).join('');
+      return '<div class="public-team-card"><div class="public-team-head" style="background:'+bg+';color:'+fg+'"><div>'+esc(team.name)+'</div>'+(!colorNamed?'<div class="public-team-shirt">👕 Maillots : '+esc(label)+'</div>':'')+'</div><div class="public-team-players">'+(playersHtml||'<div class="muted">Aucun joueur</div>')+'</div></div>';
+    }).join('')||'<p class="muted">Aucune équipe.</p>';
     $('#publicResults').innerHTML=lm.map((m,i)=>{
       const mg=goals.filter(g=>g.match_id===m.id);
       const goalLines=mg.map(g=>{
