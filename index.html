@@ -75,7 +75,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.18</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.19</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -118,7 +118,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.18</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.19</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -506,7 +506,7 @@ select{background-color:#fff} textarea{resize:vertical}
     <div class="card" id="publicEntryChoiceCard">
       <div style="text-align:center;margin-bottom:14px">
         <h2 class="sectiontitle" style="font-size:1.35rem">⚽ Comment tu viens dimanche ?</h2>
-        <div class="muted" style="line-height:1.6">Tu peux venir seul, avec tes potes ou ton équipe. Ce tournoi est réservé aux membres du groupe du <b>Swé Arena Dimanche 9h</b>. Vous devez faire partie de ce groupe ou vous faire inviter par un des membres. Pour créer une équipe, utilise le code fourni par l’administrateur du groupe.</div>
+        <div class="muted" style="line-height:1.6">Tu peux venir seul, avec tes potes ou ton équipe. Ce tournoi est réservé aux membres du groupe du <b>Swé Arena Dimanche 9h</b>. Si tu n’es pas membre, tu dois obligatoirement être invité par un membre du groupe. Un membre peut inviter quelqu’un même s’il ne participe pas lui-même au tournoi. Pour créer une équipe, utilise le code fourni par l’administrateur du groupe.</div>
       </div>
       <div class="grid g2" style="gap:12px">
         <button id="chooseSoloMode" type="button" style="padding:0;border:0;background:linear-gradient(145deg,#0f5132,#198754);color:white;border-radius:18px;overflow:hidden;text-align:left;box-shadow:0 10px 24px rgba(15,81,50,.18)">
@@ -2797,6 +2797,7 @@ async function bootPublic(token){
     return host?'Guest de '+host.name:'Guest';
   }
   function isFirstTimePublicPlayer(playerId,tournamentId){
+    if(regTour?.format!=='league')return false;
     const pl=players.find(x=>x.id===playerId);
     if(!pl||pl.is_group_member!==false)return false;
     return !registrations.some(r=>r.player_id===playerId&&r.tournament_id!==tournamentId&&r.present);
@@ -2839,8 +2840,14 @@ async function bootPublic(token){
       '<div class="space"></div><select id="publicPlayerSelect"><option value="">Choisis ton nom</option>'+players.filter(x=>x.active&&x.is_group_member!==false).sort((a,b)=>a.name.localeCompare(b.name)).map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')+'</select>'+
       '<div id="publicSelectedStatus" class="muted" style="margin-top:7px">Choisis ton nom pour voir ton statut.</div>'+
       '<div class="space"></div><div class="row"><button id="publicJoin" class="primary">✅ Je participe</button><button id="publicLeave">❌ Je ne participe pas</button></div>'+
-      '<div class="player" style="margin-top:12px;background:#fffdf4;border:1px solid #f2df9b"><b>🆕 Première fois ?</b><div class="muted" style="margin:5px 0 8px">Tu n’es pas encore membre du groupe ? Entre ton nom pour t’inscrire directement à ce Swé.</div><input id="publicNewPlayerName" maxlength="60" placeholder="Ton prénom / nom"><div class="space"></div><button id="publicNewPlayerJoin" class="primary">M’inscrire pour la première fois</button></div>'+
-      '<div class="player" style="margin-top:12px"><b>👤 Tes invités</b><div class="muted" style="margin:4px 0 8px">Sélectionne ton nom ci-dessus puis ajoute tes invités un par un. Tu peux en ajouter jusqu’à <b>5 au total</b> pour ce Swé. <b>Même si tu es déjà inscrit dans une équipe</b>, tu peux revenir dans cette rubrique et ajouter des invités : ils seront inscrits au Swé, sans être ajoutés automatiquement à ton équipe.</div><input id="publicGuestName" placeholder="Nom de l’invité"><label class="row" style="margin-top:8px;justify-content:flex-start"><input id="publicGuestMember" type="checkbox" style="width:auto"><span>Ajouter cet invité comme membre du groupe</span></label><div id="publicGuestPhoneWrap" class="hidden" style="margin-top:8px"><input id="publicGuestPhone" type="tel" inputmode="tel" placeholder="Numéro de mobile de l’invité"><div class="muted" style="margin-top:4px">Le numéro est demandé uniquement pour créer sa fiche membre. Il reste privé et visible uniquement par l’administrateur.</div></div><div class="space"></div><button id="publicAddGuest" class="primary">+ Ajouter mon invité</button></div>'+
+      (regTour.format==='league'
+        ? '<div class="player" style="margin-top:12px;background:#fffdf4;border:1px solid #f2df9b"><b>🆕 Première fois ?</b><div class="muted" style="margin:5px 0 8px">Tu n’es pas encore membre du groupe ? Entre ton nom pour t’inscrire à cette Ligue.</div><input id="publicNewPlayerName" maxlength="60" placeholder="Ton prénom / nom"><div class="space"></div><button id="publicNewPlayerJoin" class="primary">M’inscrire pour la première fois</button></div>'
+        : '<div class="player" style="margin-top:12px;background:#fff7ed;border:1px solid #fed7aa"><b>🤝 Tu ne participes pas mais tu invites quelqu’un ?</b><div class="muted" style="margin-top:6px;line-height:1.6">Aucun problème : <b>sélectionne simplement ton nom</b> dans la liste ci-dessus, sans cliquer sur « Je participe », puis saisis le nom de ton invité ci-dessous. Ton invité sera rattaché à ton nom et <b>toi, tu ne seras pas inscrit au tournoi</b>.</div></div>')+
+      '<div class="player" style="margin-top:12px"><b>👤 Tes invités</b><div class="muted" style="margin:4px 0 8px">'+
+        (regTour.format==='league'
+          ? 'Sélectionne ton nom ci-dessus puis ajoute tes invités un par un. Tu peux en ajouter jusqu’à <b>5 au total</b> pour ce Swé.'
+          : 'Pour un tournoi, une personne extérieure ne peut pas s’inscrire seule : elle doit être <b>invitée par un membre du groupe</b>. Sélectionne ton nom puis ajoute ton ou tes invités, même si toi-même tu ne participes pas. Tu peux en ajouter jusqu’à <b>5 au total</b>.')+
+      '</div><input id="publicGuestName" placeholder="Nom de l’invité"><label class="row" style="margin-top:8px;justify-content:flex-start"><input id="publicGuestMember" type="checkbox" style="width:auto"><span>Ajouter cet invité comme membre du groupe</span></label><div id="publicGuestPhoneWrap" class="hidden" style="margin-top:8px"><input id="publicGuestPhone" type="tel" inputmode="tel" placeholder="Numéro de mobile de l’invité"><div class="muted" style="margin-top:4px">Le numéro est demandé uniquement pour créer sa fiche membre. Il reste privé et visible uniquement par l’administrateur.</div></div><div class="space"></div><button id="publicAddGuest" class="primary">+ Ajouter mon invité</button></div>'+
       '<div id="publicRegStatus" class="muted" style="margin-top:8px">Les places sont attribuées dans l’ordre des inscriptions. Quand le quota est atteint, les inscriptions suivantes sont automatiquement inscrites comme remplaçants.</div>'+
       '<h3 style="margin-top:18px">👥 Inscrits</h3><div id="publicRegisteredList"></div>'+
       '<div id="publicWaitWrap" class="'+(waiting?'':'hidden')+'"><h3 style="margin-top:14px">🟠 Remplaçants</h3><div id="publicWaitList"></div></div>';
@@ -2852,7 +2859,12 @@ async function bootPublic(token){
       if(!status)return;
       if(!pid){status.textContent='Choisis ton nom pour voir ton statut.';return}
       const reg=registrations.find(r=>r.tournament_id===regTour.id&&r.player_id===pid);
-      if(!reg){status.textContent='⚪ Tu n’es pas encore inscrit à ce tournoi.';return}
+      if(!reg){
+        status.textContent=regTour.format==='league'
+          ?'⚪ Tu n’es pas encore inscrit à cette Ligue.'
+          :'⚪ Tu ne participes pas actuellement. Tu peux quand même inviter quelqu’un ci-dessous sans t’inscrire.';
+        return;
+      }
       const assignedTeamIds=new Set(teams.filter(t=>t.tournament_id===regTour.id).map(t=>t.id));
       const inTeam=teamPlayers.some(tp=>tp.player_id===pid&&assignedTeamIds.has(tp.team_id));
       status.textContent=reg.registration_status==='waitlist'
@@ -2895,7 +2907,7 @@ async function bootPublic(token){
       $('#publicRegStatus').textContent=data?.status==='waitlist'?'🟠 Le quota est atteint : tu es inscrit comme remplaçant.':'🟢 Inscription confirmée !';
       await refreshPublicRegistration();
     };
-    $('#publicNewPlayerJoin').onclick=async()=>{
+    if($('#publicNewPlayerJoin'))$('#publicNewPlayerJoin').onclick=async()=>{
       const name=$('#publicNewPlayerName').value.trim();
       if(!name)return $('#publicRegStatus').textContent='Entre ton nom pour t’inscrire.';
       const b=$('#publicNewPlayerJoin');b.disabled=true;
@@ -2930,7 +2942,8 @@ async function bootPublic(token){
       $('#publicGuestName').value='';$('#publicGuestPhone').value='';$('#publicGuestMember').checked=false;
       const used=registrations.filter(r=>r.tournament_id===regTour.id&&r.registered_by_player_id===host).length+1;
       const remaining=Math.max(0,5-used);
-      $('#publicRegStatus').textContent=(data?.status==='waitlist'?'🟠 Quota atteint : l’invité est inscrit comme remplaçant.':'🟢 Invité ajouté et confirmé !')+(data?.member?' Il est aussi enregistré comme membre du groupe.':'')+' • '+remaining+' invitation'+(remaining>1?'s':'')+' restante'+(remaining>1?'s':'')+'.';
+      const hostIsRegistered=registrations.some(r=>r.tournament_id===regTour.id&&r.player_id===host&&r.present);
+      $('#publicRegStatus').textContent=(data?.status==='waitlist'?'🟠 Quota atteint : l’invité est inscrit comme remplaçant.':'🟢 Invité ajouté et confirmé !')+(data?.member?' Il est aussi enregistré comme membre du groupe.':'')+(!hostIsRegistered&&regTour.format!=='league'?' Tu restes non inscrit au tournoi.':'')+' • '+remaining+' invitation'+(remaining>1?'s':'')+' restante'+(remaining>1?'s':'')+'.';
       await refreshPublicRegistration();
     };
     window.setInterval(refreshPublicRegistration,8000);
