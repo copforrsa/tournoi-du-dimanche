@@ -75,7 +75,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.5</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.6</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -118,7 +118,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.5</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.6</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -300,6 +300,7 @@ select{background-color:#fff} textarea{resize:vertical}
     <div id="view-matches" class="view">
       <div class="card" id="matchCreateAdminCard">
         <h2 class="sectiontitle">Créer les matchs</h2>
+        <div id="leaguePitchRequirement" class="readonly-note hidden"><b>📍 Match de Ligue :</b> le terrain est obligatoire pour chaque match (Carrefour, Mercedes, Boulogne…).</div>
         <button id="roundRobin">Générer tous les matchs</button>
         <div class="space"></div>
         <div class="grid g2"><select id="homeTeam"></select><select id="awayTeam"></select></div>
@@ -345,13 +346,18 @@ select{background-color:#fff} textarea{resize:vertical}
 
       <div class="card" id="leagueSessionCard">
         <h2 class="sectiontitle">Créer un Swé de Ligue</h2>
-        <p class="muted">Les membres inscrits à la Ligue sont automatiquement ajoutés à la journée. Le Swé utilise ensuite les mêmes outils de matchs, buts et passes, mais ses statistiques restent rattachées à cette Ligue.</p>
-        <div class="grid g2">
-          <input id="leagueSessionDate" type="date">
-          <input id="leagueSessionName" placeholder="Ex. Swé Ligue #1">
+        <p class="muted">Choisis d’abord la Ligue à laquelle ce Swé appartient. Les buts et passes resteront rattachés uniquement à cette Ligue.</p>
+        <div id="noLeagueForSession" class="readonly-note hidden"></div>
+        <div id="leagueSessionForm">
+          <label class="player"><span class="muted">Ligue concernée</span><select id="leagueSessionLeague"><option value="">Choisir une Ligue</option></select></label>
+          <div class="space"></div>
+          <div class="grid g2">
+            <input id="leagueSessionDate" type="date">
+            <input id="leagueSessionName" placeholder="Ex. Swé Ligue #1">
+          </div>
+          <div class="space"></div>
+          <button id="createLeagueSession" class="primary">Créer le Swé de Ligue</button>
         </div>
-        <div class="space"></div>
-        <button id="createLeagueSession" class="primary">Créer le Swé de Ligue</button>
       </div>
 
       <div class="card">
@@ -1807,6 +1813,15 @@ $('#smartAutoTeams').onclick=async()=>{
 
 function matchOptions(){return '<option value="">Choisir</option>'+S.teams.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')}
 function renderMatches(){
+  const current=currentTour();
+  const isLeagueMatch=current?.format==='league';
+  const req=$('#leaguePitchRequirement');
+  if(req)req.classList.toggle('hidden',!isLeagueMatch);
+  const rr=$('#roundRobin');
+  if(rr){
+    rr.disabled=!!isLeagueMatch;
+    rr.title=isLeagueMatch?'En Ligue, crée chaque match individuellement afin d’indiquer son terrain.':'';
+  }
   $('#homeTeam').innerHTML=matchOptions();
   $('#awayTeam').innerHTML=matchOptions();
   const box=$('#matchesList');box.innerHTML='';
@@ -1887,8 +1902,15 @@ function renderMatches(){
   });
 }
 
-$('#addMatch').onclick=async()=>{if(isCoorg()&&!hasTemporaryAdmin()&&!S.myPermissions.can_enter_scores)return toast('Tu n’es pas autorisé à saisir les scores.');const t=currentTour(),home=$('#homeTeam').value,away=$('#awayTeam').value;if(!t||!home||!away||home===away)return toast('Choisis deux équipes différentes');const {error}=await sb.from('matches').insert({tournament_id:t.id,home_team_id:home,away_team_id:away,match_order:S.matches.length+1,pitch:$('#pitch').value||null,round_label:$('#roundLabel').value.trim()||null});if(error)toast(error.message);else{$('#pitch').value='';$('#roundLabel').value=''}};
-$('#roundRobin').onclick=async()=>{const t=currentTour();if(!t||S.teams.length<2)return toast('Crée les équipes d’abord');const existing=new Set(S.matches.map(m=>[m.home_team_id,m.away_team_id].sort().join('|'))),rows=[];let n=S.matches.length+1;for(let i=0;i<S.teams.length;i++)for(let j=i+1;j<S.teams.length;j++){const key=[S.teams[i].id,S.teams[j].id].sort().join('|');if(!existing.has(key))rows.push({tournament_id:t.id,home_team_id:S.teams[i].id,away_team_id:S.teams[j].id,match_order:n++})}if(!rows.length)return toast('Tous les matchs existent déjà');const {error}=await sb.from('matches').insert(rows);error?toast(error.message):toast(rows.length+' matchs générés')};
+$('#addMatch').onclick=async()=>{
+  if(isCoorg()&&!hasTemporaryAdmin()&&!S.myPermissions.can_enter_scores)return toast('Tu n’es pas autorisé à saisir les scores.');
+  const t=currentTour(),home=$('#homeTeam').value,away=$('#awayTeam').value,pitch=$('#pitch').value;
+  if(!t||!home||!away||home===away)return toast('Choisis deux équipes différentes');
+  if(t.format==='league'&&!pitch)return toast('Pour un match de Ligue, indique obligatoirement le terrain.');
+  const {error}=await sb.from('matches').insert({tournament_id:t.id,home_team_id:home,away_team_id:away,match_order:S.matches.length+1,pitch:pitch||null,round_label:$('#roundLabel').value.trim()||null});
+  if(error)toast(error.message);else{$('#pitch').value='';$('#roundLabel').value=''}
+};
+$('#roundRobin').onclick=async()=>{const t=currentTour();if(!t||S.teams.length<2)return toast('Crée les équipes d’abord');if(t.format==='league')return toast('En Ligue, crée les matchs un par un afin d’indiquer le terrain de chaque match.');const existing=new Set(S.matches.map(m=>[m.home_team_id,m.away_team_id].sort().join('|'))),rows=[];let n=S.matches.length+1;for(let i=0;i<S.teams.length;i++)for(let j=i+1;j<S.teams.length;j++){const key=[S.teams[i].id,S.teams[j].id].sort().join('|');if(!existing.has(key))rows.push({tournament_id:t.id,home_team_id:S.teams[i].id,away_team_id:S.teams[j].id,match_order:n++})}if(!rows.length)return toast('Tous les matchs existent déjà');const {error}=await sb.from('matches').insert(rows);error?toast(error.message):toast(rows.length+' matchs générés')};
 
 
 async function renderLeague(){
@@ -1904,6 +1926,29 @@ async function renderLeague(){
 
   if($('#leagueStart')&&!$('#leagueStart').value)$('#leagueStart').value=today();
   if($('#leagueSessionDate')&&!$('#leagueSessionDate').value)$('#leagueSessionDate').value=today();
+
+  const leagueSessionSelect=$('#leagueSessionLeague');
+  const leagueSessionForm=$('#leagueSessionForm');
+  const noLeague=$('#noLeagueForSession');
+  const activeLeagues=S.leagues.filter(l=>l.status!=='finished');
+  if(leagueSessionSelect){
+    const keep=leagueSessionSelect.value||S.activeLeague||'';
+    leagueSessionSelect.innerHTML='<option value="">Choisir une Ligue</option>'+activeLeagues.map(l=>'<option value="'+l.id+'">'+esc(l.name)+'</option>').join('');
+    if(activeLeagues.some(l=>l.id===keep))leagueSessionSelect.value=keep;
+    leagueSessionSelect.onchange=()=>{if(leagueSessionSelect.value){S.activeLeague=leagueSessionSelect.value;renderLeague();}};
+  }
+  if(!activeLeagues.length){
+    if(leagueSessionForm)leagueSessionForm.classList.add('hidden');
+    if(noLeague){
+      noLeague.classList.remove('hidden');
+      noLeague.innerHTML=hasAdminOps()
+        ? '<b>ℹ️ Aucune Ligue disponible.</b><div style="margin-top:5px">Crée d’abord une Ligue dans la section « Créer une Ligue » avant de pouvoir créer un Swé de Ligue.</div>'
+        : '<b>ℹ️ Aucune Ligue disponible.</b><div style="margin-top:5px">Demande à l’administrateur de créer une Ligue avant de pouvoir créer un Swé de Ligue.</div>';
+    }
+  }else{
+    if(leagueSessionForm)leagueSessionForm.classList.remove('hidden');
+    if(noLeague)noLeague.classList.add('hidden');
+  }
 
   const list=$('#leagueList');list.innerHTML='';
   if(!S.leagues.length)list.innerHTML='<p class="muted">Aucune Ligue créée pour le moment.</p>';
@@ -1992,13 +2037,15 @@ $('#createLeague').onclick=async()=>{
 };
 
 $('#createLeagueSession').onclick=async()=>{
-  const league=S.leagues.find(l=>l.id===S.activeLeague);
-  if(!league)return toast('Sélectionne une Ligue.');
+  if(!S.leagues.some(l=>l.status!=='finished'))return toast(hasAdminOps()?'Crée d’abord une Ligue.':'Demande à l’administrateur de créer une Ligue.');
+  const leagueId=$('#leagueSessionLeague')?.value||'';
+  const league=S.leagues.find(l=>l.id===leagueId&&l.status!=='finished');
+  if(!league)return toast('Choisis la Ligue concernée.');
   const date=$('#leagueSessionDate').value;if(!date)return toast('Choisis la date du Swé.');
   const {data,error}=await sb.rpc('create_league_session',{p_league_id:league.id,p_date:date,p_name:$('#leagueSessionName').value.trim()||null,p_max_players:100});
   if(error)return toast(error.message);
-  S.activeTour=data;$('#leagueSessionName').value='';
-  await loadAll();setView('league');toast('Swé de Ligue créé ✅');
+  S.activeLeague=league.id;S.activeTour=data;$('#leagueSessionName').value='';
+  await loadAll();setView('league');toast('Swé créé dans « '+league.name+' » ✅');
 };
 
 $('#generateLeagueTeams').onclick=async()=>{
