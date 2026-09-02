@@ -75,7 +75,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.27</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.28</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -118,7 +118,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.27</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.28</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -2551,13 +2551,33 @@ async function renderLeague(){
       '<div class="muted" style="margin-top:3px">📍 '+esc(pitchLabels.length?(complexLabel(t.complex_id)+' • '+pitchLabels.join(', ')):(t.venue||'Terrain non renseigné'))+(t.start_time?' • 🕘 '+esc(String(t.start_time).slice(0,5)):'')+' • 💶 '+(Number(t.entry_fee_cents||0)/100).toLocaleString('fr-FR')+' €</div>'+
       (t.reservation_reference?'<div class="muted">Réservation : '+esc(t.reservation_reference)+'</div>':'')+
       '</span></div>';
-    const row=document.createElement('div');row.className='row';row.style.marginTop='8px';
+    const row=document.createElement('div');row.className='row';row.style.marginTop='8px';row.style.flexWrap='wrap';
     const open=document.createElement('button');open.textContent=t.id===S.activeTour?'Swé sélectionné':'Ouvrir';open.onclick=async()=>{S.activeTour=t.id;await loadTournament();renderAll();toast('Swé de Ligue sélectionné')};row.appendChild(open);
     if(t.registration_open&&S.workspace?.public_token){
       const share=document.createElement('button');share.textContent='🔗 Lien de ce Swé';
       const url=registrationLink(t);
       share.onclick=async()=>{try{await navigator.clipboard.writeText(url);toast('Lien du Swé copié ✅')}catch(e){}};
       row.appendChild(share);
+    }
+    if(isAdmin()){
+      const del=document.createElement('button');
+      del.className='danger';
+      del.textContent='🗑️ Supprimer le Swé';
+      del.onclick=async()=>{
+        const label=t.name||('Swé du '+t.tournament_date);
+        const warning='⚠️ SUPPRESSION IRRÉVERSIBLE\n\nLe Swé « '+label+' » va être supprimé définitivement.\n\nCela supprimera aussi ses inscriptions, équipes, match(s), scores, buts et passes décisives rattachés à ce Swé.\n\nLes autres Swés et la Ligue ne seront pas supprimés.\n\nConfirmer la suppression ?';
+        if(!confirm(warning))return;
+        const typed=prompt('Pour confirmer, saisis exactement SUPPRIMER');
+        if(typed!=='SUPPRIMER')return toast('Suppression annulée.');
+        del.disabled=true;del.textContent='Suppression…';
+        const {error}=await sb.rpc('delete_league_session_admin',{p_tournament_id:t.id});
+        if(error){del.disabled=false;del.textContent='🗑️ Supprimer le Swé';return toast(error.message);}
+        if(S.activeTour===t.id)S.activeTour=null;
+        await loadAll();
+        setView('league');
+        toast('Swé supprimé définitivement ✅');
+      };
+      row.appendChild(del);
     }
     d.appendChild(row);box.appendChild(d);
   });
@@ -3626,7 +3646,7 @@ async function bootPublic(token){
   const pmap=new Map(players.map(x=>[x.id,x]));
   const tmap=new Map(teams.map(x=>[x.id,x]));
 
-  // V39.27 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
+  // V39.28 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
   if(wantsLeagueSession&&regTour){
     const linkedLeague=leagues.find(l=>l.id===regTour.league_id)||null;
     const linkLeagueId=publicParams.get('league');
