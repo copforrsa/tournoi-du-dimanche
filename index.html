@@ -75,7 +75,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.14</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.15</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -118,7 +118,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.14</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.15</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -471,7 +471,7 @@ select{background-color:#fff} textarea{resize:vertical}
     <div class="card" id="publicEntryChoiceCard">
       <div style="text-align:center;margin-bottom:14px">
         <h2 class="sectiontitle" style="font-size:1.35rem">⚽ Comment tu viens dimanche ?</h2>
-        <div class="muted">Choisis ton mode d’inscription. On ne t’affichera ensuite que ce dont tu as besoin.</div>
+        <div class="muted" style="line-height:1.6">Tu peux venir seul, avec tes potes ou ton équipe. Ce tournoi est réservé aux membres du groupe du <b>Swé Arena Dimanche 9h</b>. Vous devez faire partie de ce groupe ou vous faire inviter par un des membres. Pour créer une équipe, utilise le code fourni par l’administrateur du groupe.</div>
       </div>
       <div class="grid g2" style="gap:12px">
         <button id="chooseSoloMode" type="button" style="padding:0;border:0;background:linear-gradient(145deg,#0f5132,#198754);color:white;border-radius:18px;overflow:hidden;text-align:left;box-shadow:0 10px 24px rgba(15,81,50,.18)">
@@ -525,20 +525,24 @@ select{background-color:#fff} textarea{resize:vertical}
       <div id="publicTeams"></div>
     </div>
 
-    <div class="card">
-      <h2 class="sectiontitle">🏆 Buteurs de la saison</h2>
-      <div id="publicSeasonScorers"></div>
-    </div>
-
-    <div class="card">
-      <h2 class="sectiontitle">🎯 Passeurs de la saison</h2>
-      <div id="publicSeasonAssists"></div>
+    <div class="grid g2" style="align-items:start">
+      <div class="card">
+        <h2 class="sectiontitle">🏆 Meilleurs buteurs</h2>
+        <div id="publicSeasonScorers"></div>
+        <button id="togglePublicSeasonScorers" type="button" class="hidden" style="margin-top:10px">Développer</button>
+      </div>
+      <div class="card">
+        <h2 class="sectiontitle">🎯 Meilleurs passeurs</h2>
+        <div id="publicSeasonAssists"></div>
+        <button id="togglePublicSeasonAssists" type="button" class="hidden" style="margin-top:10px">Développer</button>
+      </div>
     </div>
 
     <div class="card">
       <h2 class="sectiontitle">🏅 Victoires individuelles de la saison</h2>
       <p class="muted">Chaque joueur cumule ses matchs gagnés avec son équipe et les tournois remportés pendant la saison.</p>
       <div id="publicSeasonWins"></div>
+      <button id="togglePublicSeasonWins" type="button" class="hidden" style="margin-top:10px">Développer</button>
     </div>
 
     <div class="card">
@@ -2803,7 +2807,7 @@ async function bootPublic(token){
     $('#chooseTeamMode').classList.remove('hidden');
     if(regTour.format==='league'){
       const title=entryChoiceCard?.querySelector('.sectiontitle');if(title)title.textContent='🏁 Inscription à la Ligue';
-      const help=entryChoiceCard?.querySelector('.muted');if(help)help.textContent='Tu peux venir seul ou avec une équipe complète. Pour créer une équipe, utilise le code fourni par l’administrateur du groupe.';
+      const help=entryChoiceCard?.querySelector('.muted');if(help)help.innerHTML='Tu peux venir seul, avec tes potes ou ton équipe. Ce tournoi est réservé aux membres du groupe du <b>Swé Arena Dimanche 9h</b>. Vous devez faire partie de ce groupe ou vous faire inviter par un des membres. Pour créer une équipe, utilise le code fourni par l’administrateur du groupe.';
     }
     const teamBtn=$('#chooseTeamMode');
     if(teamBtn){
@@ -3014,11 +3018,25 @@ async function bootPublic(token){
   });
   let scor=[...gs.values()].filter(x=>x.g).sort((a,b)=>b.g-a.g||b.a-a.a||a.name.localeCompare(b.name));
   let prev=null,rank=0;scor=scor.map((x,i)=>{if(x.g!==prev){rank=i+1;prev=x.g}return {...x,rank}});
-  $('#publicSeasonScorers').innerHTML=scor.map(x=>'<div class="rank '+(x.guest?'guest-row':'')+'"><b>'+x.rank+'</b><span>'+esc(x.name)+(x.guest?' <span class="guest-badge">Guest</span>':'')+'</span><b class="right">'+x.g+' but'+(x.g>1?'s':'')+'</b></div>').join('')||'<p class="muted">Aucun but enregistré.</p>';
+  let publicScorersExpanded=false;
+  const renderPublicSeasonScorers=()=>{
+    const visible=publicScorersExpanded?scor:scor.slice(0,10);
+    $('#publicSeasonScorers').innerHTML=visible.map(x=>'<div class="rank '+(x.guest?'guest-row':'')+'"><b>'+x.rank+'</b><span>'+esc(x.name)+(x.guest?' <span class="guest-badge">Guest</span>':'')+'</span><b class="right">'+x.g+' but'+(x.g>1?'s':'')+'</b></div>').join('')||'<p class="muted">Aucun but enregistré.</p>';
+    const b=$('#togglePublicSeasonScorers');if(b){b.classList.toggle('hidden',scor.length<=10);b.textContent=publicScorersExpanded?'Réduire':'Développer';}
+  };
+  renderPublicSeasonScorers();
+  if($('#togglePublicSeasonScorers'))$('#togglePublicSeasonScorers').onclick=()=>{publicScorersExpanded=!publicScorersExpanded;renderPublicSeasonScorers();};
 
   let seasonAss=[...gs.values()].filter(x=>x.a).sort((a,b)=>b.a-a.a||b.g-a.g||a.name.localeCompare(b.name));
   let aprev=null,arank=0;seasonAss=seasonAss.map((x,i)=>{if(x.a!==aprev){arank=i+1;aprev=x.a}return {...x,rank:arank}});
-  $('#publicSeasonAssists').innerHTML=seasonAss.map(x=>'<div class="rank '+(x.guest?'guest-row':'')+'"><b>'+x.rank+'</b><span>'+esc(x.name)+(x.guest?' <span class="guest-badge">Guest</span>':'')+'</span><b class="right">'+x.a+' passe'+(x.a>1?'s':'')+'</b></div>').join('')||'<p class="muted">Aucune passe enregistrée.</p>';
+  let publicAssistsExpanded=false;
+  const renderPublicSeasonAssists=()=>{
+    const visible=publicAssistsExpanded?seasonAss:seasonAss.slice(0,10);
+    $('#publicSeasonAssists').innerHTML=visible.map(x=>'<div class="rank '+(x.guest?'guest-row':'')+'"><b>'+x.rank+'</b><span>'+esc(x.name)+(x.guest?' <span class="guest-badge">Guest</span>':'')+'</span><b class="right">'+x.a+' passe'+(x.a>1?'s':'')+'</b></div>').join('')||'<p class="muted">Aucune passe enregistrée.</p>';
+    const b=$('#togglePublicSeasonAssists');if(b){b.classList.toggle('hidden',seasonAss.length<=10);b.textContent=publicAssistsExpanded?'Réduire':'Développer';}
+  };
+  renderPublicSeasonAssists();
+  if($('#togglePublicSeasonAssists'))$('#togglePublicSeasonAssists').onclick=()=>{publicAssistsExpanded=!publicAssistsExpanded;renderPublicSeasonAssists();};
 
   const seasonWinStats=new Map(players.map(x=>[x.id,{id:x.id,name:x.name,matchWins:0,tournamentWins:0,guest:x.is_group_member===false}]));
   const seasonTours=tournaments.filter(t=>t.format!=='league'&&t.status==='finished'&&(!activeSeason||t.season_id===activeSeason.id));
@@ -3041,11 +3059,18 @@ async function bootPublic(token){
   });
   const winRows=[...seasonWinStats.values()].filter(x=>x.matchWins||x.tournamentWins)
     .sort((a,b)=>b.tournamentWins-a.tournamentWins||b.matchWins-a.matchWins||a.name.localeCompare(b.name));
-  $('#publicSeasonWins').innerHTML=winRows.map((x,i)=>
-    '<div class="rank '+(x.guest?'guest-row':'')+'"><b>'+(i+1)+'</b><span><b>'+esc(x.name)+'</b>'+(x.guest?' <span class="guest-badge">Guest</span>':'')+
-    '<div class="muted">'+x.matchWins+' match'+(x.matchWins>1?'s':'')+' gagné'+(x.matchWins>1?'s':'')+'</div></span>'+
-    '<b class="right">🏆 '+x.tournamentWins+' tournoi'+(x.tournamentWins>1?'s':'')+'</b></div>'
-  ).join('')||'<p class="muted">Aucune victoire enregistrée pour cette saison.</p>';
+  let publicWinsExpanded=false;
+  const renderPublicSeasonWins=()=>{
+    const visible=publicWinsExpanded?winRows:winRows.slice(0,5);
+    $('#publicSeasonWins').innerHTML=visible.map((x,i)=>
+      '<div class="rank '+(x.guest?'guest-row':'')+'"><b>'+(winRows.indexOf(x)+1)+'</b><span><b>'+esc(x.name)+'</b>'+(x.guest?' <span class="guest-badge">Guest</span>':'')+
+      '<div class="muted">'+x.matchWins+' match'+(x.matchWins>1?'s':'')+' gagné'+(x.matchWins>1?'s':'')+'</div></span>'+
+      '<b class="right">🏆 '+x.tournamentWins+' tournoi'+(x.tournamentWins>1?'s':'')+'</b></div>'
+    ).join('')||'<p class="muted">Aucune victoire enregistrée pour cette saison.</p>';
+    const b=$('#togglePublicSeasonWins');if(b){b.classList.toggle('hidden',winRows.length<=5);b.textContent=publicWinsExpanded?'Réduire':'Développer la liste';}
+  };
+  renderPublicSeasonWins();
+  if($('#togglePublicSeasonWins'))$('#togglePublicSeasonWins').onclick=()=>{publicWinsExpanded=!publicWinsExpanded;renderPublicSeasonWins();};
 
   const latest=tournaments.find(t=>t.format!=='league'&&t.status==='finished')||tournaments.find(t=>t.format!=='league');
   if(latest){
