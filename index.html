@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#101827">
+  <meta name="theme-color" content="#071b12">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Tournoi Foot">
@@ -13,44 +13,61 @@
 <link rel="icon" type="image/png" href="./favicon.png">
 <link rel="apple-touch-icon" href="./icon-192.png">
   <style>
-    :root{--bg:#f4f7fb;--card:#fff;--text:#172033;--muted:#70809b;--border:#e4e9f1;--nav:#101827;--accent:#2359c4}
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
-    .app{max-width:960px;margin:auto;padding:14px 14px 92px}
-    .top{background:linear-gradient(135deg,#101827,#253b66);color:#fff;border-radius:20px;padding:18px;margin-bottom:12px}
-    .top h1{margin:0;font-size:22px} .top .muted{color:#d7e0ef}
-    .muted{color:var(--muted);font-size:13px} .small{font-size:12px}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:15px;margin:10px 0;box-shadow:0 6px 18px rgba(23,32,51,.04)}
-    button,input,select,textarea{font:inherit} button{min-height:44px;border:0;border-radius:12px;padding:10px 14px;font-weight:700;background:#edf2f8;color:var(--text);cursor:pointer}
-    .primary{background:var(--accent);color:white} .green{background:#e9f8ef;color:#176c3c} .danger{background:#fff1f1;color:#a42727}
-    input,select,textarea{width:100%;min-height:44px;border:1px solid #dbe2ec;border-radius:12px;padding:10px;background:#fff;color:var(--text)}
-    .row{display:flex;gap:9px;align-items:center;flex-wrap:wrap} .grid{display:grid;gap:10px} .g2{grid-template-columns:repeat(2,minmax(0,1fr))} .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
-    .hidden{display:none!important} .view{display:none} .view.active{display:block}
-    .tabs{position:fixed;bottom:0;left:0;right:0;z-index:10;display:flex;justify-content:center;gap:2px;background:rgba(255,255,255,.97);border-top:1px solid #dfe5ee;padding:7px 5px calc(7px + env(safe-area-inset-bottom))}
-    .tabs button{background:transparent;font-size:11px;padding:7px 8px} .tabs button.active{background:#172033;color:#fff}
-    .player,.team,.match{border:1px solid #e2e7ef;border-radius:14px;padding:11px;margin:7px 0}
-    .score{font-size:25px;font-weight:900} .rank{display:grid;grid-template-columns:42px 1fr 65px;gap:8px;padding:9px 0;border-bottom:1px solid #edf0f5}
-    .rank:last-child{border-bottom:0} .right{text-align:right} .toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:50;background:#172033;color:#fff;padding:10px 15px;border-radius:12px;display:none;max-width:92%}
-    .auth{max-width:440px;margin:8vh auto} .space{height:8px} .sectiontitle{font-size:17px;margin:0 0 10px}
-    @media(max-width:650px){.g2,.g3{grid-template-columns:1fr}.top{border-radius:0;margin:-14px -14px 12px}.tabs{overflow-x:auto;justify-content:flex-start}}
-  
-.guest-row{opacity:.58;filter:grayscale(.25)}
-.guest-badge{display:inline-block;font-size:.78rem;padding:2px 7px;border-radius:999px;background:#e5e7eb;color:#4b5563;margin-left:6px}
-.guest-note{font-size:.82rem;color:#6b7280}
-
-
-.readonly-note{padding:10px 12px;border-radius:12px;background:#f3f6fa;color:#52617a;font-size:13px;margin:8px 0}
-.public-title{font-size:22px;margin:0}
-.public-sub{color:#d7e0ef;margin-top:4px}
-.visual-actions button{min-width:0}
-@media(max-width:650px){.visual-actions{grid-template-columns:1fr!important}}
+:root{
+  --bg:#f4f7f5;--card:#fff;--text:#101b16;--muted:#697970;--border:#e3eae6;
+  --nav:#071b12;--nav2:#0b2a1b;--accent:#17803d;--accent2:#22a34a;--accent-soft:#eaf7ef;
+  --danger:#d92d20;--danger-soft:#fff1f0;--warning:#b7791f;--shadow:0 10px 28px rgba(17,52,35,.08);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg);scroll-behavior:smooth}
+body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(180deg,#eef5f0 0,#f7f9f8 220px);color:var(--text);font-size:15px;line-height:1.45}
+button,input,select,textarea{font:inherit}
+button{min-height:46px;border:1px solid transparent;border-radius:13px;padding:10px 15px;font-weight:800;background:#eef3f0;color:#21342a;cursor:pointer;transition:.15s transform,.15s box-shadow,.15s background}
+button:active{transform:scale(.98)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid rgba(34,163,74,.18);outline-offset:1px}
+.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 6px 16px rgba(23,128,61,.2)}
+.green{background:var(--accent-soft);color:#147137;border-color:#ccebd7}.danger{background:var(--danger-soft);color:var(--danger);border-color:#ffd0cc}
+input,select,textarea{width:100%;min-height:48px;border:1px solid #d9e4dd;border-radius:13px;padding:11px 13px;background:#fff;color:var(--text);box-shadow:inset 0 1px 0 rgba(255,255,255,.7)}
+select{background-color:#fff} textarea{resize:vertical}
+.app{max-width:1180px;margin:auto;padding:18px 18px 104px}
+.top{position:relative;overflow:hidden;background:linear-gradient(135deg,#061a11,#0d3822 75%,#15522e);color:#fff;border-radius:24px;padding:20px 22px;margin-bottom:16px;box-shadow:0 12px 30px rgba(4,37,21,.2)}
+.top:after{content:"⚽";position:absolute;right:-18px;bottom:-42px;font-size:128px;opacity:.055;transform:rotate(-14deg)}
+.top h1{position:relative;z-index:1;margin:0;font-size:24px;letter-spacing:-.4px}.top .muted{color:#bcd1c4}.top button{position:relative;z-index:2;background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.18)}
+.muted{color:var(--muted);font-size:13px}.small{font-size:12px}.space{height:10px}.hidden{display:none!important}.view{display:none}.view.active{display:block}
+.card{background:rgba(255,255,255,.96);border:1px solid var(--border);border-radius:20px;padding:18px;margin:12px 0;box-shadow:var(--shadow)}
+.sectiontitle{display:flex;align-items:center;gap:8px;font-size:18px;letter-spacing:-.2px;margin:0 0 13px;color:#13261c}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.grid{display:grid;gap:12px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.player,.team,.match{border:1px solid #e0e9e3;border-radius:16px;padding:13px;margin:9px 0;background:linear-gradient(180deg,#fff,#fbfdfc)}
+.match{box-shadow:0 5px 14px rgba(20,55,35,.04)}.match>.muted:first-child{font-weight:800;text-transform:uppercase;letter-spacing:.35px;color:#5f7568}
+.score{display:inline-flex;align-items:center;justify-content:center;min-width:88px;min-height:46px;padding:4px 12px;border-radius:14px;background:#071b12;color:#fff;font-size:25px;font-weight:950;letter-spacing:.5px}
+.rank{display:grid;grid-template-columns:42px 1fr 88px;gap:9px;align-items:center;padding:11px 0;border-bottom:1px solid #edf2ef}.rank:last-child{border-bottom:0}.rank>b:first-child{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#edf7f0;color:#12713a}.right{text-align:right}
+.toast{position:fixed;top:max(14px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:100;background:#071b12;color:#fff;padding:11px 16px;border-radius:13px;display:none;max-width:92%;box-shadow:0 12px 28px rgba(0,0,0,.25)}
+.auth{max-width:460px;margin:7vh auto}.auth .card{padding:22px}
+#homeStats>div{border:1px solid #e1ebe5!important;background:linear-gradient(145deg,#fff,#f5faf6)!important;border-radius:16px!important;padding:14px!important}
+#view-home>.card:first-child{background:linear-gradient(145deg,#fff,#f1f8f3)}
+#view-home .grid.g2 button[data-go]{min-height:64px;text-align:left;padding:14px 16px;background:#f5f8f6;border:1px solid #e0e9e3;font-size:14px}
+#view-home .grid.g2 button[data-go]:hover{background:#edf7f0;border-color:#bee4ca}
+.readonly-note{padding:11px 13px;border-radius:13px;background:#f2f6f3;color:#52685b;font-size:13px;margin:8px 0;border:1px solid #e1e9e4}
+.guest-row{opacity:.58;filter:grayscale(.25)}.guest-badge{display:inline-block;font-size:.76rem;padding:2px 7px;border-radius:999px;background:#e8ece9;color:#536158;margin-left:6px}.guest-note{font-size:.82rem;color:#6b7280}
+.public-title{font-size:24px;margin:0}.public-sub{color:#c3d4c9;margin-top:4px}.visual-actions button{min-width:0}
+#matchesList .match .grid.g3{margin-top:12px}#matchesList .match .grid.g3 select{min-height:52px}#matchesList .match .primary{min-width:108px}
+#tournamentList .player,#playersList .player,#teamList .team{padding:14px}
+#shareWhatsapp{background:#19a853;color:#fff}
+.tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:40;width:min(760px,calc(100% - 20px));display:grid;grid-template-columns:repeat(6,1fr);gap:3px;background:rgba(7,27,18,.96);border:1px solid rgba(255,255,255,.08);border-radius:20px 20px 0 0;padding:7px 7px calc(7px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(7,27,18,.22);backdrop-filter:blur(14px)}
+.tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:51px;background:transparent;color:#b9cabf;border:0;font-size:10px;padding:5px 4px;border-radius:13px}.tabs button:before{font-size:19px;line-height:1}.tabs button[data-view="home"]:before{content:"⌂"}.tabs button[data-view="players"]:before{content:"♟"}.tabs button[data-view="tournaments"]:before{content:"▣"}.tabs button[data-view="teams"]:before{content:"♙"}.tabs button[data-view="matches"]:before{content:"⚽"}.tabs button[data-view="ranking"]:before{content:"★"}.tabs button.active{background:linear-gradient(135deg,#17803d,#22a34a);color:#fff;box-shadow:0 5px 12px rgba(25,152,67,.26)}
+@media(min-width:900px){
+  .app{padding-left:224px;padding-bottom:28px}.tabs{left:max(20px,calc(50% - 590px));top:18px;bottom:18px;transform:none;width:190px;height:auto;display:flex;flex-direction:column;justify-content:flex-start;border-radius:22px;padding:18px 10px;background:#071b12}.tabs:before{content:"TOURNOI DU DIMANCHE";display:block;color:#fff;font-weight:900;font-size:14px;line-height:1.2;padding:4px 8px 18px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:8px}.tabs button{flex-direction:row;justify-content:flex-start;gap:10px;padding:10px 12px;font-size:13px;min-height:46px}.tabs button:before{font-size:17px;width:22px;text-align:center}.top{margin-top:0}.card{padding:19px 20px}
+}
+@media(max-width:650px){
+  body{background:#f3f7f4}.app{padding:0 12px 94px}.top{border-radius:0 0 24px 24px;margin:0 -12px 14px;padding:18px 16px 20px}.top h1{font-size:21px}.card{border-radius:17px;padding:14px;margin:10px 0}.g2,.g3{grid-template-columns:1fr}.sectiontitle{font-size:17px}.tabs{width:100%;border-radius:18px 18px 0 0;grid-template-columns:repeat(6,1fr);padding-left:4px;padding-right:4px}.tabs button{font-size:9.5px}.score{font-size:23px;min-width:78px}.match>.row{display:grid!important;grid-template-columns:1fr auto 1fr;gap:6px}.match>.row>b:last-child{text-align:right}.match button{min-height:48px}.match .row.small{display:flex!important}.rank{grid-template-columns:36px 1fr 76px}.auth{margin:0 auto}.auth .top{margin-top:0}
+}
 </style>
 </head>
 <body>
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V33</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V34</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="loginCard" class="card">
       <h2 class="sectiontitle">Connexion</h2>
       <input id="email" type="email" placeholder="Email" autocomplete="email">
@@ -80,7 +97,7 @@
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ Tournoi du Dimanche</h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:700">V34</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -213,7 +230,7 @@
       <button class="tab" data-view="tournaments">Tournois</button>
       <button class="tab" data-view="teams">Équipes</button>
       <button class="tab" data-view="matches">Matchs</button>
-      <button class="tab" data-view="ranking">Classements</button>
+      <button class="tab" data-view="ranking">Classement</button>
     </nav>
   </section>
 
