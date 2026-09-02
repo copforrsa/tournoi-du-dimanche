@@ -67,7 +67,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V37.10</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V37.11</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -110,7 +110,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:700">V37.10</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:700">V37.11</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -423,7 +423,11 @@ function setView(v){
 // autre partie de l'initialisation rencontre une erreur.
 document.addEventListener('click',e=>{
   const tab=e.target.closest('.tab');
-  if(tab && tab.dataset.view){ e.preventDefault(); setView(tab.dataset.view); return; }
+  if(tab && tab.dataset.view){
+    e.preventDefault();
+    if(tab.disabled || tab.classList.contains('disabled-tab'))return;
+    setView(tab.dataset.view); return;
+  }
   const go=e.target.closest('[data-go]');
   if(go && go.dataset.go){ e.preventDefault(); setView(go.dataset.go); }
 });
@@ -442,7 +446,9 @@ function hasTemporaryAdmin(){
 function hasAdminOps(){return isAdmin()||hasTemporaryAdmin()}
 function canEditCurrentMatches(){const t=currentTour();return !!t && t.status!=='finished' && (hasAdminOps()||(isCoorg()&&S.myPermissions.can_enter_scores))}
 function makeDisabledActionButton(label,title){
-  const b=document.createElement('button');b.textContent=label;b.disabled=true;b.className='danger';b.style.opacity='.38';b.style.filter='grayscale(1)';b.style.cursor='not-allowed';b.title=title||'Action non autorisée';return b;
+  const b=document.createElement('button');b.textContent=label;b.disabled=true;b.setAttribute('aria-disabled','true');
+  b.className='danger disabled-action';b.style.opacity='.38';b.style.filter='grayscale(1)';b.style.cursor='not-allowed';
+  b.title=title||'Action non autorisée';return b;
 }
 function applyPermissions(){
   const admin=isAdmin();
@@ -556,7 +562,13 @@ $('#logout').onclick=async()=>{await sb.auth.signOut();location.reload()};
 
 async function boot(){
   await loadInvites();
-  const {data,error}=await sb.from('workspace_members').select('workspace_id,role,workspaces(name,public_token,public_enabled)').limit(10);
+  const currentUserId=S.session?.user?.id;
+  if(!currentUserId)return toast('Session utilisateur introuvable.');
+  const {data,error}=await sb.from('workspace_members')
+    .select('workspace_id,role,workspaces(name,public_token,public_enabled)')
+    .eq('user_id',currentUserId)
+    .eq('active',true)
+    .limit(10);
   if(error)return toast(error.message);
   if(!data?.length){$('#workspaceSetup').classList.remove('hidden');return}
   S.workspace={id:data[0].workspace_id,name:data[0].workspaces?.name||'Tournoi du dimanche',role:data[0].role,public_token:data[0].workspaces?.public_token||null,public_enabled:data[0].workspaces?.public_enabled!==false};
@@ -1060,7 +1072,7 @@ async function deleteTournament(t){
   if(!hasAdminOps())return toast('Tu n’es pas autorisé à supprimer un tournoi.');
   const label=t.name||('Tournoi du '+t.tournament_date);
   if(!confirm('Supprimer définitivement « '+label+' » ?\n\nLes équipes, matchs, buts et données liées à ce tournoi seront également supprimés. Cette action est irréversible.'))return;
-  const {error}=await sb.from('tournaments').delete().eq('id',t.id);
+  const {error}=await sb.rpc('delete_tournament_admin',{p_tournament_id:t.id});
   if(error)return toast(error.message);
   if(S.activeTour===t.id)S.activeTour=null;
   await loadAll();
