@@ -75,7 +75,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.11</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.12</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -118,7 +118,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.11</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.12</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -206,6 +206,28 @@ select{background-color:#fff} textarea{resize:vertical}
         <div id="homeStats" class="grid g3" style="margin-top:12px"></div>
         <div id="homeRegistrationShare" class="hidden" style="margin-top:12px"></div>
       </div>
+      <div class="card hidden" id="registeredPlayersAdminCard">
+        <div class="row" style="justify-content:space-between;gap:10px;flex-wrap:wrap">
+          <div>
+            <h2 class="sectiontitle">👥 Inscriptions du Swé</h2>
+            <div id="registeredPlayersCompetitionLabel" class="muted"></div>
+          </div>
+          <button id="refreshRegisteredPlayers">Actualiser</button>
+        </div>
+        <div class="space"></div>
+        <div class="grid g2">
+          <select id="manualRegisteredPlayerSelect"><option value="">Ajouter un membre inscrit manuellement</option></select>
+          <button id="manualRegisterPlayer" class="primary">+ Ajouter le membre</button>
+        </div>
+        <div class="player" style="margin-top:12px;background:#f8fbf9">
+          <b>➕ Ajouter un invité</b>
+          <div class="muted" style="margin:5px 0 8px">L’administrateur et les co-gestionnaires peuvent ajouter autant d’invités qu’ils le souhaitent. Le quota général du Swé reste appliqué : les personnes au-delà du nombre de places passent en liste d’attente.</div>
+          <div class="row"><input id="managerGuestName" maxlength="60" placeholder="Nom de l’invité" style="flex:1"><button id="managerAddGuest" class="primary">Ajouter l’invité</button></div>
+        </div>
+        <div class="space"></div>
+        <div id="registeredPlayersAdminList"></div>
+      </div>
+
       <div class="card">
         <h2 class="sectiontitle">Actions rapides</h2>
         <div class="grid g2">
@@ -455,8 +477,8 @@ select{background-color:#fff} textarea{resize:vertical}
         <button id="chooseSoloMode" type="button" style="padding:0;border:0;background:linear-gradient(145deg,#0f5132,#198754);color:white;border-radius:18px;overflow:hidden;text-align:left;box-shadow:0 10px 24px rgba(15,81,50,.18)">
           <div style="padding:22px">
             <div style="font-size:2.5rem;margin-bottom:8px">🙋🏽‍♂️⚽</div>
-            <div style="font-size:1.2rem;font-weight:800">Je viens seul</div>
-            <div style="font-size:.9rem;opacity:.9;margin-top:5px">« Je m’inscris, je joue, je profite. »</div>
+            <div style="font-size:1.2rem;font-weight:800">Je m’inscris / mes invités</div>
+            <div style="font-size:.9rem;opacity:.9;margin-top:5px">Inscription individuelle et ajout d’invités.</div>
             <div style="margin-top:13px;font-weight:700">Choisir →</div>
           </div>
         </button>
@@ -474,8 +496,8 @@ select{background-color:#fff} textarea{resize:vertical}
     <div class="card hidden" id="publicRegistrationCard">
       <div class="row" style="justify-content:space-between;align-items:center">
         <div>
-          <h2 class="sectiontitle">🙋🏽‍♂️ Je viens seul</h2>
-          <div class="muted">« Je m’inscris, je joue, je profite. »</div>
+          <h2 class="sectiontitle">🙋🏽‍♂️ Mon inscription & mes invités</h2>
+          <div class="muted">Même si tu es inscrit dans une équipe, tu peux revenir ici pour ajouter tes invités.</div>
         </div>
         <button id="backFromSoloMode" type="button">← Changer</button>
       </div>
@@ -1318,6 +1340,17 @@ document.addEventListener('click',async e=>{
     b.disabled=false;if(error)return toast(error.message);
     await loadTournament();renderRegisteredPlayersAdmin();renderHome();
     toast(data==='waitlist'?'Joueur ajouté comme remplaçant.':'Joueur ajouté aux inscrits ✅');
+  }
+  if(e.target?.id==='managerAddGuest'){
+    const t=currentTour(),name=$('#managerGuestName')?.value.trim();
+    if(!t)return toast('Aucune compétition sélectionnée.');
+    if(!name)return toast('Indique le nom de l’invité.');
+    const b=e.target;b.disabled=true;
+    const {data,error}=await sb.rpc('manager_register_tournament_guest',{p_tournament_id:t.id,p_guest_name:name});
+    b.disabled=false;if(error)return toast(error.message);
+    $('#managerGuestName').value='';
+    await loadTournament();renderRegisteredPlayersAdmin();renderHome();renderTeams();
+    toast(data?.status==='waitlist'?'Invité ajouté comme remplaçant.':'Invité ajouté ✅');
   }
 });
 
@@ -2638,12 +2671,12 @@ async function bootPublic(token){
     const waiting=regs.filter(r=>r.registration_status==='waitlist').length;
     regBox.innerHTML=
       '<div class="player"><b>'+esc(regTour.name||('Tournoi du '+regTour.tournament_date))+'</b><div id="publicRegCount" class="muted">'+confirmed+'/'+(regTour.max_players||20)+' confirmés'+(waiting?' • '+waiting+' remplaçant'+(waiting>1?'s':''):'')+'</div></div>'+
-      '<div class="player" style="margin-top:12px;background:#f8fbf9"><b>⚡ Inscription rapide</b><div class="muted" style="margin-top:6px;line-height:1.6">Choisis ton nom puis confirme ta présence. Si tu viens avec une seule personne sans composer d’équipe complète, tu peux aussi l’ajouter comme invité.</div></div>'+
+      '<div class="player" style="margin-top:12px;background:#f8fbf9"><b>✅ Inscription</b><div class="muted" style="margin-top:6px;line-height:1.6">Inscris-toi en cliquant sur <b>« Je participe »</b>. Si tu viens accompagné, indique le nom de tes invités. Chaque membre peut ajouter jusqu’à <b>5 invités maximum</b>.</div></div>'+
       '<div class="space"></div><select id="publicPlayerSelect"><option value="">Choisis ton nom</option>'+players.filter(x=>x.active&&x.is_group_member!==false).sort((a,b)=>a.name.localeCompare(b.name)).map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')+'</select>'+
       '<div id="publicSelectedStatus" class="muted" style="margin-top:7px">Choisis ton nom pour voir ton statut.</div>'+
       '<div class="space"></div><div class="row"><button id="publicJoin" class="primary">✅ Je participe</button><button id="publicLeave">❌ Je ne participe pas</button></div>'+
       '<div class="player" style="margin-top:12px;background:#fffdf4;border:1px solid #f2df9b"><b>🆕 Première fois ?</b><div class="muted" style="margin:5px 0 8px">Tu n’es pas encore membre du groupe ? Entre ton nom pour t’inscrire directement à ce Swé.</div><input id="publicNewPlayerName" maxlength="60" placeholder="Ton prénom / nom"><div class="space"></div><button id="publicNewPlayerJoin" class="primary">M’inscrire pour la première fois</button></div>'+
-      '<div class="player" style="margin-top:12px"><b>👤 Tu viens avec qui ?</b><div class="muted" style="margin:4px 0 8px">Sélectionne ton nom ci-dessus. Pour ajouter un invité, ne clique pas sur « Je participe » : indique simplement son nom ici puis ajoute-le.</div><input id="publicGuestName" placeholder="Nom de l’invité"><label class="row" style="margin-top:8px;justify-content:flex-start"><input id="publicGuestMember" type="checkbox" style="width:auto"><span>Ajouter cet invité comme membre du groupe</span></label><div id="publicGuestPhoneWrap" class="hidden" style="margin-top:8px"><input id="publicGuestPhone" type="tel" inputmode="tel" placeholder="Numéro de mobile de l’invité"><div class="muted" style="margin-top:4px">Le numéro est demandé uniquement pour créer sa fiche membre. Il reste privé et visible uniquement par l’administrateur.</div></div><div class="space"></div><button id="publicAddGuest" class="primary">+ Ajouter mon invité</button></div>'+
+      '<div class="player" style="margin-top:12px"><b>👤 Tes invités</b><div class="muted" style="margin:4px 0 8px">Sélectionne ton nom ci-dessus puis ajoute tes invités un par un. Tu peux en ajouter jusqu’à <b>5 au total</b> pour ce Swé. <b>Même si tu es déjà inscrit dans une équipe</b>, tu peux revenir dans cette rubrique et ajouter des invités : ils seront inscrits au Swé, sans être ajoutés automatiquement à ton équipe.</div><input id="publicGuestName" placeholder="Nom de l’invité"><label class="row" style="margin-top:8px;justify-content:flex-start"><input id="publicGuestMember" type="checkbox" style="width:auto"><span>Ajouter cet invité comme membre du groupe</span></label><div id="publicGuestPhoneWrap" class="hidden" style="margin-top:8px"><input id="publicGuestPhone" type="tel" inputmode="tel" placeholder="Numéro de mobile de l’invité"><div class="muted" style="margin-top:4px">Le numéro est demandé uniquement pour créer sa fiche membre. Il reste privé et visible uniquement par l’administrateur.</div></div><div class="space"></div><button id="publicAddGuest" class="primary">+ Ajouter mon invité</button></div>'+
       '<div id="publicRegStatus" class="muted" style="margin-top:8px">Les places sont attribuées dans l’ordre des inscriptions. Quand le quota est atteint, les inscriptions suivantes sont automatiquement inscrites comme remplaçants.</div>'+
       '<h3 style="margin-top:18px">👥 Inscrits</h3><div id="publicRegisteredList"></div>'+
       '<div id="publicWaitWrap" class="'+(waiting?'':'hidden')+'"><h3 style="margin-top:14px">🟠 Remplaçants</h3><div id="publicWaitList"></div></div>';
@@ -2656,7 +2689,11 @@ async function bootPublic(token){
       if(!pid){status.textContent='Choisis ton nom pour voir ton statut.';return}
       const reg=registrations.find(r=>r.tournament_id===regTour.id&&r.player_id===pid);
       if(!reg){status.textContent='⚪ Tu n’es pas encore inscrit à ce tournoi.';return}
-      status.textContent=reg.registration_status==='waitlist'?'🟠 Tu es inscrit comme remplaçant. Tu peux tout de même ajouter un invité ci-dessous.':'🟢 Tu es déjà inscrit et confirmé. Tu peux ajouter un invité directement ci-dessous.';
+      const assignedTeamIds=new Set(teams.filter(t=>t.tournament_id===regTour.id).map(t=>t.id));
+      const inTeam=teamPlayers.some(tp=>tp.player_id===pid&&assignedTeamIds.has(tp.team_id));
+      status.textContent=reg.registration_status==='waitlist'
+        ?'🟠 Tu es inscrit comme remplaçant. Tu peux tout de même ajouter des invités ci-dessous.'
+        :(inTeam?'🟢 Tu es déjà inscrit dans une équipe. Tu peux aussi ajouter jusqu’à 5 invités ci-dessous.':'🟢 Tu es déjà inscrit et confirmé. Tu peux ajouter jusqu’à 5 invités ci-dessous.');
     }
     $('#publicPlayerSelect').onchange=updateSelectedRegistrationStatus;
     updateSelectedRegistrationStatus();
@@ -2727,7 +2764,9 @@ async function bootPublic(token){
       const {data,error}=await sb.rpc('public_register_tournament_guest',{p_token:token,p_tournament_id:regTour.id,p_host_player_id:host,p_guest_name:guestName,p_phone_number:phone||null,p_add_as_member:addMember});
       b.disabled=false;if(error)return $('#publicRegStatus').textContent=error.message;
       $('#publicGuestName').value='';$('#publicGuestPhone').value='';$('#publicGuestMember').checked=false;
-      $('#publicRegStatus').textContent=(data?.status==='waitlist'?'🟠 Quota atteint : l’invité est inscrit comme remplaçant.':'🟢 Invité ajouté et confirmé !')+(data?.member?' Il est aussi enregistré comme membre du groupe.':'');
+      const used=registrations.filter(r=>r.tournament_id===regTour.id&&r.registered_by_player_id===host).length+1;
+      const remaining=Math.max(0,5-used);
+      $('#publicRegStatus').textContent=(data?.status==='waitlist'?'🟠 Quota atteint : l’invité est inscrit comme remplaçant.':'🟢 Invité ajouté et confirmé !')+(data?.member?' Il est aussi enregistré comme membre du groupe.':'')+' • '+remaining+' invitation'+(remaining>1?'s':'')+' restante'+(remaining>1?'s':'')+'.';
       await refreshPublicRegistration();
     };
     window.setInterval(refreshPublicRegistration,8000);
@@ -2784,7 +2823,7 @@ async function bootPublic(token){
       '<div id="publicTeamFormAfterCode" class="hidden">'+
       '<div class="player" style="margin-top:12px;background:#fbfcfd"><div style="font-size:1.05rem;font-weight:800">🙋🏽‍♂️ Étape 2 — Identifie-toi</div><div class="muted" style="margin-top:5px">Choisis ton nom parmi les membres actifs du groupe.</div><div class="space"></div><select id="publicTeamCreator"><option value="">Choisis ton nom</option>'+creators.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')+'</select></div>'+
       '<div class="player" style="margin-top:12px;background:#fbfcfd"><div style="font-size:1.05rem;font-weight:800">🛡️ Étape 3 — Identité de l’équipe</div><div class="muted" style="margin-top:5px">Choisis un nom court et indique obligatoirement la couleur des maillots.</div><div class="space"></div><input id="publicTeamName" maxlength="30" placeholder="Ex. Les Lions, Team Nord, FC Poto..."><div class="space"></div><div id="publicTeamColorChoices" class="row" style="gap:8px;flex-wrap:wrap"><button type="button" data-team-color="#111827" style="background:#111827;color:white">Noir</button><button type="button" data-team-color="#2563eb" style="background:#2563eb;color:white">Bleu</button><button type="button" data-team-color="#f8fafc" style="background:#f8fafc;color:#111827;border:1px solid #cbd5e1">Blanc</button><button type="button" data-team-color="#dc2626" style="background:#dc2626;color:white">Rouge</button><button type="button" data-team-color="#16a34a" style="background:#16a34a;color:white">Vert</button><button type="button" data-team-color="#eab308" style="background:#eab308;color:#111827">Jaune</button><button type="button" data-team-color="#f97316" style="background:#f97316;color:white">Orange</button><button type="button" data-team-color="#7c3aed" style="background:#7c3aed;color:white">Violet</button><button type="button" data-team-color="#ec4899" style="background:#ec4899;color:white">Rose</button><button type="button" data-team-color="#78350f" style="background:#78350f;color:white">Marron</button><button type="button" data-team-color="#64748b" style="background:#64748b;color:white">Gris</button></div><div id="publicTeamColorStatus" class="muted" style="margin-top:6px">Aucune couleur sélectionnée.</div></div>'+
-      '<div class="player" style="margin-top:12px"><div style="font-size:1.05rem;font-weight:800">👥 Étape 4 — Compose ton groupe</div><div class="muted" style="margin-top:5px">Choisis des membres du groupe et/ou ajoute des invités. Avec toi, l’équipe ne peut pas dépasser 5 joueurs.</div><div id="publicTeamMateBox" style="margin-top:12px"><p class="muted">Sélectionne d’abord ton nom.</p></div><div style="height:1px;background:#e8ecef;margin:14px 0"></div><b>➕ Ajouter des invités</b><div class="muted" style="margin:4px 0 8px">Tu peux ajouter jusqu’à 4 invités si tu ne sélectionnes aucun autre membre.</div><div id="publicTeamGuests"><input data-team-guest placeholder="Nom de l’invité 1"></div><div class="row" style="margin-top:8px"><button id="publicAddTeamGuest" type="button">+ Ajouter un invité</button></div></div>'+
+      '<div class="player" style="margin-top:12px"><div style="font-size:1.05rem;font-weight:800">👥 Étape 4 — Compose ton groupe</div><div class="muted" style="margin-top:5px">Choisis les joueurs qui feront partie de cette équipe. Avec toi, l’équipe ne peut pas dépasser 5 joueurs. <b>Tu peux aussi inviter d’autres personnes au Swé sans les mettre dans ton équipe</b> : après la création de ton équipe, reviens dans « Mon inscription & mes invités ». Chaque membre peut ajouter jusqu’à 5 invités au total.</div><div id="publicTeamMateBox" style="margin-top:12px"><p class="muted">Sélectionne d’abord ton nom.</p></div><div style="height:1px;background:#e8ecef;margin:14px 0"></div><b>➕ Ajouter des invités</b><div class="muted" style="margin:4px 0 8px">Tu peux ajouter jusqu’à 4 invités si tu ne sélectionnes aucun autre membre.</div><div id="publicTeamGuests"><input data-team-guest placeholder="Nom de l’invité 1"></div><div class="row" style="margin-top:8px"><button id="publicAddTeamGuest" type="button">+ Ajouter un invité</button></div></div>'+
       '<div class="space"></div><button id="publicCreateTeam" class="primary" style="width:100%;padding:14px;font-size:1.05rem">🔥 Valider mon équipe</button>'+
       '<div id="publicTeamStatus" class="muted" style="margin-top:8px"></div></div>';
 
@@ -2887,7 +2926,7 @@ async function bootPublic(token){
         if(/déjà inscrit|already registered/i.test(msg))return status.textContent='Un joueur sélectionné est déjà inscrit. Il peut être ajouté uniquement s’il n’appartient pas déjà à une autre équipe.';
         return status.textContent=msg;
       }
-      status.textContent='🟢 Équipe créée ! Les joueurs déjà inscrits ont été conservés et les autres ont été inscrits automatiquement.';
+      status.textContent='🟢 Équipe créée ! Les joueurs déjà inscrits ont été conservés et les autres ont été inscrits automatiquement. Tu peux ensuite revenir dans « Mon inscription & mes invités » pour ajouter jusqu’à 5 invités au Swé.';
       $('#publicTeamCode').value='';$('#publicTeamName').value='';validatedTeamCode='';selectedTeamColor='';creatorSel.disabled=false;creatorSel.value='';$('#publicTeamFormAfterCode')?.classList.add('hidden');
       try{
         const snap=await sb.rpc('get_public_workspace_snapshot',{p_token:token});
