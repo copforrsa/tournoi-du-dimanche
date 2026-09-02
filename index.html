@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Tournoi Foot">
   <link rel="apple-touch-icon" href="./icon-192.png">
   <link rel="manifest" href="./manifest.webmanifest">
-  <title>SWÉ ARENA</title>
+  <title>SWÉ TOURNAMENT 5/5</title>
 <link rel="icon" type="image/png" href="./favicon.png">
 <link rel="apple-touch-icon" href="./icon-192.png">
   <style>
@@ -56,7 +56,7 @@ select{background-color:#fff} textarea{resize:vertical}
 .tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:40;width:min(760px,calc(100% - 20px));display:grid;grid-template-columns:repeat(auto-fit,minmax(72px,1fr));gap:3px;background:rgba(7,27,18,.96);border:1px solid rgba(255,255,255,.08);border-radius:20px 20px 0 0;padding:7px 7px calc(7px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(7,27,18,.22);backdrop-filter:blur(14px)}
 .tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:51px;background:transparent;color:#b9cabf;border:0;font-size:10px;padding:5px 4px;border-radius:13px}.tabs button:before{font-size:19px;line-height:1}.tabs button[data-view="home"]:before{content:"⌂"}.tabs button[data-view="players"]:before{content:"♟"}.tabs button[data-view="permissions"]:before{content:"🔐"}.tabs button[data-view="permissions"].disabled-tab{opacity:.35;filter:grayscale(1);cursor:not-allowed;pointer-events:none}.tabs button[data-view="tournaments"]:before{content:"▣"}.tabs button[data-view="teams"]:before{content:"♙"}.tabs button[data-view="matches"]:before{content:"⚽"}.tabs button[data-view="league"]:before{content:"🏁"}.tabs button[data-view="ranking"]:before{content:"★"}.tabs button.active{background:linear-gradient(135deg,#17803d,#22a34a);color:#fff;box-shadow:0 5px 12px rgba(25,152,67,.26)}
 @media(min-width:900px){
-  .app{padding-left:224px;padding-bottom:28px}.tabs{left:max(20px,calc(50% - 590px));top:18px;bottom:18px;transform:none;width:190px;height:auto;display:flex;flex-direction:column;justify-content:flex-start;border-radius:22px;padding:18px 10px;background:#071b12}.tabs:before{content:"SWÉ ARENA";display:block;color:#fff;font-weight:900;font-size:14px;line-height:1.2;padding:4px 8px 18px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:8px}.tabs button{flex-direction:row;justify-content:flex-start;gap:10px;padding:10px 12px;font-size:13px;min-height:46px}.tabs button:before{font-size:17px;width:22px;text-align:center}.top{margin-top:0}.card{padding:19px 20px}
+  .app{padding-left:224px;padding-bottom:28px}.tabs{left:max(20px,calc(50% - 590px));top:18px;bottom:18px;transform:none;width:190px;height:auto;display:flex;flex-direction:column;justify-content:flex-start;border-radius:22px;padding:18px 10px;background:#071b12}.tabs:before{content:"SWÉ TOURNAMENT 5/5";display:block;color:#fff;font-weight:900;font-size:14px;line-height:1.2;padding:4px 8px 18px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:8px}.tabs button{flex-direction:row;justify-content:flex-start;gap:10px;padding:10px 12px;font-size:13px;min-height:46px}.tabs button:before{font-size:17px;width:22px;text-align:center}.top{margin-top:0}.card{padding:19px 20px}
 }
 @media(max-width:650px){
   body{background:#f3f7f4}.app{padding:0 12px 94px}.top{border-radius:0 0 24px 24px;margin:0 -12px 14px;padding:18px 16px 20px}.top h1{font-size:21px}.card{border-radius:17px;padding:14px;margin:10px 0}.g2,.g3{grid-template-columns:1fr}.sectiontitle{font-size:17px}.tabs{width:100%;border-radius:18px 18px 0 0;grid-template-columns:repeat(auto-fit,minmax(50px,1fr));padding-left:4px;padding-right:4px}.tabs button{font-size:9.5px}.score{font-size:23px;min-width:78px}.match>.row{display:grid!important;grid-template-columns:1fr auto 1fr;gap:6px}.match>.row>b:last-child{text-align:right}.match button{min-height:48px}.match .row.small{display:flex!important}.rank{grid-template-columns:36px 1fr 76px}.auth{margin:0 auto}.auth .top{margin-top:0}
@@ -67,7 +67,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ ARENA <span style="font-size:11px;opacity:.65;font-weight:600">V39.1</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.3</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -110,7 +110,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ ARENA <span style="font-size:11px;opacity:.65;font-weight:700">V38.0</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.3</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -120,7 +120,7 @@ select{background-color:#fff} textarea{resize:vertical}
       <div class="card" style="border:2px solid #d9eadf">
         <div class="row" style="justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
           <div>
-            <h2 class="sectiontitle">🛡️ Super Administration • SWÉ ARENA</h2>
+            <h2 class="sectiontitle">🛡️ Super Administration • SWÉ TOURNAMENT 5/5</h2>
             <p class="muted">Pilotage central des espaces clients, administrateurs, modules et limites commerciales.</p>
           </div>
           <span class="guest-badge" style="background:#111827;color:#fff">SUPER ADMIN</span>
@@ -135,7 +135,7 @@ select{background-color:#fff} textarea{resize:vertical}
 
       <div class="card">
         <h2 class="sectiontitle">Créer un espace client</h2>
-        <p class="muted">Le compte administrateur doit déjà exister dans SWÉ ARENA. Son compte utilisateur reste indépendant de l’espace.</p>
+        <p class="muted">Le compte administrateur doit déjà exister dans SWÉ TOURNAMENT 5/5. Son compte utilisateur reste indépendant de l’espace.</p>
         <div class="grid g2">
           <input id="saWorkspaceName" placeholder="Nom de l’espace">
           <input id="saOwnerEmail" type="email" placeholder="Email de l’administrateur">
@@ -169,7 +169,7 @@ select{background-color:#fff} textarea{resize:vertical}
 
     <div id="workspaceSetup" class="card hidden">
       <h2 class="sectiontitle">Créer ton espace</h2>
-      <input id="newWorkspace" value="SWÉ Arena">
+      <input id="newWorkspace" value="SWÉ Tournament 5/5">
       <div class="space"></div>
       <button id="createWorkspace" class="primary">Créer l'espace</button>
     </div>
@@ -177,6 +177,15 @@ select{background-color:#fff} textarea{resize:vertical}
     <div id="inviteBox" class="card hidden"><h2 class="sectiontitle">Invitation reçue</h2><div id="inviteList"></div></div>
 
     <div id="view-home" class="view active">
+      <div class="card" id="hostWelcomeCard">
+        <div class="row" style="justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <h2 class="sectiontitle" id="hostWelcomeTitle">👋 Bienvenue</h2>
+            <div class="muted" id="hostWelcomeEmail"></div>
+          </div>
+          <span class="guest-badge">SWÉ TOURNAMENT 5/5</span>
+        </div>
+      </div>
       <div class="card">
         <h2 class="sectiontitle">Tournoi actif</h2>
         <div id="activeTourLabel" class="muted">Aucun tournoi</div>
@@ -266,12 +275,16 @@ select{background-color:#fff} textarea{resize:vertical}
     <div id="view-teams" class="view">
       <div class="card" id="attendanceAdminCard"><h2 class="sectiontitle">Présents</h2><div id="attendanceList"></div></div>
       <div class="card" id="teamsAdminCard">
-        <h2 class="sectiontitle">Équipes</h2><p class="muted">L’application peut générer des équipes équilibrées selon les niveaux privés définis par l’administrateur. Les co-organisateurs autorisés peuvent lancer la génération sans voir ces niveaux.</p>
-        <div class="grid g2">
-          <div class="row"><input id="teamName" placeholder="Rouges, Bleus..." style="flex:1"><button id="addTeam">Ajouter</button></div>
-          <div class="row"><input id="playersPerTeam" type="number" min="2" max="11" value="5" style="max-width:120px"><button id="smartAutoTeams" class="primary">⚡ Générer équipes équilibrées</button></div>
+        <h2 class="sectiontitle">Équipes</h2>
+        <p class="muted">Les équipes du tournoi sélectionné restent visibles pour l’administrateur et les co-organisateurs, même lorsqu’ils n’ont pas le droit de les créer ou de les modifier.</p>
+        <div id="teamNoCreatePermission" class="readonly-note hidden"></div>
+        <div id="teamManagementControls">
+          <div class="grid g2">
+            <div class="row"><input id="teamName" placeholder="Rouges, Bleus..." style="flex:1"><button id="addTeam">Ajouter</button></div>
+            <div class="row"><input id="playersPerTeam" type="number" min="2" max="11" value="5" style="max-width:120px"><button id="smartAutoTeams" class="primary">⚡ Générer équipes équilibrées</button></div>
+          </div>
+          <div id="teamBalanceInfo" class="muted" style="margin-top:8px"></div>
         </div>
-        <div id="teamBalanceInfo" class="muted" style="margin-top:8px"></div>
         <div id="teamList" style="margin-top:10px"></div>
       </div>
     </div>
@@ -392,7 +405,7 @@ select{background-color:#fff} textarea{resize:vertical}
 
   <section id="publicView" class="hidden">
     <header class="top">
-      <h1 class="public-title">⚽ <span id="publicWorkspaceName">SWÉ ARENA</span></h1>
+      <h1 class="public-title">⚽ <span id="publicWorkspaceName">SWÉ TOURNAMENT 5/5</span></h1>
       <div class="public-sub">Consultation publique • lecture seule</div>
     </header>
 
@@ -526,6 +539,23 @@ const $=s=>document.querySelector(s);
 const toast=t=>{const x=$('#toast');x.textContent=t;x.style.display='block';setTimeout(()=>x.style.display='none',2600)};
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const today=()=>new Date().toISOString().slice(0,10); $('#tourDate').value=today();
+function hostFirstName(){
+  const u=S.session?.user;
+  const md=u?.user_metadata||{};
+  const raw=(md.first_name||md.given_name||md.name||md.full_name||'').trim();
+  if(raw)return raw.split(/\s+/)[0];
+  const email=(u?.email||'').trim();
+  const local=email.split('@')[0]||'';
+  const clean=local.replace(/[._-]+/g,' ').trim();
+  if(clean)return clean.split(/\s+/)[0].replace(/^./,c=>c.toUpperCase());
+  return 'à toi';
+}
+function renderHostWelcome(){
+  const title=$('#hostWelcomeTitle'),email=$('#hostWelcomeEmail');
+  if(title)title.textContent='👋 Bonjour '+hostFirstName()+' !';
+  if(email)email.textContent='Connecté avec : '+(S.session?.user?.email||'email indisponible');
+}
+
 function setView(v){
   if(v==='permissions'&&!isAdmin())v='home';
   if(v==='players'&&isCoorg()&&!hasTemporaryAdmin()&&!S.myPermissions.can_view_players)v='home';
@@ -585,7 +615,10 @@ function applyPermissions(){
   const seasonCard=$('#seasonAdminCard');if(seasonCard)seasonCard.classList.toggle('hidden',!adminOps);
   const tournamentCard=$('#tournamentAdminCard');if(tournamentCard)tournamentCard.classList.toggle('hidden',!(adminOps||(coorg&&S.myPermissions.can_create_tournaments)));
   const attendanceCard=$('#attendanceAdminCard');if(attendanceCard)attendanceCard.classList.toggle('hidden',!adminOps);
-  const teamsCard=$('#teamsAdminCard');if(teamsCard)teamsCard.classList.toggle('hidden',!(adminOps||(coorg&&S.myPermissions.can_generate_teams)));
+  const teamsCard=$('#teamsAdminCard');if(teamsCard)teamsCard.classList.remove('hidden');
+  const teamControls=$('#teamManagementControls');
+  const canManageTeams=adminOps||(coorg&&S.myPermissions.can_generate_teams);
+  if(teamControls)teamControls.classList.toggle('hidden',!canManageTeams);
   const matchCreateCard=$('#matchCreateAdminCard');if(matchCreateCard)matchCreateCard.classList.toggle('hidden',!adminOps);
   document.querySelectorAll('.admin-permissions-tab').forEach(el=>{
     el.classList.remove('hidden');
@@ -851,7 +884,7 @@ async function boot(){
     .limit(10);
   if(error)return toast(error.message);
   if(!data?.length){$('#workspaceSetup').classList.remove('hidden');return}
-  S.workspace={id:data[0].workspace_id,name:data[0].workspaces?.name||'SWÉ Arena',role:data[0].role,public_token:data[0].workspaces?.public_token||null,public_enabled:data[0].workspaces?.public_enabled!==false};
+  S.workspace={id:data[0].workspace_id,name:data[0].workspaces?.name||'SWÉ Tournament 5/5',role:data[0].role,public_token:data[0].workspaces?.public_token||null,public_enabled:data[0].workspaces?.public_enabled!==false};
   $('#workspaceSetup').classList.add('hidden');
   await loadAll();
   $('#workspaceName').textContent=S.workspace.name+' • '+(S.workspace.role==='admin'?'Administrateur':(hasTemporaryAdmin()?'Co-organisateur • Admin temporaire':'Co-organisateur'));
@@ -878,7 +911,7 @@ async function loadInvites(){
   $('#inviteBox').classList.toggle('hidden',!mine.length);
   mine.forEach(i=>{
     const d=document.createElement('div');d.className='player';
-    d.innerHTML='<b>Invitation à rejoindre '+esc(i.workspaces?.name||'SWÉ ARENA')+'</b><div class="muted" style="margin-top:4px">Connecté avec '+esc(userEmail)+'. Clique ci-dessous pour devenir co-organisateur.</div>';
+    d.innerHTML='<b>Invitation à rejoindre '+esc(i.workspaces?.name||'SWÉ TOURNAMENT 5/5')+'</b><div class="muted" style="margin-top:4px">Connecté avec '+esc(userEmail)+'. Clique ci-dessous pour devenir co-organisateur.</div>';
     const b=document.createElement('button');b.textContent='✅ Accepter l’invitation';b.className='primary';b.style.marginTop='8px';
     b.onclick=async()=>{
       const {error}=await sb.rpc('accept_workspace_invite',{p_invite_id:i.id});
@@ -916,7 +949,7 @@ async function loadAll(){
     r=await sb.rpc('get_admin_player_skill_reviews',{p_workspace_id:w});S.skillReviews=r.data||[];
     r=await sb.from('player_team_codes').select('player_id,code,enabled,updated_at').eq('workspace_id',w);S.teamCodes=r.data||[];
   }else{
-    if(isCoorg()&&(S.myPermissions.can_view_players||hasTemporaryAdmin())){
+    if(isCoorg()){
       r=await sb.rpc('get_workspace_players_safe',{p_workspace_id:w});
       if(r.error){console.error('players safe',r.error);S.players=[];toast('Impossible de charger la liste des joueurs.')}
       else S.players=Array.isArray(r.data)?r.data:[];
@@ -969,7 +1002,7 @@ function coorgInviteLink(inv){
 }
 function coorgInviteMessage(inv){
   const link=coorgInviteLink(inv);
-  return '⚽ SWÉ ARENA\n\nTu es invité comme co-organisateur.\n\n1. Ouvre ce lien.\n2. Connecte-toi ou crée ton compte avec cette adresse : '+inv.email+'\n3. Une fois connecté, accepte l’invitation.\n\n'+link;
+  return '⚽ SWÉ TOURNAMENT 5/5\n\nTu es invité comme co-organisateur.\n\n1. Ouvre ce lien.\n2. Connecte-toi ou crée ton compte avec cette adresse : '+inv.email+'\n3. Une fois connecté, accepte l’invitation.\n\n'+link;
 }
 function renderAccess(){
   const box=$('#memberList');if(!box)return;
@@ -1108,7 +1141,9 @@ function renderPermissions(){
   });
 }
 function renderAll(){
+  renderHostWelcome();
   renderHome();
+  renderRegisteredPlayersAdmin().catch(e=>console.error('registered players',e));
   renderPlayers();
   renderPermissions();
   renderTournaments();
@@ -1121,6 +1156,36 @@ function renderAll(){
   renderRanking().catch(e=>console.error('ranking',e));
   renderSeasonScorerSummary().catch(e=>console.error('season ranking',e));
 }
+
+async function renderRegisteredPlayersAdmin(){
+  const card=$('#registeredPlayersAdminCard');if(!card)return;
+  const t=currentTour();
+  card.classList.toggle('hidden',!t);
+  if(!t)return;
+  const label=$('#registeredPlayersCompetitionLabel');
+  if(label)label.textContent=(t.format==='league'?'Swé de Ligue : ':'Tournoi : ')+(t.name||t.tournament_date)+' • '+t.tournament_date;
+  const {data,error}=await sb.rpc('get_registered_players_for_tournament',{p_tournament_id:t.id});
+  const box=$('#registeredPlayersAdminList'),sel=$('#manualRegisteredPlayerSelect');
+  if(error){box.innerHTML='<p class="muted">'+esc(error.message)+'</p>';return}
+  const rows=Array.isArray(data)?data:[];
+  const registeredIds=new Set(rows.filter(r=>r.present).map(r=>r.player_id));
+  const available=(S.players||[]).filter(p=>p.active&&p.is_group_member!==false&&!registeredIds.has(p.id)).sort((a,b)=>a.name.localeCompare(b.name));
+  if(sel)sel.innerHTML='<option value="">Ajouter un membre inscrit manuellement</option>'+available.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join('');
+  if(!rows.length){box.innerHTML='<p class="muted">Aucun joueur inscrit pour le moment.</p>';return}
+  box.innerHTML='';
+  rows.filter(r=>r.present).forEach((r,i)=>{
+    const d=document.createElement('div');d.className='player row';d.style.marginBottom='8px';
+    d.innerHTML='<b style="min-width:28px">'+(i+1)+'.</b><span style="flex:1">'+esc(r.player_name)+(r.is_group_member===false?' <span class="guest-badge">Guest</span>':'')+'</span><span class="guest-badge">'+(r.registration_status==='waitlist'?'Remplaçant':'Confirmé')+'</span>';
+    const remove=document.createElement('button');remove.className='danger';remove.textContent='Retirer';remove.onclick=async()=>{
+      if(!confirm('Retirer '+r.player_name+' de cette inscription ?'))return;
+      const {error}=await sb.rpc('remove_registered_member_from_tournament',{p_tournament_id:t.id,p_player_id:r.player_id});
+      if(error)return toast(error.message);
+      await loadTournament();renderRegisteredPlayersAdmin();renderHome();toast('Inscription retirée.');
+    };
+    d.appendChild(remove);box.appendChild(d);
+  });
+}
+
 function renderHome(){
   const t=currentTour();
   const lastFinished=S.tournaments.find(x=>x.status==='finished');
@@ -1135,10 +1200,25 @@ function renderHome(){
       share.classList.remove('hidden');
       share.innerHTML='<div class="player"><b>🔗 Inscriptions ouvertes</b><div class="muted" style="margin:4px 0 8px">Envoie ce lien aux joueurs pour qu’ils s’inscrivent.</div><div class="row"><input id="homeRegLink" readonly value="'+esc(url)+'" style="flex:1"><button id="homeCopyReg">Copier</button><button id="homeWaReg" class="primary">📲 WhatsApp</button></div></div>';
       $('#homeCopyReg').onclick=async()=>{try{await navigator.clipboard.writeText(url);toast('Lien d’inscription copié ✅')}catch(e){$('#homeRegLink').select();toast('Lien sélectionné : copie-le.')}};
-      $('#homeWaReg').onclick=()=>{const msg='⚽ '+(t.name||'SWÉ Arena')+'\n📅 '+t.tournament_date+'\n\nInscriptions ouvertes :\n'+url;window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank','noopener')};
+      $('#homeWaReg').onclick=()=>{const msg='⚽ '+(t.name||'SWÉ Tournament 5/5')+'\n📅 '+t.tournament_date+'\n\nInscriptions ouvertes :\n'+url;window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank','noopener')};
     }else{share.classList.add('hidden');share.innerHTML=''}
   }
 }
+
+document.addEventListener('click',async e=>{
+  if(e.target?.id==='refreshRegisteredPlayers')await renderRegisteredPlayersAdmin();
+  if(e.target?.id==='manualRegisterPlayer'){
+    const t=currentTour();const pid=$('#manualRegisteredPlayerSelect')?.value;
+    if(!t)return toast('Aucune compétition sélectionnée.');
+    if(!pid)return toast('Choisis un membre du groupe.');
+    const b=e.target;b.disabled=true;
+    const {data,error}=await sb.rpc('add_registered_member_to_tournament',{p_tournament_id:t.id,p_player_id:pid});
+    b.disabled=false;if(error)return toast(error.message);
+    await loadTournament();renderRegisteredPlayersAdmin();renderHome();
+    toast(data==='waitlist'?'Joueur ajouté comme remplaçant.':'Joueur ajouté aux inscrits ✅');
+  }
+});
+
 $('#sendInvite').onclick=async()=>{
   if(!S.workspace)return;
   if(!(isAdmin()||(isCoorg()&&S.myPermissions.can_invite_coorganizers)))return toast('Tu n’es pas autorisé à inviter un co-organisateur.');
@@ -1323,7 +1403,7 @@ function renderPlayers(){
 }
 async function ensureWorkspace(){
   if(S.workspace)return S.workspace;
-  const name=$('#newWorkspace').value.trim()||'SWÉ Arena';
+  const name=$('#newWorkspace').value.trim()||'SWÉ Tournament 5/5';
   const {data:workspaceId,error}=await sb.rpc('create_workspace',{p_name:name});
   if(error)throw error;
   if(!workspaceId)throw new Error('Impossible de créer l’espace.');
@@ -1585,60 +1665,119 @@ $('#createTournament').onclick=async()=>{
 };
 
 function presentIds(){return new Set(S.tPlayers.filter(x=>x.present&&x.registration_status!=='waitlist').map(x=>x.player_id))} function teamPlayerIds(teamId){return S.teamPlayers.filter(x=>x.team_id===teamId).map(x=>x.player_id)}
-function renderTeams(){const t=currentTour(),att=$('#attendanceList'),box=$('#teamList');att.innerHTML='';box.innerHTML='';if(!t){att.innerHTML='<p class="muted">Crée ou ouvre un tournoi.</p>';return}
-if(!hasAdminOps()){
-  att.innerHTML='<div class="readonly-note">Consultation des présences. Seul l’administrateur peut modifier les présences.</div>';
+function renderTeams(){
+  const t=currentTour(),att=$('#attendanceList'),box=$('#teamList');
+  const note=$('#teamNoCreatePermission'),controls=$('#teamManagementControls');
+  att.innerHTML='';box.innerHTML='';
+  if(!t){
+    att.innerHTML='<p class="muted">Crée ou ouvre un tournoi.</p>';
+    box.innerHTML='<p class="muted">Aucun tournoi sélectionné.</p>';
+    if(note)note.classList.add('hidden');
+    return;
+  }
+
+  const canGenerate=hasAdminOps()||(isCoorg()&&S.myPermissions.can_generate_teams);
+  const canFullEdit=hasAdminOps();
+
+  if(controls)controls.classList.toggle('hidden',!canGenerate);
+
+  if(!canFullEdit){
+    att.innerHTML='<div class="readonly-note">Tu peux consulter les joueurs inscrits et les équipes de ce tournoi. La modification manuelle des présences reste réservée à l’administrateur.</div>';
+  }else{
+    const prs=presentIds();
+    S.players.filter(x=>x.active).forEach(x=>{
+      const l=document.createElement('label');l.className='player row';
+      const c=document.createElement('input');c.type='checkbox';c.style.width='auto';c.checked=prs.has(x.id);
+      c.onchange=async()=>{
+        if(c.checked){
+          const confirmed=S.tPlayers.filter(tp=>tp.present&&tp.registration_status!=='waitlist'&&tp.player_id!==x.id).length;
+          const status=confirmed<(t.max_players||20)?'confirmed':'waitlist';
+          const {error}=await sb.from('tournament_players').upsert({tournament_id:t.id,player_id:x.id,present:true,registration_status:status,registered_at:new Date().toISOString()},{onConflict:'tournament_id,player_id'});
+          if(error)return toast(error.message);
+        }else{
+          const {error}=await sb.from('tournament_players').delete().eq('tournament_id',t.id).eq('player_id',x.id);
+          if(error)return toast(error.message);
+        }
+        await loadTournament();renderAll();
+      };
+      const tp=S.tPlayers.find(z=>z.player_id===x.id);
+      const label=document.createElement('span');label.style.flex='1';label.textContent=playerDisplayName(x);
+      if(tp?.registration_status==='waitlist'){
+        const badge=document.createElement('span');badge.className='guest-badge';badge.textContent='Liste d’attente';
+        label.appendChild(document.createTextNode(' '));label.appendChild(badge);
+      }
+      l.append(c,label);att.appendChild(l);
+    });
+  }
+
+  if(!S.teams.length){
+    if(note){
+      if(canGenerate){
+        note.classList.add('hidden');
+      }else{
+        note.classList.remove('hidden');
+        note.innerHTML='<b>ℹ️ Les équipes ne sont pas encore créées.</b><div style="margin-top:5px">Tu peux consulter les inscrits, mais ton compte co-organisateur n’a pas l’autorisation de créer ou générer les équipes. L’administrateur doit les créer ou t’accorder le droit « Générer les équipes ».</div>';
+      }
+    }
+    box.innerHTML=canGenerate
+      ? '<p class="muted">Aucune équipe créée pour ce tournoi. Tu peux les créer ou les générer ci-dessus.</p>'
+      : '';
+    return;
+  }
+
+  if(note)note.classList.add('hidden');
+  const prs=presentIds();
+
   S.teams.forEach(team=>{
     const d=document.createElement('div');d.className='team';
-    d.innerHTML='<b>'+esc(team.name)+'</b>';
-    teamPlayerIds(team.id).forEach(id=>{const pl=p(id);if(pl)d.innerHTML+='<div class="small" style="margin-top:6px">'+esc(playerDisplayName(pl))+'</div>'});
+    const head=document.createElement('div');head.className='row';head.style.justifyContent='space-between';
+    const title=document.createElement('b');title.textContent=team.name;head.appendChild(title);
+
+    if(canFullEdit){
+      const del=document.createElement('button');del.textContent='Supprimer';del.className='danger';
+      del.onclick=async()=>{
+        const hasMatches=S.matches.some(m=>m.home_team_id===team.id||m.away_team_id===team.id);
+        const msg=hasMatches
+          ? 'Supprimer cette équipe ? Les matchs, buts et statistiques liés à cette équipe seront aussi supprimés.'
+          : 'Supprimer cette équipe ?';
+        if(!confirm(msg))return;
+        del.disabled=true;
+        const {error}=await sb.from('teams').delete().eq('id',team.id);
+        if(error){del.disabled=false;return toast(error.message)}
+        await loadTournament();renderAll();toast('Équipe supprimée ✅');
+      };
+      head.appendChild(del);
+    }
+    d.appendChild(head);
+
+    if(canFullEdit){
+      const sel=document.createElement('select');
+      sel.innerHTML='<option value="">Ajouter un joueur...</option>'+S.players.filter(x=>prs.has(x.id)&&!S.teamPlayers.some(tp=>tp.player_id===x.id)).map(x=>'<option value="'+x.id+'">'+esc(playerDisplayName(x))+'</option>').join('');
+      sel.onchange=async()=>{
+        if(!sel.value)return;
+        const {error}=await sb.from('team_players').insert({team_id:team.id,player_id:sel.value});
+        if(error)return toast(error.message);
+        await loadTournament();renderTeams();
+      };
+      d.appendChild(sel);
+    }
+
+    teamPlayerIds(team.id).forEach(id=>{
+      const pl=p(id);if(!pl)return;
+      const r=document.createElement('div');
+      r.className='row small '+(pl.is_group_member===false?'guest-row':'');
+      r.innerHTML='<span style="flex:1">'+esc(playerDisplayName(pl))+(pl.is_group_member===false?' <span class="guest-badge">Guest</span>':'')+'</span>';
+      if(canFullEdit){
+        const b=document.createElement('button');b.textContent='×';
+        b.onclick=async()=>{const {error}=await sb.from('team_players').delete().eq('team_id',team.id).eq('player_id',id);if(error)return toast(error.message);await loadTournament();renderTeams();};
+        r.appendChild(b);
+      }
+      d.appendChild(r);
+    });
     box.appendChild(d);
   });
-  const manual=$('#teamName')?.closest('.row');if(manual)manual.classList.add('hidden');
-  if($('#smartAutoTeams'))$('#smartAutoTeams').disabled=!(isCoorg()&&S.myPermissions.can_generate_teams);
-  return;
 }
-const manual=$('#teamName')?.closest('.row');if(manual)manual.classList.remove('hidden');
-const prs=presentIds();S.players.filter(x=>x.active).forEach(x=>{const l=document.createElement('label');l.className='player row';const c=document.createElement('input');c.type='checkbox';c.style.width='auto';c.checked=prs.has(x.id);c.onchange=async()=>{
-  if(c.checked){
-    const confirmed=S.tPlayers.filter(tp=>tp.present&&tp.registration_status!=='waitlist'&&tp.player_id!==x.id).length;
-    const status=confirmed<(t.max_players||20)?'confirmed':'waitlist';
-    const {error}=await sb.from('tournament_players').upsert({tournament_id:t.id,player_id:x.id,present:true,registration_status:status,registered_at:new Date().toISOString()},{onConflict:'tournament_id,player_id'});
-    if(error)return toast(error.message);
-  }else{
-    const {error}=await sb.from('tournament_players').delete().eq('tournament_id',t.id).eq('player_id',x.id);
-    if(error)return toast(error.message);
-  }
-  await loadTournament();renderAll();
-};const tp=S.tPlayers.find(z=>z.player_id===x.id);
-const label=document.createElement('span');label.style.flex='1';label.textContent=playerDisplayName(x);
-if(tp?.registration_status==='waitlist'){const badge=document.createElement('span');badge.className='guest-badge';badge.textContent='Liste d’attente';label.appendChild(document.createTextNode(' '));label.appendChild(badge)}
-l.append(c,label);att.appendChild(l)});S.teams.forEach(team=>{
-  const d=document.createElement('div');d.className='team';
-  const head=document.createElement('div');head.className='row';head.style.justifyContent='space-between';
-  const title=document.createElement('b');title.textContent=team.name;
-  const del=document.createElement('button');del.textContent='Supprimer';del.className='danger';
-  del.onclick=async()=>{
-    const hasMatches=S.matches.some(m=>m.home_team_id===team.id||m.away_team_id===team.id);
-    const msg=hasMatches
-      ? 'Supprimer cette équipe ? Les matchs, buts et statistiques liés à cette équipe seront aussi supprimés.'
-      : 'Supprimer cette équipe ?';
-    if(!confirm(msg))return;
-    del.disabled=true;
-    const {error}=await sb.from('teams').delete().eq('id',team.id);
-    if(error){del.disabled=false;return toast(error.message)}
-    S.teams=S.teams.filter(x=>x.id!==team.id);
-    Object.keys(S.goalTeamSelections).forEach(mid=>{if(S.goalTeamSelections[mid]===team.id)delete S.goalTeamSelections[mid]});
-    S.teamPlayers=S.teamPlayers.filter(x=>x.team_id!==team.id);
-    S.matches=S.matches.filter(m=>m.home_team_id!==team.id&&m.away_team_id!==team.id);
-    const validMatchIds=new Set(S.matches.map(m=>m.id));
-    S.goals=S.goals.filter(g=>validMatchIds.has(g.match_id));
-    renderAll();
-    toast('Équipe supprimée ✅');
-  };
-  head.append(title,del);d.appendChild(head);
-  const ids=new Set(teamPlayerIds(team.id));const sel=document.createElement('select');sel.innerHTML='<option value="">Ajouter un joueur...</option>'+S.players.filter(x=>prs.has(x.id)&&!S.teamPlayers.some(tp=>tp.player_id===x.id)).map(x=>'<option value="'+x.id+'">'+esc(playerDisplayName(x))+'</option>').join('');sel.onchange=async()=>{if(sel.value)await sb.from('team_players').insert({team_id:team.id,player_id:sel.value})};d.appendChild(sel);ids.forEach(id=>{const pl=p(id);if(!pl)return;const r=document.createElement('div');r.className='row small';r.className+=' '+(pl.is_group_member===false?'guest-row':'');r.innerHTML='<span style="flex:1">'+esc(playerDisplayName(pl))+(pl.is_group_member===false?' <span class="guest-badge">Guest</span>':'')+'</span>';const b=document.createElement('button');b.textContent='×';b.onclick=async()=>await sb.from('team_players').delete().eq('team_id',team.id).eq('player_id',id);r.appendChild(b);d.appendChild(r)});box.appendChild(d)})}
-$('#addTeam').onclick=async()=>{const t=currentTour(),name=$('#teamName').value.trim();if(!t||!name)return;const {error}=await sb.from('teams').insert({tournament_id:t.id,name});if(error)return toast(error.message);$('#teamName').value=''};
+$('#addTeam').onclick=async()=>{if(!(hasAdminOps()||(isCoorg()&&S.myPermissions.can_generate_teams)))return toast('Tu n’as pas l’autorisation de créer une équipe.');const t=currentTour(),name=$('#teamName').value.trim();if(!t||!name)return;const {error}=await sb.from('teams').insert({tournament_id:t.id,name});if(error)return toast(error.message);$('#teamName').value=''};
 $('#smartAutoTeams').onclick=async()=>{
   if(isCoorg()&&!hasTemporaryAdmin()&&!S.myPermissions.can_generate_teams)return toast('Tu n’es pas autorisé à générer les équipes.');
   const t=currentTour();if(!t)return toast('Ouvre un tournoi.');
@@ -2007,13 +2146,13 @@ function visualTheme(ctx,title,t){
   ctx.globalAlpha=.08;ctx.fillStyle='#ffffff';
   for(let i=0;i<16;i++){ctx.beginPath();ctx.arc(80+i*75,110+(i%3)*42,22,0,Math.PI*2);ctx.fill()}
   ctx.globalAlpha=1;
-  vText(ctx,'⚽ SWÉ ARENA',70,105,940,'700 34px Arial','#9ee6b8');
+  vText(ctx,'⚽ SWÉ TOURNAMENT 5/5',70,105,940,'700 34px Arial','#9ee6b8');
   vText(ctx,title,70,180,940,'800 62px Arial','#ffffff');
   vText(ctx,visualDate(t),70,228,940,'500 28px Arial','#c9e7d5');
   ctx.fillStyle='#36c36c';ctx.fillRect(70,258,115,7);
 }
 function visualFooter(ctx,t){
-  vText(ctx,(t?.name||'SWÉ ARENA'),70,1292,760,'600 24px Arial','#a8c9b6');
+  vText(ctx,(t?.name||'SWÉ TOURNAMENT 5/5'),70,1292,760,'600 24px Arial','#a8c9b6');
   vText(ctx,'Généré par l’app',1010,1292,300,'500 22px Arial','#7da28e','right');
 }
 
@@ -2110,7 +2249,7 @@ async function shareCurrentVisual(){
   const file=new File([currentVisualBlob],currentVisualFilename,{type:'image/png'});
   if(navigator.canShare && navigator.canShare({files:[file]}) && navigator.share){
     try{
-      await navigator.share({files:[file],title:'SWÉ ARENA'});
+      await navigator.share({files:[file],title:'SWÉ TOURNAMENT 5/5'});
       return;
     }catch(e){if(e.name==='AbortError')return;}
   }
@@ -2141,7 +2280,7 @@ async function bootPublic(token){
     return;
   }
   const P=parsed;
-  $('#publicWorkspaceName').textContent=P.workspace?.name||'SWÉ ARENA';
+  $('#publicWorkspaceName').textContent=P.workspace?.name||'SWÉ TOURNAMENT 5/5';
   let players=P.players||[],seasons=P.seasons||[],leagues=P.leagues||[],leaguePlayers=P.league_players||[],tournaments=(P.tournaments||[]).sort((a,b)=>String(b.tournament_date).localeCompare(String(a.tournament_date)));
   let teams=P.teams||[],teamPlayers=P.team_players||[],matches=P.matches||[],goals=P.goals||[];
   let registrations=P.tournament_players||[];
@@ -2150,12 +2289,12 @@ async function bootPublic(token){
   if(publicParamsTop.get('mode')==='league'&&leagueJoinId&&!publicParamsTop.get('tournament')){
     const league=leagues.find(l=>l.id===leagueJoinId);
     if(!league){
-      $('#publicView').innerHTML='<header class="top"><h1>⚽ SWÉ ARENA</h1></header><div class="card"><p>Ligue introuvable.</p></div>';return;
+      $('#publicView').innerHTML='<header class="top"><h1>⚽ SWÉ TOURNAMENT 5/5</h1></header><div class="card"><p>Ligue introuvable.</p></div>';return;
     }
     const members=players.filter(p=>p.active&&p.is_group_member!==false).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
     const confirmed=new Set(leaguePlayers.filter(lp=>lp.league_id===league.id&&lp.status==='confirmed').map(lp=>lp.player_id));
     $('#publicView').innerHTML=
-      '<header class="top"><h1>🏁 '+esc(league.name)+'</h1><div class="public-sub">SWÉ ARENA • Inscription à la Ligue</div></header>'+
+      '<header class="top"><h1>🏁 '+esc(league.name)+'</h1><div class="public-sub">SWÉ TOURNAMENT 5/5 • Inscription à la Ligue</div></header>'+
       '<div class="card"><h2 class="sectiontitle">Rejoindre la Ligue</h2><p class="muted">Cette Ligue est réservée aux membres enregistrés par l’administrateur de la communauté. Sélectionne ton nom pour t’inscrire.</p>'+
       '<select id="publicLeaguePlayer"><option value="">Choisis ton nom</option>'+members.map(p=>'<option value="'+p.id+'">'+esc(p.name)+(confirmed.has(p.id)?' • déjà inscrit':'')+'</option>').join('')+'</select>'+
       '<div class="space"></div><div class="row"><button id="publicLeagueJoin" class="primary">Je rejoins la Ligue</button><button id="publicLeagueLeave">Me retirer</button></div><div id="publicLeagueStatus" class="muted" style="margin-top:8px"></div></div>'+
@@ -2169,7 +2308,7 @@ async function bootPublic(token){
   if(historyId){
     const ht=tournaments.find(x=>x.id===historyId);
     if(!ht){
-      $('#publicView').innerHTML='<header class="top"><h1>⚽ SWÉ ARENA</h1></header><div class="card"><p>Tournoi introuvable.</p><button id="backPublic">← Retour</button></div>';
+      $('#publicView').innerHTML='<header class="top"><h1>⚽ SWÉ TOURNAMENT 5/5</h1></header><div class="card"><p>Tournoi introuvable.</p><button id="backPublic">← Retour</button></div>';
       $('#backPublic').onclick=()=>location.href=APP_URL+'?public='+encodeURIComponent(token);
       return;
     }
@@ -2206,7 +2345,7 @@ async function bootPublic(token){
       return '<div class="team"><b>'+esc(team.name)+'</b>'+ids.map(id=>'<div class="small" style="margin-top:6px">'+esc(pmap2.get(id)?.name||'?')+'</div>').join('')+'</div>';
     }).join('');
     $('#publicView').innerHTML=
-      '<header class="top"><div class="row" style="justify-content:space-between"><div><h1>⚽ '+esc(ht.name||'SWÉ ARENA')+'</h1><div class="public-sub">'+ht.tournament_date+' • Historique</div></div><button id="backPublic">← Retour</button></div></header>'+
+      '<header class="top"><div class="row" style="justify-content:space-between"><div><h1>⚽ '+esc(ht.name||'SWÉ TOURNAMENT 5/5')+'</h1><div class="public-sub">'+ht.tournament_date+' • Historique</div></div><button id="backPublic">← Retour</button></div></header>'+
       '<div class="card"><h2 class="sectiontitle">👥 Équipes</h2>'+ (teamsRows||'<p class="muted">Aucune équipe.</p>') +'</div>'+
       '<div class="card"><h2 class="sectiontitle">🏆 Classement final</h2>'+ (teamRows||'<p class="muted">Aucun classement.</p>') +'</div>'+
       '<div class="card"><h2 class="sectiontitle">⚽ Buteurs</h2>'+ (scorRows||'<p class="muted">Aucun buteur.</p>') +'</div>'+
