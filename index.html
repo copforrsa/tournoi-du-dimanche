@@ -97,7 +97,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:700">V36.6</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:700">V36.7</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -1436,13 +1436,13 @@ async function bootPublic(token){
       const pl=playerMap.get(r.player_id);if(!pl)return '';
       const host=r.registered_by_player_id?playerMap.get(r.registered_by_player_id):null;
       const guest=host?('Guest de '+host.name):publicGuestLabel(pl);
-      return '<div class="player row '+(guest?'guest-row':'')+'"><b style="min-width:34px">'+(i+1)+'.</b><span style="flex:1">'+esc(pl.name)+(guest?' <span class="guest-badge">'+esc(guest)+'</span>':'')+'</span><span style="font-weight:700;color:#15803d">Confirmé</span></div>';
+      return '<div class="player row"><b style="min-width:34px">'+(i+1)+'.</b><span style="flex:1">'+esc(pl.name)+(guest?' <span class="guest-badge">'+esc(guest)+'</span>':'')+'</span><span style="font-weight:700;color:#15803d">Confirmé</span></div>';
     }).join('');
     const waitRows=waiting.map((r,i)=>{
       const pl=playerMap.get(r.player_id);if(!pl)return '';
       const host=r.registered_by_player_id?playerMap.get(r.registered_by_player_id):null;
       const guest=host?('Guest de '+host.name):publicGuestLabel(pl);
-      return '<div class="player row guest-row"><b style="min-width:34px">'+(i+1)+'.</b><span style="flex:1">'+esc(pl.name)+(guest?' <span class="guest-badge">'+esc(guest)+'</span>':'')+'</span><span style="font-weight:700;color:#b45309">Attente</span></div>';
+      return '<div class="player row"><b style="min-width:34px">'+(i+1)+'.</b><span style="flex:1">'+esc(pl.name)+(guest?' <span class="guest-badge">'+esc(guest)+'</span>':'')+'</span><span style="font-weight:700;color:#b45309">Attente</span></div>';
     }).join('');
     const count=$('#publicRegCount');if(count)count.textContent=confirmed.length+'/'+(regTour.max_players||20)+' confirmés'+(waiting.length?' • '+waiting.length+' en attente':'');
     const list=$('#publicRegisteredList');if(list)list.innerHTML=listRows||'<p class="muted">Aucun inscrit pour le moment.</p>';
@@ -1455,11 +1455,11 @@ async function bootPublic(token){
     const waiting=regs.filter(r=>r.registration_status==='waitlist').length;
     regBox.innerHTML=
       '<div class="player"><b>'+esc(regTour.name||('Tournoi du '+regTour.tournament_date))+'</b><div id="publicRegCount" class="muted">'+confirmed+'/'+(regTour.max_players||20)+' confirmés'+(waiting?' • '+waiting+' en attente':'')+'</div></div>'+
-      '<div class="player" style="margin-top:12px;background:#f8fbf9"><b>ℹ️ Comment ça marche ?</b><div class="muted" style="margin-top:6px;line-height:1.5">1. Choisis ton nom. 2. Si tu n’es pas encore inscrit, clique sur <b>Je participe</b>. 3. Si tu es déjà inscrit et que tu veux simplement ajouter un invité, ne reclique pas sur “Je participe” : remplis directement la zone <b>Tu viens avec un invité ?</b> ci-dessous. 4. Ton invité apparaîtra dans la liste comme <b>Guest de ton nom</b>.</div></div>'+
+      '<div class="player" style="margin-top:12px;background:#f8fbf9"><b>ℹ️ Comment ça marche ?</b><div class="muted" style="margin-top:8px;line-height:1.7"><div>1. Choisis ton nom dans la liste.</div><div>2. Pour t’inscrire toi-même, clique sur <b>Je participe</b>.</div><div>3. Pour ajouter un invité, sélectionne ton nom mais <b>ne clique pas sur “Je participe”</b>.</div><div>4. Va directement dans <b>Tu viens avec qui ?</b>, indique son nom puis ajoute-le.</div><div>5. Ton invité apparaîtra dans la liste comme <b>Guest de ton nom</b>.</div></div></div>'+
       '<div class="space"></div><select id="publicPlayerSelect"><option value="">Choisis ton nom</option>'+players.filter(x=>x.active&&x.is_group_member!==false).sort((a,b)=>a.name.localeCompare(b.name)).map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')+'</select>'+
       '<div id="publicSelectedStatus" class="muted" style="margin-top:7px">Choisis ton nom pour voir ton statut.</div>'+
       '<div class="space"></div><div class="row"><button id="publicJoin" class="primary">✅ Je participe</button><button id="publicLeave">❌ Je ne participe pas</button></div>'+
-      '<div class="player" style="margin-top:12px"><b>👤 Tu viens avec un invité ?</b><div class="muted" style="margin:4px 0 8px">Tu peux ajouter ton invité même si tu étais déjà inscrit auparavant. Choisis ton nom ci-dessus, puis indique le nom de ton invité.</div><input id="publicGuestName" placeholder="Nom de l’invité"><label class="row" style="margin-top:8px;justify-content:flex-start"><input id="publicGuestMember" type="checkbox" style="width:auto"><span>Ajouter cet invité comme membre du groupe</span></label><div id="publicGuestPhoneWrap" class="hidden" style="margin-top:8px"><input id="publicGuestPhone" type="tel" inputmode="tel" placeholder="Numéro de mobile de l’invité"><div class="muted" style="margin-top:4px">Le numéro est demandé uniquement pour créer sa fiche membre. Il reste privé et visible uniquement par l’administrateur.</div></div><div class="space"></div><button id="publicAddGuest" class="primary">+ Ajouter mon invité</button></div>'+
+      '<div class="player" style="margin-top:12px"><b>👤 Tu viens avec qui ?</b><div class="muted" style="margin:4px 0 8px">Sélectionne ton nom ci-dessus. Pour ajouter un invité, ne clique pas sur « Je participe » : indique simplement son nom ici puis ajoute-le.</div><input id="publicGuestName" placeholder="Nom de l’invité"><label class="row" style="margin-top:8px;justify-content:flex-start"><input id="publicGuestMember" type="checkbox" style="width:auto"><span>Ajouter cet invité comme membre du groupe</span></label><div id="publicGuestPhoneWrap" class="hidden" style="margin-top:8px"><input id="publicGuestPhone" type="tel" inputmode="tel" placeholder="Numéro de mobile de l’invité"><div class="muted" style="margin-top:4px">Le numéro est demandé uniquement pour créer sa fiche membre. Il reste privé et visible uniquement par l’administrateur.</div></div><div class="space"></div><button id="publicAddGuest" class="primary">+ Ajouter mon invité</button></div>'+
       '<div id="publicRegStatus" class="muted" style="margin-top:8px">Les places sont attribuées dans l’ordre des inscriptions.</div>'+
       '<h3 style="margin-top:18px">👥 Inscrits</h3><div id="publicRegisteredList"></div>'+
       '<div id="publicWaitWrap" class="'+(waiting?'':'hidden')+'"><h3 style="margin-top:14px">🟠 Liste d’attente</h3><div id="publicWaitList"></div></div>';
