@@ -60,7 +60,7 @@ select{background-color:#fff} textarea{resize:vertical}
 }
 @media(max-width:650px){
   body{background:#f3f7f4}.app{padding:0 12px 100px}.top{border-radius:0 0 24px 24px;margin:0 -12px 14px;padding:18px 16px 20px}.top h1{font-size:21px}.card{border-radius:17px;padding:14px;margin:10px 0}.g2,.g3{grid-template-columns:1fr}.sectiontitle{font-size:17px}
-  /* V39.36 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
+  /* V39.37 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
   .tabs{left:0;right:0;transform:none;width:100%;display:flex;grid-template-columns:none;justify-content:flex-start;gap:5px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;border-radius:18px 18px 0 0;padding:7px 10px calc(7px + env(safe-area-inset-bottom));scroll-snap-type:x proximity;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
   .tabs button{flex:0 0 74px;min-width:74px;font-size:10px;scroll-snap-align:center;padding:5px 6px}
@@ -81,7 +81,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.36</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.37</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -124,7 +124,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.36</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.37</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -1942,7 +1942,7 @@ function seasonNameForTournament(t){
 }
 
 function renderTournaments(){
-  // V39.36 : l'éditeur de tournoi est protégé des synchronisations automatiques.
+  // V39.37 : l'éditeur de tournoi est protégé des synchronisations automatiques.
   const ss=$('#seasonSelect');
   ss.innerHTML='<option value="">Sans saison</option>'+S.seasons.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');
   const box=$('#tournamentList');box.innerHTML='';
@@ -2902,7 +2902,7 @@ async function renderLeague(){
   }
 
 
-  // V39.36 — Saisie du résultat directement depuis l'onglet Ligue.
+  // V39.37 — Saisie du résultat directement depuis l'onglet Ligue.
   const scoringCard=$('#leagueScoringCard'),scoringBody=$('#leagueScoringBody'),scoringLabel=$('#leagueScoringSessionLabel');
   if(scoringCard)scoringCard.classList.toggle('hidden',!canScoreLeague);
   if(canScoreLeague&&scoringBody){
@@ -3772,7 +3772,9 @@ async function bootPublic(token){
         renderPublicRegistrationList();
         refreshPublicPlayerSelect();
         updateSelectedRegistrationStatus();
-        if(typeof renderPublicTeamBuilder==='function')renderPublicTeamBuilder();
+        // Ne pas reconstruire le formulaire équipe pendant que l’utilisateur le remplit.
+        // Le rafraîchissement automatique de 8 s reste actif pour les données, mais ne reset plus l'inscription équipe.
+        if(typeof renderPublicTeamBuilder==='function'&&!publicTeamBuilderEditing)renderPublicTeamBuilder();
       }catch(e){}
     }
 
@@ -3854,9 +3856,16 @@ async function bootPublic(token){
       if(teamHelp.length) teamBtn.title='Équipe de 5 joueurs maximum, avec jusqu’à 4 coéquipiers ou invités';
     }
     $('#chooseSoloMode').onclick=()=>setPublicEntryMode('solo');
-    $('#chooseTeamMode').onclick=()=>setPublicEntryMode('team');
+    $('#chooseTeamMode').onclick=()=>{
+      publicTeamBuilderEditing=false;
+      renderPublicTeamBuilder();
+      setPublicEntryMode('team');
+    };
     $('#backFromSoloMode').onclick=()=>setPublicEntryMode(null);
-    $('#backFromTeamMode').onclick=()=>setPublicEntryMode(null);
+    $('#backFromTeamMode').onclick=()=>{
+      publicTeamBuilderEditing=false;
+      setPublicEntryMode(null);
+    };
     setPublicEntryMode(null);
   }else if(entryChoiceCard){
     entryChoiceCard.classList.add('hidden');
@@ -3871,6 +3880,7 @@ async function bootPublic(token){
 
   const teamBuilder=$('#publicTeamBuilder');
   const teamBuilderCard=$('#publicTeamBuilderCard');
+  let publicTeamBuilderEditing=false;
   function renderPublicTeamBuilder(){
     if(!teamBuilder||!teamBuilderCard)return;
     if(!regTour){
@@ -3902,6 +3912,7 @@ async function bootPublic(token){
       const {data,error}=await sb.rpc('public_validate_team_code',{p_token:token,p_tournament_id:regTour.id,p_code:code});
       if(error||!data){codeStatus.textContent=error?.message||'Code secret invalide ou expiré.';formAfterCode.classList.add('hidden');validatedTeamCode='';return}
       validatedTeamCode=code;
+      publicTeamBuilderEditing=true;
       const ownerId=String(data);
       if([...creatorSel.options].some(o=>o.value===ownerId)){
         creatorSel.value=ownerId;
@@ -3917,7 +3928,11 @@ async function bootPublic(token){
     };
     codeInput.addEventListener('input',()=>{
       if(validatedTeamCode&&codeInput.value.trim()!==validatedTeamCode){
-        validatedTeamCode='';creatorSel.disabled=false;creatorSel.value='';formAfterCode.classList.add('hidden');codeStatus.textContent='Le code a été modifié : valide-le à nouveau.';
+        validatedTeamCode='';
+        publicTeamBuilderEditing=false;
+        creatorSel.disabled=false;creatorSel.value='';
+        formAfterCode.classList.add('hidden');
+        codeStatus.textContent='Le code a été modifié : valide-le à nouveau.';
       }
     });
     function renderMates(){
@@ -3990,6 +4005,7 @@ async function bootPublic(token){
         return status.textContent=msg;
       }
       status.textContent='🟢 Équipe créée ! Les joueurs déjà inscrits ont été conservés et les autres ont été inscrits automatiquement. Tu peux ensuite revenir dans « Mon inscription & mes invités » pour ajouter jusqu’à 5 invités au Swé.';
+      publicTeamBuilderEditing=false;
       $('#publicTeamCode').value='';$('#publicTeamName').value='';validatedTeamCode='';selectedTeamColor='';creatorSel.disabled=false;creatorSel.value='';$('#publicTeamFormAfterCode')?.classList.add('hidden');
       try{
         const snap=await sb.rpc('get_public_workspace_snapshot',{p_token:token});
@@ -4037,7 +4053,7 @@ async function bootPublic(token){
   const pmap=new Map(players.map(x=>[x.id,x]));
   const tmap=new Map(teams.map(x=>[x.id,x]));
 
-  // V39.36 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
+  // V39.37 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
   if(wantsLeagueSession&&regTour){
     const linkedLeague=leagues.find(l=>l.id===regTour.league_id)||null;
     const linkLeagueId=publicParams.get('league');
