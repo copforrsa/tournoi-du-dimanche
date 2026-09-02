@@ -50,7 +50,7 @@
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ Tournoi du Dimanche</h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V31</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="loginCard" class="card">
       <h2 class="sectiontitle">Connexion</h2>
       <input id="email" type="email" placeholder="Email" autocomplete="email">
@@ -268,7 +268,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const { createClient } = window.supabase;
-const sb=createClient('https://fbppesfxkvledwjemwsn.supabase.co','sb_publishable_Kl3HDD4S08YC1EB-cWJKaQ_e9gCbygp');
+const noStoreFetch=(input,init={})=>fetch(input,{...init,cache:'no-store'});
+const sb=createClient('https://fbppesfxkvledwjemwsn.supabase.co','sb_publishable_Kl3HDD4S08YC1EB-cWJKaQ_e9gCbygp',{
+  global:{fetch:noStoreFetch}
+});
 
 window.addEventListener('error', (e) => {
   const t=document.querySelector('#toast');
@@ -954,7 +957,11 @@ $('#shareWhatsapp').onclick=async()=>{const text=$('#shareText').value;if(naviga
 
 function subscribeRealtime(){if(S.channel)sb.removeChannel(S.channel);let timer;const reload=()=>{clearTimeout(timer);timer=setTimeout(async()=>await loadAll(),250)};S.channel=sb.channel('tournoi-manager').on('postgres_changes',{event:'*',schema:'public',table:'players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'seasons'},reload).on('postgres_changes',{event:'*',schema:'public',table:'tournaments'},reload).on('postgres_changes',{event:'*',schema:'public',table:'tournament_players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'teams'},reload).on('postgres_changes',{event:'*',schema:'public',table:'team_players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'matches'},reload).on('postgres_changes',{event:'*',schema:'public',table:'goals'},reload).subscribe()}
 
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'})
+    .then(reg=>reg.update())
+    .catch(()=>{});
+}
 sb.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){S.session=session;showRecoveryForm();return}setTimeout(authState,0)});
 function latestTournamentForVisual(){
   return currentTour()||S.tournaments[0]||null;
