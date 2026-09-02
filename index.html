@@ -50,7 +50,7 @@
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V31</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V32</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="loginCard" class="card">
       <h2 class="sectiontitle">Connexion</h2>
       <input id="email" type="email" placeholder="Email" autocomplete="email">
@@ -182,7 +182,7 @@
         <div class="space"></div>
         <div class="grid g2"><select id="homeTeam"></select><select id="awayTeam"></select></div>
         <div class="space"></div>
-        <div class="grid g2"><input id="pitch" placeholder="Terrain"><input id="roundLabel" placeholder="Tour / étape"></div>
+        <div class="grid g2"><select id="pitch"><option value="">Terrain</option><option value="Carrefour">Carrefour</option><option value="Mercedes">Mercedes</option><option value="Boulogne">Boulogne</option></select><input id="roundLabel" placeholder="Tour / étape"></div>
         <div class="space"></div><button id="addMatch" class="primary">Ajouter le match</button>
       </div>
       <div id="matchesList"></div>
@@ -868,7 +868,7 @@ team.onchange=fill;form.append(team,sc,as);const b=document.createElement('butto
   renderAll();
   toast('But ajouté ✅');
 };if(canEditCurrentMatches())d.append(form,b);const hist=document.createElement('div');hist.style.marginTop='8px';S.goals.filter(g=>g.match_id===m.id).forEach(g=>{const r=document.createElement('div');r.className='row small';r.innerHTML='<span style="flex:1">⚽ '+esc(p(g.scorer_player_id)?.name||'?')+(g.assister_player_id?' ← '+esc(p(g.assister_player_id)?.name||''):'')+'</span>';const x=document.createElement('button');x.textContent='Annuler';x.onclick=async()=>{const {error}=await sb.from('goals').delete().eq('id',g.id);if(error)return toast(error.message);await loadTournament();renderAll();toast('But annulé')};if(canEditCurrentMatches())r.appendChild(x);hist.appendChild(r)});d.appendChild(hist);box.appendChild(d)})}
-$('#addMatch').onclick=async()=>{const t=currentTour(),home=$('#homeTeam').value,away=$('#awayTeam').value;if(!t||!home||!away||home===away)return toast('Choisis deux équipes différentes');const {error}=await sb.from('matches').insert({tournament_id:t.id,home_team_id:home,away_team_id:away,match_order:S.matches.length+1,pitch:$('#pitch').value.trim()||null,round_label:$('#roundLabel').value.trim()||null});if(error)toast(error.message);else{$('#pitch').value='';$('#roundLabel').value=''}};
+$('#addMatch').onclick=async()=>{const t=currentTour(),home=$('#homeTeam').value,away=$('#awayTeam').value;if(!t||!home||!away||home===away)return toast('Choisis deux équipes différentes');const {error}=await sb.from('matches').insert({tournament_id:t.id,home_team_id:home,away_team_id:away,match_order:S.matches.length+1,pitch:$('#pitch').value||null,round_label:$('#roundLabel').value.trim()||null});if(error)toast(error.message);else{$('#pitch').value='';$('#roundLabel').value=''}};
 $('#roundRobin').onclick=async()=>{const t=currentTour();if(!t||S.teams.length<2)return toast('Crée les équipes d’abord');const existing=new Set(S.matches.map(m=>[m.home_team_id,m.away_team_id].sort().join('|'))),rows=[];let n=S.matches.length+1;for(let i=0;i<S.teams.length;i++)for(let j=i+1;j<S.teams.length;j++){const key=[S.teams[i].id,S.teams[j].id].sort().join('|');if(!existing.has(key))rows.push({tournament_id:t.id,home_team_id:S.teams[i].id,away_team_id:S.teams[j].id,match_order:n++})}if(!rows.length)return toast('Tous les matchs existent déjà');const {error}=await sb.from('matches').insert(rows);error?toast(error.message):toast(rows.length+' matchs générés')};
 
 async function rankingDataset(){
