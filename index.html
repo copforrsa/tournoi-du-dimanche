@@ -276,6 +276,30 @@ window.addEventListener('error', (e) => {
 });
 
 const S={session:null,workspace:null,members:[],invites:[],players:[],seasons:[],tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},publicMode:false,publicToken:null};
+
+let mobileRefreshTimer=null;
+let mobileRefreshBusy=false;
+
+async function refreshVisibleApp(){
+  if(mobileRefreshBusy || S.publicMode || !S.session || !S.workspace) return;
+  if(document.visibilityState==='hidden') return;
+  mobileRefreshBusy=true;
+  try{ await loadAll(); }
+  catch(e){ console.warn('refreshVisibleApp',e); }
+  finally{ mobileRefreshBusy=false; }
+}
+
+function startMobileRefreshFallback(){
+  if(mobileRefreshTimer) clearInterval(mobileRefreshTimer);
+  mobileRefreshTimer=setInterval(()=>refreshVisibleApp(),15000);
+}
+
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible') refreshVisibleApp();
+});
+window.addEventListener('focus',()=>refreshVisibleApp());
+window.addEventListener('pageshow',()=>refreshVisibleApp());
+
 const $=s=>document.querySelector(s);
 const toast=t=>{const x=$('#toast');x.textContent=t;x.style.display='block';setTimeout(()=>x.style.display='none',2600)};
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -364,7 +388,7 @@ async function boot(){
 }
 $('#createWorkspace').onclick=async()=>{
   const btn=$('#createWorkspace');btn.disabled=true;btn.textContent='Création…';
-  try{await ensureWorkspace();toast('Espace créé ✅');await loadAll();subscribeRealtime()}
+  try{await ensureWorkspace();toast('Espace créé ✅');await loadAll();subscribeRealtime();startMobileRefreshFallback()}
   catch(error){toast(friendlyAuthError(error))}
   finally{btn.disabled=false;btn.textContent="Créer l'espace"}
 };
@@ -916,12 +940,19 @@ function renderTeamRanking(){const r=S.teams.map(x=>({id:x.id,name:x.name,mj:0,v
 document.querySelectorAll('.rankMode').forEach(b=>b.onclick=()=>{S.rankMode=b.dataset.mode;document.querySelectorAll('.rankMode').forEach(x=>x.classList.toggle('primary',x===b));renderRanking()});
 $('#shareWhatsapp').onclick=async()=>{const text=$('#shareText').value;if(navigator.share){try{await navigator.share({title:'Classement du tournoi',text});return}catch{}}await navigator.clipboard.writeText(text);toast('Résumé copié')};
 
-function subscribeRealtime(){if(S.channel)sb.removeChannel(S.channel);let timer;const reload=()=>{clearTimeout(timer);timer=setTimeout(async()=>await loadAll(),250)};S.channel=sb.channel('tournoi-manager').on('postgres_changes',{event:'*',schema:'public',table:'players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'seasons'},reload).on('postgres_changes',{event:'*',schema:'public',table:'tournaments'},reload).on('postgres_changes',{event:'*',schema:'public',table:'tournament_players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'teams'},reload).on('postgres_changes',{event:'*',schema:'public',table:'team_players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'matches'},reload).on('postgres_changes',{event:'*',schema:'public',table:'goals'},reload).subscribe()}
-document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>setView(b.dataset.view));document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>setView(b.dataset.go));
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
-sb.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){S.session=session;showRecoveryForm();return}setTimeout(authState,0)});
-function latestTournamentForVisual(){
-  return currentTour()||S.tournaments[0]||null;
+function subscribeRealtime(){
+  if(S.channel){try{sb.removeChannel(S.channel)}catch(e){}}
+  if(!S.workspace)return;
+  S.channel=sb.channel('tournoi-'+S.workspace.id)
+    .on('postgres_changes',{event:'*',schema:'public',table:'players',filter:'workspace_id=eq.'+S.workspace.id},()=>refreshVisibleApp())
+    .on('postgres_changes',{event:'*',schema:'public',table:'seasons',filter:'workspace_id=eq.'+S.workspace.id},()=>refreshVisibleApp())
+    .on('postgres_changes',{event:'*',schema:'public',table:'tournaments',filter:'workspace_id=eq.'+S.workspace.id},()=>refreshVisibleApp())
+    .on('postgres_changes',{event:'*',schema:'public',table:'tournament_players'},()=>refreshVisibleApp())
+    .on('postgres_changes',{event:'*',schema:'public',table:'teams'},()=>refreshVisibleApp())
+    .on('postgres_changes',{event:'*',schema:'public',table:'team_players'},()=>refreshVisibleApp())
+    .on('postgres_changes',{event:'*',schema:'public',table:'matches'},()=>refreshVisibleApp())
+    .on('postgres_changes',{event:'*',schema:'public',table:'goals'},()=>refreshVisibleApp())
+    .subscribe();
 }
 function visualPrompt(kind){
   const t=latestTournamentForVisual();
