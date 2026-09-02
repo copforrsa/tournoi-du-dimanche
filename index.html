@@ -75,7 +75,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.26</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.27</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -118,7 +118,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.26</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.27</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -165,6 +165,23 @@ select{background-color:#fff} textarea{resize:vertical}
         <label class="player row" style="justify-content:flex-start"><input id="saRankingsEnabled" type="checkbox" style="width:auto" checked><span><b>Classements buteurs / passeurs</b></span></label>
         <div class="space"></div>
         <button id="saCreateWorkspace" class="primary">+ Créer l’espace administrateur</button>
+      </div>
+
+      <div class="card">
+        <div class="row" style="justify-content:space-between;gap:10px;flex-wrap:wrap">
+          <div>
+            <h2 class="sectiontitle">📍 Complexes & terrains</h2>
+            <div class="muted">Catalogue commun à la plateforme. Les administrateurs choisissent ensuite leurs terrains réservés lors de la création d’un tournoi ou d’un Swé.</div>
+          </div>
+          <button id="saRefreshVenues">Actualiser</button>
+        </div>
+        <div class="space"></div>
+        <div class="grid g3">
+          <input id="saNewComplexName" placeholder="Nom du complexe">
+          <input id="saNewComplexCity" placeholder="Ville / commune">
+          <button id="saAddComplex" class="primary">+ Ajouter le complexe</button>
+        </div>
+        <div id="saVenueList" style="margin-top:12px"></div>
       </div>
 
       <div class="card">
@@ -312,6 +329,20 @@ select{background-color:#fff} textarea{resize:vertical}
         <h2 class="sectiontitle">Créer un tournoi</h2>
         <div class="grid g2"><input id="tourDate" type="date"><select id="tourFormat"><option value="classic">Classique</option><option value="king_of_pitch">Roi du terrain</option></select></div>
         <div class="space"></div><input id="tourName" placeholder="Nom facultatif"><div class="space"></div>
+        <div class="player" style="background:#f8fbf9">
+          <b>📍 Réservation des terrains</b>
+          <div class="muted" style="margin:5px 0 8px">Choisis le complexe puis 1 à 3 terrains réservés pour ce tournoi.</div>
+          <div class="grid g2">
+            <label><span class="muted">Complexe *</span><select id="tourComplex"><option value="">Choisir le complexe</option></select></label>
+            <label><span class="muted">Heure de réservation *</span><input id="tourStartTime" type="time" value="09:00"></label>
+          </div>
+          <div id="tourPitchChoices" style="margin-top:10px"></div>
+          <div class="grid g2" style="margin-top:10px">
+            <label><span class="muted">Prix / participant (€) *</span><input id="tourEntryFee" type="number" min="0" step="0.50" value="0"></label>
+            <label><span class="muted">Nom ou n° de réservation (facultatif)</span><input id="tourReservationRef" placeholder="Ex. Résa Forssa / n° 12345"></label>
+          </div>
+        </div>
+        <div class="space"></div>
         <div class="grid g2">
           <label class="player"><span class="muted">Places maximum</span><input id="tourMaxPlayers" type="number" min="2" max="100" value="20"></label>
           <label class="player row" style="justify-content:flex-start"><input id="tourRegistrationOpen" type="checkbox" style="width:auto" checked><span><b>Ouvrir les inscriptions</b><div class="muted">Les joueurs pourront s’inscrire via le lien public.</div></span></label>
@@ -319,10 +350,7 @@ select{background-color:#fff} textarea{resize:vertical}
         <div id="thirdHalfTournamentCreate" class="player hidden" style="margin-top:12px;background:#fff8ed;border:1px solid #fed7aa">
           <b>🧊 3e mi-temps & participation</b>
           <div class="muted" style="margin:5px 0 10px">Option activée par le Super Admin. Définis le prix de participation au Swé. Le paiement en ligne sera raccordé à Stripe ultérieurement.</div>
-          <div class="grid g2">
-            <label><span class="muted">Prix par participant (€)</span><input id="tourEntryFee" type="number" min="0" step="0.50" value="0"></label>
-            <label><span class="muted">Participation glacière conseillée (€)</span><input id="tourCoolerSuggested" type="number" min="0" step="0.50" value="0"></label>
-          </div>
+          <label><span class="muted">Participation glacière conseillée (€)</span><input id="tourCoolerSuggested" type="number" min="0" step="0.50" value="0"></label>
         </div>
         <div class="space"></div><button id="createTournament" class="primary">Créer le tournoi</button>
       </div>
@@ -425,15 +453,26 @@ select{background-color:#fff} textarea{resize:vertical}
           <div class="space"></div>
           <div class="grid g2">
             <input id="leagueSessionDate" type="date">
-            <input id="leagueSessionName" placeholder="Ex. Swé Ligue #1">
+            <input id="leagueSessionName" placeholder="Nom du Swé (facultatif)">
+          </div>
+          <div class="space"></div>
+          <div class="player" style="background:#f8fbf9">
+            <b>📍 Réservation du Swé</b>
+            <div class="muted" style="margin:5px 0 8px">Le terrain, l’heure et le prix sont obligatoires. Le nom ou numéro de réservation est facultatif.</div>
+            <div class="grid g2">
+              <label><span class="muted">Complexe *</span><select id="leagueSessionComplex"><option value="">Choisir le complexe</option></select></label>
+              <label><span class="muted">Terrain *</span><select id="leagueSessionPitch"><option value="">Choisir le terrain</option></select></label>
+            </div>
+            <div class="grid g3" style="margin-top:10px">
+              <label><span class="muted">Heure de réservation *</span><input id="leagueSessionStartTime" type="time" value="09:00"></label>
+              <label><span class="muted">Prix / participant (€) *</span><input id="leagueSessionEntryFee" type="number" min="0" step="0.50" value="0"></label>
+              <label><span class="muted">Nom ou n° de réservation</span><input id="leagueSessionReservationRef" placeholder="Facultatif"></label>
+            </div>
           </div>
           <div id="thirdHalfLeagueCreate" class="player hidden" style="margin-top:12px;background:#fff8ed;border:1px solid #fed7aa">
             <b>🧊 3e mi-temps & participation</b>
             <div class="muted" style="margin:5px 0 10px">Prix du Swé de Ligue et participation glacière. Le paiement en ligne sera activé avec Stripe dans une prochaine étape.</div>
-            <div class="grid g2">
-              <label><span class="muted">Prix par participant (€)</span><input id="leagueSessionEntryFee" type="number" min="0" step="0.50" value="0"></label>
-              <label><span class="muted">Participation glacière conseillée (€)</span><input id="leagueSessionCoolerSuggested" type="number" min="0" step="0.50" value="0"></label>
-            </div>
+            <label><span class="muted">Participation glacière conseillée (€)</span><input id="leagueSessionCoolerSuggested" type="number" min="0" step="0.50" value="0"></label>
           </div>
           <div class="space"></div>
           <button id="createLeagueSession" class="primary">Créer le Swé de Ligue</button>
@@ -656,7 +695,7 @@ window.addEventListener('error', (e) => {
   if(t){t.textContent='Erreur de chargement de l’application. Recharge la page.';t.style.display='block';}
 });
 
-const S={session:null,isSuperAdmin:false,superWorkspaces:[],workspace:null,members:[],coorgs:[],coorgCount:0,workspaceFeatures:{max_coorganizers:3,max_coorganizers_cap:100,rankings_enabled:true,league_enabled:true,tournaments_enabled:true,third_half_enabled:false},myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null},myRatings:[],lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],teamCodes:[],seasons:[],leagues:[],leaguePlayers:[],activeLeague:null,tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},publicMode:false,publicToken:null};
+const S={session:null,isSuperAdmin:false,superWorkspaces:[],workspace:null,members:[],coorgs:[],coorgCount:0,workspaceFeatures:{max_coorganizers:3,max_coorganizers_cap:100,rankings_enabled:true,league_enabled:true,tournaments_enabled:true,third_half_enabled:false},myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null},myRatings:[],lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],teamCodes:[],seasons:[],leagues:[],leaguePlayers:[],activeLeague:null,tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},sportsComplexes:[],sportsPitches:[],publicMode:false,publicToken:null};
 
 let safeSyncTimer=null;
 let safeSyncBusy=false;
@@ -681,6 +720,53 @@ const $=s=>document.querySelector(s);
 const toast=t=>{const x=$('#toast');x.textContent=t;x.style.display='block';setTimeout(()=>x.style.display='none',2600)};
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const today=()=>new Date().toISOString().slice(0,10); $('#tourDate').value=today();
+
+async function loadSportsVenues(){
+  const {data,error}=await sb.rpc('get_sports_venues');
+  if(error){console.warn('sports venues',error);return}
+  S.sportsComplexes=Array.isArray(data?.complexes)?data.complexes:[];
+  S.sportsPitches=Array.isArray(data?.pitches)?data.pitches:[];
+  renderVenueSelectors();
+  if(S.isSuperAdmin)renderSuperAdminVenues();
+}
+function complexLabel(id){
+  const c=S.sportsComplexes.find(x=>x.id===id);return c?([c.name,c.city].filter(Boolean).join(' • ')):'Complexe';
+}
+function pitchName(id){return S.sportsPitches.find(x=>x.id===id)?.name||'Terrain'}
+function renderVenueSelectors(){
+  const activeComplexes=S.sportsComplexes.filter(x=>x.active!==false);
+  const options='<option value="">Choisir le complexe</option>'+activeComplexes.map(c=>'<option value="'+c.id+'">'+esc(complexLabel(c.id))+'</option>').join('');
+  if($('#tourComplex')){$('#tourComplex').innerHTML=options;renderTournamentPitchChoices();}
+  if($('#leagueSessionComplex')){$('#leagueSessionComplex').innerHTML=options;renderLeaguePitchSelect();}
+  renderMatchPitchSelect();
+}
+function renderTournamentPitchChoices(){
+  const box=$('#tourPitchChoices');if(!box)return;
+  const cid=$('#tourComplex')?.value||'';
+  const pitches=S.sportsPitches.filter(x=>x.active!==false&&x.complex_id===cid);
+  box.innerHTML=pitches.length
+    ? '<div class="muted" style="margin-bottom:6px">Terrains réservés (maximum 3)</div>'+pitches.map(p=>'<label class="player row" style="justify-content:flex-start;margin:5px 0"><input class="tourPitchCheck" type="checkbox" value="'+p.id+'" style="width:auto"><span><b>'+esc(p.name)+'</b></span></label>').join('')
+    : '<div class="muted">Choisis d’abord un complexe disposant de terrains actifs.</div>';
+  box.querySelectorAll('.tourPitchCheck').forEach(ch=>ch.onchange=()=>{
+    const checked=[...box.querySelectorAll('.tourPitchCheck:checked')];
+    if(checked.length>3){ch.checked=false;toast('Maximum 3 terrains pour un tournoi.');}
+  });
+}
+function renderLeaguePitchSelect(){
+  const sel=$('#leagueSessionPitch');if(!sel)return;
+  const cid=$('#leagueSessionComplex')?.value||'';
+  const pitches=S.sportsPitches.filter(x=>x.active!==false&&x.complex_id===cid);
+  sel.innerHTML='<option value="">Choisir le terrain</option>'+pitches.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join('');
+}
+function renderMatchPitchSelect(){
+  const sel=$('#pitch');if(!sel)return;
+  const t=currentTour();
+  let pitches=[];
+  if(t?.reserved_pitch_ids?.length)pitches=S.sportsPitches.filter(p=>t.reserved_pitch_ids.includes(p.id));
+  if(!pitches.length)pitches=S.sportsPitches.filter(p=>p.active!==false);
+  sel.innerHTML='<option value="">Terrain</option>'+pitches.map(p=>'<option value="'+esc(p.name)+'">'+esc(p.name)+' • '+esc(complexLabel(p.complex_id))+'</option>').join('');
+}
+
 function hostFirstName(){
   const u=S.session?.user;
   const md=u?.user_metadata||{};
@@ -911,6 +997,56 @@ $('#updatePassword').onclick=async()=>{
 $('#logout').onclick=async()=>{await sb.auth.signOut();location.reload()};
 
 
+
+function renderSuperAdminVenues(){
+  const box=$('#saVenueList');if(!box)return;
+  box.innerHTML='';
+  const complexes=(S.sportsComplexes||[]).slice().sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)||String(a.name).localeCompare(String(b.name)));
+  if(!complexes.length){box.innerHTML='<p class="muted">Aucun complexe enregistré.</p>';return}
+  complexes.forEach(c=>{
+    const d=document.createElement('div');d.className='player';d.style.marginBottom='12px';
+    const pitches=(S.sportsPitches||[]).filter(p=>p.complex_id===c.id);
+    d.innerHTML=
+      '<div class="grid g3">'+
+        '<input data-complex-name value="'+esc(c.name)+'" placeholder="Nom du complexe">'+
+        '<input data-complex-city value="'+esc(c.city||'')+'" placeholder="Ville / commune">'+
+        '<label class="player row" style="justify-content:flex-start"><input data-complex-active type="checkbox" style="width:auto" '+(c.active!==false?'checked':'')+'><span>Actif</span></label>'+
+      '</div>'+
+      '<div class="row" style="margin-top:8px;flex-wrap:wrap"><button data-complex-save class="primary">💾 Enregistrer le complexe</button><button data-complex-delete class="danger">Supprimer</button></div>'+
+      '<div style="height:1px;background:#e8ecef;margin:12px 0"></div>'+
+      '<b>Terrains</b><div data-pitch-list style="margin-top:8px"></div>'+
+      '<div class="row" style="margin-top:8px"><input data-new-pitch placeholder="Nom du nouveau terrain" style="flex:1"><button data-add-pitch>+ Terrain</button></div>';
+    const plist=d.querySelector('[data-pitch-list]');
+    plist.innerHTML=pitches.map(p=>'<div class="row player" data-pitch-id="'+p.id+'" style="margin:5px 0"><input data-pitch-name value="'+esc(p.name)+'" style="flex:1"><label class="row" style="gap:5px"><input data-pitch-active type="checkbox" style="width:auto" '+(p.active!==false?'checked':'')+'> Actif</label><button data-pitch-save>Enregistrer</button><button data-pitch-delete class="danger">Supprimer</button></div>').join('')||'<div class="muted">Aucun terrain.</div>';
+    d.querySelector('[data-complex-save]').onclick=async()=>{
+      const {error}=await sb.rpc('super_admin_manage_sports_complex',{p_action:'update',p_id:c.id,p_name:d.querySelector('[data-complex-name]').value.trim(),p_city:d.querySelector('[data-complex-city]').value.trim()||null,p_active:d.querySelector('[data-complex-active]').checked});
+      if(error)return toast(error.message);await loadSportsVenues();toast('Complexe mis à jour ✅');
+    };
+    d.querySelector('[data-complex-delete]').onclick=async()=>{
+      if(!confirm('Supprimer définitivement le complexe « '+c.name+' » ?'))return;
+      const {error}=await sb.rpc('super_admin_manage_sports_complex',{p_action:'delete',p_id:c.id});
+      if(error)return toast(error.message);await loadSportsVenues();toast('Complexe supprimé.');
+    };
+    d.querySelector('[data-add-pitch]').onclick=async()=>{
+      const name=d.querySelector('[data-new-pitch]').value.trim();if(!name)return toast('Indique le nom du terrain.');
+      const {error}=await sb.rpc('super_admin_manage_sports_pitch',{p_action:'create',p_complex_id:c.id,p_name:name,p_active:true});
+      if(error)return toast(error.message);await loadSportsVenues();toast('Terrain ajouté ✅');
+    };
+    plist.querySelectorAll('[data-pitch-id]').forEach(row=>{
+      const pid=row.dataset.pitchId;
+      row.querySelector('[data-pitch-save]').onclick=async()=>{
+        const {error}=await sb.rpc('super_admin_manage_sports_pitch',{p_action:'update',p_id:pid,p_complex_id:c.id,p_name:row.querySelector('[data-pitch-name]').value.trim(),p_active:row.querySelector('[data-pitch-active]').checked});
+        if(error)return toast(error.message);await loadSportsVenues();toast('Terrain mis à jour ✅');
+      };
+      row.querySelector('[data-pitch-delete]').onclick=async()=>{
+        if(!confirm('Supprimer définitivement ce terrain ?'))return;
+        const {error}=await sb.rpc('super_admin_manage_sports_pitch',{p_action:'delete',p_id:pid});
+        if(error)return toast(error.message);await loadSportsVenues();toast('Terrain supprimé.');
+      };
+    });
+    box.appendChild(d);
+  });
+}
 async function loadSuperAdminWorkspaces(){
   const {data,error}=await sb.rpc('super_admin_get_workspaces');
   if(error){toast(error.message);return}
@@ -962,6 +1098,7 @@ function renderSuperAdminWorkspaces(){
         '<label><span class="muted">Nom administrateur</span><input data-sa-last-name value="'+esc(w.admin_last_name||'')+'" placeholder="Nom"></label>'+
         '<label><span class="muted">Téléphone administrateur</span><input data-sa-phone type="tel" inputmode="tel" value="'+esc(w.admin_phone||'')+'" placeholder="Téléphone"></label>'+
       '</div>'+
+      '<div class="row" style="margin-top:8px"><button data-sa-save-profile>💾 Enregistrer nom / prénom</button><span class="muted">Modifie uniquement l’identité affichée de l’administrateur, sans changer son compte de connexion.</span></div>'+
       '<div class="grid g3" style="margin-top:10px">'+
         '<label><span class="muted">Co-organisateurs autorisés</span><input data-sa-max type="number" min="0" max="'+Number(w.max_coorganizers_cap||100)+'" value="'+Number(w.max_coorganizers||0)+'"></label>'+
         '<label><span class="muted">Plafond commercial</span><input data-sa-cap type="number" min="0" max="100" value="'+Number(w.max_coorganizers_cap||100)+'"></label>'+
@@ -981,6 +1118,21 @@ function renderSuperAdminWorkspaces(){
         '<div class="muted" style="margin-top:5px">Sinon, son accès à cet espace sera désactivé. Son compte utilisateur n’est jamais supprimé.</div>'+
         '<button data-sa-transfer class="danger" style="margin-top:10px">Transférer l’administration</button>'+
       '</div>';
+
+    const profileSave=d.querySelector('[data-sa-save-profile]');
+    profileSave.onclick=async()=>{
+      profileSave.disabled=true;
+      const {error}=await sb.rpc('super_admin_update_admin_profile',{
+        p_workspace_id:w.workspace_id,
+        p_first_name:d.querySelector('[data-sa-first-name]').value.trim()||null,
+        p_last_name:d.querySelector('[data-sa-last-name]').value.trim()||null,
+        p_phone:d.querySelector('[data-sa-phone]').value.trim()||null
+      });
+      profileSave.disabled=false;
+      if(error)return toast(error.message);
+      toast('Nom et prénom de l’administrateur mis à jour ✅');
+      await loadSuperAdminWorkspaces();
+    };
 
     const actions=document.createElement('div');actions.className='row';actions.style.marginTop='12px';actions.style.flexWrap='wrap';
 
@@ -1088,13 +1240,27 @@ async function initSuperAdmin(){
   document.querySelectorAll('.view,.tabs').forEach(el=>el.classList.add('hidden'));
   $('#workspaceName').textContent='Super administrateur de la plateforme';
   await loadSuperAdminWorkspaces();
+  await loadSportsVenues();
   return true;
 }
 document.addEventListener('input',e=>{
   if(e.target?.id==='saSearchWorkspace')renderSuperAdminWorkspaces();
 });
+document.addEventListener('change',e=>{
+  if(e.target?.id==='tourComplex')renderTournamentPitchChoices();
+  if(e.target?.id==='leagueSessionComplex')renderLeaguePitchSelect();
+});
 document.addEventListener('click',async e=>{
   if(e.target?.id==='saRefresh')await loadSuperAdminWorkspaces();
+  if(e.target?.id==='saRefreshVenues')await loadSportsVenues();
+  if(e.target?.id==='saAddComplex'){
+    const name=$('#saNewComplexName').value.trim(),city=$('#saNewComplexCity').value.trim();
+    if(!name)return toast('Indique le nom du complexe.');
+    const {error}=await sb.rpc('super_admin_manage_sports_complex',{p_action:'create',p_name:name,p_city:city||null,p_active:true});
+    if(error)return toast(error.message);
+    $('#saNewComplexName').value='';$('#saNewComplexCity').value='';
+    await loadSportsVenues();toast('Complexe ajouté ✅');
+  }
   if(e.target?.id==='saCreateWorkspace'){
     const name=$('#saWorkspaceName').value.trim(),email=$('#saOwnerEmail').value.trim().toLowerCase();
     if(!name||!email)return toast('Indique le nom de l’espace et l’e-mail de son administrateur.');
@@ -1131,6 +1297,7 @@ async function boot(){
   if(!data?.length){$('#workspaceSetup').classList.remove('hidden');return}
   S.workspace={id:data[0].workspace_id,name:data[0].workspaces?.name||'SWÉ Tournament 5/5',role:data[0].role,public_token:data[0].workspaces?.public_token||null,public_enabled:data[0].workspaces?.public_enabled!==false};
   $('#workspaceSetup').classList.add('hidden');
+  await loadSportsVenues();
   await loadAll();
   $('#workspaceName').textContent=S.workspace.name+' • '+(S.workspace.role==='admin'?'Administrateur':(hasTemporaryAdmin()?'Co-organisateur • Admin temporaire':'Co-organisateur'));
   applyPermissions(); subscribeRealtime(); startSafeAppSync();
@@ -1218,7 +1385,8 @@ async function loadTournament(){
   r=await sb.from('teams').select('*').eq('tournament_id',t.id).order('created_at');S.teams=r.data||[];
   const tids=S.teams.map(x=>x.id);if(tids.length){r=await sb.from('team_players').select('*').in('team_id',tids);S.teamPlayers=r.data||[]}else S.teamPlayers=[];
   r=await sb.from('matches').select('*').eq('tournament_id',t.id).order('match_order');S.matches=r.data||[];
-  const mids=S.matches.map(x=>x.id);if(mids.length){r=await sb.from('goals').select('*').in('match_id',mids).order('created_at');S.goals=r.data||[]}else S.goals=[]
+  const mids=S.matches.map(x=>x.id);if(mids.length){r=await sb.from('goals').select('*').in('match_id',mids).order('created_at');S.goals=r.data||[]}else S.goals=[];
+  renderMatchPitchSelect();
 }
 const THIRD_HALF_PAYMENT_MODES={
   event_online:'Paiement en ligne',
@@ -1759,7 +1927,11 @@ function renderTournaments(){
   current.forEach(t=>{
     const d=document.createElement('div');d.className='player';
     const top=document.createElement('div');top.className='row';
-    top.innerHTML='<span style="flex:1"><b>'+esc(t.name||('Tournoi du '+t.tournament_date))+'</b><div class="muted">'+t.tournament_date+' • '+formatLabel(t)+'</div><div class="muted">📅 '+esc(seasonNameForTournament(t))+'</div></span>';
+    const pitchLabels=(t.reserved_pitch_ids||[]).map(id=>pitchName(id)).filter(Boolean);
+    top.innerHTML='<span style="flex:1"><b>'+esc(t.name||('Tournoi du '+t.tournament_date))+'</b><div class="muted">'+t.tournament_date+' • '+formatLabel(t)+'</div><div class="muted">📅 '+esc(seasonNameForTournament(t))+'</div>'+
+      '<div class="muted" style="margin-top:3px">📍 '+esc(pitchLabels.length?(complexLabel(t.complex_id)+' • '+pitchLabels.join(', ')):(t.venue||'Terrains non renseignés'))+(t.start_time?' • 🕘 '+esc(String(t.start_time).slice(0,5)):'')+' • 💶 '+(Number(t.entry_fee_cents||0)/100).toLocaleString('fr-FR')+' €</div>'+
+      (t.reservation_reference?'<div class="muted">Réservation : '+esc(t.reservation_reference)+'</div>':'')+
+      '</span>';
     const open=document.createElement('button');open.textContent=t.id===S.activeTour?'Actif':'Ouvrir';if(t.id===S.activeTour)open.className='green';
     open.onclick=async()=>{S.activeTour=t.id;await loadTournament();renderAll();toast('Tournoi sélectionné')};
     top.appendChild(open);d.appendChild(top);
@@ -1919,30 +2091,50 @@ $('#createTournament').onclick=async()=>{
   if(isCoorg()&&!hasTemporaryAdmin()&&!S.myPermissions.can_create_tournaments)return toast('Tu n’es pas autorisé à créer un tournoi.');
   const btn=$('#createTournament');
   const date=$('#tourDate').value;
-  if(!date)return toast('Choisis une date');
+  if(!date)return toast('Choisis une date.');
+  const complexId=$('#tourComplex')?.value||'';
+  const startTime=$('#tourStartTime')?.value||'';
+  const feeRaw=$('#tourEntryFee')?.value;
+  const pitchIds=[...document.querySelectorAll('.tourPitchCheck:checked')].map(x=>x.value);
+  if(!complexId)return toast('Choisis le complexe sportif.');
+  if(!pitchIds.length)return toast('Choisis au moins 1 terrain réservé.');
+  if(pitchIds.length>3)return toast('Maximum 3 terrains pour un tournoi.');
+  if(!startTime)return toast('Indique l’heure de réservation.');
+  if(feeRaw===''||Number(feeRaw)<0)return toast('Indique le prix par participant.');
+  const complex=S.sportsComplexes.find(c=>c.id===complexId);
+  const selectedPitches=S.sportsPitches.filter(p=>pitchIds.includes(p.id));
+  if(selectedPitches.length!==pitchIds.length)return toast('Un terrain sélectionné est invalide.');
   btn.disabled=true;btn.textContent='Création…';
   try{
-    const row={workspace_id:S.workspace.id,season_id:$('#seasonSelect').value||null,name:$('#tourName').value.trim()||null,tournament_date:date,format:$('#tourFormat').value,status:'draft',max_players:Math.max(2,Math.min(100,Number($('#tourMaxPlayers').value)||20)),registration_open:$('#tourRegistrationOpen').checked};
-    if(S.workspaceFeatures.third_half_enabled){
-      row.entry_fee_cents=Math.round(Math.max(0,Number($('#tourEntryFee')?.value)||0)*100);
-      row.cooler_suggested_cents=Math.round(Math.max(0,Number($('#tourCoolerSuggested')?.value)||0)*100);
-    }
-    let created=await sb.from('tournaments').insert(row).select().single();
-    if(created.error&&S.workspaceFeatures.third_half_enabled&&(String(created.error.message||'').includes('entry_fee_cents')||String(created.error.message||'').includes('cooler_suggested_cents'))){
-      delete row.entry_fee_cents;delete row.cooler_suggested_cents;
-      created=await sb.from('tournaments').insert(row).select().single();
-    }
-    const {data,error}=created;
+    const venue=[complex?.name,selectedPitches.map(p=>p.name).join(', ')].filter(Boolean).join(' — ');
+    const row={
+      workspace_id:S.workspace.id,
+      season_id:$('#seasonSelect').value||null,
+      name:$('#tourName').value.trim()||null,
+      tournament_date:date,
+      format:$('#tourFormat').value,
+      status:'draft',
+      max_players:Math.max(2,Math.min(100,Number($('#tourMaxPlayers').value)||20)),
+      registration_open:$('#tourRegistrationOpen').checked,
+      complex_id:complexId,
+      reserved_pitch_ids:pitchIds,
+      venue,
+      start_time:startTime,
+      entry_fee_cents:Math.round(Number(feeRaw)*100),
+      reservation_reference:$('#tourReservationRef')?.value.trim()||null
+    };
+    if(S.workspaceFeatures.third_half_enabled)row.cooler_suggested_cents=Math.round(Math.max(0,Number($('#tourCoolerSuggested')?.value)||0)*100);
+    const {data,error}=await sb.from('tournaments').insert(row).select().single();
     if(error)throw error;
     S.activeTour=data.id;
     S.tournaments=[data,...S.tournaments.filter(t=>t.id!==data.id)].sort((a,b)=>String(b.tournament_date).localeCompare(String(a.tournament_date)));
     S.tPlayers=[];S.teams=[];S.teamPlayers=[];S.matches=[];S.goals=[];
-    $('#tourName').value='';
+    $('#tourName').value='';$('#tourReservationRef').value='';
     renderAll();
     setView('tournaments');
     await loadAll();
     setView('tournaments');
-    toast('Nouveau tournoi créé et activé ✅');
+    toast('Nouveau tournoi créé avec '+pitchIds.length+' terrain'+(pitchIds.length>1?'s':'')+' réservé'+(pitchIds.length>1?'s':'')+' ✅');
   }catch(error){
     toast(error.message||'Impossible de créer le tournoi');
   }finally{
@@ -2354,7 +2546,11 @@ async function renderLeague(){
   if(!leagueTours.length)box.innerHTML='<p class="muted">Aucun Swé créé dans cette Ligue.</p>';
   leagueTours.forEach(t=>{
     const d=document.createElement('div');d.className='player';
-    d.innerHTML='<div class="row"><span style="flex:1"><b>'+esc(t.name||('Swé Ligue '+t.tournament_date))+'</b><div class="muted">'+t.tournament_date+' • '+(t.status==='finished'?'Terminé':'À jouer')+'</div></span></div>';
+    const pitchLabels=(t.reserved_pitch_ids||[]).map(id=>pitchName(id)).filter(Boolean);
+    d.innerHTML='<div class="row"><span style="flex:1"><b>'+esc(t.name||('Swé Ligue '+t.tournament_date))+'</b><div class="muted">'+t.tournament_date+' • '+(t.status==='finished'?'Terminé':'À jouer')+'</div>'+
+      '<div class="muted" style="margin-top:3px">📍 '+esc(pitchLabels.length?(complexLabel(t.complex_id)+' • '+pitchLabels.join(', ')):(t.venue||'Terrain non renseigné'))+(t.start_time?' • 🕘 '+esc(String(t.start_time).slice(0,5)):'')+' • 💶 '+(Number(t.entry_fee_cents||0)/100).toLocaleString('fr-FR')+' €</div>'+
+      (t.reservation_reference?'<div class="muted">Réservation : '+esc(t.reservation_reference)+'</div>':'')+
+      '</span></div>';
     const row=document.createElement('div');row.className='row';row.style.marginTop='8px';
     const open=document.createElement('button');open.textContent=t.id===S.activeTour?'Swé sélectionné':'Ouvrir';open.onclick=async()=>{S.activeTour=t.id;await loadTournament();renderAll();toast('Swé de Ligue sélectionné')};row.appendChild(open);
     if(t.registration_open&&S.workspace?.public_token){
@@ -2468,9 +2664,29 @@ $('#createLeagueSession').onclick=async()=>{
   const league=S.leagues.find(l=>l.id===leagueId&&l.status!=='finished');
   if(!league)return toast('Choisis la Ligue concernée.');
   const date=$('#leagueSessionDate').value;if(!date)return toast('Choisis la date du Swé.');
-  const {data,error}=await sb.rpc('create_league_session',{p_league_id:league.id,p_date:date,p_name:$('#leagueSessionName').value.trim()||null,p_max_players:100});
+  const complexId=$('#leagueSessionComplex')?.value||'';
+  const pitchId=$('#leagueSessionPitch')?.value||'';
+  const startTime=$('#leagueSessionStartTime')?.value||'';
+  const feeRaw=$('#leagueSessionEntryFee')?.value;
+  if(!complexId)return toast('Choisis le complexe du Swé.');
+  if(!pitchId)return toast('Choisis le terrain du Swé.');
+  if(!startTime)return toast('Indique l’heure de réservation.');
+  if(feeRaw===''||Number(feeRaw)<0)return toast('Indique le prix par participant.');
+  const {data,error}=await sb.rpc('create_league_session_v2',{
+    p_league_id:league.id,
+    p_date:date,
+    p_name:$('#leagueSessionName').value.trim()||null,
+    p_max_players:100,
+    p_complex_id:complexId,
+    p_pitch_id:pitchId,
+    p_start_time:startTime,
+    p_entry_fee_cents:Math.round(Number(feeRaw)*100),
+    p_reservation_reference:$('#leagueSessionReservationRef')?.value.trim()||null,
+    p_cooler_suggested_cents:S.workspaceFeatures.third_half_enabled?Math.round(Math.max(0,Number($('#leagueSessionCoolerSuggested')?.value)||0)*100):0
+  });
   if(error)return toast(error.message);
-  S.activeLeague=league.id;S.activeTour=data;$('#leagueSessionName').value='';
+  S.activeLeague=league.id;S.activeTour=data;
+  $('#leagueSessionName').value='';$('#leagueSessionReservationRef').value='';
   await loadAll();setView('league');toast('Swé créé dans « '+league.name+' » ✅');
 };
 
@@ -2785,6 +3001,8 @@ async function bootPublic(token){
   $('#publicWorkspaceName').textContent=P.workspace?.name||'SWÉ TOURNAMENT 5/5';
   let players=P.players||[],seasons=P.seasons||[],leagues=P.leagues||[],leaguePlayers=P.league_players||[],tournaments=(P.tournaments||[]).sort((a,b)=>String(b.tournament_date).localeCompare(String(a.tournament_date)));
   let teams=P.teams||[],teamPlayers=P.team_players||[],matches=P.matches||[],goals=P.goals||[];
+  S.sportsComplexes=P.sports_complexes||[];
+  S.sportsPitches=P.sports_pitches||[];
   let registrations=P.tournament_players||[];
   const publicParamsTop=new URLSearchParams(location.search);
   const requestedPublicView=publicParamsTop.get('view')||'';
@@ -3070,8 +3288,15 @@ async function bootPublic(token){
     const regs=registrations.filter(r=>r.tournament_id===regTour.id);
     const confirmed=regs.filter(r=>r.registration_status!=='waitlist'&&r.present).length;
     const waiting=regs.filter(r=>r.registration_status==='waitlist').length;
+    const publicFee=(Number(regTour.entry_fee_cents||0)/100).toLocaleString('fr-FR',{minimumFractionDigits:Number(regTour.entry_fee_cents||0)%100?2:0,maximumFractionDigits:2});
+    const reservedPitchNames=(regTour.reserved_pitch_ids||[]).map(id=>S.sportsPitches.find(p=>p.id===id)?.name).filter(Boolean);
+    const publicTerrainLabel=reservedPitchNames.length?reservedPitchNames.join(', '):(regTour.venue||'À préciser');
+    const publicTime=regTour.start_time?String(regTour.start_time).slice(0,5):'À préciser';
     regBox.innerHTML=
       '<div class="player"><b>'+esc(regTour.name||('Tournoi du '+regTour.tournament_date))+'</b><div id="publicRegCount" class="muted">'+confirmed+'/'+(regTour.max_players||20)+' confirmés'+(waiting?' • '+waiting+' remplaçant'+(waiting>1?'s':''):'')+'</div></div>'+
+      (regTour.format!=='league'
+        ? '<div class="player" style="margin-top:12px;background:#eef8f2;border:1px solid #b7dfc4"><b>📍 Infos pratiques</b><div class="muted" style="margin-top:6px;line-height:1.7">Complexe / terrains : <b>'+esc(publicTerrainLabel)+'</b><br>Heure de réservation : <b>'+esc(publicTime)+'</b><br>Prix : <b>'+esc(publicFee)+' € / participant</b>'+(regTour.reservation_reference?'<br>Réservation : <b>'+esc(regTour.reservation_reference)+'</b>':'')+'</div><div class="muted" style="margin-top:8px;line-height:1.7"><b>Programme :</b><br>8h45 : arrivée, paiement + échauffement<br>9h00 : début du tournoi — les premières équipes arrivées commencent<br>11h00 : 3e mi-temps</div></div>'
+        : '')+
       '<div class="player" style="margin-top:12px;background:#f8fbf9"><b>✅ Inscription</b><div class="muted" style="margin-top:6px;line-height:1.6">Inscris-toi en cliquant sur <b>« Je participe »</b>. Si tu viens accompagné, indique le nom de tes invités. Chaque membre peut ajouter jusqu’à <b>5 invités maximum</b>.</div></div>'+
       '<div class="space"></div><select id="publicPlayerSelect"><option value="">Choisis ton nom</option>'+players.filter(x=>x.active&&x.is_group_member!==false).sort((a,b)=>a.name.localeCompare(b.name)).map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')+'</select>'+
       '<div id="publicSelectedStatus" class="muted" style="margin-top:7px">Choisis ton nom pour voir ton statut.</div>'+
@@ -3401,7 +3626,7 @@ async function bootPublic(token){
   const pmap=new Map(players.map(x=>[x.id,x]));
   const tmap=new Map(teams.map(x=>[x.id,x]));
 
-  // V39.26 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
+  // V39.27 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
   if(wantsLeagueSession&&regTour){
     const linkedLeague=leagues.find(l=>l.id===regTour.league_id)||null;
     const linkLeagueId=publicParams.get('league');
@@ -3448,6 +3673,8 @@ async function bootPublic(token){
       '<header class="top"><h1>🏁 '+esc(linkedLeague.name)+'</h1><div class="public-sub">SWÉ TOURNAMENT 5/5 • Inscription au Swé de Ligue</div></header>'+
       '<div class="card"><h2 class="sectiontitle">✅ Inscription à ce Swé</h2>'+
         '<div class="player" style="background:#f8fbf9"><b>'+esc(regTour.name||('Swé du '+regTour.tournament_date))+'</b><div class="muted">'+esc(regTour.tournament_date)+' • 1 match d’environ 60 min</div></div>'+
+        '<div class="grid g3" style="margin-top:10px"><div class="player"><span class="muted">📍 Terrain réservé</span><br><b>'+esc(regTour.venue||'À préciser')+'</b></div><div class="player"><span class="muted">🕘 Heure</span><br><b>'+esc(regTour.start_time?String(regTour.start_time).slice(0,5):'À préciser')+'</b></div><div class="player"><span class="muted">💶 Prix</span><br><b>'+(Number(regTour.entry_fee_cents||0)/100).toLocaleString('fr-FR',{minimumFractionDigits:Number(regTour.entry_fee_cents||0)%100?2:0,maximumFractionDigits:2})+' € / participant</b></div></div>'+
+        (regTour.reservation_reference?'<div class="muted" style="margin-top:8px">Réservation : <b>'+esc(regTour.reservation_reference)+'</b></div>':'')+
         '<div class="muted" style="margin:10px 0">Ce lien concerne uniquement ce Swé. Les informations affichées en dessous concernent uniquement la Ligue <b>'+esc(linkedLeague.name)+'</b>.</div>'+
         '<div class="player"><b>'+confirmed+'/'+(regTour.max_players||100)+' confirmés</b>'+(waiting?' • '+waiting+' remplaçant'+(waiting>1?'s':''):'')+'</div>'+
         '<div class="space"></div><select id="leagueSessionPublicPlayer"><option value="">Choisis ton nom</option>'+leagueMembers.map(pl=>'<option value="'+pl.id+'">'+esc(pl.name)+'</option>').join('')+'</select>'+
