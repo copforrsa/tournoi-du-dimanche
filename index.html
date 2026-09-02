@@ -67,7 +67,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V37.3</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V37.4</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -110,7 +110,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:700">V37.3</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:700">V37.4</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -142,13 +142,15 @@ select{background-color:#fff} textarea{resize:vertical}
       </div>
       <div class="card" id="adminAccessCard">
         <h2 class="sectiontitle">Accès et co-organisateurs</h2>
-        <p class="muted">Maximum : 1 administrateur + 3 co-organisateurs. Après avoir créé l’invitation, envoie le lien par WhatsApp ou copie-le : aucun e-mail automatique n’est envoyé.</p>
-        <div class="row">
-          <input id="inviteEmail" type="email" placeholder="Email du co-organisateur" style="flex:1">
-          <button id="sendInvite" class="primary">Inviter</button>
+        <div id="adminInviteControls">
+          <p class="muted">Maximum : 1 administrateur + 3 co-organisateurs. Après avoir créé l’invitation, envoie le lien par WhatsApp ou copie-le : aucun e-mail automatique n’est envoyé.</p>
+          <div class="row">
+            <input id="inviteEmail" type="email" placeholder="Email du co-organisateur" style="flex:1">
+            <button id="sendInvite" class="primary">Inviter</button>
+          </div>
         </div>
         <div id="memberList" style="margin-top:12px"></div>
-        <div class="muted" style="margin-top:8px">🟠 En attente = invitation non acceptée • 🟢 Actif = accès autorisé • ⏸️ Suspendu = accès bloqué par l’admin</div>
+        <div id="adminAccessLegend" class="muted" style="margin-top:8px">🟠 En attente = invitation non acceptée • 🟢 Actif = accès autorisé • ⏸️ Suspendu = accès bloqué par l’admin</div>
         <div class="space"></div>
         <label class="muted">Lien public — consultation uniquement</label>
         <div class="row">
@@ -160,7 +162,7 @@ select{background-color:#fff} textarea{resize:vertical}
 
     <div id="view-players" class="view">
       <div class="card">
-        <h2 class="sectiontitle">Joueurs</h2><p class="muted">Le niveau attribué par l’administrateur est privé. Les co-organisateurs peuvent donner leur propre avis sans voir les autres évaluations.</p>
+        <h2 class="sectiontitle">Joueurs</h2><p class="muted">Les co-organisateurs voient la liste des joueurs et peuvent donner <b>un avis par joueur</b> sur son niveau. Cet avis est modifiable et reste visible uniquement par l’administrateur.</p>
         <textarea id="playersInput" rows="3" placeholder="Charly, Mika, Miguel..."></textarea>
         <div class="space"></div>
         <div class="grid g2">
@@ -375,7 +377,7 @@ window.addEventListener('error', (e) => {
   if(t){t.textContent='Erreur de chargement de l’application. Recharge la page.';t.style.display='block';}
 });
 
-const S={session:null,workspace:null,members:[],coorgs:[],invites:[],players:[],contacts:[],skillReviews:[],teamCodes:[],seasons:[],tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},publicMode:false,publicToken:null};
+const S={session:null,workspace:null,members:[],coorgs:[],coorgCount:0,invites:[],players:[],contacts:[],skillReviews:[],teamCodes:[],seasons:[],tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},publicMode:false,publicToken:null};
 
 let safeSyncTimer=null;
 let safeSyncBusy=false;
@@ -425,11 +427,15 @@ function isCoorg(){return S.workspace?.role==='coorganizer'}
 function canEditCurrentMatches(){const t=currentTour();return !!t && t.status!=='finished' && (isAdmin()||isCoorg())}
 function applyPermissions(){
   const admin=isAdmin();
-  ['#adminAccessCard','#seasonAdminCard','#tournamentAdminCard','#attendanceAdminCard','#teamsAdminCard','#matchCreateAdminCard'].forEach(sel=>{
+  const coorg=isCoorg();
+  ['#seasonAdminCard','#tournamentAdminCard','#attendanceAdminCard','#teamsAdminCard','#matchCreateAdminCard'].forEach(sel=>{
     const el=$(sel);if(el)el.classList.toggle('hidden',!admin);
   });
+  const access=$('#adminAccessCard');if(access)access.classList.toggle('hidden',!(admin||coorg));
+  const inviteControls=$('#adminInviteControls');if(inviteControls)inviteControls.classList.toggle('hidden',!admin);
+  const accessLegend=$('#adminAccessLegend');if(accessLegend)accessLegend.classList.toggle('hidden',!admin);
   document.querySelectorAll('[data-go="tournaments"]').forEach(b=>{b.textContent=admin?'📅 Nouveau tournoi':'📅 Tournois / historique'});
-  document.querySelectorAll('[data-go="players"]').forEach(b=>{b.textContent=admin?'👥 Gérer les joueurs':'👥 Ajouter des joueurs'});
+  document.querySelectorAll('[data-go="players"]').forEach(b=>{b.textContent=admin?'👥 Gérer les joueurs':'👥 Joueurs et avis'});
 }
 
 function showRecoveryForm(){
@@ -554,6 +560,7 @@ async function loadInvites(){
 async function loadAll(){
   if(!S.workspace)return;const w=S.workspace.id;let r;
   r=await sb.from('workspace_members').select('user_id,role,active').eq('workspace_id',w);S.members=r.data||[];
+  r=await sb.rpc('get_workspace_coorganizer_count',{p_workspace_id:w});S.coorgCount=Number(r.data||0);
   if(isAdmin()){
     r=await sb.from('workspace_invites').select('id,email,role,accepted_at,created_at').eq('workspace_id',w).order('created_at',{ascending:false});S.invites=r.data||[];
     r=await sb.rpc('get_workspace_coorganizers',{p_workspace_id:w});S.coorgs=r.data||[];
@@ -610,7 +617,12 @@ function coorgInviteMessage(inv){
   return '⚽ Tournoi du Dimanche\n\nTu es invité comme co-organisateur.\n\n1. Ouvre ce lien.\n2. Connecte-toi ou crée ton compte avec cette adresse : '+inv.email+'\n3. Une fois connecté, accepte l’invitation.\n\n'+link;
 }
 function renderAccess(){
-  const box=$('#memberList');if(!box||!isAdmin())return;
+  const box=$('#memberList');if(!box)return;
+  if(isCoorg()){
+    box.innerHTML='<div class="player"><b>👥 Co-organisateurs</b><div class="muted" style="margin-top:5px">Il y a actuellement <b>'+S.coorgCount+'</b> co-organisateur'+(S.coorgCount>1?'s':'')+' dans l’espace. Seul l’administrateur peut inviter, suspendre ou supprimer un co-organisateur.</div></div>';
+    return;
+  }
+  if(!isAdmin())return;
   const activeCo=S.coorgs.filter(x=>x.active);
   const suspendedCo=S.coorgs.filter(x=>!x.active);
   const pending=S.invites.filter(x=>!x.accepted_at);
@@ -841,15 +853,15 @@ function renderPlayers(){
       }
     } else if(isCoorg()){
       const rate=document.createElement('div');rate.className='row';rate.style.marginTop='8px';rate.style.flexWrap='wrap';
-      const label=document.createElement('span');label.className='muted';label.style.flex='1';label.textContent='Ton avis privé sur son niveau :';
+      const label=document.createElement('span');label.className='muted';label.style.flex='1';label.textContent='Ton avis sur son niveau (1 avis par joueur) :';
       const select=document.createElement('select');select.innerHTML='<option value="">Choisir…</option><option value="1">1 — Loisir</option><option value="2">2 — Intermédiaire</option><option value="3">3 — Bon</option><option value="4">4 — Très bon</option>';
-      const send=document.createElement('button');send.textContent='Envoyer mon avis';send.className='primary';
+      const send=document.createElement('button');send.textContent='Enregistrer mon avis';send.className='primary';
       send.onclick=async()=>{
         const val=Number(select.value);if(!val)return toast('Choisis un niveau de 1 à 4.');
         send.disabled=true;
         const {error}=await sb.rpc('submit_player_skill_rating',{p_player_id:x.id,p_rating:val});
         send.disabled=false;if(error)return toast(error.message);
-        select.value='';toast('Avis enregistré 🔒 Seul l’administrateur peut le consulter.');
+        select.value='';toast('Avis enregistré 🔒 Tu peux le modifier plus tard. Seul l’administrateur peut le consulter.');
       };
       rate.append(label,select,send);d.appendChild(rate);
     }
