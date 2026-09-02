@@ -67,7 +67,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V36.8</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V36.9</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -110,7 +110,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:700">V36.8</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:700">V36.9</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -286,26 +286,6 @@ select{background-color:#fff} textarea{resize:vertical}
     </div>
 
     <div class="card">
-      <h2 class="sectiontitle">📋 Résultats du dernier tournoi</h2>
-      <div id="publicResults"></div>
-    </div>
-
-    <div class="card">
-      <h2 class="sectiontitle">⚽ Buteurs du dernier tournoi</h2>
-      <div id="publicTournamentScorers"></div>
-    </div>
-
-    <div class="card">
-      <h2 class="sectiontitle">🎯 Passeurs du dernier tournoi</h2>
-      <div id="publicTournamentAssists"></div>
-    </div>
-
-    <div class="card">
-      <h2 class="sectiontitle">🗂 Historique</h2>
-      <div id="publicHistory"></div>
-    </div>
-
-    <div class="card">
       <h2 class="sectiontitle">🏆 Buteurs de la saison</h2>
       <div id="publicSeasonScorers"></div>
     </div>
@@ -313,6 +293,29 @@ select{background-color:#fff} textarea{resize:vertical}
     <div class="card">
       <h2 class="sectiontitle">🎯 Passeurs de la saison</h2>
       <div id="publicSeasonAssists"></div>
+    </div>
+
+    <div class="card">
+      <div class="row" style="justify-content:space-between;align-items:center;gap:10px">
+        <div>
+          <h2 class="sectiontitle" style="margin-bottom:4px">📋 Dernier tournoi</h2>
+          <div class="muted">Résultats, buteurs et passeurs du dernier tournoi terminé.</div>
+        </div>
+        <button id="toggleLastTournamentPublic" type="button">Afficher</button>
+      </div>
+      <div id="publicLastTournamentDetails" class="hidden" style="margin-top:14px">
+        <h3>📋 Résultats</h3>
+        <div id="publicResults"></div>
+        <h3 style="margin-top:18px">⚽ Buteurs du tournoi</h3>
+        <div id="publicTournamentScorers"></div>
+        <h3 style="margin-top:18px">🎯 Passeurs du tournoi</h3>
+        <div id="publicTournamentAssists"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="sectiontitle">🗂 Historique</h2>
+      <div id="publicHistory"></div>
     </div>
   </section>
 </div>
@@ -1683,6 +1686,16 @@ async function bootPublic(token){
     $('#publicTeams').innerHTML='<p class="muted">Aucune équipe.</p>';
     $('#publicResults').innerHTML='<p class="muted">Aucun résultat.</p>';
   }
+  const lastDetails=$('#publicLastTournamentDetails');
+  const toggleLast=$('#toggleLastTournamentPublic');
+  if(toggleLast&&lastDetails){
+    toggleLast.onclick=()=>{
+      const opening=lastDetails.classList.contains('hidden');
+      lastDetails.classList.toggle('hidden',!opening);
+      toggleLast.textContent=opening?'Masquer':'Afficher';
+    };
+  }
+
   const pubHist=$('#publicHistory');
   pubHist.innerHTML='';
   tournaments.filter(t=>t.status==='finished').forEach(t=>{
