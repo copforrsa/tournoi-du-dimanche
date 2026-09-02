@@ -67,7 +67,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V38.1</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V38.2</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -526,6 +526,11 @@ function hasTemporaryAdmin(){
 }
 function hasAdminOps(){return isAdmin()||hasTemporaryAdmin()}
 function formatLabel(t){return t?.format==='king_of_pitch'?'Roi du terrain':(t?.format==='league'?'Ligue':'Classique')}
+function registrationLink(t){
+  if(!t||!S.workspace?.public_token)return '';
+  const mode=t.format==='league'?'league':'tournament';
+  return APP_URL+'?public='+encodeURIComponent(S.workspace.public_token)+'&mode='+mode+'&tournament='+encodeURIComponent(t.id);
+}
 function canEditCurrentMatches(){const t=currentTour();return !!t && t.status!=='finished' && (hasAdminOps()||(isCoorg()&&S.myPermissions.can_enter_scores))}
 function makeDisabledActionButton(label,title){
   const b=document.createElement('button');b.textContent=label;b.disabled=true;b.setAttribute('aria-disabled','true');
@@ -995,7 +1000,7 @@ function renderAll(){
   renderLeague().catch(e=>console.error('league',e));
   applyPermissions();
   renderAccess();
-  if($('#publicLink')&&S.workspace?.public_token)$('#publicLink').value=APP_URL+'?public='+S.workspace.public_token;
+  if($('#publicLink')&&S.workspace?.public_token)$('#publicLink').value=APP_URL+'?public='+S.workspace.public_token; // lien public général de consultation ; les inscriptions utilisent registrationLink(t)
   renderRanking().catch(e=>console.error('ranking',e));
   renderSeasonScorerSummary().catch(e=>console.error('season ranking',e));
 }
@@ -1009,7 +1014,7 @@ function renderHome(){
   const share=$('#homeRegistrationShare');
   if(share){
     if(t?.registration_open && S.workspace?.public_token){
-      const url=APP_URL+'?public='+S.workspace.public_token;
+      const url=registrationLink(t);
       share.classList.remove('hidden');
       share.innerHTML='<div class="player"><b>🔗 Inscriptions ouvertes</b><div class="muted" style="margin:4px 0 8px">Envoie ce lien aux joueurs pour qu’ils s’inscrivent.</div><div class="row"><input id="homeRegLink" readonly value="'+esc(url)+'" style="flex:1"><button id="homeCopyReg">Copier</button><button id="homeWaReg" class="primary">📲 WhatsApp</button></div></div>';
       $('#homeCopyReg').onclick=async()=>{try{await navigator.clipboard.writeText(url);toast('Lien d’inscription copié ✅')}catch(e){$('#homeRegLink').select();toast('Lien sélectionné : copie-le.')}};
@@ -1648,7 +1653,7 @@ async function renderLeague(){
     row.appendChild(open);
     if(t.registration_open&&S.workspace?.public_token){
       const share=document.createElement('button');share.textContent='🔗 Lien inscription';
-      const url=APP_URL+'?public='+encodeURIComponent(S.workspace.public_token)+'&tournament='+encodeURIComponent(t.id);
+      const url=registrationLink(t);
       share.onclick=async()=>{try{await navigator.clipboard.writeText(url);toast('Lien d’inscription Ligue copié ✅')}catch(e){toast('Copie impossible')}};
       row.appendChild(share);
     }
@@ -2023,8 +2028,11 @@ async function bootPublic(token){
     return;
   }
   const openTours=[...tournaments].filter(t=>t.status!=='finished'&&t.registration_open).sort((a,b)=>String(a.tournament_date).localeCompare(String(b.tournament_date)));
-  const requestedTournament=new URLSearchParams(location.search).get('tournament');
-  const regTour=(requestedTournament&&openTours.find(t=>t.id===requestedTournament))||openTours[0];
+  const publicParams=new URLSearchParams(location.search);
+  const requestedTournament=publicParams.get('tournament');
+  const requestedMode=publicParams.get('mode');
+  const modeMatches=t=>!requestedMode||(requestedMode==='league'?t.format==='league':t.format!=='league');
+  const regTour=(requestedTournament&&openTours.find(t=>t.id===requestedTournament&&modeMatches(t)))||openTours.find(modeMatches)||openTours[0];
   const regBox=$('#publicRegistration');
 
   function publicGuestLabel(pl){
@@ -2155,11 +2163,18 @@ async function bootPublic(token){
     if(mode)window.scrollTo({top:0,behavior:'smooth'});
   }
   if(regTour){
+    $('#chooseTeamMode').classList.remove('hidden');
     if(regTour.format==='league'){
-      $('#chooseTeamMode').classList.add('hidden');
       const title=entryChoiceCard?.querySelector('.sectiontitle');if(title)title.textContent='🏁 Inscription à la Ligue';
-      const help=entryChoiceCard?.querySelector('.muted');if(help)help.textContent='Inscris-toi avec ton nom. Les 2 équipes seront créées aléatoirement par l’organisateur.';
-    }else $('#chooseTeamMode').classList.remove('hidden');
+      const help=entryChoiceCard?.querySelector('.muted');if(help)help.textContent='Tu peux venir seul ou avec une équipe complète. Pour créer une équipe, utilise le code fourni par l’administrateur du groupe.';
+    }
+    const teamBtn=$('#chooseTeamMode');
+    if(teamBtn){
+      const teamTitle=teamBtn.querySelector('div[style*="font-size:1.2rem"]');
+      if(teamTitle)teamTitle.textContent='Je viens avec mon équipe';
+      const teamHelp=teamBtn.querySelectorAll('div');
+      if(teamHelp.length) teamBtn.title='Équipe de 5 joueurs maximum, avec jusqu’à 4 coéquipiers ou invités';
+    }
     $('#chooseSoloMode').onclick=()=>setPublicEntryMode('solo');
     $('#chooseTeamMode').onclick=()=>setPublicEntryMode('team');
     $('#backFromSoloMode').onclick=()=>setPublicEntryMode(null);
@@ -2182,7 +2197,7 @@ async function bootPublic(token){
     const alreadyAssigned=new Set(teamPlayers.filter(tp=>currentTeamIds.has(tp.team_id)).map(tp=>tp.player_id));
     const creators=players.filter(pl=>pl.active&&pl.is_group_member!==false).sort((a,b)=>a.name.localeCompare(b.name));
     teamBuilder.innerHTML=
-      '<div class="player" style="background:linear-gradient(145deg,#eef5ff,#f8fbff);border:1px solid #d7e7fb"><div style="font-size:1.05rem;font-weight:800">🔐 Étape 1 — Identifie-toi</div><div class="muted" style="margin-top:5px;line-height:1.6">Tous les membres actifs du groupe sont disponibles. Ton code personnel confirme que l’administrateur t’autorise à composer une équipe.</div><div class="space"></div><select id="publicTeamCreator"><option value="">Choisis ton nom</option>'+creators.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')+'</select><div class="space"></div><input id="publicTeamCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="Code équipe à 6 chiffres"></div>'+
+      '<div class="player" style="background:linear-gradient(145deg,#eef5ff,#f8fbff);border:1px solid #d7e7fb"><div style="font-size:1.05rem;font-weight:800">🔐 Étape 1 — Identifie-toi</div><div class="muted" style="margin-top:5px;line-height:1.6">Tous les membres actifs du groupe sont disponibles. Le code équipe fourni par l’administrateur du groupe confirme que tu es autorisé à composer une équipe.</div><div class="space"></div><select id="publicTeamCreator"><option value="">Choisis ton nom</option>'+creators.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')+'</select><div class="space"></div><input id="publicTeamCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="Code fourni par l’administrateur (6 chiffres)"></div>'+
       '<div class="player" style="margin-top:12px;background:#fbfcfd"><div style="font-size:1.05rem;font-weight:800">🛡️ Étape 2 — Donne une identité à ton équipe</div><div class="muted" style="margin-top:5px">Choisis un nom court et reconnaissable.</div><div class="space"></div><input id="publicTeamName" maxlength="30" placeholder="Ex. Les Lions, Team Nord, FC Poto..."></div>'+
       '<div class="player" style="margin-top:12px"><div style="font-size:1.05rem;font-weight:800">👥 Étape 3 — Compose ton groupe</div><div class="muted" style="margin-top:5px">Choisis des membres du groupe et/ou ajoute des invités. Avec toi, l’équipe ne peut pas dépasser 5 joueurs.</div><div id="publicTeamMateBox" style="margin-top:12px"><p class="muted">Sélectionne d’abord ton nom.</p></div><div style="height:1px;background:#e8ecef;margin:14px 0"></div><b>➕ Ajouter des invités</b><div class="muted" style="margin:4px 0 8px">Tu peux ajouter jusqu’à 4 invités si tu ne sélectionnes aucun autre membre.</div><div id="publicTeamGuests"><input data-team-guest placeholder="Nom de l’invité 1"></div><div class="row" style="margin-top:8px"><button id="publicAddTeamGuest" type="button">+ Ajouter un invité</button></div></div>'+
       '<div class="space"></div><button id="publicCreateTeam" class="primary" style="width:100%;padding:14px;font-size:1.05rem">🔥 Valider mon équipe</button>'+
@@ -2194,10 +2209,10 @@ async function bootPublic(token){
       const creator=creatorSel.value;
       if(!creator){mateBox.innerHTML='<p class="muted">Sélectionne d’abord ton nom.</p>';return}
       if(alreadyAssigned.has(creator)){
-        mateBox.innerHTML='<p class="muted">Tu appartiens déjà à une équipe pour ce tournoi.</p>';return;
+        mateBox.innerHTML='<p class="muted">Tu appartiens déjà à une équipe pour cette compétition.</p>';return;
       }
       const available=players.filter(pl=>pl.active&&pl.is_group_member!==false&&pl.id!==creator&&!alreadyAssigned.has(pl.id)).sort((a,b)=>a.name.localeCompare(b.name));
-      mateBox.innerHTML='<b>Membres du groupe</b><div class="muted" style="margin:3px 0 8px">Choisis jusqu’à 4 joueurs. Les joueurs sélectionnés seront automatiquement inscrits au tournoi avec l’équipe.</div>'+
+      mateBox.innerHTML='<b>Membres du groupe</b><div class="muted" style="margin:3px 0 8px">Choisis jusqu’à 4 joueurs. Les joueurs sélectionnés seront automatiquement inscrits à cette compétition avec l’équipe.</div>'+
         (available.map(pl=>'<label class="row" style="justify-content:flex-start;margin:5px 0"><input type="checkbox" data-team-mate="'+pl.id+'" style="width:auto"><span>'+esc(pl.name)+'</span></label>').join('')||'<p class="muted">Aucun autre joueur disponible.</p>');
       mateBox.querySelectorAll('[data-team-mate]').forEach(cb=>cb.onchange=()=>{
         const checked=[...mateBox.querySelectorAll('[data-team-mate]:checked')];
@@ -2223,7 +2238,7 @@ async function bootPublic(token){
       const name=$('#publicTeamName').value.trim();
       const status=$('#publicTeamStatus');
       if(!creator)return status.textContent='Choisis ton nom.';
-      if(!code)return status.textContent='Entre ton code équipe personnel.';
+      if(!code)return status.textContent='Entre le code équipe fourni par l’administrateur du groupe.';
       if(!name)return status.textContent='Donne un nom à ton équipe.';
       const mates=[...mateBox.querySelectorAll('[data-team-mate]:checked')].map(x=>x.dataset.teamMate);
       const guests=[...guestsBox.querySelectorAll('[data-team-guest]')].map(x=>x.value.trim()).filter(Boolean);
@@ -2234,7 +2249,7 @@ async function bootPublic(token){
       });
       btn.disabled=false;
       if(error)return status.textContent=error.message;
-      status.textContent='🟢 Équipe créée ! Les joueurs sélectionnés ont aussi été inscrits au tournoi.';
+      status.textContent='🟢 Équipe créée ! Les joueurs sélectionnés ont aussi été inscrits à cette compétition.';
       $('#publicTeamCode').value='';$('#publicTeamName').value='';
       try{
         const snap=await sb.rpc('get_public_workspace_snapshot',{p_token:token});
