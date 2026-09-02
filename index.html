@@ -75,7 +75,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.20</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.22</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -118,7 +118,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.20</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.22</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -327,6 +327,12 @@ select{background-color:#fff} textarea{resize:vertical}
     </div>
 
     <div id="view-matches" class="view">
+      <div class="card" id="matchCompetitionSelectorCard">
+        <h2 class="sectiontitle">⚽ Matchs à saisir</h2>
+        <p class="muted" id="matchAccessHelp">Choisis le tournoi ou le Swé de Ligue dont tu veux saisir les scores.</p>
+        <select id="matchCompetitionSelect"><option value="">Choisir une compétition</option></select>
+        <div id="matchCompetitionStatus" class="muted" style="margin-top:8px"></div>
+      </div>
       <div class="card" id="matchCreateAdminCard">
         <h2 class="sectiontitle">Créer les matchs</h2>
         <div id="leaguePitchRequirement" class="readonly-note hidden"><b>📍 Match de Ligue :</b> le terrain est obligatoire pour chaque match (Carrefour, Mercedes, Boulogne…).</div>
@@ -695,6 +701,7 @@ function setView(v){
   if(v==='tournaments'&&!S.workspaceFeatures.tournaments_enabled)v='home';
   if(v==='league'&&!S.workspaceFeatures.league_enabled)v='home';
   if(v==='ranking'&&!S.workspaceFeatures.rankings_enabled)v='home';
+  if(v==='matches'&&isCoorg()&&!hasTemporaryAdmin()&&!S.myPermissions.can_enter_scores)v='home';
   document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id==='view-'+v));
   document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.view===v));
   if(v==='ranking')renderRanking();
@@ -738,6 +745,7 @@ function leagueRegistrationLink(l){
   return APP_URL+'?public='+encodeURIComponent(S.workspace.public_token)+'&view=league&league='+encodeURIComponent(l.id);
 }
 function canEditCurrentMatches(){const t=currentTour();return !!t && t.status!=='finished' && (hasAdminOps()||(isCoorg()&&S.myPermissions.can_enter_scores))}
+function canManageMatchStructure(){const t=currentTour();return !!t && t.status!=='finished' && hasAdminOps()}
 function makeDisabledActionButton(label,title){
   const b=document.createElement('button');b.textContent=label;b.disabled=true;b.setAttribute('aria-disabled','true');
   b.className='danger disabled-action';b.style.opacity='.38';b.style.filter='grayscale(1)';b.style.cursor='not-allowed';
@@ -755,6 +763,13 @@ function applyPermissions(){
   const canManageTeams=adminOps||(coorg&&S.myPermissions.can_generate_teams);
   if(teamControls)teamControls.classList.toggle('hidden',!canManageTeams);
   const matchCreateCard=$('#matchCreateAdminCard');if(matchCreateCard)matchCreateCard.classList.toggle('hidden',!adminOps);
+  const matchTabAllowed=adminOps||(coorg&&S.myPermissions.can_enter_scores);
+  document.querySelectorAll('.tab[data-view="matches"]').forEach(el=>{
+    el.style.display=matchTabAllowed?'':'none';
+    el.disabled=!matchTabAllowed;
+    el.title=matchTabAllowed?'Saisir les matchs':'Aucune autorisation de saisie des scores';
+  });
+  document.querySelectorAll('[data-go="matches"]').forEach(el=>el.style.display=matchTabAllowed?'':'none');
   document.querySelectorAll('.admin-permissions-tab').forEach(el=>{
     el.classList.remove('hidden');
     el.classList.toggle('disabled-tab',!admin);
@@ -2023,6 +2038,38 @@ $('#smartAutoTeams').onclick=async()=>{
 function matchOptions(){return '<option value="">Choisir</option>'+S.teams.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')}
 function renderMatches(){
   const current=currentTour();
+  const selector=$('#matchCompetitionSelect');
+  const selectorStatus=$('#matchCompetitionStatus');
+  const accessHelp=$('#matchAccessHelp');
+  const eligible=S.tournaments
+    .filter(t=>t.status!=='finished')
+    .sort((a,b)=>String(a.tournament_date).localeCompare(String(b.tournament_date)));
+  if(selector){
+    const keep=current?.id||'';
+    selector.innerHTML='<option value="">Choisir une compétition</option>'+eligible.map(t=>{
+      const kind=t.format==='league'?'🏁 Swé de Ligue':'⚽ Tournoi';
+      return '<option value="'+t.id+'">'+kind+' • '+esc(t.name||t.tournament_date)+' • '+esc(t.tournament_date)+'</option>';
+    }).join('');
+    if(eligible.some(t=>t.id===keep))selector.value=keep;
+    selector.onchange=async()=>{
+      const id=selector.value;
+      if(!id)return;
+      S.activeTour=id;
+      selector.disabled=true;
+      await loadTournament();
+      selector.disabled=false;
+      renderMatches();
+      renderHome();
+    };
+  }
+  if(accessHelp&&isCoorg()&&!hasTemporaryAdmin()&&S.myPermissions.can_enter_scores){
+    accessHelp.innerHTML='Ton profil est autorisé à <b>saisir les scores et les buteurs/passeurs pendant les matchs</b>. Choisis la compétition ci-dessous.';
+  }
+  if(selectorStatus){
+    selectorStatus.textContent=current
+      ? ((current.format==='league'?'Swé de Ligue : ':'Tournoi : ')+(current.name||current.tournament_date)+' • '+S.matches.length+' match'+(S.matches.length>1?'s':''))
+      : 'Aucune compétition sélectionnée.';
+  }
   const isLeagueMatch=current?.format==='league';
   const req=$('#leaguePitchRequirement');
   if(req)req.classList.toggle('hidden',!isLeagueMatch);
@@ -2039,7 +2086,7 @@ function renderMatches(){
     const d=document.createElement('div');d.className='card match';
     d.innerHTML='<div class="muted">Match '+(i+1)+(m.pitch?' • '+esc(m.pitch):'')+(m.round_label?' • '+esc(m.round_label):'')+'</div><div class="row" style="justify-content:space-between"><b>'+esc(home.name)+'</b><span class="score">'+m.home_score+' - '+m.away_score+'</span><b>'+esc(away.name)+'</b></div>';
 
-    if(canEditCurrentMatches()){
+    if(canManageMatchStructure()){
       const actions=document.createElement('div');actions.className='row';actions.style.marginTop='8px';
       const edit=document.createElement('button');edit.textContent='Modifier';
       const del=document.createElement('button');del.textContent='Supprimer';del.className='danger';
@@ -2109,6 +2156,11 @@ function renderMatches(){
     });
     d.appendChild(hist);box.appendChild(d);
   });
+  if(!current){
+    box.innerHTML='<div class="card"><p class="muted">Choisis d’abord un tournoi ou un Swé de Ligue ci-dessus.</p></div>';
+  }else if(!S.matches.length){
+    box.innerHTML='<div class="card"><p class="muted">Aucun match n’est encore créé pour cette compétition. Dès que l’administrateur crée les matchs, ils apparaîtront ici pour la saisie des scores.</p></div>';
+  }
 }
 
 $('#addMatch').onclick=async()=>{
@@ -2667,28 +2719,68 @@ async function bootPublic(token){
     if(!league){
       $('#publicView').innerHTML='<header class="top"><h1>⚽ SWÉ TOURNAMENT 5/5</h1></header><div class="card"><p>Ligue introuvable.</p></div>';return;
     }
+
     const groupMembers=players.filter(p=>p.active&&p.is_group_member!==false).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
     const confirmedIds=new Set(leaguePlayers.filter(lp=>lp.league_id===league.id&&lp.status==='confirmed').map(lp=>lp.player_id));
     const confirmedMembers=players.filter(p=>p.active&&confirmedIds.has(p.id)).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
 
-    // Classements cumulés de la saison de CETTE Ligue uniquement.
-    const leagueTournamentIds=new Set(tournaments.filter(t=>t.format==='league'&&t.league_id===league.id).map(t=>t.id));
-    const leagueMatches=matches.filter(m=>leagueTournamentIds.has(m.tournament_id)&&m.status==='finished');
+    // Une Ligue = une succession de Swés. Chaque Swé de Ligue correspond à UN match long (~60 min).
+    // Les statistiques ci-dessous ne prennent que les Swés rattachés à CETTE Ligue.
+    const leagueSessions=tournaments
+      .filter(t=>t.format==='league'&&t.league_id===league.id)
+      .sort((a,b)=>String(a.tournament_date).localeCompare(String(b.tournament_date)));
+    const leagueTournamentIds=new Set(leagueSessions.map(t=>t.id));
+    const leagueMatches=matches
+      .filter(m=>leagueTournamentIds.has(m.tournament_id))
+      .sort((a,b)=>{
+        const ta=leagueSessions.find(t=>t.id===a.tournament_id),tb=leagueSessions.find(t=>t.id===b.tournament_id);
+        return String(ta?.tournament_date||'').localeCompare(String(tb?.tournament_date||''))||(Number(a.match_order||0)-Number(b.match_order||0));
+      });
     const leagueMatchIds=new Set(leagueMatches.map(m=>m.id));
-    const leagueStats=new Map(confirmedMembers.map(p=>[p.id,{id:p.id,name:p.name,g:0,a:0}]));
+
+    // Inclure tous les joueurs ayant réellement participé à la Ligue, y compris les "1ère fois".
+    const leaguePlayerIds=new Set(confirmedIds);
+    const leagueTeamIds=new Set();
+    leagueMatches.forEach(m=>{leagueTeamIds.add(m.home_team_id);leagueTeamIds.add(m.away_team_id);});
+    teamPlayers.filter(tp=>leagueTeamIds.has(tp.team_id)).forEach(tp=>leaguePlayerIds.add(tp.player_id));
+    goals.filter(g=>leagueMatchIds.has(g.match_id)).forEach(g=>{
+      if(g.scorer_player_id)leaguePlayerIds.add(g.scorer_player_id);
+      if(g.assister_player_id)leaguePlayerIds.add(g.assister_player_id);
+    });
+    const leaguePeople=players.filter(p=>leaguePlayerIds.has(p.id));
+    const leagueStats=new Map(leaguePeople.map(p=>[p.id,{id:p.id,name:p.name,g:0,a:0,w:0}]));
+
     goals.filter(g=>leagueMatchIds.has(g.match_id)).forEach(g=>{
       if(leagueStats.has(g.scorer_player_id))leagueStats.get(g.scorer_player_id).g++;
       if(g.assister_player_id&&leagueStats.has(g.assister_player_id))leagueStats.get(g.assister_player_id).a++;
     });
+
+    // Top Player = nombre de Swés / matchs de Ligue gagnés.
+    leagueMatches.forEach(m=>{
+      const hs=Number(m.home_score||0),as=Number(m.away_score||0);
+      if(hs===as)return;
+      const winnerId=hs>as?m.home_team_id:m.away_team_id;
+      teamPlayers.filter(tp=>tp.team_id===winnerId).forEach(tp=>{
+        if(leagueStats.has(tp.player_id))leagueStats.get(tp.player_id).w++;
+      });
+    });
+
     let leagueScorers=[...leagueStats.values()].filter(x=>x.g>0).sort((a,b)=>b.g-a.g||b.a-a.a||a.name.localeCompare(b.name));
     let prevGoals=null,goalRank=0;
     leagueScorers=leagueScorers.map((x,i)=>{if(x.g!==prevGoals){goalRank=i+1;prevGoals=x.g}return {...x,rank:goalRank}});
+
     let leagueAssists=[...leagueStats.values()].filter(x=>x.a>0).sort((a,b)=>b.a-a.a||b.g-a.g||a.name.localeCompare(b.name));
     let prevAssists=null,assistRank=0;
     leagueAssists=leagueAssists.map((x,i)=>{if(x.a!==prevAssists){assistRank=i+1;prevAssists=x.a}return {...x,rank:assistRank}});
 
-    const scorersHtml=leagueScorers.map(x=>'<div class="rank"><b>'+x.rank+'</b><span>'+esc(x.name)+'</span><b class="right">'+x.g+' but'+(x.g>1?'s':'')+'</b></div>').join('')||'<p class="muted">Aucun but enregistré pour le moment.</p>';
-    const assistsHtml=leagueAssists.map(x=>'<div class="rank"><b>'+x.rank+'</b><span>'+esc(x.name)+'</span><b class="right">'+x.a+' passe'+(x.a>1?'s':'')+'</b></div>').join('')||'<p class="muted">Aucune passe enregistrée pour le moment.</p>';
+    let leagueWinners=[...leagueStats.values()].filter(x=>x.w>0).sort((a,b)=>b.w-a.w||b.g-a.g||b.a-a.a||a.name.localeCompare(b.name));
+    let prevWins=null,winRank=0;
+    leagueWinners=leagueWinners.map((x,i)=>{if(x.w!==prevWins){winRank=i+1;prevWins=x.w}return {...x,rank:winRank}});
+
+    const scorersHtml=leagueScorers.slice(0,10).map(x=>'<div class="rank"><b>'+x.rank+'</b><span>'+esc(x.name)+'</span><b class="right">'+x.g+' but'+(x.g>1?'s':'')+'</b></div>').join('')||'<p class="muted">Aucun but enregistré pour le moment.</p>';
+    const assistsHtml=leagueAssists.slice(0,10).map(x=>'<div class="rank"><b>'+x.rank+'</b><span>'+esc(x.name)+'</span><b class="right">'+x.a+' passe'+(x.a>1?'s':'')+'</b></div>').join('')||'<p class="muted">Aucune passe enregistrée pour le moment.</p>';
+    const winnersHtml=leagueWinners.slice(0,10).map(x=>'<div class="rank"><b>'+(x.rank===1?'👑':x.rank)+'</b><span><b>'+esc(x.name)+'</b><div class="muted">Top Player • victoires en Swé de Ligue</div></span><b class="right">'+x.w+' victoire'+(x.w>1?'s':'')+'</b></div>').join('')||'<p class="muted">Aucune victoire individuelle enregistrée pour le moment.</p>';
+
     const memberHtml=confirmedMembers.map((p,i)=>{
       const first=p.temporary_league_member&&p.league_origin_id===league.id;
       return '<div class="player row"><span style="flex:1"><b>'+esc(p.name)+'</b>'+(first?' <span class="guest-badge">🆕 1ère fois</span>':'')+'</span><span class="muted">#'+(i+1)+'</span></div>';
@@ -2700,32 +2792,80 @@ async function bootPublic(token){
         '<div class="player">🥇 <b>1er buteur :</b> '+esc(league.prize_first||'Lot à définir ultérieurement')+'</div>'+
         '<div class="player">🥈 <b>2e buteur :</b> '+esc(league.prize_second||'Lot à définir ultérieurement')+'</div>'+
         '<div class="player">🥉 <b>3e buteur :</b> '+esc(league.prize_third||'Lot à définir ultérieurement')+'</div></div>'
-      : '<div class="card"><h2 class="sectiontitle">🎁 Lots de la Ligue</h2><p class="muted">Aucun lot n’est prévu pour le moment. L’administrateur pourra en ajouter ultérieurement.</p></div>';
+      : '';
 
-    const leagueResultsHtml=leagueMatches.length
-      ? '<div class="card"><h2 class="sectiontitle">📋 Résultats de la Ligue</h2>'+
-        leagueMatches.sort((a,b)=>String(a.finished_at||'').localeCompare(String(b.finished_at||''))).map((m,i)=>{
-          const home=teams.find(t=>t.id===m.home_team_id),away=teams.find(t=>t.id===m.away_team_id);
-          const session=tournaments.find(t=>t.id===m.tournament_id);
-          return '<div class="player"><div class="muted">'+esc(session?.name||('Journée '+(i+1)))+(m.pitch?' • '+esc(m.pitch):'')+'</div><div class="row" style="justify-content:space-between;gap:8px"><span>'+esc(home?.name||'Équipe')+'</span><b>'+Number(m.home_score||0)+' - '+Number(m.away_score||0)+'</b><span>'+esc(away?.name||'Équipe')+'</span></div></div>';
-        }).join('')+'</div>'
-      : '<div class="card" style="background:#f8fbf9"><h2 class="sectiontitle">🚀 La Ligue débute</h2><p class="muted" style="line-height:1.6">Il n’y a encore aucun résultat. Les résultats de la Ligue apparaîtront ici dès les premiers matchs. Le classement du <b>meilleur buteur</b> et du <b>meilleur passeur</b> va commencer.</p></div>';
+    // Dernier Swé de Ligue ayant effectivement un match : afficher UNIQUEMENT ses deux équipes.
+    const sessionsWithMatch=leagueSessions.filter(s=>leagueMatches.some(m=>m.tournament_id===s.id));
+    const latestLeagueSession=sessionsWithMatch.length?sessionsWithMatch[sessionsWithMatch.length-1]:null;
+    const latestLeagueMatches=latestLeagueSession?leagueMatches.filter(m=>m.tournament_id===latestLeagueSession.id):[];
+    // Le format attendu est 1 Swé = 1 match de 60 min. Si plusieurs anciens matchs existent, on montre le dernier enregistré.
+    const latestLeagueMatch=latestLeagueMatches.length?latestLeagueMatches[latestLeagueMatches.length-1]:null;
+
+    let latestSweHtml='';
+    if(latestLeagueSession&&latestLeagueMatch){
+      const home=teams.find(t=>t.id===latestLeagueMatch.home_team_id);
+      const away=teams.find(t=>t.id===latestLeagueMatch.away_team_id);
+      const involved=[home,away].filter(Boolean);
+      const cards=involved.map(team=>{
+        const members=teamPlayers.filter(tp=>tp.team_id===team.id).map(tp=>players.find(p=>p.id===tp.player_id)).filter(Boolean);
+        const isWinner=Number(latestLeagueMatch.home_score||0)!==Number(latestLeagueMatch.away_score||0) &&
+          ((Number(latestLeagueMatch.home_score||0)>Number(latestLeagueMatch.away_score||0)&&team.id===latestLeagueMatch.home_team_id)||
+           (Number(latestLeagueMatch.away_score||0)>Number(latestLeagueMatch.home_score||0)&&team.id===latestLeagueMatch.away_team_id));
+        return '<div class="public-team-card">'+
+          '<div class="public-team-head"><div>'+(isWinner?'👑 ':'')+esc(team.name)+'</div>'+(isWinner?'<div class="public-team-shirt">🏆 Vainqueur du dernier Swé</div>':'')+'</div>'+
+          '<div class="public-team-players">'+(members.map(pl=>'<div class="public-team-player">'+esc(pl.name)+'</div>').join('')||'<div class="muted">Composition non enregistrée</div>')+'</div>'+
+        '</div>';
+      }).join('');
+      const mg=goals.filter(g=>g.match_id===latestLeagueMatch.id);
+      const goalLines=mg.map(g=>{
+        const scorer=players.find(p=>p.id===g.scorer_player_id);
+        const assister=g.assister_player_id?players.find(p=>p.id===g.assister_player_id):null;
+        return '<div class="small" style="margin-top:5px">⚽ '+esc(scorer?.name||'?')+(assister?' <span class="muted">← passe '+esc(assister.name)+'</span>':'')+'</div>';
+      }).join('');
+      latestSweHtml=
+        '<div class="card"><div class="row" style="justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap">'+
+          '<div><h2 class="sectiontitle">🔥 Dernier Swé de Ligue</h2><div class="muted">'+esc(latestLeagueSession.name||latestLeagueSession.tournament_date)+' • '+esc(latestLeagueSession.tournament_date)+' • 1 match d’environ 60 min</div></div>'+
+          '<span class="guest-badge">FORMAT LIGUE</span>'+
+        '</div>'+
+        '<div class="player" style="margin-top:10px"><div class="row" style="justify-content:space-between;gap:8px"><b>'+esc(home?.name||'Équipe A')+'</b><span class="score">'+Number(latestLeagueMatch.home_score||0)+' - '+Number(latestLeagueMatch.away_score||0)+'</span><b>'+esc(away?.name||'Équipe B')+'</b></div>'+(goalLines?'<div style="margin-top:8px">'+goalLines+'</div>':'')+'</div>'+
+        '<h3 style="margin-top:15px">👥 Les équipes qui se sont affrontées</h3><div id="publicLeagueLastTeams" style="display:flex;gap:12px;overflow-x:auto;padding:4px 2px 10px">'+cards+'</div>'+
+        '</div>';
+    }else{
+      latestSweHtml='<div class="card" style="background:#f8fbf9"><h2 class="sectiontitle">🔥 Dernier Swé de Ligue</h2><p class="muted">Aucun match de Ligue n’a encore été enregistré.</p></div>';
+    }
 
     $('#publicView').innerHTML=
-      '<header class="top"><h1>🏁 '+esc(league.name)+'</h1><div class="public-sub">SWÉ TOURNAMENT 5/5 • Inscription à la Ligue</div></header>'+
-      '<div class="card"><h2 class="sectiontitle">📅 Saison de la Ligue</h2><div class="player"><b>Début :</b> '+esc(league.starts_on)+'</div><div class="player"><b>Fin :</b> '+esc(league.ends_on||'Non définie')+'</div></div>'+
+      '<header class="top"><h1>🏁 '+esc(league.name)+'</h1><div class="public-sub">SWÉ TOURNAMENT 5/5 • Ligue • 1 Swé = 1 match d’environ 60 min</div></header>'+
+      '<div class="card"><h2 class="sectiontitle">📅 Saison de la Ligue</h2><div class="player"><b>Début :</b> '+esc(league.starts_on)+'</div><div class="player"><b>Fin :</b> '+esc(league.ends_on||'Non définie')+'</div><div class="muted" style="margin-top:8px">Contrairement au format Tournoi (environ 5 à 8 matchs sur 2h), un Swé de Ligue correspond à un seul match long d’environ 60 minutes.</div></div>'+
+      '<div class="grid g3">'+
+        '<div class="card"><h2 class="sectiontitle">⚽ Meilleurs buteurs</h2>'+scorersHtml+'</div>'+
+        '<div class="card"><h2 class="sectiontitle">🎯 Meilleurs passeurs</h2>'+assistsHtml+'</div>'+
+        '<div class="card"><h2 class="sectiontitle">👑 Top Player</h2><div class="muted" style="margin-bottom:8px">Classement par nombre de Swés de Ligue gagnés.</div>'+winnersHtml+'</div>'+
+      '</div>'+
+      latestSweHtml+
       prizeHtml+
-      '<div class="card"><h2 class="sectiontitle">Rejoindre la Ligue</h2><p class="muted">Si tu es déjà membre du groupe, sélectionne ton nom. Sinon, tu peux t’inscrire pour cette saison de Ligue : ton nom sera ajouté aux membres de la Ligue et restera disponible jusqu’à la fin de la saison.</p>'+
+      '<div class="card"><h2 class="sectiontitle">Rejoindre la Ligue</h2><p class="muted">Si tu es déjà membre du groupe, sélectionne ton nom. Sinon, l’option « 1ère fois » reste disponible uniquement pour l’inscription à la Ligue.</p>'+
       '<select id="publicLeaguePlayer"><option value="">Choisis ton nom</option>'+groupMembers.map(p=>'<option value="'+p.id+'">'+esc(p.name)+(confirmedIds.has(p.id)?' • déjà inscrit':'')+'</option>').join('')+'</select>'+
       '<div class="space"></div><div class="row"><button id="publicLeagueJoin" class="primary">Je rejoins la Ligue</button><button id="publicLeagueLeave">Me retirer</button></div><div id="publicLeagueStatus" class="muted" style="margin-top:8px"></div>'+
-      '<div class="player" style="margin-top:14px;background:#f8fbf9"><b>🆕 Première fois avec le groupe ?</b><div class="muted" style="margin:5px 0 8px">Entre ton nom pour t’inscrire à cette Ligue. Tu pourras te réinscrire pendant toute la saison si tu t’es retiré.</div><input id="publicNewLeaguePlayerName" maxlength="60" placeholder="Ton prénom / nom"><div class="space"></div><button id="publicNewLeagueJoin" class="primary">M’inscrire pour cette Ligue</button><div id="publicNewLeagueStatus" class="muted" style="margin-top:8px"></div></div></div>'+
-      '<div class="card"><h2 class="sectiontitle">👥 Membres inscrits ('+confirmedMembers.length+')</h2><div id="publicLeagueMembers">'+memberHtml+'</div></div>'+
-      leagueResultsHtml+
-      '<div class="grid g2"><div class="card"><h2 class="sectiontitle">⚽ Classement des buteurs de la Ligue</h2><div>'+scorersHtml+'</div></div>'+
-      '<div class="card"><h2 class="sectiontitle">🎯 Classement des passeurs de la Ligue</h2><div>'+assistsHtml+'</div></div></div>';
+      '<div class="player" style="margin-top:14px;background:#f8fbf9"><b>🆕 Première fois avec le groupe ?</b><div class="muted" style="margin:5px 0 8px">Entre ton nom pour t’inscrire à cette Ligue. Tu pourras participer aux prochains Swés de Ligue.</div><input id="publicNewLeaguePlayerName" maxlength="60" placeholder="Ton prénom / nom"><div class="space"></div><button id="publicNewLeagueJoin" class="primary">M’inscrire pour cette Ligue</button><div id="publicNewLeagueStatus" class="muted" style="margin-top:8px"></div></div></div>'+
+      '<div class="card"><h2 class="sectiontitle">👥 Membres inscrits ('+confirmedMembers.length+')</h2><div id="publicLeagueMembers">'+memberHtml+'</div></div>';
 
-    $('#publicLeagueJoin').onclick=async()=>{const pid=$('#publicLeaguePlayer').value;if(!pid)return $('#publicLeagueStatus').textContent='Choisis ton nom.';const {error}=await sb.rpc('public_league_registration',{p_token:token,p_league_id:league.id,p_player_id:pid,p_action:'join'});if(error)return $('#publicLeagueStatus').textContent=error.message;$('#publicLeagueStatus').textContent='🟢 Inscription à la Ligue confirmée !';setTimeout(()=>location.reload(),500);};
-    $('#publicLeagueLeave').onclick=async()=>{const pid=$('#publicLeaguePlayer').value;if(!pid)return $('#publicLeagueStatus').textContent='Choisis ton nom.';const {error}=await sb.rpc('public_league_registration',{p_token:token,p_league_id:league.id,p_player_id:pid,p_action:'leave'});if(error)return $('#publicLeagueStatus').textContent=error.message;$('#publicLeagueStatus').textContent='Inscription retirée.';setTimeout(()=>location.reload(),500);};
+    $('#publicLeagueJoin').onclick=async()=>{
+      const pid=$('#publicLeaguePlayer').value;
+      if(!pid)return $('#publicLeagueStatus').textContent='Choisis ton nom.';
+      const {error}=await sb.rpc('public_league_registration',{p_token:token,p_league_id:league.id,p_player_id:pid,p_action:'join'});
+      if(error)return $('#publicLeagueStatus').textContent=error.message;
+      $('#publicLeagueStatus').textContent='🟢 Inscription à la Ligue confirmée !';
+      setTimeout(()=>location.reload(),500);
+    };
+    $('#publicLeagueLeave').onclick=async()=>{
+      const pid=$('#publicLeaguePlayer').value;
+      if(!pid)return $('#publicLeagueStatus').textContent='Choisis ton nom.';
+      const {error}=await sb.rpc('public_league_registration',{p_token:token,p_league_id:league.id,p_player_id:pid,p_action:'leave'});
+      if(error)return $('#publicLeagueStatus').textContent=error.message;
+      $('#publicLeagueStatus').textContent='Inscription retirée.';
+      setTimeout(()=>location.reload(),500);
+    };
     $('#publicNewLeagueJoin').onclick=async()=>{
       const name=$('#publicNewLeaguePlayerName').value.trim();
       if(!name)return $('#publicNewLeagueStatus').textContent='Entre ton nom.';
