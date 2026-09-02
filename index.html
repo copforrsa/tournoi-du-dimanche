@@ -75,7 +75,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.30</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.31</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -118,7 +118,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.30</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.31</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -503,7 +503,7 @@ select{background-color:#fff} textarea{resize:vertical}
           </div>
           <div class="player" style="background:#f8fbf9;margin-top:10px">
             <b>➕ Ajouter des inscrits manuellement</b>
-            <div class="muted" style="margin:5px 0 8px">Sélectionne une ou plusieurs personnes déjà inscrites à cette Ligue. Sur ordinateur : Ctrl/Cmd + clic pour en choisir plusieurs.</div>
+            <div class="muted" style="margin:5px 0 8px">Cette liste propose les membres de la Ligue qui ne sont pas encore inscrits à CE Swé. Les ajouter ici les inscrit uniquement à ce Swé. Sur ordinateur : Ctrl/Cmd + clic pour en choisir plusieurs.</div>
             <div class="row" style="align-items:flex-start">
               <select id="leagueManualPlayerSelect" multiple size="7" style="flex:1;min-height:180px"></select>
               <button id="leagueManualAddPlayer" class="primary">Ajouter la sélection</button>
@@ -2209,31 +2209,46 @@ function renderTeams(){
 
   if(!canFullEdit){
     att.innerHTML='<div class="readonly-note">Tu peux consulter les joueurs inscrits et les équipes de cette compétition. La modification manuelle des présences reste réservée à l’administrateur.</div>';
+    const registeredIds=new Set(S.tPlayers.filter(tp=>tp.present).map(tp=>tp.player_id));
+    const registeredPlayers=S.players.filter(x=>x.active&&registeredIds.has(x.id));
+    att.innerHTML+='<div class="muted" style="margin:10px 0 6px">'+(t.format==='league'
+      ?'<b>Important :</b> cette liste contient uniquement les inscrits à ce Swé, pas tous les membres de la Ligue.'
+      :'Liste des inscrits à ce tournoi.')+'</div>'+
+      (registeredPlayers.map(x=>'<div class="player row"><span style="flex:1">'+esc(playerDisplayName(x))+'</span><span class="guest-badge">'+((S.tPlayers.find(tp=>tp.player_id===x.id)?.registration_status==='waitlist')?'Remplaçant':'Inscrit au Swé')+'</span></div>').join('')||'<p class="muted">Aucun inscrit à cette compétition.</p>');
   }else{
     const prs=presentIds();
-    S.players.filter(x=>x.active).forEach(x=>{
-      const l=document.createElement('label');l.className='player row';
-      const c=document.createElement('input');c.type='checkbox';c.style.width='auto';c.checked=prs.has(x.id);
-      c.onchange=async()=>{
-        if(c.checked){
-          const confirmed=S.tPlayers.filter(tp=>tp.present&&tp.registration_status!=='waitlist'&&tp.player_id!==x.id).length;
-          const status=confirmed<(t.max_players||20)?'confirmed':'waitlist';
-          const {error}=await sb.from('tournament_players').upsert({tournament_id:t.id,player_id:x.id,present:true,registration_status:status,registered_at:new Date().toISOString()},{onConflict:'tournament_id,player_id'});
-          if(error)return toast(error.message);
-        }else{
-          const {error}=await sb.from('tournament_players').delete().eq('tournament_id',t.id).eq('player_id',x.id);
-          if(error)return toast(error.message);
+    if(t.format==='league'){
+      const sessionRows=S.tPlayers.filter(tp=>tp.present);
+      att.innerHTML='<div class="readonly-note"><b>🏁 Inscrits à CE Swé de Ligue uniquement</b><div style="margin-top:5px">Être membre de la Ligue ne signifie pas participer automatiquement à ce Swé. Les membres de la Ligue qui ne se sont pas inscrits à ce Swé ne sont pas affichés ici.</div></div>'+
+        (sessionRows.map(tp=>{
+          const x=p(tp.player_id);if(!x)return '';
+          return '<div class="player row"><span style="flex:1">'+esc(playerDisplayName(x))+'</span><span class="guest-badge">'+(tp.registration_status==='waitlist'?'Remplaçant':'Inscrit au Swé')+'</span></div>';
+        }).join('')||'<p class="muted">Aucun joueur inscrit à ce Swé pour le moment.</p>');
+    }else{
+      S.players.filter(x=>x.active).forEach(x=>{
+        const l=document.createElement('label');l.className='player row';
+        const c=document.createElement('input');c.type='checkbox';c.style.width='auto';c.checked=prs.has(x.id);
+        c.onchange=async()=>{
+          if(c.checked){
+            const confirmed=S.tPlayers.filter(tp=>tp.present&&tp.registration_status!=='waitlist'&&tp.player_id!==x.id).length;
+            const status=confirmed<(t.max_players||20)?'confirmed':'waitlist';
+            const {error}=await sb.from('tournament_players').upsert({tournament_id:t.id,player_id:x.id,present:true,registration_status:status,registered_at:new Date().toISOString()},{onConflict:'tournament_id,player_id'});
+            if(error)return toast(error.message);
+          }else{
+            const {error}=await sb.from('tournament_players').delete().eq('tournament_id',t.id).eq('player_id',x.id);
+            if(error)return toast(error.message);
+          }
+          await loadTournament();renderAll();
+        };
+        const tp=S.tPlayers.find(z=>z.player_id===x.id);
+        const label=document.createElement('span');label.style.flex='1';label.textContent=playerDisplayName(x);
+        if(tp?.registration_status==='waitlist'){
+          const badge=document.createElement('span');badge.className='guest-badge';badge.textContent='Liste d’attente';
+          label.appendChild(document.createTextNode(' '));label.appendChild(badge);
         }
-        await loadTournament();renderAll();
-      };
-      const tp=S.tPlayers.find(z=>z.player_id===x.id);
-      const label=document.createElement('span');label.style.flex='1';label.textContent=playerDisplayName(x);
-      if(tp?.registration_status==='waitlist'){
-        const badge=document.createElement('span');badge.className='guest-badge';badge.textContent='Liste d’attente';
-        label.appendChild(document.createTextNode(' '));label.appendChild(badge);
-      }
-      l.append(c,label);att.appendChild(l);
-    });
+        l.append(c,label);att.appendChild(l);
+      });
+    }
   }
 
   if(!S.teams.length){
@@ -2569,7 +2584,8 @@ async function renderLeague(){
     return;
   }
   const members=S.leaguePlayers.filter(lp=>lp.league_id===league.id&&lp.status==='confirmed');
-  info.innerHTML='<div class="player"><b>'+esc(league.name)+'</b><div class="muted">📅 Du '+esc(league.starts_on)+(league.ends_on?' au '+esc(league.ends_on):' • sans date de fin')+'</div><div class="muted">'+members.length+' membre'+(members.length>1?'s':'')+' de la communauté inscrit'+(members.length>1?'s':'')+'. Les statistiques ci-dessous appartiennent uniquement à cette Ligue.</div></div>';
+  info.innerHTML='<div class="player"><b>'+esc(league.name)+'</b><div class="muted">📅 Du '+esc(league.starts_on)+(league.ends_on?' au '+esc(league.ends_on):' • sans date de fin')+'</div><div class="muted"><b>'+members.length+' membre'+(members.length>1?'s':'')+' inscrit'+(members.length>1?'s':'')+' à la Ligue.</b> Cela donne accès aux Swés de la Ligue mais ne les inscrit pas automatiquement à chaque Swé.</div></div>'+
+    '<div class="readonly-note" style="margin-top:8px"><b>À ne pas confondre :</b> « membre de la Ligue » ≠ « inscrit au Swé ». Chaque Swé possède sa propre liste d’inscrits.</div>';
 
   const prizeCard=$('#leaguePrizesCard'),prizeToggle=$('#leaguePrizesEnabled'),prizeFields=$('#leaguePrizeFields'),prizeReadonly=$('#leaguePrizeReadonly');
   if(prizeCard){
@@ -2667,12 +2683,12 @@ async function renderLeague(){
       const selectedSessionLabel=$('#leagueAdminSelectedSession');
       if(selectedSessionLabel)selectedSessionLabel.textContent=(current.name||('Swé du '+current.tournament_date))+' • '+current.tournament_date;
       const registeredTitle=$('#leagueRegisteredTitle');
-      if(registeredTitle)registeredTitle.textContent='Liste des inscrits — '+(current.name||('Swé du '+current.tournament_date));
+      if(registeredTitle)registeredTitle.textContent='Inscrits à CE Swé uniquement — '+(current.name||('Swé du '+current.tournament_date));
       const manualSel=$('#leagueManualPlayerSelect');
       if(manualSel)manualSel.innerHTML=available.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join('');
 
       const count=$('#leagueRegisteredCount');
-      if(count)count.textContent=presentRows.length+' inscrit'+(presentRows.length>1?'s':'');
+      if(count)count.textContent=presentRows.length+' participant'+(presentRows.length>1?'s':'')+' à ce Swé';
       const list=$('#leagueRegisteredPlayersList');
       if(list){
         list.innerHTML=presentRows.length?presentRows.map((r,i)=>'<div class="player row"><b style="min-width:30px">'+(i+1)+'.</b><span style="flex:1">'+esc(r.player_name)+(r.is_group_member===false?' <span class="guest-badge">Invité</span>':'')+'</span><span class="guest-badge">'+(r.registration_status==='waitlist'?'Remplaçant':'Confirmé')+'</span></div>').join(''):'<p class="muted">Aucun inscrit pour ce Swé.</p>';
@@ -2702,7 +2718,7 @@ async function renderLeague(){
   }
 
 
-  // V39.30 — Saisie du résultat directement depuis l'onglet Ligue.
+  // V39.31 — Saisie du résultat directement depuis l'onglet Ligue.
   const scoringCard=$('#leagueScoringCard'),scoringBody=$('#leagueScoringBody'),scoringLabel=$('#leagueScoringSessionLabel');
   if(scoringCard)scoringCard.classList.toggle('hidden',!canScoreLeague);
   if(canScoreLeague&&scoringBody){
@@ -3310,7 +3326,7 @@ async function bootPublic(token){
       '<select id="publicLeaguePlayer"><option value="">Choisis ton nom</option>'+groupMembers.map(p=>'<option value="'+p.id+'">'+esc(p.name)+(confirmedIds.has(p.id)?' • déjà inscrit':'')+'</option>').join('')+'</select>'+
       '<div class="space"></div><div class="row"><button id="publicLeagueJoin" class="primary">Je rejoins la Ligue</button><button id="publicLeagueLeave">Me retirer</button></div><div id="publicLeagueStatus" class="muted" style="margin-top:8px"></div>'+
       '<div class="player" style="margin-top:14px;background:#f8fbf9"><b>🆕 Première fois avec le groupe ?</b><div class="muted" style="margin:5px 0 8px">Entre ton nom pour t’inscrire à cette Ligue. Tu pourras participer aux prochains Swés de Ligue.</div><input id="publicNewLeaguePlayerName" maxlength="60" placeholder="Ton prénom / nom"><div class="space"></div><button id="publicNewLeagueJoin" class="primary">M’inscrire pour cette Ligue</button><div id="publicNewLeagueStatus" class="muted" style="margin-top:8px"></div></div></div>'+
-      '<div class="card"><h2 class="sectiontitle">👥 Membres inscrits ('+confirmedMembers.length+')</h2><div id="publicLeagueMembers">'+memberHtml+'</div></div>';
+      '<div class="card"><h2 class="sectiontitle">👥 Membres de la Ligue ('+confirmedMembers.length+')</h2><div class="readonly-note" style="margin-bottom:10px"><b>Attention :</b> cette liste correspond aux membres de la Ligue. Elle ne signifie pas qu’ils participent au prochain Swé. Chaque Swé nécessite une inscription séparée.</div><div id="publicLeagueMembers">'+memberHtml+'</div></div>';
 
     $('#publicLeagueJoin').onclick=async()=>{
       const pid=$('#publicLeaguePlayer').value;
@@ -3793,7 +3809,7 @@ async function bootPublic(token){
   const pmap=new Map(players.map(x=>[x.id,x]));
   const tmap=new Map(teams.map(x=>[x.id,x]));
 
-  // V39.30 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
+  // V39.31 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
   if(wantsLeagueSession&&regTour){
     const linkedLeague=leagues.find(l=>l.id===regTour.league_id)||null;
     const linkLeagueId=publicParams.get('league');
@@ -3844,10 +3860,11 @@ async function bootPublic(token){
         (regTour.reservation_reference?'<div class="muted" style="margin-top:8px">Réservation : <b>'+esc(regTour.reservation_reference)+'</b></div>':'')+
         '<div class="muted" style="margin:10px 0">Ce lien concerne uniquement ce Swé. Les informations affichées en dessous concernent uniquement la Ligue <b>'+esc(linkedLeague.name)+'</b>.</div>'+
         '<div class="player"><b>'+confirmed+'/'+(regTour.max_players||100)+' confirmés</b>'+(waiting?' • '+waiting+' remplaçant'+(waiting>1?'s':''):'')+'</div>'+
-        '<div class="space"></div><select id="leagueSessionPublicPlayer"><option value="">Choisis ton nom</option>'+leagueMembers.map(pl=>'<option value="'+pl.id+'">'+esc(pl.name)+'</option>').join('')+'</select>'+
-        '<div class="space"></div><div class="row"><button id="leagueSessionPublicJoin" class="primary">✅ Je participe à ce Swé</button><button id="leagueSessionPublicLeave">❌ Je ne participe pas</button></div>'+
+        '<div class="readonly-note" style="margin:10px 0"><b>Tu es membre de la Ligue ?</b> Cela te permet de t’inscrire ici, mais tu n’es participant à ce Swé que si tu cliques sur « Je participe à ce Swé ».</div>'+
+        '<div class="space"></div><select id="leagueSessionPublicPlayer"><option value="">Choisis ton nom parmi les membres de la Ligue</option>'+leagueMembers.map(pl=>'<option value="'+pl.id+'">'+esc(pl.name)+'</option>').join('')+'</select>'+
+        '<div class="space"></div><div class="row"><button id="leagueSessionPublicJoin" class="primary">✅ Je participe à CE Swé</button><button id="leagueSessionPublicLeave">❌ Je ne participe pas à CE Swé</button></div>'+
         '<div id="leagueSessionPublicStatus" class="muted" style="margin-top:8px"></div>'+
-        '<h3 style="margin-top:18px">👥 Inscrits à ce Swé</h3><div id="leagueSessionPublicRegistered"></div>'+
+        '<h3 style="margin-top:18px">👥 Participants inscrits à CE Swé</h3><div class="muted" style="margin-bottom:8px">Cette liste est indépendante de la liste des membres de la Ligue.</div><div id="leagueSessionPublicRegistered"></div>'+
       '</div>'+
       '<div class="card"><h2 class="sectiontitle">🏁 '+esc(linkedLeague.name)+'</h2><div class="player"><b>Saison :</b> '+esc(linkedLeague.starts_on)+(linkedLeague.ends_on?' → '+esc(linkedLeague.ends_on):'')+'</div><div class="muted" style="margin-top:8px">Informations de la Ligue sélectionnée uniquement.</div></div>'+
       '<div class="grid g3">'+
