@@ -54,7 +54,7 @@ select{background-color:#fff} textarea{resize:vertical}
 #tournamentList .player,#playersList .player,#teamList .team{padding:14px}
 #shareWhatsapp{background:#19a853;color:#fff}
 .tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:40;width:min(760px,calc(100% - 20px));display:grid;grid-template-columns:repeat(auto-fit,minmax(72px,1fr));gap:3px;background:rgba(7,27,18,.96);border:1px solid rgba(255,255,255,.08);border-radius:20px 20px 0 0;padding:7px 7px calc(7px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(7,27,18,.22);backdrop-filter:blur(14px)}
-.tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:51px;background:transparent;color:#b9cabf;border:0;font-size:10px;padding:5px 4px;border-radius:13px}.tabs button:before{font-size:19px;line-height:1}.tabs button[data-view="home"]:before{content:"⌂"}.tabs button[data-view="players"]:before{content:"♟"}.tabs button[data-view="permissions"]:before{content:"🔐"}.tabs button[data-view="tournaments"]:before{content:"▣"}.tabs button[data-view="teams"]:before{content:"♙"}.tabs button[data-view="matches"]:before{content:"⚽"}.tabs button[data-view="ranking"]:before{content:"★"}.tabs button.active{background:linear-gradient(135deg,#17803d,#22a34a);color:#fff;box-shadow:0 5px 12px rgba(25,152,67,.26)}
+.tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:51px;background:transparent;color:#b9cabf;border:0;font-size:10px;padding:5px 4px;border-radius:13px}.tabs button:before{font-size:19px;line-height:1}.tabs button[data-view="home"]:before{content:"⌂"}.tabs button[data-view="players"]:before{content:"♟"}.tabs button[data-view="permissions"]{display:none!important}.tabs.admin-mode button[data-view="permissions"]{display:flex!important}.tabs button[data-view="permissions"]:before{content:"🔐"}.tabs button[data-view="tournaments"]:before{content:"▣"}.tabs button[data-view="teams"]:before{content:"♙"}.tabs button[data-view="matches"]:before{content:"⚽"}.tabs button[data-view="ranking"]:before{content:"★"}.tabs button.active{background:linear-gradient(135deg,#17803d,#22a34a);color:#fff;box-shadow:0 5px 12px rgba(25,152,67,.26)}
 @media(min-width:900px){
   .app{padding-left:224px;padding-bottom:28px}.tabs{left:max(20px,calc(50% - 590px));top:18px;bottom:18px;transform:none;width:190px;height:auto;display:flex;flex-direction:column;justify-content:flex-start;border-radius:22px;padding:18px 10px;background:#071b12}.tabs:before{content:"TOURNOI DU DIMANCHE";display:block;color:#fff;font-weight:900;font-size:14px;line-height:1.2;padding:4px 8px 18px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:8px}.tabs button{flex-direction:row;justify-content:flex-start;gap:10px;padding:10px 12px;font-size:13px;min-height:46px}.tabs button:before{font-size:17px;width:22px;text-align:center}.top{margin-top:0}.card{padding:19px 20px}
 }
@@ -67,7 +67,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V37.8</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V37.9</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -110,7 +110,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:700">V37.8</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:700">V37.9</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -450,10 +450,9 @@ function applyPermissions(){
   const attendanceCard=$('#attendanceAdminCard');if(attendanceCard)attendanceCard.classList.toggle('hidden',!adminOps);
   const teamsCard=$('#teamsAdminCard');if(teamsCard)teamsCard.classList.toggle('hidden',!(adminOps||(coorg&&S.myPermissions.can_generate_teams)));
   const matchCreateCard=$('#matchCreateAdminCard');if(matchCreateCard)matchCreateCard.classList.toggle('hidden',!adminOps);
-  document.querySelectorAll('.admin-permissions-tab').forEach(el=>{
-    if(admin){el.style.display='';el.classList.remove('hidden')}
-    else{el.style.display='none';el.classList.add('hidden')}
-  });
+  document.querySelectorAll('.tabs').forEach(nav=>nav.classList.toggle('admin-mode',admin));
+  document.querySelectorAll('.admin-permissions-tab').forEach(el=>el.classList.toggle('hidden',!admin));
+  const permView=$('#view-permissions');if(permView&&!admin)permView.classList.remove('active');
   const access=$('#adminAccessCard');if(access)access.classList.toggle('hidden',!(admin||coorg));
   const inviteControls=$('#adminInviteControls');if(inviteControls)inviteControls.classList.toggle('hidden',!(admin||(coorg&&S.myPermissions.can_invite_coorganizers)));
   const accessLegend=$('#adminAccessLegend');if(accessLegend)accessLegend.classList.toggle('hidden',!admin);
@@ -554,8 +553,9 @@ async function boot(){
   if(!data?.length){$('#workspaceSetup').classList.remove('hidden');return}
   S.workspace={id:data[0].workspace_id,name:data[0].workspaces?.name||'Tournoi du dimanche',role:data[0].role,public_token:data[0].workspaces?.public_token||null,public_enabled:data[0].workspaces?.public_enabled!==false};
   $('#workspaceSetup').classList.add('hidden');
+  await loadAll();
   $('#workspaceName').textContent=S.workspace.name+' • '+(S.workspace.role==='admin'?'Administrateur':(hasTemporaryAdmin()?'Co-organisateur • Admin temporaire':'Co-organisateur'));
-  await loadAll(); applyPermissions(); subscribeRealtime(); startSafeAppSync();
+  applyPermissions(); subscribeRealtime(); startSafeAppSync();
 }
 $('#createWorkspace').onclick=async()=>{
   const btn=$('#createWorkspace');btn.disabled=true;btn.textContent='Création…';
@@ -601,8 +601,9 @@ async function loadAll(){
   }else if(isCoorg()){
     S.invites=[];S.coorgs=[];
     r=await sb.rpc('get_my_coorganizer_permissions',{p_workspace_id:w});
-    const mp=Array.isArray(r.data)?r.data[0]:r.data;
-    S.myPermissions=mp||{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null};
+    if(r.error)console.error('permissions coorganisateur',r.error);
+    const mp=Array.isArray(r.data)?(r.data[0]||null):r.data;
+    S.myPermissions={can_invite_coorganizers:false,can_enter_scores:true,can_add_members:true,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null,...(mp||{})};
   }else{S.invites=[];S.coorgs=[];}
   if(isAdmin()){
     r=await sb.rpc('get_admin_workspace_players',{p_workspace_id:w});S.players=r.data||[];
@@ -610,8 +611,11 @@ async function loadAll(){
     r=await sb.rpc('get_admin_player_skill_reviews',{p_workspace_id:w});S.skillReviews=r.data||[];
     r=await sb.from('player_team_codes').select('player_id,code,enabled,updated_at').eq('workspace_id',w);S.teamCodes=r.data||[];
   }else{
-    r=await sb.rpc('get_workspace_players_safe',{p_workspace_id:w});
-    if(r.error){console.error('players safe',r.error);S.players=[]}else S.players=r.data||[];
+    if(isCoorg()&&(S.myPermissions.can_view_players||hasTemporaryAdmin())){
+      r=await sb.rpc('get_workspace_players_safe',{p_workspace_id:w});
+      if(r.error){console.error('players safe',r.error);S.players=[];toast('Impossible de charger la liste des joueurs.')}
+      else S.players=Array.isArray(r.data)?r.data:[];
+    }else S.players=[];
     S.contacts=[];S.skillReviews=[];S.teamCodes=[];
   }
   r=await sb.from('seasons').select('*').eq('workspace_id',w).order('starts_on',{ascending:false});S.seasons=r.data||[];
@@ -1033,7 +1037,7 @@ $('#addPlayers').onclick=async()=>{
       const {data:freshPlayers,error:playersError}=await sb.rpc('get_admin_workspace_players',{p_workspace_id:workspace.id});
       if(playersError)throw playersError;S.players=freshPlayers||[];
     }else{
-      const {data:freshPlayers,error:playersError}=await sb.from('players').select('id,workspace_id,name,active,created_at,is_group_member,guest_of_player_id').eq('workspace_id',workspace.id).order('name');
+      const {data:freshPlayers,error:playersError}=await sb.rpc('get_workspace_players_safe',{p_workspace_id:workspace.id});
       if(playersError)throw playersError;S.players=freshPlayers||[];
     }
     renderPlayers();
