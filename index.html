@@ -54,7 +54,7 @@ select{background-color:#fff} textarea{resize:vertical}
 #tournamentList .player,#playersList .player,#teamList .team{padding:14px}
 #shareWhatsapp{background:#19a853;color:#fff}
 .tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:40;width:min(760px,calc(100% - 20px));display:grid;grid-template-columns:repeat(auto-fit,minmax(72px,1fr));gap:3px;background:rgba(7,27,18,.96);border:1px solid rgba(255,255,255,.08);border-radius:20px 20px 0 0;padding:7px 7px calc(7px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(7,27,18,.22);backdrop-filter:blur(14px)}
-.tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:51px;background:transparent;color:#b9cabf;border:0;font-size:10px;padding:5px 4px;border-radius:13px}.tabs button:before{font-size:19px;line-height:1}.tabs button[data-view="home"]:before{content:"⌂"}.tabs button[data-view="players"]:before{content:"♟"}.tabs button[data-view="permissions"]:before{content:"🔐"}.tabs button[data-view="permissions"].disabled-tab{opacity:.35;filter:grayscale(1);cursor:not-allowed;pointer-events:none}.tabs button[data-view="tournaments"]:before{content:"▣"}.tabs button[data-view="teams"]:before{content:"♙"}.tabs button[data-view="matches"]:before{content:"⚽"}.tabs button[data-view="ranking"]:before{content:"★"}.tabs button.active{background:linear-gradient(135deg,#17803d,#22a34a);color:#fff;box-shadow:0 5px 12px rgba(25,152,67,.26)}
+.tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:51px;background:transparent;color:#b9cabf;border:0;font-size:10px;padding:5px 4px;border-radius:13px}.tabs button:before{font-size:19px;line-height:1}.tabs button[data-view="home"]:before{content:"⌂"}.tabs button[data-view="players"]:before{content:"♟"}.tabs button[data-view="permissions"]:before{content:"🔐"}.tabs button[data-view="permissions"].disabled-tab{opacity:.35;filter:grayscale(1);cursor:not-allowed;pointer-events:none}.tabs button[data-view="tournaments"]:before{content:"▣"}.tabs button[data-view="teams"]:before{content:"♙"}.tabs button[data-view="matches"]:before{content:"⚽"}.tabs button[data-view="league"]:before{content:"🏁"}.tabs button[data-view="ranking"]:before{content:"★"}.tabs button.active{background:linear-gradient(135deg,#17803d,#22a34a);color:#fff;box-shadow:0 5px 12px rgba(25,152,67,.26)}
 @media(min-width:900px){
   .app{padding-left:224px;padding-bottom:28px}.tabs{left:max(20px,calc(50% - 590px));top:18px;bottom:18px;transform:none;width:190px;height:auto;display:flex;flex-direction:column;justify-content:flex-start;border-radius:22px;padding:18px 10px;background:#071b12}.tabs:before{content:"TOURNOI DU DIMANCHE";display:block;color:#fff;font-weight:900;font-size:14px;line-height:1.2;padding:4px 8px 18px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:8px}.tabs button{flex-direction:row;justify-content:flex-start;gap:10px;padding:10px 12px;font-size:13px;min-height:46px}.tabs button:before{font-size:17px;width:22px;text-align:center}.top{margin-top:0}.card{padding:19px 20px}
 }
@@ -67,7 +67,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V37.11</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:600">V38.0</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -110,7 +110,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:700">V37.11</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ Tournoi du Dimanche <span style="font-size:11px;opacity:.65;font-weight:700">V38.0</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -200,7 +200,7 @@ select{background-color:#fff} textarea{resize:vertical}
       </div>
       <div class="card" id="tournamentAdminCard">
         <h2 class="sectiontitle">Créer un tournoi</h2>
-        <div class="grid g2"><input id="tourDate" type="date"><select id="tourFormat"><option value="classic">Classique</option><option value="king_of_pitch">Roi du terrain</option></select></div>
+        <div class="grid g2"><input id="tourDate" type="date"><select id="tourFormat"><option value="classic">Classique</option><option value="king_of_pitch">Roi du terrain</option><option value="league">Ligue simple</option></select></div>
         <div class="space"></div><input id="tourName" placeholder="Nom facultatif"><div class="space"></div>
         <div class="grid g2">
           <label class="player"><span class="muted">Places maximum</span><input id="tourMaxPlayers" type="number" min="2" max="100" value="20"></label>
@@ -237,6 +237,43 @@ select{background-color:#fff} textarea{resize:vertical}
       <div id="matchesList"></div>
     </div>
 
+
+    <div id="view-league" class="view">
+      <div class="card">
+        <h2 class="sectiontitle">🏁 Ligue simple</h2>
+        <p class="muted">Une journée de ligue reprend les membres du groupe, le même système d’inscription publique et crée automatiquement 2 équipes aléatoires. Les buts et passes sont cumulés dans les classements de la ligue.</p>
+        <div id="leagueFeatureDisabled" class="readonly-note hidden">Cette option n’est pas activée pour cet espace.</div>
+      </div>
+      <div class="card" id="leagueCreateCard">
+        <h2 class="sectiontitle">Créer une journée de Ligue</h2>
+        <div class="grid g2">
+          <input id="leagueDate" type="date">
+          <select id="leagueSeason"></select>
+        </div>
+        <div class="space"></div>
+        <div class="grid g2">
+          <input id="leagueName" placeholder="Ex. Ligue du mercredi">
+          <input id="leagueMaxPlayers" type="number" min="4" max="100" value="10" placeholder="Places maximum">
+        </div>
+        <div class="space"></div>
+        <button id="createLeagueDay" class="primary">Créer et ouvrir les inscriptions</button>
+      </div>
+      <div class="card">
+        <h2 class="sectiontitle">Journées de Ligue</h2>
+        <div id="leagueDays"></div>
+      </div>
+      <div class="card">
+        <h2 class="sectiontitle">⚡ Équipes aléatoires</h2>
+        <p class="muted">Ouvre une journée de ligue puis génère 2 équipes à partir des joueurs confirmés. Un match Équipe A – Équipe B est créé automatiquement.</p>
+        <button id="generateLeagueTeams" class="primary">Générer les 2 équipes</button>
+        <div id="leagueGenerationInfo" class="muted" style="margin-top:8px"></div>
+      </div>
+      <div class="grid g2">
+        <div class="card"><h2 class="sectiontitle">⚽ Buteurs de la Ligue</h2><div id="leagueScorers"></div></div>
+        <div class="card"><h2 class="sectiontitle">🎯 Passeurs de la Ligue</h2><div id="leagueAssists"></div></div>
+      </div>
+    </div>
+
     <div id="view-ranking" class="view">
       <div class="card"><div class="row"><button class="rankMode" data-mode="day">Tournoi</button><button class="rankMode primary" data-mode="season">Saison</button></div><p class="muted">Le classement Saison cumule tous les tournois de la saison en cours.</p></div>
       <div class="grid g2">
@@ -271,6 +308,7 @@ select{background-color:#fff} textarea{resize:vertical}
       <button class="tab" data-view="tournaments">Tournois</button>
       <button class="tab" data-view="teams">Équipes</button>
       <button class="tab" data-view="matches">Matchs</button>
+      <button class="tab" data-view="league">Ligue</button>
       <button class="tab" data-view="ranking">Classement</button>
     </nav>
   </section>
@@ -386,7 +424,7 @@ window.addEventListener('error', (e) => {
   if(t){t.textContent='Erreur de chargement de l’application. Recharge la page.';t.style.display='block';}
 });
 
-const S={session:null,workspace:null,members:[],coorgs:[],coorgCount:0,myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null},lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],teamCodes:[],seasons:[],tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},publicMode:false,publicToken:null};
+const S={session:null,workspace:null,members:[],coorgs:[],coorgCount:0,workspaceFeatures:{max_coorganizers:3,max_coorganizers_cap:100,rankings_enabled:true,league_enabled:true},myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null},myRatings:[],lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],teamCodes:[],seasons:[],tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},publicMode:false,publicToken:null};
 
 let safeSyncTimer=null;
 let safeSyncBusy=false;
@@ -414,6 +452,8 @@ const today=()=>new Date().toISOString().slice(0,10); $('#tourDate').value=today
 function setView(v){
   if(v==='permissions'&&!isAdmin())v='home';
   if(v==='players'&&isCoorg()&&!hasTemporaryAdmin()&&!S.myPermissions.can_view_players)v='home';
+  if(v==='league'&&!S.workspaceFeatures.league_enabled)v='home';
+  if(v==='ranking'&&!S.workspaceFeatures.rankings_enabled)v='home';
   document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id==='view-'+v));
   document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.view===v));
   if(v==='ranking')renderRanking();
@@ -444,6 +484,7 @@ function hasTemporaryAdmin(){
   return new Date(S.myPermissions.temporary_admin_until).getTime()>Date.now();
 }
 function hasAdminOps(){return isAdmin()||hasTemporaryAdmin()}
+function formatLabel(t){return t?.format==='king_of_pitch'?'Roi du terrain':(t?.format==='league'?'Ligue':'Classique')}
 function canEditCurrentMatches(){const t=currentTour();return !!t && t.status!=='finished' && (hasAdminOps()||(isCoorg()&&S.myPermissions.can_enter_scores))}
 function makeDisabledActionButton(label,title){
   const b=document.createElement('button');b.textContent=label;b.disabled=true;b.setAttribute('aria-disabled','true');
@@ -472,6 +513,8 @@ function applyPermissions(){
   const accessLegend=$('#adminAccessLegend');if(accessLegend)accessLegend.classList.toggle('hidden',!admin);
   const playerAddCard=$('#playersInput')?.closest('.card');
   if(playerAddCard)playerAddCard.classList.toggle('hidden',coorg&&!S.myPermissions.can_add_members);
+  document.querySelectorAll('.tab[data-view="league"]').forEach(el=>el.style.display=S.workspaceFeatures.league_enabled?'':'none');
+  document.querySelectorAll('.tab[data-view="ranking"]').forEach(el=>el.style.display=S.workspaceFeatures.rankings_enabled?'':'none');
   document.querySelectorAll('.tab[data-view="players"]').forEach(el=>{
     const visible=admin||hasTemporaryAdmin()||(coorg&&S.myPermissions.can_view_players);
     el.style.display=visible?'':'none';
@@ -614,6 +657,9 @@ async function loadAll(){
   if(!S.workspace)return;const w=S.workspace.id;let r;
   r=await sb.from('workspace_members').select('user_id,role,active').eq('workspace_id',w);S.members=r.data||[];
   r=await sb.rpc('get_workspace_coorganizer_count',{p_workspace_id:w});S.coorgCount=Number(r.data||0);
+  r=await sb.rpc('get_workspace_features',{p_workspace_id:w});
+  if(!r.error){const f=Array.isArray(r.data)?r.data[0]:r.data;if(f)S.workspaceFeatures={...S.workspaceFeatures,...f};}
+  S.myRatings=[];
   if(isAdmin()){
     S.myPermissions={can_invite_coorganizers:true,can_enter_scores:true,can_add_members:true,can_delete_members:true,can_create_tournaments:true,can_view_players:true,can_generate_teams:true,temporary_admin_until:null};
     r=await sb.from('workspace_invites').select('id,email,role,accepted_at,created_at').eq('workspace_id',w).order('created_at',{ascending:false});S.invites=r.data||[];
@@ -624,6 +670,8 @@ async function loadAll(){
     if(r.error)console.error('permissions coorganisateur',r.error);
     const mp=Array.isArray(r.data)?(r.data[0]||null):r.data;
     S.myPermissions={can_invite_coorganizers:false,can_enter_scores:true,can_add_members:true,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null,...(mp||{})};
+    r=await sb.rpc('get_my_player_skill_ratings',{p_workspace_id:w});
+    if(!r.error)S.myRatings=Array.isArray(r.data)?r.data:[];
   }else{S.invites=[];S.coorgs=[];}
   if(isAdmin()){
     r=await sb.rpc('get_admin_workspace_players',{p_workspace_id:w});S.players=r.data||[];
@@ -704,7 +752,15 @@ function renderAccess(){
   const pending=S.invites.filter(x=>!x.accepted_at);
   const fmt=d=>d?new Date(d).toLocaleDateString('fr-FR'):'';
 
-  box.innerHTML='<div class="muted" style="margin-bottom:8px"><b>'+activeCo.length+' / 3 co-organisateur'+(activeCo.length>1?'s':'')+' actif'+(activeCo.length>1?'s':'')+'</b> • '+suspendedCo.length+' suspendu'+(suspendedCo.length>1?'s':'')+' • '+pending.length+' invitation'+(pending.length>1?'s':'')+' en attente</div>';
+  const lim=Number(S.workspaceFeatures.max_coorganizers||0),cap=Number(S.workspaceFeatures.max_coorganizers_cap||100);
+  box.innerHTML='<div class="player" style="background:#f7fbf8"><b>Limite de co-organisateurs</b><div class="muted" style="margin:5px 0 8px">Choisis le nombre autorisé pour cet espace. Cette valeur est séparée de la limite commerciale maximale ('+cap+'), ce qui permettra plus tard de l’adapter aux abonnements.</div><div class="row"><input id="maxCoorgSetting" type="number" min="0" max="'+cap+'" value="'+lim+'" style="max-width:120px"><button id="saveMaxCoorg" class="primary">Enregistrer</button></div></div>'+
+    '<div class="muted" style="margin-bottom:8px"><b>'+activeCo.length+' / '+lim+' co-organisateur'+(activeCo.length>1?'s':'')+' actif'+(activeCo.length>1?'s':'')+'</b> • '+suspendedCo.length+' suspendu'+(suspendedCo.length>1?'s':'')+' • '+pending.length+' invitation'+(pending.length>1?'s':'')+' en attente</div>';
+  $('#saveMaxCoorg').onclick=async()=>{
+    const n=Math.max(0,Math.min(cap,Number($('#maxCoorgSetting').value)||0));
+    const {error}=await sb.rpc('admin_set_max_coorganizers',{p_workspace_id:S.workspace.id,p_max:n});
+    if(error)return toast(error.message);
+    toast('Limite mise à jour ✅');await loadAll();
+  };
 
   S.coorgs.forEach(c=>{
     const d=document.createElement('div');d.className='player';
@@ -815,6 +871,7 @@ function renderAll(){
   renderTournaments();
   renderTeams();
   renderMatches();
+  renderLeague().catch(e=>console.error('league',e));
   applyPermissions();
   renderAccess();
   if($('#publicLink')&&S.workspace?.public_token)$('#publicLink').value=APP_URL+'?public='+S.workspace.public_token;
@@ -824,7 +881,7 @@ function renderAll(){
 function renderHome(){
   const t=currentTour();
   const lastFinished=S.tournaments.find(x=>x.status==='finished');
-  $('#activeTourLabel').textContent=t?((t.name||'Tournoi')+' • '+t.tournament_date+' • '+(t.format==='king_of_pitch'?'Roi du terrain':'Classique')+' • '+seasonNameForTournament(t)):(lastFinished?'Aucun tournoi actif • dernier tournoi terminé le '+lastFinished.tournament_date+' • '+seasonNameForTournament(lastFinished):'Aucun tournoi');
+  $('#activeTourLabel').textContent=t?((t.name||'Tournoi')+' • '+t.tournament_date+' • '+formatLabel(t)+' • '+seasonNameForTournament(t)):(lastFinished?'Aucun tournoi actif • dernier tournoi terminé le '+lastFinished.tournament_date+' • '+seasonNameForTournament(lastFinished):'Aucun tournoi');
   const present=S.tPlayers.filter(x=>x.present&&x.registration_status!=='waitlist').length;
   const wait=S.tPlayers.filter(x=>x.registration_status==='waitlist').length;
   $('#homeStats').innerHTML='<div class="player"><b>'+present+'</b><div class="muted">confirmés'+(t?.max_players?' / '+t.max_players:'')+'</div></div><div class="player"><b>'+wait+'</b><div class="muted">liste d’attente</div></div><div class="player"><b>'+S.teams.length+'</b><div class="muted">équipes</div></div><div class="player"><b>'+S.matches.length+'</b><div class="muted">matchs</div></div>';
@@ -842,7 +899,7 @@ function renderHome(){
 $('#sendInvite').onclick=async()=>{
   if(!S.workspace)return;
   if(!(isAdmin()||(isCoorg()&&S.myPermissions.can_invite_coorganizers)))return toast('Tu n’es pas autorisé à inviter un co-organisateur.');
-  if(S.coorgCount>=3)return toast('Maximum de 3 co-organisateurs atteint.');
+  if(S.coorgCount>=Number(S.workspaceFeatures.max_coorganizers||0))return toast('Limite de co-organisateurs atteinte.');
   const email=$('#inviteEmail').value.trim().toLowerCase();if(!email)return;
   const {data,error}=await sb.rpc('create_coorganizer_invite',{p_workspace_id:S.workspace.id,p_email:email});
   if(error)return toast(error.message);
@@ -1001,16 +1058,20 @@ function renderPlayers(){
         d.appendChild(codeRow);
       }
     } else if(isCoorg()){
+      const existing=S.myRatings.find(r=>r.player_id===x.id);
       const rate=document.createElement('div');rate.className='row';rate.style.marginTop='8px';rate.style.flexWrap='wrap';
-      const label=document.createElement('span');label.className='muted';label.style.flex='1';label.textContent='Ton avis sur son niveau (1 avis par joueur) :';
+      const label=document.createElement('span');label.className='muted';label.style.flex='1';label.innerHTML=existing?'<b>Mon avis actuel : '+existing.rating+'/4</b><div class="muted">Tu peux le modifier à tout moment.</div>':'Ton avis sur son niveau (1 avis par joueur) :';
       const select=document.createElement('select');select.innerHTML='<option value="">Choisir…</option><option value="1">1 — Loisir</option><option value="2">2 — Intermédiaire</option><option value="3">3 — Bon</option><option value="4">4 — Très bon</option>';
-      const send=document.createElement('button');send.textContent='Enregistrer mon avis';send.className='primary';
+      if(existing)select.value=String(existing.rating);
+      const send=document.createElement('button');send.textContent=existing?'Modifier mon avis':'Enregistrer mon avis';send.className='primary';
       send.onclick=async()=>{
         const val=Number(select.value);if(!val)return toast('Choisis un niveau de 1 à 4.');
         send.disabled=true;
         const {error}=await sb.rpc('submit_player_skill_rating',{p_player_id:x.id,p_rating:val});
         send.disabled=false;if(error)return toast(error.message);
-        select.value='';toast('Avis enregistré 🔒 Tu peux le modifier plus tard. Seul l’administrateur peut le consulter.');
+        const cur=S.myRatings.find(r=>r.player_id===x.id);
+        if(cur){cur.rating=val;cur.updated_at=new Date().toISOString()}else S.myRatings.push({player_id:x.id,rating:val,updated_at:new Date().toISOString()});
+        renderPlayers();toast(existing?'Avis modifié ✅':'Avis enregistré ✅');
       };
       rate.append(label,select,send);d.appendChild(rate);
     }
@@ -1098,7 +1159,7 @@ function renderTournaments(){
   current.forEach(t=>{
     const d=document.createElement('div');d.className='player';
     const top=document.createElement('div');top.className='row';
-    top.innerHTML='<span style="flex:1"><b>'+esc(t.name||('Tournoi du '+t.tournament_date))+'</b><div class="muted">'+t.tournament_date+' • '+(t.format==='king_of_pitch'?'Roi du terrain':'Classique')+'</div><div class="muted">📅 '+esc(seasonNameForTournament(t))+'</div></span>';
+    top.innerHTML='<span style="flex:1"><b>'+esc(t.name||('Tournoi du '+t.tournament_date))+'</b><div class="muted">'+t.tournament_date+' • '+formatLabel(t)+'</div><div class="muted">📅 '+esc(seasonNameForTournament(t))+'</div></span>';
     const open=document.createElement('button');open.textContent=t.id===S.activeTour?'Actif':'Ouvrir';if(t.id===S.activeTour)open.className='green';
     open.onclick=async()=>{S.activeTour=t.id;await loadTournament();renderAll();toast('Tournoi sélectionné')};
     top.appendChild(open);d.appendChild(top);
@@ -1439,6 +1500,80 @@ function renderMatches(){
 $('#addMatch').onclick=async()=>{if(isCoorg()&&!hasTemporaryAdmin()&&!S.myPermissions.can_enter_scores)return toast('Tu n’es pas autorisé à saisir les scores.');const t=currentTour(),home=$('#homeTeam').value,away=$('#awayTeam').value;if(!t||!home||!away||home===away)return toast('Choisis deux équipes différentes');const {error}=await sb.from('matches').insert({tournament_id:t.id,home_team_id:home,away_team_id:away,match_order:S.matches.length+1,pitch:$('#pitch').value||null,round_label:$('#roundLabel').value.trim()||null});if(error)toast(error.message);else{$('#pitch').value='';$('#roundLabel').value=''}};
 $('#roundRobin').onclick=async()=>{const t=currentTour();if(!t||S.teams.length<2)return toast('Crée les équipes d’abord');const existing=new Set(S.matches.map(m=>[m.home_team_id,m.away_team_id].sort().join('|'))),rows=[];let n=S.matches.length+1;for(let i=0;i<S.teams.length;i++)for(let j=i+1;j<S.teams.length;j++){const key=[S.teams[i].id,S.teams[j].id].sort().join('|');if(!existing.has(key))rows.push({tournament_id:t.id,home_team_id:S.teams[i].id,away_team_id:S.teams[j].id,match_order:n++})}if(!rows.length)return toast('Tous les matchs existent déjà');const {error}=await sb.from('matches').insert(rows);error?toast(error.message):toast(rows.length+' matchs générés')};
 
+
+async function renderLeague(){
+  const disabled=$('#leagueFeatureDisabled'),createCard=$('#leagueCreateCard');
+  if(!disabled||!createCard)return;
+  const enabled=!!S.workspaceFeatures.league_enabled;
+  disabled.classList.toggle('hidden',enabled);
+  createCard.classList.toggle('hidden',!enabled||!(hasAdminOps()||(isCoorg()&&S.myPermissions.can_create_tournaments)));
+  document.querySelectorAll('#view-league .card').forEach(c=>{if(c!==disabled)c.style.opacity=enabled?'':'0.55'});
+  if(!enabled)return;
+
+  const season=$('#leagueSeason');
+  if(season)season.innerHTML='<option value="">Sans saison</option>'+S.seasons.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');
+  if($('#leagueDate')&&!$('#leagueDate').value)$('#leagueDate').value=today();
+
+  const leagueTours=S.tournaments.filter(t=>t.format==='league').sort((a,b)=>String(b.tournament_date).localeCompare(String(a.tournament_date)));
+  const box=$('#leagueDays');box.innerHTML='';
+  if(!leagueTours.length)box.innerHTML='<p class="muted">Aucune journée de ligue pour le moment.</p>';
+  leagueTours.forEach(t=>{
+    const d=document.createElement('div');d.className='player';
+    const status=t.status==='finished'?'Terminé':(t.id===S.activeTour?'Actif':'À venir');
+    d.innerHTML='<div class="row"><span style="flex:1"><b>'+esc(t.name||('Ligue du '+t.tournament_date))+'</b><div class="muted">'+t.tournament_date+' • '+status+' • '+(t.registration_open?'Inscriptions ouvertes':'Inscriptions fermées')+'</div></span></div>';
+    const row=document.createElement('div');row.className='row';row.style.marginTop='8px';
+    const open=document.createElement('button');open.textContent=t.id===S.activeTour?'Journée active':'Ouvrir';open.className=t.id===S.activeTour?'green':'';
+    open.onclick=async()=>{S.activeTour=t.id;await loadTournament();renderAll();toast('Journée de ligue sélectionnée')};
+    row.appendChild(open);
+    if(t.registration_open&&S.workspace?.public_token){
+      const share=document.createElement('button');share.textContent='🔗 Lien inscription';
+      const url=APP_URL+'?public='+encodeURIComponent(S.workspace.public_token)+'&tournament='+encodeURIComponent(t.id);
+      share.onclick=async()=>{try{await navigator.clipboard.writeText(url);toast('Lien d’inscription Ligue copié ✅')}catch(e){toast('Copie impossible')}};
+      row.appendChild(share);
+    }
+    d.appendChild(row);box.appendChild(d);
+  });
+
+  const current=currentTour();
+  const gen=$('#generateLeagueTeams');
+  const canGenerate=current?.format==='league'&&(hasAdminOps()||(isCoorg()&&S.myPermissions.can_generate_teams));
+  gen.disabled=!canGenerate;
+  gen.title=canGenerate?'Créer 2 équipes aléatoires':'Ouvre une journée de Ligue et vérifie ton autorisation';
+
+  const activeSeason=S.seasons.find(s=>s.is_active)||S.seasons[0]||null;
+  const {data,error}=await sb.rpc('get_league_player_rankings',{p_workspace_id:S.workspace.id,p_season_id:activeSeason?.id||null});
+  if(error){$('#leagueScorers').innerHTML='<p class="muted">'+esc(error.message)+'</p>';$('#leagueAssists').innerHTML='';return}
+  let rows=Array.isArray(data)?data:[];
+  let scor=rows.filter(x=>Number(x.goals)>0).sort((a,b)=>Number(b.goals)-Number(a.goals)||String(a.player_name).localeCompare(String(b.player_name)));
+  let ass=rows.filter(x=>Number(x.assists)>0).sort((a,b)=>Number(b.assists)-Number(a.assists)||String(a.player_name).localeCompare(String(b.player_name)));
+  scor=competitionRanks(scor,'goals');ass=competitionRanks(ass,'assists');
+  $('#leagueScorers').innerHTML=scor.map(x=>'<div class="rank"><b>'+x.rank+'</b><span>'+esc(x.player_name)+'</span><b class="right">'+x.goals+' but'+(Number(x.goals)>1?'s':'')+'</b></div>').join('')||'<p class="muted">Aucun but pour le moment.</p>';
+  $('#leagueAssists').innerHTML=ass.map(x=>'<div class="rank"><b>'+x.rank+'</b><span>'+esc(x.player_name)+'</span><b class="right">'+x.assists+' passe'+(Number(x.assists)>1?'s':'')+'</b></div>').join('')||'<p class="muted">Aucune passe pour le moment.</p>';
+}
+
+$('#createLeagueDay').onclick=async()=>{
+  if(!(hasAdminOps()||(isCoorg()&&S.myPermissions.can_create_tournaments)))return toast('Tu n’es pas autorisé à créer une journée de Ligue.');
+  const date=$('#leagueDate').value;if(!date)return toast('Choisis une date.');
+  const row={workspace_id:S.workspace.id,season_id:$('#leagueSeason').value||null,name:$('#leagueName').value.trim()||('Ligue du '+date),tournament_date:date,format:'league',status:'draft',max_players:Math.max(4,Math.min(100,Number($('#leagueMaxPlayers').value)||10)),registration_open:true};
+  const {data,error}=await sb.from('tournaments').insert(row).select().single();
+  if(error)return toast(error.message);
+  S.activeTour=data.id;$('#leagueName').value='';await loadAll();setView('league');toast('Journée de Ligue créée ✅');
+};
+
+$('#generateLeagueTeams').onclick=async()=>{
+  const t=currentTour();if(!t||t.format!=='league')return toast('Ouvre une journée de Ligue.');
+  if(!(hasAdminOps()||(isCoorg()&&S.myPermissions.can_generate_teams)))return toast('Tu n’es pas autorisé à générer les équipes.');
+  if((S.teams.length||S.matches.length)&&!confirm('Les équipes et matchs actuels de cette journée seront remplacés. Continuer ?'))return;
+  const b=$('#generateLeagueTeams');b.disabled=true;b.textContent='Génération…';
+  const {data,error}=await sb.rpc('generate_league_two_teams',{p_tournament_id:t.id});
+  b.disabled=false;b.textContent='Générer les 2 équipes';
+  if(error)return toast(error.message);
+  await loadTournament();renderAll();
+  $('#leagueGenerationInfo').textContent='2 équipes créées avec '+Number(data?.player_count||0)+' joueurs confirmés. Le match a été créé automatiquement.';
+  toast('Équipes de Ligue générées ✅');
+};
+
+
 async function rankingDataset(){
   const t=currentTour();
   if(S.rankMode==='day'){
@@ -1767,7 +1902,8 @@ async function bootPublic(token){
     return;
   }
   const openTours=[...tournaments].filter(t=>t.status!=='finished'&&t.registration_open).sort((a,b)=>String(a.tournament_date).localeCompare(String(b.tournament_date)));
-  const regTour=openTours[0];
+  const requestedTournament=new URLSearchParams(location.search).get('tournament');
+  const regTour=(requestedTournament&&openTours.find(t=>t.id===requestedTournament))||openTours[0];
   const regBox=$('#publicRegistration');
 
   function publicGuestLabel(pl){
@@ -1898,6 +2034,11 @@ async function bootPublic(token){
     if(mode)window.scrollTo({top:0,behavior:'smooth'});
   }
   if(regTour){
+    if(regTour.format==='league'){
+      $('#chooseTeamMode').classList.add('hidden');
+      const title=entryChoiceCard?.querySelector('.sectiontitle');if(title)title.textContent='🏁 Inscription à la Ligue';
+      const help=entryChoiceCard?.querySelector('.muted');if(help)help.textContent='Inscris-toi avec ton nom. Les 2 équipes seront créées aléatoirement par l’organisateur.';
+    }else $('#chooseTeamMode').classList.remove('hidden');
     $('#chooseSoloMode').onclick=()=>setPublicEntryMode('solo');
     $('#chooseTeamMode').onclick=()=>setPublicEntryMode('team');
     $('#backFromSoloMode').onclick=()=>setPublicEntryMode(null);
