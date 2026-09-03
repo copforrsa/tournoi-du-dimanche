@@ -60,7 +60,7 @@ select{background-color:#fff} textarea{resize:vertical}
 }
 @media(max-width:650px){
   body{background:#f3f7f4}.app{padding:0 12px 100px}.top{border-radius:0 0 24px 24px;margin:0 -12px 14px;padding:18px 16px 20px}.top h1{font-size:21px}.card{border-radius:17px;padding:14px;margin:10px 0}.g2,.g3{grid-template-columns:1fr}.sectiontitle{font-size:17px}
-  /* V39.48 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
+  /* V39.50 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
   .tabs{left:0;right:0;transform:none;width:100%;display:flex;grid-template-columns:none;justify-content:flex-start;gap:5px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;border-radius:18px 18px 0 0;padding:7px 10px calc(7px + env(safe-area-inset-bottom));scroll-snap-type:x proximity;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
   .tabs button{flex:0 0 74px;min-width:74px;font-size:10px;scroll-snap-align:center;padding:5px 6px}
@@ -75,13 +75,95 @@ select{background-color:#fff} textarea{resize:vertical}
 #publicTeams .public-team-players{padding:10px 12px;background:rgba(255,255,255,.94);min-height:120px}
 #publicTeams .public-team-player{padding:7px 0;border-bottom:1px solid #edf2ef}
 #publicTeams .public-team-player:last-child{border-bottom:0}
+
+/* V39.50 — alignements et justification */
+.card p,.card .muted,.player .muted,.readonly-note,.public-sub{
+  text-align:justify;
+  text-justify:inter-word;
+}
+.sectiontitle,h1,h2,h3,.rank,.row,.score,.guest-badge,button,label,input,select,textarea{
+  text-align:left;
+}
+.rank{
+  grid-template-columns:44px minmax(0,1fr) 104px;
+}
+.rank>b:first-child{
+  justify-self:center;
+}
+.rank>.right{
+  justify-self:end;
+  min-width:92px;
+  font-variant-numeric:tabular-nums;
+}
+.score{
+  font-variant-numeric:tabular-nums;
+}
+.stat-grid,.aligned-stats{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px 16px;
+}
+.stat-line{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:10px;
+  align-items:center;
+}
+.stat-line .value{
+  text-align:right;
+  font-variant-numeric:tabular-nums;
+  font-weight:800;
+}
+.public-team-card,.team,.match,.player{
+  align-content:start;
+}
+.public-team-players{
+  display:grid;
+  gap:4px;
+}
+.history-scoreline{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+  gap:12px;
+  align-items:start;
+}
+.history-scoreline>div:last-child{
+  text-align:right;
+}
+.notes-columns{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  align-items:start;
+}
+.notes-column{
+  min-width:0;
+}
+.notes-column .small{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:8px;
+  align-items:center;
+}
+.notes-column .small b{
+  text-align:right;
+  font-variant-numeric:tabular-nums;
+}
+@media(max-width:650px){
+  .rank{grid-template-columns:38px minmax(0,1fr) 86px}
+  .rank>.right{min-width:76px}
+  .history-scoreline{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px}
+  .notes-columns{grid-template-columns:1fr 1fr;gap:8px}
+  .card p,.card .muted,.player .muted,.readonly-note,.public-sub{text-align:left}
+}
+
 </style>
 </head>
 <body>
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.48</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.50</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -124,7 +206,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.48</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.50</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -559,7 +641,7 @@ select{background-color:#fff} textarea{resize:vertical}
     </div>
 
     <div id="view-ranking" class="view">
-      <div class="card"><div class="row"><button class="rankMode" data-mode="day">Tournoi</button><button class="rankMode primary" data-mode="season">Saison</button></div><p class="muted">Le classement Saison cumule uniquement les tournois rattachés à la saison sélectionnée. Un tournoi « Hors saison » conserve ses buts et passes uniquement dans son propre classement.</p></div>
+      <div class="card"><div class="row"><button class="rankMode" data-mode="day">Tournoi</button><button class="rankMode primary" data-mode="season">Saison</button></div><p class="muted">Le classement Saison cumule uniquement les statistiques des tournois rattachés à la saison sélectionnée. Un tournoi « Hors saison » conserve ses buts et ses passes décisives dans son propre historique, sans les ajouter au classement de saison.</p></div>
       <div class="grid g2">
         <div class="card"><h2 class="sectiontitle">⚽ Buteurs</h2><div id="scorerRank"></div></div>
         <div class="card"><h2 class="sectiontitle">🎯 Passeurs</h2><div id="assistRank"></div></div>
@@ -675,12 +757,12 @@ select{background-color:#fff} textarea{resize:vertical}
 
     <div class="card">
       <h2 class="sectiontitle">🏅 Victoires individuelles de la saison</h2>
-      <p class="muted">Classement affiné par les victoires, puis les buts et les passes décisives.</p>
+      <p class="muted">Le classement tient compte des victoires individuelles, puis utilise les buts et les passes décisives pour départager les joueurs.</p>
       <div id="publicSeasonWins"></div>
       <button id="togglePublicSeasonWins" type="button" class="hidden" style="margin-top:10px">Développer</button>
       <div id="publicTopPlayerSeasonWrap" class="hidden" style="margin-top:16px;border-top:1px solid #e8ecef;padding-top:14px">
         <h3 style="margin:0 0 4px">⭐ Top Player de la saison</h3>
-        <div class="muted" style="margin-bottom:8px">Moyenne des notes obtenues sur les matchs joués.</div>
+        <div class="muted" style="margin-bottom:8px">La moyenne est calculée à partir des notes obtenues sur l’ensemble des matchs réellement disputés.</div>
         <div id="publicSeasonTopPlayers"></div>
       </div>
     </div>
@@ -689,7 +771,7 @@ select{background-color:#fff} textarea{resize:vertical}
       <div class="row" style="justify-content:space-between;align-items:center;gap:10px">
         <div>
           <h2 class="sectiontitle" style="margin-bottom:4px">📋 Dernier tournoi</h2>
-          <div class="muted">Résultats, buteurs et passeurs du dernier tournoi terminé.</div>
+          <div class="muted">Retrouve les résultats, les buteurs, les passeurs et les performances individuelles du dernier tournoi terminé.</div>
         </div>
         <button id="toggleLastTournamentPublic" type="button">Afficher</button>
       </div>
@@ -2150,7 +2232,7 @@ function appendTournamentSeasonControl(container,t){
 }
 
 function renderTournaments(){
-  // V39.48 : l'éditeur de tournoi est protégé des synchronisations automatiques.
+  // V39.50 : l'éditeur de tournoi est protégé des synchronisations automatiques.
   const ss=$('#seasonSelect');
   ss.innerHTML='<option value="">Sans saison</option>'+S.seasons.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');
   const box=$('#tournamentList');box.innerHTML='';
@@ -2846,7 +2928,7 @@ function buildMatchPlayerManager(match,home,away){
     .map(tp=>({tp,pl:p(tp.player_id)})).filter(x=>x.pl)
     .sort((a,b)=>String(a.pl.name).localeCompare(String(b.pl.name)));
 
-  wrap.innerHTML='<div class="row" style="justify-content:space-between"><div><b>🔄 Joueurs de ce match</b><div class="muted">Déplace rapidement un titulaire ou un remplaçant entre les deux équipes. Le changement peut rester limité à ce match ou être appliqué aux matchs suivants.</div></div></div>';
+  wrap.innerHTML='<div class="row" style="justify-content:space-between"><div><b>🔄 Joueurs de ce match</b><div class="muted">Déplace rapidement un titulaire ou un remplaçant entre les deux équipes. Le changement peut s’appliquer uniquement à ce match ou être conservé pour les matchs suivants.</div></div></div>';
   const formula=document.createElement('div');
   formula.className='muted';
   formula.style.marginTop='6px';
@@ -3280,7 +3362,7 @@ async function renderLeague(){
   }
 
 
-  // V39.48 — Saisie du résultat directement depuis l'onglet Ligue.
+  // V39.50 — Saisie du résultat directement depuis l'onglet Ligue.
   const scoringCard=$('#leagueScoringCard'),scoringBody=$('#leagueScoringBody'),scoringLabel=$('#leagueScoringSessionLabel');
   if(scoringCard)scoringCard.classList.toggle('hidden',!canScoreLeague);
   if(canScoreLeague&&scoringBody){
@@ -3728,7 +3810,7 @@ $('#closeVisual').onclick=()=>$('#visualPreviewBox').classList.add('hidden');
 
 async function bootPublic(token){
   S.publicMode=true;
-  // V39.48 — état global pour éviter qu'un ancien rafraîchissement public
+  // V39.50 — état global pour éviter qu'un ancien rafraîchissement public
   // reconstruise le formulaire d'inscription équipe après validation du code.
   window.__swePublicTeamEditing=false;
   if(window.__swePublicRegistrationInterval){
@@ -3957,29 +4039,64 @@ async function bootPublic(token){
     let prev=null,rank=0;scor=scor.map((x,i)=>{if(x.g!==prev){rank=i+1;prev=x.g}return {...x,rank}});
     let ass=[...stats.values()].filter(x=>x.a).sort((a,z)=>z.a-a.a||a.name.localeCompare(z.name));
     let ap=null,ar=0;ass=ass.map((x,i)=>{if(x.a!==ap){ar=i+1;ap=x.a}return {...x,rank:ar}});
-    const scorRows=scor.map(x=>'<div class="rank '+(x.guest?'guest-row':'')+'"><b>'+x.rank+'</b><span>'+esc(x.name)+'</span><b class="right">'+x.g+' but'+(x.g>1?'s':'')+'</b></div>').join('');
-    const assRows=ass.map(x=>'<div class="rank '+(x.guest?'guest-row':'')+'"><b>'+x.rank+'</b><span>'+esc(x.name)+'</span><b class="right">'+x.a+' passe'+(x.a>1?'s':'')+'</b></div>').join('');
+    const historyRankRows=(arr,type,expanded=false)=>{
+      const visible=expanded?arr:arr.slice(0,10);
+      return visible.map((x,i)=>{
+        const right=type==='g'?(x.g+' but'+(x.g>1?'s':'')):type==='a'?(x.a+' passe'+(x.a>1?'s':'')):('⭐ '+x.avg.toFixed(1));
+        const pos=type==='top'?(i===0?'👑':(i+1)):x.rank;
+        const extra=type==='top'?'<div class="muted">'+x.matches+' match'+(x.matches>1?'s':'')+' • ⚽ '+x.g+' • 🎯 '+x.a+'</div>':'';
+        return '<div class="rank '+(x.guest?'guest-row':'')+'"><b>'+pos+'</b><span><b>'+esc(x.name)+'</b>'+extra+'</span><b class="right">'+right+'</b></div>';
+      }).join('');
+    };
     const histTop=publicPlayerRatingsEnabled?topPlayersFromData(tmatches,tgoals,matchAssignments,players,new Set([ht.id])):[];
-    const histTopRows=histTop.map((x,i)=>'<div class="rank '+(x.guest?'guest-row':'')+'"><b>'+(i===0?'👑':(i+1))+'</b><span><b>'+esc(x.name)+'</b><div class="muted">'+x.matches+' match'+(x.matches>1?'s':'')+' • ⚽ '+x.g+' • 🎯 '+x.a+'</div></span><b class="right">⭐ '+x.avg.toFixed(1)+'</b></div>').join('');
     const matchRows=tmatches.map((m,i)=>{
       const mg=tgoals.filter(g=>g.match_id===m.id);
-      const gl=mg.map(g=>{const sc=pmap2.get(g.scorer_player_id),as=g.assister_player_id?pmap2.get(g.assister_player_id):null;return '<div class="small" style="margin-top:5px">⚽ '+esc(sc?.name||'?')+(as?' <span class="muted">← passe '+esc(as.name)+'</span>':'')+'</div>'}).join('');
-      const notes=publicPlayerRatingsEnabled?matchAssignments.filter(a=>a.match_id===m.id&&a.team_id).map(a=>{const pl=pmap2.get(a.player_id),rr=ratingForMatchPlayer(m,a.player_id,a.team_id,tgoals);return rr&&pl?{name:pl.name,r:rr.rating}:null}).filter(Boolean).sort((a,b)=>b.r-a.r||a.name.localeCompare(b.name)):[];
-      const noteHtml=notes.length?'<div class="small" style="margin-top:7px"><b>⭐ Notes :</b> '+notes.map(n=>esc(n.name)+' '+n.r.toFixed(1)).join(' • ')+'</div>':'';
-      return '<div class="player"><div class="muted">Match '+(i+1)+(m.pitch?' • '+esc(m.pitch):'')+'</div><div><b>'+esc(tmap2.get(m.home_team_id)||'?')+' '+m.home_score+' - '+m.away_score+' '+esc(tmap2.get(m.away_team_id)||'?')+'</b></div>'+gl+noteHtml+'</div>';
+      const goalBlock=(teamId)=>{
+        const rows=mg.filter(g=>String(g.team_id)===String(teamId)).map(g=>{
+          const sc=pmap2.get(g.scorer_player_id),as=g.assister_player_id?pmap2.get(g.assister_player_id):null;
+          return '<div class="small" style="margin-top:5px">⚽ '+esc(sc?.name||'?')+(as?' <span class="muted">← '+esc(as.name)+'</span>':'')+'</div>';
+        }).join('');
+        return rows||'<div class="small muted" style="margin-top:5px">Aucun buteur</div>';
+      };
+      const rated=publicPlayerRatingsEnabled?matchAssignments.filter(a=>a.match_id===m.id&&a.team_id).map(a=>{
+        const pl=pmap2.get(a.player_id),rr=ratingForMatchPlayer(m,a.player_id,a.team_id,tgoals);
+        return rr&&pl?{name:pl.name,r:rr.rating,team:a.team_id}:null;
+      }).filter(Boolean):[];
+      const best= rated.length?Math.max(...rated.map(x=>x.r)):null;
+      const noteCol=(teamId)=>{
+        const rows=rated.filter(x=>String(x.team)===String(teamId)).sort((a,b)=>b.r-a.r||a.name.localeCompare(b.name));
+        return rows.map(n=>'<div class="small" style="padding:4px 0">'+(n.r===best?'⭐ ':'')+esc(n.name)+' <b style="float:right">'+n.r.toFixed(1)+'/10</b></div>').join('')||'<div class="small muted">Aucune note</div>';
+      };
+      const notesHtml=publicPlayerRatingsEnabled?'<div class="notes-columns" style="margin-top:10px">'+
+        '<div class="player notes-column" style="margin:0"><b>'+esc(tmap2.get(m.home_team_id)||'?')+'</b>'+noteCol(m.home_team_id)+'</div>'+
+        '<div class="player notes-column" style="margin:0"><b>'+esc(tmap2.get(m.away_team_id)||'?')+'</b>'+noteCol(m.away_team_id)+'</div>'+
+        '</div>':'';
+      return '<div class="player"><div class="muted">Match '+(i+1)+(m.pitch?' • '+esc(m.pitch):'')+'</div>'+
+        '<div class="history-scoreline" style="margin-top:6px">'+
+          '<div style="flex:1"><b>'+esc(tmap2.get(m.home_team_id)||'?')+'</b>'+goalBlock(m.home_team_id)+'</div>'+
+          '<div class="score">'+m.home_score+' - '+m.away_score+'</div>'+
+          '<div style="flex:1;text-align:right"><b>'+esc(tmap2.get(m.away_team_id)||'?')+'</b><div style="text-align:left">'+goalBlock(m.away_team_id)+'</div></div>'+
+        '</div>'+notesHtml+'</div>';
     }).join('');
-    const teamsRows=tteams.map(team=>{
+    const standingOrder=new Map(standings.map((x,i)=>[x.id,i]));
+    const sortedHistoryTeams=tteams.slice().sort((a,b)=>(standingOrder.get(a.id)??999)-(standingOrder.get(b.id)??999)||String(a.name).localeCompare(String(b.name)));
+    const teamsRows='<div style="display:flex;gap:12px;overflow-x:auto;padding:4px 2px 10px">'+sortedHistoryTeams.map(team=>{
       const ids=teamPlayers.filter(tp=>tp.team_id===team.id).map(tp=>tp.player_id);
-      return '<div class="team"><b>'+esc(team.name)+'</b>'+ids.map(id=>'<div class="small" style="margin-top:6px">'+esc(pmap2.get(id)?.name||'?')+'</div>').join('')+'</div>';
-    }).join('');
+      const rank=(standingOrder.get(team.id)??999)+1;
+      return '<div class="team" style="min-width:230px;flex:0 0 230px"><div class="row" style="justify-content:space-between"><b>'+esc(team.name)+'</b><span class="guest-badge">#'+rank+'</span></div>'+ids.map(id=>'<div class="small" style="margin-top:6px">'+esc(pmap2.get(id)?.name||'?')+'</div>').join('')+'</div>';
+    }).join('')+'</div>';
     $('#publicView').innerHTML=
       '<header class="top"><div class="row" style="justify-content:space-between"><div><h1>⚽ '+esc(ht.name||'SWÉ TOURNAMENT 5/5')+'</h1><div class="public-sub">'+ht.tournament_date+' • Historique</div></div><button id="backPublic">← Retour</button></div></header>'+
       '<div class="card"><h2 class="sectiontitle">👥 Équipes</h2>'+ (teamsRows||'<p class="muted">Aucune équipe.</p>') +'</div>'+
       '<div class="card"><h2 class="sectiontitle">🏆 Classement final</h2>'+ (teamRows||'<p class="muted">Aucun classement.</p>') +'</div>'+
-      '<div class="grid g2"><div class="card"><h2 class="sectiontitle">⚽ Buteurs</h2>'+ (scorRows||'<p class="muted">Aucun buteur.</p>') +'</div>'+
-      '<div class="card"><h2 class="sectiontitle">🎯 Passeurs</h2>'+ (assRows||'<p class="muted">Aucun passeur.</p>') +'</div></div>'+
-      (publicPlayerRatingsEnabled?'<div class="card"><h2 class="sectiontitle">⭐ Top Player du tournoi</h2><div class="muted" style="margin-bottom:8px">Moyenne des notes : victoire 6 • nul 5 • défaite 4 • +1/but • +0,5/passe • max 10.</div>'+ (histTopRows||'<p class="muted">Aucune note disponible.</p>') +'</div>':'')+
+      '<div class="grid g2"><div class="card"><h2 class="sectiontitle">⚽ Buteurs</h2><div id="historyScorersBox">'+(historyRankRows(scor,'g')||'<p class="muted">Aucun buteur.</p>')+'</div>'+(scor.length>10?'<button id="historyToggleScorers" style="margin-top:10px">Développer</button>':'')+'</div>'+
+      '<div class="card"><h2 class="sectiontitle">🎯 Passeurs</h2><div id="historyAssistsBox">'+(historyRankRows(ass,'a')||'<p class="muted">Aucun passeur.</p>')+'</div>'+(ass.length>10?'<button id="historyToggleAssists" style="margin-top:10px">Développer</button>':'')+'</div></div>'+
+      (publicPlayerRatingsEnabled?'<div class="card"><h2 class="sectiontitle">⭐ Top Player du tournoi</h2><div class="muted" style="margin-bottom:8px">Moyenne des notes : victoire 6 • nul 5 • défaite 4 • +1/but • +0,5/passe • max 10.</div><div id="historyTopPlayerBox">'+(historyRankRows(histTop,'top')||'<p class="muted">Aucune note disponible.</p>')+'</div>'+(histTop.length>10?'<button id="historyToggleTopPlayer" style="margin-top:10px">Développer</button>':'')+'</div>':'')+
       '<div class="card"><h2 class="sectiontitle">📋 Résultats & notes</h2>'+ (matchRows||'<p class="muted">Aucun match.</p>') +'</div>';
+    let histScExpanded=false,histAssExpanded=false,histTopExpanded=false;
+    if($('#historyToggleScorers'))$('#historyToggleScorers').onclick=()=>{histScExpanded=!histScExpanded;$('#historyScorersBox').innerHTML=historyRankRows(scor,'g',histScExpanded);$('#historyToggleScorers').textContent=histScExpanded?'Réduire':'Développer';};
+    if($('#historyToggleAssists'))$('#historyToggleAssists').onclick=()=>{histAssExpanded=!histAssExpanded;$('#historyAssistsBox').innerHTML=historyRankRows(ass,'a',histAssExpanded);$('#historyToggleAssists').textContent=histAssExpanded?'Réduire':'Développer';};
+    if($('#historyToggleTopPlayer'))$('#historyToggleTopPlayer').onclick=()=>{histTopExpanded=!histTopExpanded;$('#historyTopPlayerBox').innerHTML=historyRankRows(histTop,'top',histTopExpanded);$('#historyToggleTopPlayer').textContent=histTopExpanded?'Réduire':'Développer';};
     $('#backPublic').onclick=()=>location.href=APP_URL+'?public='+encodeURIComponent(token);
     return;
   }
@@ -4564,7 +4681,7 @@ async function bootPublic(token){
   const pmap=new Map(players.map(x=>[x.id,x]));
   const tmap=new Map(teams.map(x=>[x.id,x]));
 
-  // V39.48 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
+  // V39.50 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
   if(wantsLeagueSession&&regTour){
     const linkedLeague=leagues.find(l=>l.id===regTour.league_id)||null;
     const linkLeagueId=publicParams.get('league');
