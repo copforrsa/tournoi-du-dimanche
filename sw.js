@@ -1,4 +1,4 @@
-const CACHE='swe-tournament-5v5-v39-50';
+const CACHE='swe-tournament-5v5-v39-52';
 const STATIC_ASSETS=['./','./index.html','./manifest.webmanifest','./favicon.png','./icon-192.png','./icon-512.png'];
 
 self.addEventListener('install',event=>{
