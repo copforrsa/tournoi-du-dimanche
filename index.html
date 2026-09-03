@@ -158,7 +158,7 @@ select{background-color:#fff} textarea{resize:vertical}
 }
 @media(max-width:650px){
   body{background:#f3f7f4}.app{padding:0 12px 100px}.top{border-radius:0 0 24px 24px;margin:0 -12px 14px;padding:18px 16px 20px}.top h1{font-size:21px}.card{border-radius:17px;padding:14px;margin:10px 0}.g2,.g3{grid-template-columns:1fr}.sectiontitle{font-size:17px}
-  /* V39.58 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
+  /* V39.59 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
   .tabs{left:0;right:0;transform:none;width:100%;display:flex;grid-template-columns:none;justify-content:flex-start;gap:5px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;border-radius:18px 18px 0 0;padding:7px 10px calc(7px + env(safe-area-inset-bottom));scroll-snap-type:x proximity;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
   .tabs button{flex:0 0 74px;min-width:74px;font-size:10px;scroll-snap-align:center;padding:5px 6px}
@@ -174,7 +174,7 @@ select{background-color:#fff} textarea{resize:vertical}
 #publicTeams .public-team-player{padding:7px 0;border-bottom:1px solid #edf2ef}
 #publicTeams .public-team-player:last-child{border-bottom:0}
 
-/* V39.58 — alignements et justification */
+/* V39.59 — alignements et justification */
 .card p,.card .muted,.player .muted,.readonly-note,.public-sub{
   text-align:justify;
   text-justify:inter-word;
@@ -261,7 +261,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.58</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.59</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -304,7 +304,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.58</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.59</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -480,7 +480,7 @@ select{background-color:#fff} textarea{resize:vertical}
 
     <div id="view-players" class="view">
       <div class="card">
-        <h2 class="sectiontitle">Joueurs</h2><p class="muted">Les co-organisateurs voient la liste des joueurs et peuvent donner <b>un avis par joueur</b> sur son niveau. Cet avis est modifiable et reste visible uniquement par l’administrateur.</p>
+        <h2 class="sectiontitle">Joueurs</h2><p class="muted">Les co-organisateurs peuvent consulter les joueurs et donner <b>un avis par joueur</b> sur leur niveau. <b>Seul l’administrateur peut suspendre, réactiver ou supprimer un joueur du groupe.</b></p>
         <textarea id="playersInput" rows="3" placeholder="Charly, Mika, Miguel..."></textarea>
         <div class="space"></div>
         <div class="grid g2">
@@ -1820,7 +1820,7 @@ function renderPermissions(){
     ['can_invite_coorganizers','Inviter des co-organisateurs','Peut créer et partager une invitation.'],
     ['can_enter_scores','Saisir les scores pendant les matchs','Peut modifier les scores et ajouter/annuler des buts pendant un tournoi en cours.'],
     ['can_add_members','Ajouter des membres','Peut ajouter de nouveaux joueurs à la liste.'],
-    ['can_delete_members','Supprimer des membres','Peut retirer un joueur. Si le joueur possède déjà des statistiques, son historique est conservé et le joueur est désactivé.'],
+
     ['can_create_tournaments','Créer un nouveau tournoi','Peut créer un nouveau tournoi depuis l’onglet Tournois.'],
     ['can_view_players','Voir la liste des joueurs','Affiche l’onglet Joueurs et permet de consulter la liste et donner un avis de niveau.'],
     ['can_generate_teams','Générer des équipes','Peut lancer la génération automatique des équipes équilibrées sans voir les niveaux privés de l’administrateur.']
@@ -2072,20 +2072,31 @@ function renderPlayers(){
       '<div class="muted">'+meta+'</div>';
     if(isAdmin()){
       const toggle=document.createElement('button');toggle.textContent=x.active?'Désactiver':'Réactiver';toggle.className=x.active?'player-action-disable':'player-action-enable';
-      toggle.onclick=async()=>{const {error}=await sb.from('players').update({active:!x.active}).eq('id',x.id);if(error)return toast(error.message);await loadAll()};
-      top.append(info,toggle);
-    }else if(isCoorg()&&S.myPermissions.can_delete_members){
-      const del=document.createElement('button');del.textContent='Supprimer';del.className='danger smallbtn';
-      del.onclick=async()=>{
-        if(!confirm('Retirer '+x.name+' de la liste des membres ?'))return;
-        const {data,error}=await sb.rpc('remove_player_member',{p_player_id:x.id});
+      toggle.onclick=async()=>{
+        const next=!x.active;
+        if(!confirm(next?'Réactiver '+x.name+' dans le groupe ?':'Suspendre '+x.name+' du groupe ? Son historique sera conservé.'))return;
+        toggle.disabled=true;
+        const {error}=await sb.rpc('admin_set_player_active',{p_player_id:x.id,p_active:next});
+        toggle.disabled=false;
         if(error)return toast(error.message);
         await loadAll();
-        toast(data==='archived'?'Joueur désactivé : son historique est conservé.':'Joueur supprimé.');
+        toast(next?'Joueur réactivé ✅':'Joueur suspendu.');
       };
-      top.append(info,del);
+      const del=document.createElement('button');
+      del.textContent='🗑 Supprimer';
+      del.className='danger smallbtn';
+      del.onclick=async()=>{
+        if(!confirm('Supprimer '+x.name+' du groupe ?\n\nSi ce joueur possède déjà un historique sportif, il sera suspendu afin de préserver ses statistiques.'))return;
+        del.disabled=true;
+        const {data,error}=await sb.rpc('remove_player_member',{p_player_id:x.id});
+        del.disabled=false;
+        if(error)return toast(error.message);
+        await loadAll();
+        toast(data==='archived'?'Joueur suspendu : historique conservé.':'Joueur supprimé.');
+      };
+      top.append(info,toggle,del);
     }else if(isCoorg()){
-      top.append(info,makeDisabledActionButton('Supprimer','Suppression non autorisée par l’administrateur'));
+      top.append(info);
     }else top.append(info);
     d.appendChild(top);
 
@@ -2405,7 +2416,7 @@ function appendTournamentSeasonControl(container,t){
 }
 
 function renderTournaments(){
-  // V39.58 : l'éditeur de tournoi est protégé des synchronisations automatiques.
+  // V39.59 : l'éditeur de tournoi est protégé des synchronisations automatiques.
   const ss=$('#seasonSelect');
   ss.innerHTML='<option value="">Sans saison</option>'+S.seasons.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');
   const box=$('#tournamentList');box.innerHTML='';
@@ -3548,7 +3559,7 @@ async function renderLeague(){
   }
 
 
-  // V39.58 — Saisie du résultat directement depuis l'onglet Ligue.
+  // V39.59 — Saisie du résultat directement depuis l'onglet Ligue.
   const scoringCard=$('#leagueScoringCard'),scoringBody=$('#leagueScoringBody'),scoringLabel=$('#leagueScoringSessionLabel');
   if(scoringCard)scoringCard.classList.toggle('hidden',!canScoreLeague);
   if(canScoreLeague&&scoringBody){
@@ -4085,7 +4096,7 @@ $('#closeVisual').onclick=()=>$('#visualPreviewBox').classList.add('hidden');
 
 async function bootPublic(token){
   S.publicMode=true;
-  // V39.58 — état global pour éviter qu'un ancien rafraîchissement public
+  // V39.59 — état global pour éviter qu'un ancien rafraîchissement public
   // reconstruise le formulaire d'inscription équipe après validation du code.
   window.__swePublicTeamEditing=false;
   if(window.__swePublicRegistrationInterval){
@@ -4999,7 +5010,7 @@ async function bootPublic(token){
   const pmap=new Map(players.map(x=>[x.id,x]));
   const tmap=new Map(teams.map(x=>[x.id,x]));
 
-  // V39.58 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
+  // V39.59 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
   if(wantsLeagueSession&&regTour){
     const linkedLeague=leagues.find(l=>l.id===regTour.league_id)||null;
     const linkLeagueId=publicParams.get('league');
