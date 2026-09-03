@@ -36,6 +36,91 @@ select{background-color:#fff} textarea{resize:vertical}
 .muted{color:var(--muted);font-size:13px}.small{font-size:12px}.space{height:10px}.hidden{display:none!important}.view{display:none}.view.active{display:block}
 .card{background:rgba(255,255,255,.96);border:1px solid var(--border);border-radius:20px;padding:18px;margin:12px 0;box-shadow:var(--shadow)}
 .sectiontitle{display:flex;align-items:center;gap:8px;font-size:18px;letter-spacing:-.2px;margin:0 0 13px;color:#13261c}
+#view-tournaments .sectiontitle{
+  color:#1264b8;
+  font-weight:900;
+  padding-bottom:9px;
+  border-bottom:2px solid #dbeafe;
+}
+#view-tournaments .tournament-current-card{
+  border:1px solid #dbe7f4;
+  border-left:5px solid #2563eb;
+  background:linear-gradient(180deg,#ffffff,#f8fbff);
+  padding:15px;
+  margin:12px 0;
+  box-shadow:0 5px 16px rgba(37,99,235,.06);
+}
+#view-tournaments .tournament-current-head{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:12px;
+  align-items:start;
+}
+#view-tournaments .tournament-current-name{
+  color:#123b6d;
+  font-size:17px;
+  font-weight:900;
+  line-height:1.25;
+}
+#view-tournaments .tournament-badges{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  margin-top:7px;
+}
+#view-tournaments .tournament-badge{
+  display:inline-flex;
+  align-items:center;
+  border-radius:999px;
+  padding:4px 9px;
+  font-size:11px;
+  font-weight:800;
+  background:#eaf2ff;
+  color:#175ca8;
+  border:1px solid #d4e5fb;
+}
+#view-tournaments .tournament-info-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  margin-top:11px;
+}
+#view-tournaments .tournament-info-item{
+  background:#fff;
+  border:1px solid #e6edf5;
+  border-radius:12px;
+  padding:9px 10px;
+  min-width:0;
+}
+#view-tournaments .tournament-info-label{
+  display:block;
+  color:#64748b;
+  font-size:11px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.3px;
+  margin-bottom:3px;
+}
+#view-tournaments .tournament-info-value{
+  color:#1f2937;
+  font-size:13px;
+  font-weight:750;
+  line-height:1.35;
+}
+#view-tournaments .tournament-admin-block{
+  margin-top:12px;
+  padding-top:11px;
+  border-top:1px solid #dbe7f4;
+}
+#view-tournaments .tournament-admin-block>div:first-child b{
+  color:#174f8a;
+}
+@media(max-width:650px){
+  #view-tournaments .tournament-current-head{grid-template-columns:1fr}
+  #view-tournaments .tournament-current-head>button{width:100%}
+  #view-tournaments .tournament-info-grid{grid-template-columns:1fr}
+}
+
 .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.grid{display:grid;gap:12px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .player,.team,.match{border:1px solid #e0e9e3;border-radius:16px;padding:13px;margin:9px 0;background:linear-gradient(180deg,#fff,#fbfdfc)}
 .match{box-shadow:0 5px 14px rgba(20,55,35,.04)}.match>.muted:first-child{font-weight:800;text-transform:uppercase;letter-spacing:.35px;color:#5f7568}
@@ -60,7 +145,7 @@ select{background-color:#fff} textarea{resize:vertical}
 }
 @media(max-width:650px){
   body{background:#f3f7f4}.app{padding:0 12px 100px}.top{border-radius:0 0 24px 24px;margin:0 -12px 14px;padding:18px 16px 20px}.top h1{font-size:21px}.card{border-radius:17px;padding:14px;margin:10px 0}.g2,.g3{grid-template-columns:1fr}.sectiontitle{font-size:17px}
-  /* V39.56 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
+  /* V39.57 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
   .tabs{left:0;right:0;transform:none;width:100%;display:flex;grid-template-columns:none;justify-content:flex-start;gap:5px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;border-radius:18px 18px 0 0;padding:7px 10px calc(7px + env(safe-area-inset-bottom));scroll-snap-type:x proximity;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
   .tabs button{flex:0 0 74px;min-width:74px;font-size:10px;scroll-snap-align:center;padding:5px 6px}
@@ -76,7 +161,7 @@ select{background-color:#fff} textarea{resize:vertical}
 #publicTeams .public-team-player{padding:7px 0;border-bottom:1px solid #edf2ef}
 #publicTeams .public-team-player:last-child{border-bottom:0}
 
-/* V39.56 — alignements et justification */
+/* V39.57 — alignements et justification */
 .card p,.card .muted,.player .muted,.readonly-note,.public-sub{
   text-align:justify;
   text-justify:inter-word;
@@ -163,7 +248,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.56</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.57</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -206,7 +291,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.56</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.57</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -442,16 +527,16 @@ select{background-color:#fff} textarea{resize:vertical}
         </div>
         <div class="space"></div><button id="createTournament" class="primary">Créer le tournoi</button>
       </div>
-      <div class="card"><h2 class="sectiontitle">Tournoi en cours</h2><div id="tournamentList"></div></div><div class="card"><h2 class="sectiontitle">🏆 Classements de la saison</h2><div id="seasonScorerSummary"></div></div>
+      <div class="card"><h2 class="sectiontitle">⚽ Tournois en cours</h2><p class="muted">Retrouve ici les informations essentielles de chaque tournoi. Les réglages administratifs sont séparés sous chaque fiche pour éviter les confusions.</p><div id="tournamentList"></div></div><div class="card"><h2 class="sectiontitle">🏆 Classements de la saison</h2><div id="seasonScorerSummary"></div></div>
     </div>
 
     <div id="view-teams" class="view">
       <div class="card" id="teamsAdminCard">
-        <h2 class="sectiontitle">Équipes</h2>
+        <h2 class="sectiontitle">👥 Équipes</h2>
         <p class="muted">Choisis d’abord le tournoi ou le Swé de Ligue concerné. Toutes les équipes créées dans cette section seront rattachées uniquement à cette compétition.</p>
         <div class="player" style="background:#f8fbf9;margin-bottom:12px">
-          <b>🏆 Compétition concernée</b>
-          <div class="muted" style="margin:5px 0 8px">Sélectionne un tournoi ou un Swé de Ligue déjà créé.</div>
+          <b style="color:#1264b8">🏆 1. Choisir la compétition</b>
+          <div class="muted" style="margin:5px 0 8px">Aucune compétition n’est affichée par défaut. Choisis le tournoi ou le Swé de Ligue que tu veux gérer.</div>
           <select id="teamCompetitionSelect"><option value="">Choisir une compétition</option></select>
           <div id="teamCompetitionStatus" class="muted" style="margin-top:7px"></div>
         </div>
@@ -819,7 +904,7 @@ window.addEventListener('error', (e) => {
   if(t){t.textContent='Erreur de chargement de l’application. Recharge la page.';t.style.display='block';}
 });
 
-const S={session:null,isSuperAdmin:false,superWorkspaces:[],workspace:null,members:[],coorgs:[],coorgCount:0,workspaceFeatures:{max_coorganizers:3,max_coorganizers_cap:100,rankings_enabled:true,league_enabled:true,tournaments_enabled:true,third_half_enabled:false,player_ratings_enabled:false},myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null},myRatings:[],lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],teamCodes:[],seasons:[],leagues:[],leaguePlayers:[],activeLeague:null,tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matchAssignments:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},sportsComplexes:[],sportsPitches:[],publicMode:false,publicToken:null,editingTournamentId:null};
+const S={session:null,isSuperAdmin:false,superWorkspaces:[],workspace:null,members:[],coorgs:[],coorgCount:0,workspaceFeatures:{max_coorganizers:3,max_coorganizers_cap:100,rankings_enabled:true,league_enabled:true,tournaments_enabled:true,third_half_enabled:false,player_ratings_enabled:false},myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null},myRatings:[],lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],teamCodes:[],seasons:[],leagues:[],leaguePlayers:[],activeLeague:null,tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matchAssignments:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},sportsComplexes:[],sportsPitches:[],publicMode:false,publicToken:null,editingTournamentId:null,teamCompetitionId:null,lastView:null};
 
 let safeSyncTimer=null;
 let safeSyncBusy=false;
@@ -940,6 +1025,7 @@ function renderHostWelcome(){
 }
 
 function setView(v){
+  const previousView=S.lastView;
   if(v==='permissions'&&!isAdmin())v='home';
   if(v==='players'&&isCoorg()&&!hasTemporaryAdmin()&&!S.myPermissions.can_view_players)v='home';
   if(v==='tournaments'&&!S.workspaceFeatures.tournaments_enabled)v='home';
@@ -952,7 +1038,12 @@ function setView(v){
   if(activeTab&&window.matchMedia('(max-width:650px)').matches){
     requestAnimationFrame(()=>activeTab.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}));
   }
+  if(v==='teams'){
+    if(previousView!=='teams')S.teamCompetitionId=null;
+    renderTeams();
+  }
   if(v==='ranking')renderRanking();
+  S.lastView=v;
 }
 
 // Navigation attachée immédiatement : elle reste fonctionnelle même si une
@@ -2245,7 +2336,7 @@ function appendTournamentSeasonControl(container,t){
 }
 
 function renderTournaments(){
-  // V39.56 : l'éditeur de tournoi est protégé des synchronisations automatiques.
+  // V39.57 : l'éditeur de tournoi est protégé des synchronisations automatiques.
   const ss=$('#seasonSelect');
   ss.innerHTML='<option value="">Sans saison</option>'+S.seasons.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');
   const box=$('#tournamentList');box.innerHTML='';
@@ -2258,21 +2349,30 @@ function renderTournaments(){
     const empty=document.createElement('p');empty.className='muted';empty.textContent='Aucun tournoi en cours.';box.appendChild(empty);
   }
   current.forEach(t=>{
-    const d=document.createElement('div');d.className='player';
-    const top=document.createElement('div');top.className='row';
+    const d=document.createElement('div');d.className='player tournament-current-card';
+    const top=document.createElement('div');top.className='tournament-current-head';
     const pitchLabels=(t.reserved_pitch_ids||[]).map(id=>pitchName(id)).filter(Boolean);
-    top.innerHTML='<span style="flex:1"><b>'+esc(t.name||('Tournoi du '+t.tournament_date))+'</b><div class="muted">'+t.tournament_date+' • '+formatLabel(t)+'</div><div class="muted">📅 '+esc(seasonNameForTournament(t))+'</div>'+
-      '<div class="muted" style="margin-top:3px">📍 '+esc(pitchLabels.length?(complexLabel(t.complex_id)+' • '+pitchLabels.join(', ')):(t.venue||'Terrains non renseignés'))+(t.start_time?' • 🕘 '+esc(String(t.start_time).slice(0,5)):'')+' • 💶 '+(Number(t.entry_fee_cents||0)/100).toLocaleString('fr-FR')+' €</div>'+
-      (t.reservation_reference?'<div class="muted">Réservation : '+esc(t.reservation_reference)+'</div>':'')+
-      (t.format!=='league'&&t.registration_deadline?'<div data-registration-deadline="'+esc(t.registration_deadline)+'" style="margin-top:5px"></div><div class="muted">Clôture prévue la veille à 17h'+(Number(t.registration_extension_hours||0)===3?' • prolongée de 3h':'')+'</div>':'')+
-      (t.generated_team_count?(()=>{const pc=S.activeTour===t.id?S.tPlayers.filter(x=>x.present&&x.registration_status!=='waitlist').length:0;const pl=pc?tournamentAutoPlan(pc):null;return '<div class="muted" style="margin-top:5px">⚙️ '+t.generated_team_count+' équipes • '+(t.recommended_pitch_count||1)+' terrain'+((t.recommended_pitch_count||1)>1?'s':'')+' • '+(t.odd_team_rotation_rule?'Règle 2 buts d’écart / 10 min':'Matchs de 10 min')+(pl?.subs?' • '+pl.subs+' remplaçant'+(pl.subs>1?'s':'')+' commun'+(pl.subs>1?'s':''):'')+'</div>'})():'')+
-      '</span>';
+    const venueLabel=pitchLabels.length?(complexLabel(t.complex_id)+' • '+pitchLabels.join(', ')):(t.venue||'Terrains non renseignés');
+    const priceLabel=(Number(t.entry_fee_cents||0)/100).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:2})+' €';
+    const generatedInfo=t.generated_team_count
+      ? t.generated_team_count+' équipes • '+(t.recommended_pitch_count||1)+' terrain'+((t.recommended_pitch_count||1)>1?'s':'')+' • '+(t.odd_team_rotation_rule?'Règle 2 buts d’écart / 10 min':'Matchs de 10 min')
+      : 'Équipes non générées';
+    top.innerHTML='<div><div class="tournament-current-name">'+esc(t.name||('Tournoi du '+t.tournament_date))+'</div>'+
+      '<div class="tournament-badges"><span class="tournament-badge">📅 '+esc(t.tournament_date)+'</span><span class="tournament-badge">⚽ '+esc(formatLabel(t))+'</span><span class="tournament-badge">🏆 '+esc(seasonNameForTournament(t))+'</span></div>'+
+      '<div class="tournament-info-grid">'+
+        '<div class="tournament-info-item"><span class="tournament-info-label">Lieu / terrains</span><span class="tournament-info-value">📍 '+esc(venueLabel)+'</span></div>'+
+        '<div class="tournament-info-item"><span class="tournament-info-label">Horaire & prix</span><span class="tournament-info-value">🕘 '+esc(t.start_time?String(t.start_time).slice(0,5):'Non renseignée')+' • 💶 '+esc(priceLabel)+'</span></div>'+
+        '<div class="tournament-info-item"><span class="tournament-info-label">Organisation</span><span class="tournament-info-value">⚙️ '+esc(generatedInfo)+'</span></div>'+
+        '<div class="tournament-info-item"><span class="tournament-info-label">Réservation</span><span class="tournament-info-value">'+esc(t.reservation_reference||'Non renseignée')+'</span></div>'+
+      '</div>'+
+      (t.format!=='league'&&t.registration_deadline?'<div class="tournament-info-item" style="margin-top:8px"><span class="tournament-info-label">Clôture des inscriptions</span><div data-registration-deadline="'+esc(t.registration_deadline)+'"></div><span class="tournament-info-value">Prévue la veille à 17h'+(Number(t.registration_extension_hours||0)===3?' • prolongation +3h':'')+'</span></div>':'')+
+      '</div>';
     const open=document.createElement('button');open.textContent=t.id===S.activeTour?'Actif':'Ouvrir';if(t.id===S.activeTour)open.className='green';
     open.onclick=async()=>{S.activeTour=t.id;await loadTournament();renderAll();toast('Tournoi sélectionné')};
     top.appendChild(open);d.appendChild(top);
 
     if(hasAdminOps()){
-      const reg=document.createElement('div');reg.className='player';reg.style.marginTop='8px';
+      const reg=document.createElement('div');reg.className='player tournament-admin-block';reg.style.marginTop='12px';
       const confirmed=S.activeTour===t.id?S.tPlayers.filter(x=>x.registration_status!=='waitlist'&&x.present).length:null;
       reg.innerHTML='<div class="row"><span style="flex:1"><b>Inscriptions : '+(t.registration_open?'🟢 ouvertes':'🔴 fermées')+'</b><div class="muted">Maximum '+(t.max_players||20)+' joueurs'+(confirmed!==null?' • '+confirmed+' confirmé'+(confirmed>1?'s':''):'')+'</div></span></div>';
       const row=document.createElement('div');row.className='row';row.style.marginTop='8px';
@@ -2717,7 +2817,7 @@ $('#createTournament').onclick=async()=>{
 
 function presentIds(){return new Set(S.tPlayers.filter(x=>x.present&&x.registration_status!=='waitlist').map(x=>x.player_id))} function teamPlayerIds(teamId){return S.teamPlayers.filter(x=>x.team_id===teamId).map(x=>x.player_id)}
 function renderTeams(){
-  const t=currentTour(),att=$('#attendanceList'),box=$('#teamList');
+  const t=S.teamCompetitionId?S.tournaments.find(x=>String(x.id)===String(S.teamCompetitionId))||null:null,att=$('#attendanceList'),box=$('#teamList');
   const note=$('#teamNoCreatePermission'),controls=$('#teamManagementControls');
   const compSel=$('#teamCompetitionSelect'),compStatus=$('#teamCompetitionStatus');
   att.innerHTML='';box.innerHTML='';
@@ -2726,7 +2826,7 @@ function renderTeams(){
     .slice()
     .sort((a,b)=>String(b.tournament_date).localeCompare(String(a.tournament_date)));
   if(compSel){
-    const keep=t?.id||'';
+    const keep=S.teamCompetitionId||'';
     compSel.innerHTML='<option value="">Choisir une compétition</option>'+competitions.map(c=>{
       const kind=c.format==='league'?'🏁 Swé de Ligue':'⚽ Tournoi';
       return '<option value="'+c.id+'">'+kind+' • '+esc(c.name||c.tournament_date)+' • '+esc(c.tournament_date)+(c.status==='finished'?' • terminé':'')+'</option>';
@@ -2735,9 +2835,10 @@ function renderTeams(){
     compSel.onchange=async()=>{
       const id=compSel.value;
       if(!id){
-        S.activeTour=null;S.tPlayers=[];S.teams=[];S.teamPlayers=[];S.matches=[];S.goals=[];
+        S.teamCompetitionId=null;
         renderTeams();return;
       }
+      S.teamCompetitionId=id;
       S.activeTour=id;
       compSel.disabled=true;
       await loadTournament();
@@ -2747,14 +2848,17 @@ function renderTeams(){
     };
   }
 
+  const attendanceCard=$('#attendanceAdminCard');
   if(!t){
-    if(compStatus)compStatus.textContent='Aucune compétition sélectionnée.';
-    att.innerHTML='<p class="muted">Sélectionne un tournoi ou un Swé de Ligue ci-dessus.</p>';
-    box.innerHTML='<p class="muted">Aucune compétition sélectionnée.</p>';
+    if(compStatus)compStatus.innerHTML='<span style="color:#64748b">Sélectionne une compétition pour afficher les équipes et les joueurs inscrits.</span>';
+    att.innerHTML='';
+    box.innerHTML='';
     if(note)note.classList.add('hidden');
     if(controls)controls.classList.add('hidden');
+    if(attendanceCard)attendanceCard.classList.add('hidden');
     return;
   }
+  if(attendanceCard)attendanceCard.classList.remove('hidden');
   if(compStatus){
     const confirmedCount=S.tPlayers.filter(tp=>tp.present&&tp.registration_status!=='waitlist').length;
     const plan=t.format==='league'?null:tournamentAutoPlan(confirmedCount);
@@ -3375,7 +3479,7 @@ async function renderLeague(){
   }
 
 
-  // V39.56 — Saisie du résultat directement depuis l'onglet Ligue.
+  // V39.57 — Saisie du résultat directement depuis l'onglet Ligue.
   const scoringCard=$('#leagueScoringCard'),scoringBody=$('#leagueScoringBody'),scoringLabel=$('#leagueScoringSessionLabel');
   if(scoringCard)scoringCard.classList.toggle('hidden',!canScoreLeague);
   if(canScoreLeague&&scoringBody){
@@ -3912,7 +4016,7 @@ $('#closeVisual').onclick=()=>$('#visualPreviewBox').classList.add('hidden');
 
 async function bootPublic(token){
   S.publicMode=true;
-  // V39.56 — état global pour éviter qu'un ancien rafraîchissement public
+  // V39.57 — état global pour éviter qu'un ancien rafraîchissement public
   // reconstruise le formulaire d'inscription équipe après validation du code.
   window.__swePublicTeamEditing=false;
   if(window.__swePublicRegistrationInterval){
@@ -4826,7 +4930,7 @@ async function bootPublic(token){
   const pmap=new Map(players.map(x=>[x.id,x]));
   const tmap=new Map(teams.map(x=>[x.id,x]));
 
-  // V39.56 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
+  // V39.57 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
   if(wantsLeagueSession&&regTour){
     const linkedLeague=leagues.find(l=>l.id===regTour.league_id)||null;
     const linkLeagueId=publicParams.get('league');
