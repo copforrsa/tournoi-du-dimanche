@@ -60,7 +60,7 @@ select{background-color:#fff} textarea{resize:vertical}
 }
 @media(max-width:650px){
   body{background:#f3f7f4}.app{padding:0 12px 100px}.top{border-radius:0 0 24px 24px;margin:0 -12px 14px;padding:18px 16px 20px}.top h1{font-size:21px}.card{border-radius:17px;padding:14px;margin:10px 0}.g2,.g3{grid-template-columns:1fr}.sectiontitle{font-size:17px}
-  /* V39.40 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
+  /* V39.41 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
   .tabs{left:0;right:0;transform:none;width:100%;display:flex;grid-template-columns:none;justify-content:flex-start;gap:5px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;border-radius:18px 18px 0 0;padding:7px 10px calc(7px + env(safe-area-inset-bottom));scroll-snap-type:x proximity;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
   .tabs button{flex:0 0 74px;min-width:74px;font-size:10px;scroll-snap-align:center;padding:5px 6px}
@@ -81,7 +81,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.40</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.41</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -124,7 +124,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.40</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.41</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -1941,8 +1941,35 @@ function seasonNameForTournament(t){
   return s?s.name:'Sans saison';
 }
 
+
+function registrationSummaryHtml(tournamentId){
+  const regs=S.tPlayers.filter(r=>r.tournament_id===tournamentId&&r.present&&r.registration_status!=='waitlist');
+  const tournamentTeams=S.teams.filter(t=>t.tournament_id===tournamentId);
+  const teamIds=new Set(tournamentTeams.map(t=>t.id));
+  const teamPlayerRows=S.teamPlayers.filter(tp=>teamIds.has(tp.team_id));
+  const assignedIds=new Set(teamPlayerRows.map(tp=>tp.player_id));
+  const playerMap=new Map(S.players.map(pl=>[pl.id,pl]));
+
+  const freeRegs=regs.filter(r=>!assignedIds.has(r.player_id));
+  const freeHtml=freeRegs.length
+    ? freeRegs.map(r=>'<div class="player row"><span style="flex:1">'+esc(playerMap.get(r.player_id)?.name||'Joueur')+'</span><span class="muted">Inscrit librement</span></div>').join('')
+    : '<p class="muted">Aucun joueur inscrit librement.</p>';
+
+  const teamsHtml=tournamentTeams.length
+    ? tournamentTeams.map(team=>{
+        const members=teamPlayerRows.filter(tp=>tp.team_id===team.id).map(tp=>playerMap.get(tp.player_id)?.name).filter(Boolean);
+        const remaining=Math.max(0,5-members.length);
+        return '<div class="player" style="margin-top:8px"><div class="row"><b style="flex:1">'+esc(team.name||'Équipe')+'</b><span class="muted">'+members.length+'/5 • '+remaining+' place'+(remaining>1?'s':'')+' restante'+(remaining>1?'s':'')+'</span></div>'+
+          '<div class="muted" style="margin-top:5px">'+(members.length?esc(members.join(', ')):'Aucun joueur')+'</div></div>';
+      }).join('')
+    : '<p class="muted">Aucune équipe composée.</p>';
+
+  return '<div class="player" style="background:#f8fbf9"><b>👤 Joueurs inscrits librement</b>'+freeHtml+'</div>'+
+         '<div class="player" style="margin-top:10px;background:#f8fbff"><b>👥 Équipes déjà composées</b>'+teamsHtml+'</div>';
+}
+
 function renderTournaments(){
-  // V39.40 : l'éditeur de tournoi est protégé des synchronisations automatiques.
+  // V39.41 : l'éditeur de tournoi est protégé des synchronisations automatiques.
   const ss=$('#seasonSelect');
   ss.innerHTML='<option value="">Sans saison</option>'+S.seasons.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');
   const box=$('#tournamentList');box.innerHTML='';
@@ -2189,6 +2216,27 @@ function renderTournaments(){
     }else if(isCoorg()){
       const del=makeDisabledActionButton('Supprimer','Seul l’administrateur ou un admin temporaire peut supprimer un tournoi');
       del.style.margin='8px 0 0 8px';d.appendChild(del);
+    }
+    if(!t.finished_at){
+      const regBtn=document.createElement('button');
+      regBtn.type='button';
+      regBtn.textContent='👥 Afficher la liste des inscrits';
+      regBtn.style.marginTop='10px';
+      const regList=document.createElement('div');
+      regList.className='hidden';
+      regList.style.marginTop='10px';
+      regBtn.onclick=()=>{
+        const opening=regList.classList.contains('hidden');
+        if(opening){
+          regList.innerHTML=registrationSummaryHtml(t.id);
+          regList.classList.remove('hidden');
+          regBtn.textContent='Masquer la liste des inscrits';
+        }else{
+          regList.classList.add('hidden');
+          regBtn.textContent='👥 Afficher la liste des inscrits';
+        }
+      };
+      d.append(regBtn,regList);
     }
     box.appendChild(d);
   });
@@ -2902,7 +2950,7 @@ async function renderLeague(){
   }
 
 
-  // V39.40 — Saisie du résultat directement depuis l'onglet Ligue.
+  // V39.41 — Saisie du résultat directement depuis l'onglet Ligue.
   const scoringCard=$('#leagueScoringCard'),scoringBody=$('#leagueScoringBody'),scoringLabel=$('#leagueScoringSessionLabel');
   if(scoringCard)scoringCard.classList.toggle('hidden',!canScoreLeague);
   if(canScoreLeague&&scoringBody){
@@ -3349,7 +3397,7 @@ $('#closeVisual').onclick=()=>$('#visualPreviewBox').classList.add('hidden');
 
 async function bootPublic(token){
   S.publicMode=true;
-  // V39.40 — état global pour éviter qu'un ancien rafraîchissement public
+  // V39.41 — état global pour éviter qu'un ancien rafraîchissement public
   // reconstruise le formulaire d'inscription équipe après validation du code.
   window.__swePublicTeamEditing=false;
   if(window.__swePublicRegistrationInterval){
@@ -3629,6 +3677,34 @@ async function bootPublic(token){
     if(!pl||pl.is_group_member!==false)return false;
     return !registrations.some(r=>r.player_id===playerId&&r.tournament_id!==tournamentId&&r.present);
   }
+
+  function publicRegistrationSummaryHtml(){
+    if(!regTour)return '';
+    const regs=registrations.filter(r=>r.tournament_id===regTour.id&&r.present&&r.registration_status!=='waitlist');
+    const tourTeams=teams.filter(t=>t.tournament_id===regTour.id);
+    const ids=new Set(tourTeams.map(t=>t.id));
+    const tpRows=teamPlayers.filter(tp=>ids.has(tp.team_id));
+    const assigned=new Set(tpRows.map(tp=>tp.player_id));
+    const pmap=new Map(players.map(pl=>[pl.id,pl]));
+
+    const free=regs.filter(r=>!assigned.has(r.player_id));
+    const freeHtml=free.length
+      ? free.map(r=>'<div class="player row"><span style="flex:1">'+esc(pmap.get(r.player_id)?.name||'Joueur')+'</span><span class="muted">Inscrit librement</span></div>').join('')
+      : '<p class="muted">Aucun joueur inscrit librement.</p>';
+
+    const teamsHtml=tourTeams.length
+      ? tourTeams.map(team=>{
+          const members=tpRows.filter(tp=>tp.team_id===team.id).map(tp=>pmap.get(tp.player_id)?.name).filter(Boolean);
+          const remaining=Math.max(0,5-members.length);
+          return '<div class="player" style="margin-top:8px"><div class="row"><b style="flex:1">'+esc(team.name||'Équipe')+'</b><span class="muted">'+members.length+'/5 • '+remaining+' place'+(remaining>1?'s':'')+' restante'+(remaining>1?'s':'')+'</span></div>'+
+            '<div class="muted" style="margin-top:5px">'+(members.length?esc(members.join(', ')):'Aucun joueur')+'</div></div>';
+        }).join('')
+      : '<p class="muted">Aucune équipe composée.</p>';
+
+    return '<div class="player" style="background:#f8fbf9"><b>👤 Joueurs inscrits librement</b>'+freeHtml+'</div>'+
+           '<div class="player" style="margin-top:10px;background:#f8fbff"><b>👥 Équipes déjà composées</b>'+teamsHtml+'</div>';
+  }
+
   function renderPublicRegistrationList(){
     if(!regTour||!regBox)return;
     const regs=registrations.filter(r=>r.tournament_id===regTour.id).sort((a,b)=>String(a.registered_at||'').localeCompare(String(b.registered_at||'')));
@@ -3650,7 +3726,7 @@ async function bootPublic(token){
       return '<div class="player row"><b style="min-width:34px">'+(i+1)+'.</b><span style="flex:1">'+esc(pl.name)+(first?' <span class="guest-badge">🆕 1ère fois</span>':'')+(guest&&!first?' <span class="guest-badge">'+esc(guest)+'</span>':'')+'</span><span style="font-weight:700;color:#b45309">Attente</span></div>';
     }).join('');
     const count=$('#publicRegCount');if(count)count.textContent=confirmed.length+'/'+(regTour.max_players||20)+' confirmés'+(waiting.length?' • '+waiting.length+' remplaçant'+(waiting.length>1?'s':''):'');
-    const list=$('#publicRegisteredList');if(list)list.innerHTML=listRows||'<p class="muted">Aucun inscrit pour le moment.</p>';
+    const list=$('#publicRegisteredList');if(list)list.innerHTML=publicRegistrationSummaryHtml();
     const wlist=$('#publicWaitList');if(wlist){wlist.innerHTML=waitRows;wlist.parentElement.classList.toggle('hidden',!waiting.length)}
   }
 
@@ -3684,7 +3760,7 @@ async function bootPublic(token){
           : 'Pour un tournoi, une personne extérieure ne peut pas s’inscrire seule : elle doit être <b>invitée par un membre du groupe</b>. Sélectionne ton nom puis ajoute ton ou tes invités, même si toi-même tu ne participes pas. Tu peux en ajouter jusqu’à <b>5 au total</b>.')+
       '</div><input id="publicGuestName" placeholder="Nom de l’invité"><label class="row" style="margin-top:8px;justify-content:flex-start"><input id="publicGuestMember" type="checkbox" style="width:auto"><span>Ajouter cet invité comme membre du groupe</span></label><div id="publicGuestPhoneWrap" class="hidden" style="margin-top:8px"><input id="publicGuestPhone" type="tel" inputmode="tel" placeholder="Numéro de mobile de l’invité"><div class="muted" style="margin-top:4px">Le numéro est demandé uniquement pour créer sa fiche membre. Il reste privé et visible uniquement par l’administrateur.</div></div><div class="space"></div><button id="publicAddGuest" class="primary">+ Ajouter mon invité</button></div>'+
       '<div id="publicRegStatus" class="muted" style="margin-top:8px">Les places sont attribuées dans l’ordre des inscriptions. Quand le quota est atteint, les inscriptions suivantes sont automatiquement inscrites comme remplaçants.</div>'+
-      '<h3 style="margin-top:18px">👥 Inscrits</h3><div id="publicRegisteredList"></div>'+
+      '<h3 style="margin-top:18px">👥 Liste des inscrits</h3><div id="publicRegisteredList"></div>'+
       '<div id="publicWaitWrap" class="'+(waiting?'':'hidden')+'"><h3 style="margin-top:14px">🟠 Remplaçants</h3><div id="publicWaitList"></div></div>';
     renderPublicRegistrationList();
 
@@ -4102,7 +4178,7 @@ async function bootPublic(token){
   const pmap=new Map(players.map(x=>[x.id,x]));
   const tmap=new Map(teams.map(x=>[x.id,x]));
 
-  // V39.40 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
+  // V39.41 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
   if(wantsLeagueSession&&regTour){
     const linkedLeague=leagues.find(l=>l.id===regTour.league_id)||null;
     const linkLeagueId=publicParams.get('league');
