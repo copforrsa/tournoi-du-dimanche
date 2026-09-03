@@ -60,7 +60,7 @@ select{background-color:#fff} textarea{resize:vertical}
 }
 @media(max-width:650px){
   body{background:#f3f7f4}.app{padding:0 12px 100px}.top{border-radius:0 0 24px 24px;margin:0 -12px 14px;padding:18px 16px 20px}.top h1{font-size:21px}.card{border-radius:17px;padding:14px;margin:10px 0}.g2,.g3{grid-template-columns:1fr}.sectiontitle{font-size:17px}
-  /* V39.43 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
+  /* V39.44 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
   .tabs{left:0;right:0;transform:none;width:100%;display:flex;grid-template-columns:none;justify-content:flex-start;gap:5px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;border-radius:18px 18px 0 0;padding:7px 10px calc(7px + env(safe-area-inset-bottom));scroll-snap-type:x proximity;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
   .tabs button{flex:0 0 74px;min-width:74px;font-size:10px;scroll-snap-align:center;padding:5px 6px}
@@ -81,7 +81,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.43</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.44</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -124,7 +124,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.43</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.44</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -1953,9 +1953,10 @@ function registrationColorInfo(team){
 }
 function registrationGuestText(reg,playerMap){
   const pl=playerMap.get(reg?.player_id);
+  if(pl?.is_group_member!==false)return 'Membre du groupe';
   const hostId=reg?.registered_by_player_id||pl?.guest_of_player_id||null;
   const host=hostId?playerMap.get(hostId):null;
-  return host?'Guest de '+host.name:(pl?.is_group_member===false?'Guest':'');
+  return host?'Guest de '+host.name:'Guest';
 }
 function registrationSummaryHtml(tournamentId){
   const tournament=S.tournaments.find(t=>t.id===tournamentId);
@@ -2002,7 +2003,7 @@ function registrationSummaryHtml(tournamentId){
 }
 
 function renderTournaments(){
-  // V39.43 : l'éditeur de tournoi est protégé des synchronisations automatiques.
+  // V39.44 : l'éditeur de tournoi est protégé des synchronisations automatiques.
   const ss=$('#seasonSelect');
   ss.innerHTML='<option value="">Sans saison</option>'+S.seasons.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');
   const box=$('#tournamentList');box.innerHTML='';
@@ -2996,7 +2997,7 @@ async function renderLeague(){
   }
 
 
-  // V39.43 — Saisie du résultat directement depuis l'onglet Ligue.
+  // V39.44 — Saisie du résultat directement depuis l'onglet Ligue.
   const scoringCard=$('#leagueScoringCard'),scoringBody=$('#leagueScoringBody'),scoringLabel=$('#leagueScoringSessionLabel');
   if(scoringCard)scoringCard.classList.toggle('hidden',!canScoreLeague);
   if(canScoreLeague&&scoringBody){
@@ -3443,7 +3444,7 @@ $('#closeVisual').onclick=()=>$('#visualPreviewBox').classList.add('hidden');
 
 async function bootPublic(token){
   S.publicMode=true;
-  // V39.43 — état global pour éviter qu'un ancien rafraîchissement public
+  // V39.44 — état global pour éviter qu'un ancien rafraîchissement public
   // reconstruise le formulaire d'inscription équipe après validation du code.
   window.__swePublicTeamEditing=false;
   if(window.__swePublicRegistrationInterval){
@@ -3713,7 +3714,8 @@ async function bootPublic(token){
   }
 
   function publicGuestLabel(pl){
-    if(!pl||pl.is_group_member!==false)return '';
+    if(!pl)return '';
+    if(pl.is_group_member!==false)return 'Membre du groupe';
     const host=players.find(x=>x.id===pl.guest_of_player_id);
     return host?'Guest de '+host.name:'Guest';
   }
@@ -3738,9 +3740,10 @@ async function bootPublic(token){
 
     const guestText=r=>{
       const pl=pmap.get(r?.player_id);
+      if(pl?.is_group_member!==false)return 'Membre du groupe';
       const hostId=r?.registered_by_player_id||pl?.guest_of_player_id||null;
       const host=hostId?pmap.get(hostId):null;
-      return host?'Guest de '+host.name:(pl?.is_group_member===false?'Guest':'');
+      return host?'Guest de '+host.name:'Guest';
     };
     const colorInfo=team=>{
       const hex=String(team?.color||'#64748b').toLowerCase();
@@ -3788,15 +3791,15 @@ async function bootPublic(token){
     const playerMap=new Map(players.map(x=>[x.id,x]));
     const listRows=confirmed.map((r,i)=>{
       const pl=playerMap.get(r.player_id);if(!pl)return '';
-      const host=r.registered_by_player_id?playerMap.get(r.registered_by_player_id):null;
-      const guest=host?('Guest de '+host.name):publicGuestLabel(pl);
+      const host=(pl?.is_group_member===false&&r.registered_by_player_id)?playerMap.get(r.registered_by_player_id):null;
+      const guest=pl?.is_group_member!==false?'Membre du groupe':(host?('Guest de '+host.name):publicGuestLabel(pl));
       const first=isFirstTimePublicPlayer(pl.id,regTour.id);
       return '<div class="player row"><b style="min-width:34px">'+(i+1)+'.</b><span style="flex:1">'+esc(pl.name)+(first?' <span class="guest-badge">🆕 1ère fois</span>':'')+(guest&&!first?' <span class="guest-badge">'+esc(guest)+'</span>':'')+'</span><span style="font-weight:700;color:#15803d">Confirmé</span></div>';
     }).join('');
     const waitRows=waiting.map((r,i)=>{
       const pl=playerMap.get(r.player_id);if(!pl)return '';
-      const host=r.registered_by_player_id?playerMap.get(r.registered_by_player_id):null;
-      const guest=host?('Guest de '+host.name):publicGuestLabel(pl);
+      const host=(pl?.is_group_member===false&&r.registered_by_player_id)?playerMap.get(r.registered_by_player_id):null;
+      const guest=pl?.is_group_member!==false?'Membre du groupe':(host?('Guest de '+host.name):publicGuestLabel(pl));
       const first=isFirstTimePublicPlayer(pl.id,regTour.id);
       return '<div class="player row"><b style="min-width:34px">'+(i+1)+'.</b><span style="flex:1">'+esc(pl.name)+(first?' <span class="guest-badge">🆕 1ère fois</span>':'')+(guest&&!first?' <span class="guest-badge">'+esc(guest)+'</span>':'')+'</span><span style="font-weight:700;color:#b45309">Attente</span></div>';
     }).join('');
@@ -4113,7 +4116,7 @@ async function bootPublic(token){
       }
       const available=players.filter(pl=>pl.active&&pl.is_group_member!==false&&pl.id!==creator).sort((a,b)=>a.name.localeCompare(b.name));
       mateBox.innerHTML=(confirmedIds.has(creator)?'<div class="readonly-note" style="margin-bottom:10px">ℹ️ Tu es déjà inscrit à ce Swé. Tu peux quand même créer ton équipe : ton inscription existante sera conservée.</div>':'')+
-        '<b>Membres du groupe</b><div class="muted" style="margin:3px 0 8px;line-height:1.55">Choisis les membres avec qui tu t’es arrangé. Tu peux mélanger membres et invités librement dans les 4 places disponibles. Un joueur déjà affecté à une autre équipe ne peut pas être sélectionné.</div>'+
+        '<b>Membres du groupe</b><div class="muted" style="margin:3px 0 8px;line-height:1.55">Choisis les membres du groupe avec qui tu t’es arrangé. Ils resteront identifiés comme « Membre du groupe ». Seules les personnes hors du groupe seront affichées comme Guest. Un joueur déjà affecté à une autre équipe ne peut pas être sélectionné.</div>'+
         (available.map(pl=>{
           const assigned=alreadyAssigned.has(pl.id);
           const registered=confirmedIds.has(pl.id);
@@ -4255,7 +4258,7 @@ async function bootPublic(token){
   const pmap=new Map(players.map(x=>[x.id,x]));
   const tmap=new Map(teams.map(x=>[x.id,x]));
 
-  // V39.43 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
+  // V39.44 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
   if(wantsLeagueSession&&regTour){
     const linkedLeague=leagues.find(l=>l.id===regTour.league_id)||null;
     const linkLeagueId=publicParams.get('league');
