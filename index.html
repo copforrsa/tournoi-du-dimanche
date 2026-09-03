@@ -158,7 +158,7 @@ select{background-color:#fff} textarea{resize:vertical}
 }
 @media(max-width:650px){
   body{background:#f3f7f4}.app{padding:0 12px 100px}.top{border-radius:0 0 24px 24px;margin:0 -12px 14px;padding:18px 16px 20px}.top h1{font-size:21px}.card{border-radius:17px;padding:14px;margin:10px 0}.g2,.g3{grid-template-columns:1fr}.sectiontitle{font-size:17px}
-  /* V39.59 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
+  /* V39.60 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
   .tabs{left:0;right:0;transform:none;width:100%;display:flex;grid-template-columns:none;justify-content:flex-start;gap:5px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;border-radius:18px 18px 0 0;padding:7px 10px calc(7px + env(safe-area-inset-bottom));scroll-snap-type:x proximity;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
   .tabs button{flex:0 0 74px;min-width:74px;font-size:10px;scroll-snap-align:center;padding:5px 6px}
@@ -174,7 +174,7 @@ select{background-color:#fff} textarea{resize:vertical}
 #publicTeams .public-team-player{padding:7px 0;border-bottom:1px solid #edf2ef}
 #publicTeams .public-team-player:last-child{border-bottom:0}
 
-/* V39.59 — alignements et justification */
+/* V39.60 — alignements et justification */
 .card p,.card .muted,.player .muted,.readonly-note,.public-sub{
   text-align:justify;
   text-justify:inter-word;
@@ -261,7 +261,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.59</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.60</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -304,7 +304,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.59</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.60</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -2416,7 +2416,7 @@ function appendTournamentSeasonControl(container,t){
 }
 
 function renderTournaments(){
-  // V39.59 : l'éditeur de tournoi est protégé des synchronisations automatiques.
+  // V39.60 : l'éditeur de tournoi est protégé des synchronisations automatiques.
   const ss=$('#seasonSelect');
   ss.innerHTML='<option value="">Sans saison</option>'+S.seasons.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');
   const box=$('#tournamentList');box.innerHTML='';
@@ -3559,7 +3559,7 @@ async function renderLeague(){
   }
 
 
-  // V39.59 — Saisie du résultat directement depuis l'onglet Ligue.
+  // V39.60 — Saisie du résultat directement depuis l'onglet Ligue.
   const scoringCard=$('#leagueScoringCard'),scoringBody=$('#leagueScoringBody'),scoringLabel=$('#leagueScoringSessionLabel');
   if(scoringCard)scoringCard.classList.toggle('hidden',!canScoreLeague);
   if(canScoreLeague&&scoringBody){
@@ -4096,7 +4096,7 @@ $('#closeVisual').onclick=()=>$('#visualPreviewBox').classList.add('hidden');
 
 async function bootPublic(token){
   S.publicMode=true;
-  // V39.59 — état global pour éviter qu'un ancien rafraîchissement public
+  // V39.60 — état global pour éviter qu'un ancien rafraîchissement public
   // reconstruise le formulaire d'inscription équipe après validation du code.
   window.__swePublicTeamEditing=false;
   if(window.__swePublicRegistrationInterval){
@@ -4835,11 +4835,26 @@ async function bootPublic(token){
         creatorSel.disabled=true;
         renderMates();
         const ownerName=players.find(x=>x.id===ownerId)?.name||'membre';
-        if(alreadyAssigned.has(ownerId)){
-          codeStatus.textContent='🔒 '+ownerName+' est déjà inscrit dans une équipe. Impossible de créer une seconde équipe, mais les invitations restent possibles dans « Mon inscription & mes invités ».';
-          const createBtn=$('#publicCreateTeam');if(createBtn)createBtn.disabled=true;
+        const existingTeam=teams.find(t=>t.tournament_id===regTour.id&&String(t.created_by_player_id||'')===ownerId&&t.is_preformed===true);
+        const createBtn=$('#publicCreateTeam');
+        if(existingTeam){
+          const directIds=teamPlayers.filter(tp=>tp.team_id===existingTeam.id).map(tp=>tp.player_id);
+          const pendingIds=teamInvitations.filter(i=>i.team_id===existingTeam.id&&i.status==='pending').map(i=>i.player_id);
+          const occupied=directIds.length+pendingIds.length;
+          codeStatus.innerHTML='🟢 Code validé pour <b>'+esc(ownerName)+'</b>. Tu retrouves ton équipe <b>'+esc(existingTeam.name)+'</b> ci-dessous. '+Math.max(0,5-occupied)+' place'+(Math.max(0,5-occupied)>1?'s':'')+' encore disponible'+(Math.max(0,5-occupied)>1?'s':'')+'.';
+          const nameInput=$('#publicTeamName');if(nameInput){nameInput.value=existingTeam.name||'';nameInput.disabled=true}
+          selectedTeamColor=String(existingTeam.color||'').toLowerCase();
+          document.querySelectorAll('#publicTeamColorChoices [data-team-color]').forEach(b=>{
+            const active=b.dataset.teamColor===selectedTeamColor;
+            b.disabled=true;
+            b.style.outline=active?'3px solid #0f5132':'none';
+            b.style.outlineOffset=active?'2px':'0';
+          });
+          const colorStatus=$('#publicTeamColorStatus');if(colorStatus)colorStatus.textContent='👕 Couleur actuelle : '+(document.querySelector('#publicTeamColorChoices [data-team-color="'+selectedTeamColor+'"]')?.textContent||'définie');
+          if(createBtn){createBtn.disabled=occupied>=5;createBtn.textContent=occupied>=5?'✅ Équipe complète':'➕ Compléter mon équipe'}
         }else{
           codeStatus.textContent='🟢 Code validé pour '+ownerName+'. Tu peux maintenant composer ton équipe.';
+          if(createBtn){createBtn.disabled=false;createBtn.textContent='🔥 Valider mon équipe'}
         }
       }else{
         creatorSel.disabled=false;
@@ -4860,24 +4875,34 @@ async function bootPublic(token){
     function renderMates(){
       const creator=creatorSel.value;
       if(!creator){mateBox.innerHTML='<p class="muted">Sélectionne d’abord ton nom.</p>';return}
-      if(alreadyAssigned.has(creator)){
-        mateBox.innerHTML='<div class="player" style="background:#fff7ed;border:1px solid #fed7aa"><b>🔒 Tu es déjà inscrit dans une équipe.</b><div class="muted" style="margin-top:5px;line-height:1.6">Tu ne peux pas t’inscrire dans une deuxième équipe. En revanche, tu peux toujours ajouter tes invités au Swé depuis <b>« Mon inscription & mes invités »</b>.</div></div>';return;
-      }
+      const existingTeam=teams.find(t=>t.tournament_id===regTour.id&&String(t.created_by_player_id||'')===String(creator)&&t.is_preformed===true);
+      const directRows=existingTeam?teamPlayers.filter(tp=>tp.team_id===existingTeam.id):[];
+      const pendingRows=existingTeam?teamInvitations.filter(i=>i.team_id===existingTeam.id&&i.status==='pending'):[];
+      const acceptedRows=existingTeam?teamInvitations.filter(i=>i.team_id===existingTeam.id&&i.status==='accepted'):[];
+      const occupiedCount=directRows.length+pendingRows.length;
+      const directIds=new Set(directRows.map(tp=>tp.player_id));
+      const pendingIds=new Set(pendingRows.map(i=>i.player_id));
+      const currentTeamHtml=existingTeam
+        ? '<div class="player" style="background:#eef8f2;border:1px solid #b7dfc4;margin-bottom:12px"><b>👥 Ton équipe actuelle — '+esc(existingTeam.name)+'</b><div class="muted" style="margin-top:5px">Les joueurs confirmés et les Guests sont conservés. Les joueurs en attente doivent encore accepter.</div>'+
+          directRows.map(tp=>{const pl=players.find(p=>p.id===tp.player_id);return pl?'<div style="margin-top:6px">✅ '+esc(pl.name)+(pl.is_group_member===false?' <span class="guest-badge">Guest</span>':'')+'</div>':''}).join('')+
+          pendingRows.map(i=>{const pl=players.find(p=>p.id===i.player_id);return pl?'<div style="margin-top:6px">⏳ '+esc(pl.name)+' <span class="muted">• en attente de confirmation</span></div>':''}).join('')+
+          '<div class="muted" style="margin-top:9px"><b>'+occupiedCount+'/5 places réservées</b> • '+Math.max(0,5-occupiedCount)+' place'+(Math.max(0,5-occupiedCount)>1?'s':'')+' à compléter</div></div>'
+        : '';
       const available=players.filter(pl=>pl.active&&pl.is_group_member!==false&&pl.id!==creator&&confirmedIds.has(pl.id)).sort((a,b)=>a.name.localeCompare(b.name));
-      mateBox.innerHTML=(confirmedIds.has(creator)?'<div class="readonly-note" style="margin-bottom:10px">ℹ️ Tu es déjà inscrit à ce Swé. Tu peux quand même créer ton équipe : ton inscription existante sera conservée.</div>':'')+
-        '<b>Membres du groupe</b><div class="muted" style="margin:3px 0 8px;line-height:1.55">Tu peux sélectionner uniquement les <b>membres déjà inscrits et confirmés à ce tournoi</b>. Les membres du groupe ne sont <b>jamais comptés comme tes invités</b> : seuls tes Guests hors groupe utilisent ton quota d’invitations. Leur place dans ton équipe restera en attente tant qu’ils n’auront pas accepté. Un joueur non inscrit n’apparaît pas ici : seuls l’administrateur et les co-gestionnaires peuvent l’ajouter au tournoi.</div>'+
+      mateBox.innerHTML=currentTeamHtml+(confirmedIds.has(creator)?'<div class="readonly-note" style="margin-bottom:10px">ℹ️ Tu es déjà inscrit à ce Swé. Ton inscription existante est conservée.</div>':'')+
+        '<b>Membres du groupe disponibles</b><div class="muted" style="margin:3px 0 8px;line-height:1.55">Tu peux sélectionner uniquement les <b>membres déjà inscrits et confirmés à ce tournoi</b>. Les membres déjà dans ton équipe ou déjà en attente de confirmation sont affichés ci-dessus et ne sont pas proposés une deuxième fois.</div>'+
         (available.map(pl=>{
           const assigned=alreadyAssigned.has(pl.id);
           const pending=pendingTeamInviteIds.has(pl.id);
-          const unavailable=assigned||pending;
+          const unavailable=assigned||pending||directIds.has(pl.id)||pendingIds.has(pl.id);
           const registered=confirmedIds.has(pl.id);
           return '<label class="row" style="justify-content:flex-start;margin:5px 0;opacity:'+(unavailable?'.55':'1')+'"><input type="checkbox" data-team-mate="'+pl.id+'" style="width:auto" '+(unavailable?'disabled':'')+'><span>'+esc(pl.name)+(assigned?' <span class="muted">• déjà dans une équipe</span>':(pending?' <span class="muted">• proposition d’équipe en attente</span>':(registered?' <span class="muted">• déjà inscrit</span>':'')))+'</span></label>';
         }).join('')||'<p class="muted">Aucun autre membre déjà inscrit et confirmé n’est disponible pour cette équipe.</p>');
       mateBox.querySelectorAll('[data-team-mate]').forEach(cb=>cb.onchange=()=>{
         const info=teamMateUsage();
-        if(info.used>4){
+        if(info.total>5){
           cb.checked=false;
-          toast('Maximum 4 coéquipiers au total avec toi.');
+          toast('Ton équipe est limitée à 5 places, confirmations en attente comprises.');
         }
         updateTeamSlotsStatus();
       });
@@ -4887,16 +4912,22 @@ async function bootPublic(token){
     const guestsBox=$('#publicTeamGuests');
 
     function teamMateUsage(){
+      const creator=creatorSel.value;
+      const existingTeam=teams.find(t=>t.tournament_id===regTour.id&&String(t.created_by_player_id||'')===String(creator||'')&&t.is_preformed===true);
+      const existingDirect=existingTeam?teamPlayers.filter(tp=>tp.team_id===existingTeam.id).length:1;
+      const existingPending=existingTeam?teamInvitations.filter(i=>i.team_id===existingTeam.id&&i.status==='pending').length:0;
+      const baseOccupied=existingTeam?(existingDirect+existingPending):1;
       const mateCount=[...mateBox.querySelectorAll('[data-team-mate]:checked')].length;
       const filledGuests=[...guestsBox.querySelectorAll('[data-team-guest]')].map(x=>x.value.trim()).filter(Boolean).length;
-      const used=mateCount+filledGuests;
-      return {mateCount,filledGuests,used,remaining:Math.max(0,4-used)};
+      const added=mateCount+filledGuests;
+      const total=baseOccupied+added;
+      return {mateCount,filledGuests,used:added,total,baseOccupied,remaining:Math.max(0,5-total)};
     }
 
     function updateTeamSlotsStatus(){
       const info=teamMateUsage();
       const status=$('#publicTeamSlotsStatus');
-      if(status)status.innerHTML='<b>'+info.used+'/4 coéquipier'+(info.used>1?'s':'')+' ajouté'+(info.used>1?'s':'')+'</b> • '+info.remaining+' place'+(info.remaining>1?'s':'')+' restante'+(info.remaining>1?'s':'');
+      if(status)status.innerHTML='<b>'+info.total+'/5 places occupées ou réservées</b> • '+info.remaining+' place'+(info.remaining>1?'s':'')+' restante'+(info.remaining>1?'s':'');
       const addBtn=$('#publicAddTeamGuest');
       if(addBtn){
         addBtn.disabled=info.remaining<=0;
@@ -4907,7 +4938,7 @@ async function bootPublic(token){
     $('#publicAddTeamGuest').onclick=()=>{
       const fields=[...guestsBox.querySelectorAll('[data-team-guest]')];
       const info=teamMateUsage();
-      if(info.used>=4)return toast('Maximum 4 coéquipiers au total avec toi.');
+      if(info.remaining<=0)return toast('Ton équipe est déjà complète ou toutes ses places sont réservées.');
       // Un champ vide déjà affiché ne consomme pas une place.
       const emptyField=fields.find(x=>!x.value.trim());
       if(emptyField){emptyField.focus();return}
@@ -4949,7 +4980,8 @@ async function bootPublic(token){
       if(!color)return status.textContent='Choisis la couleur des maillots de ton équipe.';
       const mates=[...mateBox.querySelectorAll('[data-team-mate]:checked')].map(x=>x.dataset.teamMate);
       const guests=[...guestsBox.querySelectorAll('[data-team-guest]')].map(x=>x.value.trim()).filter(Boolean);
-      if(mates.length+guests.length>4)return status.textContent='Tu peux ajouter 4 coéquipiers maximum en plus de toi, soit une équipe de 5 joueurs.';
+      const usage=teamMateUsage();
+      if(usage.total>5)return status.textContent='Ton équipe ne peut pas dépasser 5 places, joueurs en attente compris.';
       const btn=$('#publicCreateTeam');btn.disabled=true;
       const {data,error}=await sb.rpc('public_create_team_with_member_code_v2',{
         p_token:token,p_tournament_id:regTour.id,p_player_id:creator,p_code:code,p_team_name:name,p_team_color:color,p_player_ids:mates,p_guest_names:guests
@@ -4957,11 +4989,11 @@ async function bootPublic(token){
       btn.disabled=false;
       if(error){
         const msg=String(error.message||'');
-        if(/déjà.*équipe|already.*team/i.test(msg))return status.textContent='Un des joueurs sélectionnés appartient déjà à une autre équipe. Retire-le puis réessaie.';
+        if(/déjà.*équipe|already.*team/i.test(msg))return status.textContent='Un des nouveaux joueurs sélectionnés appartient déjà à une autre équipe. Retire-le puis réessaie.';
         if(/déjà inscrit|already registered/i.test(msg))return status.textContent='Un joueur sélectionné est déjà inscrit. Il peut être ajouté uniquement s’il n’appartient pas déjà à une autre équipe.';
         return status.textContent=msg;
       }
-      status.textContent='🟢 Équipe créée ! Les membres du groupe sélectionnés ont une proposition d’équipe à accepter ou refuser. Ton équipe peut rester incomplète : les places libres seront complétées avec les joueurs en Équipe aléatoire lors de la génération finale.';
+      status.textContent='🟢 Équipe enregistrée ! Les nouveaux membres sélectionnés ont une proposition à accepter ou refuser. Les joueurs déjà confirmés et les Guests restent dans ton noyau. Les places encore libres seront complétées en Équipe aléatoire lors de la génération finale.';
       window.__swePublicTeamEditing=false;
       $('#publicTeamCode').value='';$('#publicTeamName').value='';validatedTeamCode='';selectedTeamColor='';creatorSel.disabled=false;creatorSel.value='';$('#publicTeamFormAfterCode')?.classList.add('hidden');
       try{
@@ -5010,7 +5042,7 @@ async function bootPublic(token){
   const pmap=new Map(players.map(x=>[x.id,x]));
   const tmap=new Map(teams.map(x=>[x.id,x]));
 
-  // V39.59 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
+  // V39.60 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
   if(wantsLeagueSession&&regTour){
     const linkedLeague=leagues.find(l=>l.id===regTour.league_id)||null;
     const linkLeagueId=publicParams.get('league');
