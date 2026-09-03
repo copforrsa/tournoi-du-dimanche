@@ -129,6 +129,19 @@ select{background-color:#fff} textarea{resize:vertical}
 .toast{position:fixed;top:max(14px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:100;background:#071b12;color:#fff;padding:11px 16px;border-radius:13px;display:none;max-width:92%;box-shadow:0 12px 28px rgba(0,0,0,.25)}
 .auth{max-width:460px;margin:7vh auto}.auth .card{padding:22px}
 #homeStats>div{border:1px solid #e1ebe5!important;background:linear-gradient(145deg,#fff,#f5faf6)!important;border-radius:16px!important;padding:14px!important}
+#homeWorkspaceStats .home-kpi{border-radius:16px;padding:15px;border:1px solid #e4e9ef;background:#fff;min-height:86px}
+#homeWorkspaceStats .home-kpi b{font-size:25px;display:block;line-height:1.1}
+#homeWorkspaceStats .home-kpi.blue{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8}
+#homeWorkspaceStats .home-kpi.green{background:#f0fdf4;border-color:#bbf7d0;color:#15803d}
+#homeWorkspaceStats .home-kpi.orange{background:#fff7ed;border-color:#fed7aa;color:#c2410c}
+#homeWorkspaceStats .home-kpi.violet{background:#f5f3ff;border-color:#ddd6fe;color:#6d28d9}
+#homeWorkspaceStats .home-kpi .muted{color:#526070;margin-top:5px}
+.player-action-save{background:#2563eb!important;color:#fff!important;border-color:#2563eb!important}
+.player-action-code{background:#7c3aed!important;color:#fff!important;border-color:#7c3aed!important}
+.player-action-disable{background:#fff7ed!important;color:#b45309!important;border-color:#fdba74!important}
+.player-action-enable{background:#16a34a!important;color:#fff!important;border-color:#16a34a!important}
+.player-action-neutral{background:#0f766e!important;color:#fff!important;border-color:#0f766e!important}
+
 #view-home>.card:first-child{background:linear-gradient(145deg,#fff,#f1f8f3)}
 #view-home .grid.g2 button[data-go]{min-height:64px;text-align:left;padding:14px 16px;background:#f5f8f6;border:1px solid #e0e9e3;font-size:14px}
 #view-home .grid.g2 button[data-go]:hover{background:#edf7f0;border-color:#bee4ca}
@@ -145,7 +158,7 @@ select{background-color:#fff} textarea{resize:vertical}
 }
 @media(max-width:650px){
   body{background:#f3f7f4}.app{padding:0 12px 100px}.top{border-radius:0 0 24px 24px;margin:0 -12px 14px;padding:18px 16px 20px}.top h1{font-size:21px}.card{border-radius:17px;padding:14px;margin:10px 0}.g2,.g3{grid-template-columns:1fr}.sectiontitle{font-size:17px}
-  /* V39.57 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
+  /* V39.58 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
   .tabs{left:0;right:0;transform:none;width:100%;display:flex;grid-template-columns:none;justify-content:flex-start;gap:5px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;border-radius:18px 18px 0 0;padding:7px 10px calc(7px + env(safe-area-inset-bottom));scroll-snap-type:x proximity;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
   .tabs button{flex:0 0 74px;min-width:74px;font-size:10px;scroll-snap-align:center;padding:5px 6px}
@@ -161,7 +174,7 @@ select{background-color:#fff} textarea{resize:vertical}
 #publicTeams .public-team-player{padding:7px 0;border-bottom:1px solid #edf2ef}
 #publicTeams .public-team-player:last-child{border-bottom:0}
 
-/* V39.57 — alignements et justification */
+/* V39.58 — alignements et justification */
 .card p,.card .muted,.player .muted,.readonly-note,.public-sub{
   text-align:justify;
   text-justify:inter-word;
@@ -248,7 +261,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.57</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.58</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -291,7 +304,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.57</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.58</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -393,7 +406,12 @@ select{background-color:#fff} textarea{resize:vertical}
         <div id="coorgMyRights" class="hidden" style="margin-top:12px"></div>
       </div>
       <div class="card">
-        <h2 class="sectiontitle">Tournoi actif</h2>
+        <h2 class="sectiontitle">📊 Vue d’ensemble</h2>
+        <div id="homeWorkspaceStats" class="grid g2" style="margin-top:12px"></div>
+        <div id="homeCoorgQuotaRequest" style="margin-top:12px"></div>
+      </div>
+      <div class="card">
+        <h2 class="sectiontitle">⚽ Compétition sélectionnée</h2>
         <div id="activeTourLabel" class="muted">Aucun tournoi</div>
         <div id="homeStats" class="grid g3" style="margin-top:12px"></div>
         <div id="homeRegistrationShare" class="hidden" style="margin-top:12px"></div>
@@ -904,7 +922,7 @@ window.addEventListener('error', (e) => {
   if(t){t.textContent='Erreur de chargement de l’application. Recharge la page.';t.style.display='block';}
 });
 
-const S={session:null,isSuperAdmin:false,superWorkspaces:[],workspace:null,members:[],coorgs:[],coorgCount:0,workspaceFeatures:{max_coorganizers:3,max_coorganizers_cap:100,rankings_enabled:true,league_enabled:true,tournaments_enabled:true,third_half_enabled:false,player_ratings_enabled:false},myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null},myRatings:[],lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],teamCodes:[],seasons:[],leagues:[],leaguePlayers:[],activeLeague:null,tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matchAssignments:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},sportsComplexes:[],sportsPitches:[],publicMode:false,publicToken:null,editingTournamentId:null,teamCompetitionId:null,lastView:null};
+const S={session:null,isSuperAdmin:false,superWorkspaces:[],workspace:null,members:[],coorgs:[],coorgCount:0,workspaceFeatures:{max_coorganizers:3,max_coorganizers_cap:100,rankings_enabled:true,league_enabled:true,tournaments_enabled:true,third_half_enabled:false,player_ratings_enabled:false},myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null},myRatings:[],lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],teamCodes:[],seasons:[],leagues:[],leaguePlayers:[],activeLeague:null,tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matchAssignments:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},sportsComplexes:[],sportsPitches:[],publicMode:false,publicToken:null,editingTournamentId:null,teamCompetitionId:null,lastView:null,coorgQuotaRequest:null,superCoorgQuotaRequests:[]};
 
 let safeSyncTimer=null;
 let safeSyncBusy=false;
@@ -1272,6 +1290,8 @@ async function loadSuperAdminWorkspaces(){
   const {data,error}=await sb.rpc('super_admin_get_workspaces');
   if(error){toast(error.message);return}
   S.superWorkspaces=Array.isArray(data)?data:[];
+  const requests=await sb.rpc('super_admin_get_coorganizer_quota_requests');
+  S.superCoorgQuotaRequests=requests.error?[]:(Array.isArray(requests.data)?requests.data:[]);
   renderSuperAdminWorkspaces();
 }
 function renderSuperAdminWorkspaces(){
@@ -1302,6 +1322,7 @@ function renderSuperAdminWorkspaces(){
           '<div class="muted" style="margin-top:4px">👤 Administrateur : <b>'+esc(([w.admin_first_name,w.admin_last_name].filter(Boolean).join(' ')||w.owner_email||'Non renseigné'))+'</b></div>'+
           '<div class="muted">📧 '+esc(w.owner_email||'Email indisponible')+(w.admin_phone?' • 📱 '+esc(w.admin_phone):'')+'</div>'+
           '<div class="muted">Créé le '+esc(created)+'</div>'+
+          (S.superCoorgQuotaRequests.find(r=>String(r.workspace_id)===String(w.workspace_id)&&r.status==='pending')?(()=>{const qr=S.superCoorgQuotaRequests.find(r=>String(r.workspace_id)===String(w.workspace_id)&&r.status==='pending');return '<div class="player" style="margin-top:9px;background:#fff8e8;border-color:#f2d18a"><b>🔔 Demande de co-gestionnaires</b><div class="muted" style="margin:4px 0 7px">Actuel : '+Number(qr.current_limit)+' • demandé : <b>'+Number(qr.requested_limit)+'</b></div><div class="row"><button class="primary" data-sa-approve-coorg-request="'+qr.id+'">✅ Accepter</button><button class="danger" data-sa-reject-coorg-request="'+qr.id+'">Refuser</button></div></div>'})():'')+
         '</span>'+
       '</div>'+
       '<div class="grid g3" style="margin-top:12px">'+
@@ -1477,6 +1498,18 @@ document.addEventListener('change',e=>{
   if(e.target?.id==='leagueSessionComplex')renderLeaguePitchSelect();
 });
 document.addEventListener('click',async e=>{
+  if(e.target?.dataset?.saApproveCoorgRequest){
+    const b=e.target;b.disabled=true;
+    const {error}=await sb.rpc('super_admin_resolve_coorganizer_quota_request',{p_request_id:b.dataset.saApproveCoorgRequest,p_approve:true});
+    b.disabled=false;if(error)return toast(error.message);
+    toast('Demande acceptée ✅');await loadSuperAdminWorkspaces();return;
+  }
+  if(e.target?.dataset?.saRejectCoorgRequest){
+    const b=e.target;b.disabled=true;
+    const {error}=await sb.rpc('super_admin_resolve_coorganizer_quota_request',{p_request_id:b.dataset.saRejectCoorgRequest,p_approve:false});
+    b.disabled=false;if(error)return toast(error.message);
+    toast('Demande refusée.');await loadSuperAdminWorkspaces();return;
+  }
   if(e.target?.id==='saRefresh')await loadSuperAdminWorkspaces();
   if(e.target?.id==='saRefreshVenues')await loadSportsVenues();
   if(e.target?.id==='saAddComplex'){
@@ -1594,6 +1627,10 @@ async function loadAll(){
     }else S.players=[];
     S.contacts=[];S.skillReviews=[];S.teamCodes=[];
   }
+  if(isAdmin()){
+    const qr=await sb.rpc('get_my_coorganizer_quota_request',{p_workspace_id:w});
+    S.coorgQuotaRequest=qr.error?null:(qr.data||null);
+  }else S.coorgQuotaRequest=null;
   r=await sb.from('seasons').select('*').eq('workspace_id',w).order('starts_on',{ascending:false});S.seasons=r.data||[];
   r=await sb.from('leagues').select('*').eq('workspace_id',w).order('created_at',{ascending:false});S.leagues=r.data||[];
   if(S.leagues.length){
@@ -1723,14 +1760,8 @@ function renderAccess(){
   const fmt=d=>d?new Date(d).toLocaleDateString('fr-FR'):'';
 
   const lim=Number(S.workspaceFeatures.max_coorganizers||0),cap=Number(S.workspaceFeatures.max_coorganizers_cap||100);
-  box.innerHTML='<div class="player" style="background:#f7fbf8"><b>Limite de co-organisateurs</b><div class="muted" style="margin:5px 0 8px">Choisis le nombre autorisé pour cet espace. Cette valeur est séparée de la limite commerciale maximale ('+cap+'), ce qui permettra plus tard de l’adapter aux abonnements.</div><div class="row"><input id="maxCoorgSetting" type="number" min="0" max="'+cap+'" value="'+lim+'" style="max-width:120px"><button id="saveMaxCoorg" class="primary">Enregistrer</button></div></div>'+
+  box.innerHTML='<div class="player" style="background:#f7fbf8"><b>Limite de co-gestionnaires</b><div class="muted" style="margin-top:5px">Autorisation actuelle : <b>'+activeCo.length+' / '+lim+'</b>. Cette limite est définie par le Super Admin.</div>'+(S.coorgQuotaRequest?.status==='pending'?'<div class="muted" style="margin-top:6px;color:#b45309">⏳ Demande en attente pour passer à <b>'+Number(S.coorgQuotaRequest.requested_limit||lim)+'</b>.</div>':'<div class="muted" style="margin-top:6px">Pour augmenter cette limite, utilise le bouton de demande depuis l’accueil.</div>')+'</div>'+
     '<div class="muted" style="margin-bottom:8px"><b>'+activeCo.length+' / '+lim+' co-organisateur'+(activeCo.length>1?'s':'')+' actif'+(activeCo.length>1?'s':'')+'</b> • '+suspendedCo.length+' suspendu'+(suspendedCo.length>1?'s':'')+' • '+pending.length+' invitation'+(pending.length>1?'s':'')+' en attente</div>';
-  $('#saveMaxCoorg').onclick=async()=>{
-    const n=Math.max(0,Math.min(cap,Number($('#maxCoorgSetting').value)||0));
-    const {error}=await sb.rpc('admin_set_max_coorganizers',{p_workspace_id:S.workspace.id,p_max:n});
-    if(error)return toast(error.message);
-    toast('Limite mise à jour ✅');await loadAll();
-  };
 
   S.coorgs.forEach(c=>{
     const d=document.createElement('div');d.className='player';
@@ -1897,7 +1928,35 @@ async function renderRegisteredPlayersAdmin(){
 function renderHome(){
   const t=currentTour();
   const lastFinished=S.tournaments.find(x=>x.status==='finished');
-  $('#activeTourLabel').textContent=t?((t.name||'Tournoi')+' • '+t.tournament_date+' • '+formatLabel(t)+' • '+seasonNameForTournament(t)):(lastFinished?'Aucun tournoi actif • dernier tournoi terminé le '+lastFinished.tournament_date+' • '+seasonNameForTournament(lastFinished):'Aucun tournoi');
+  $('#activeTourLabel').textContent=t?((t.name||'Tournoi')+' • '+t.tournament_date+' • '+formatLabel(t)+' • '+seasonNameForTournament(t)):(lastFinished?'Aucun tournoi actif • dernier tournoi terminé le '+lastFinished.tournament_date+' • '+seasonNameForTournament(lastFinished):'Aucune compétition sélectionnée');
+
+  const ongoingTournaments=S.tournaments.filter(x=>x.format!=='league'&&x.status!=='finished').length;
+  const ongoingLeagues=S.leagues.filter(x=>x.status!=='finished').length;
+  const groupMembers=S.players.filter(x=>x.active&&x.is_group_member!==false).length;
+  const allowedCoorg=Number(S.workspaceFeatures.max_coorganizers||0);
+  const activeCoorg=Number(S.coorgCount||0);
+  const wsStats=$('#homeWorkspaceStats');
+  if(wsStats){
+    wsStats.innerHTML=
+      '<div class="home-kpi blue"><b>'+ongoingTournaments+'</b><div class="muted">⚽ tournoi'+(ongoingTournaments>1?'s':'')+' en cours</div></div>'+
+      '<div class="home-kpi green"><b>'+ongoingLeagues+'</b><div class="muted">🏁 ligue'+(ongoingLeagues>1?'s':'')+' en cours</div></div>'+
+      '<div class="home-kpi orange"><b>'+groupMembers+'</b><div class="muted">👥 membre'+(groupMembers>1?'s':'')+' inscrit'+(groupMembers>1?'s':'')+' dans le groupe</div></div>'+
+      '<div class="home-kpi violet"><b>'+activeCoorg+' / '+allowedCoorg+'</b><div class="muted">🤝 co-gestionnaire'+(allowedCoorg>1?'s':'')+' autorisé'+(allowedCoorg>1?'s':'')+'</div></div>';
+  }
+
+  const quotaBox=$('#homeCoorgQuotaRequest');
+  if(quotaBox){
+    quotaBox.innerHTML='';
+    if(isAdmin()){
+      const req=S.coorgQuotaRequest;
+      if(req&&req.status==='pending'){
+        quotaBox.innerHTML='<div class="player" style="background:#fff8e8;border-color:#f2d18a"><b>⏳ Demande envoyée au Super Admin</b><div class="muted" style="margin-top:5px">Limite actuelle : <b>'+allowedCoorg+'</b> • demande : <b>'+Number(req.requested_limit||allowedCoorg)+'</b> co-gestionnaires. Tu seras informé ici lorsque la demande aura été traitée.</div></div>';
+      }else{
+        quotaBox.innerHTML='<div class="player" style="background:#f8fbff;border-color:#bfdbfe"><b>🤝 Besoin de plus de co-gestionnaires ?</b><div class="muted" style="margin:5px 0 9px">La limite est définie par le Super Admin. Tu peux lui envoyer une demande d’augmentation.</div><div class="row"><input id="homeRequestedCoorgLimit" type="number" min="'+(allowedCoorg+1)+'" max="'+Number(S.workspaceFeatures.max_coorganizers_cap||100)+'" value="'+Math.min(Number(S.workspaceFeatures.max_coorganizers_cap||100),allowedCoorg+1)+'" style="max-width:125px"><button id="homeRequestMoreCoorg" class="primary">Demander + de co-gestionnaires</button></div></div>';
+      }
+    }
+  }
+
   const present=S.tPlayers.filter(x=>x.present&&x.registration_status!=='waitlist').length;
   const wait=S.tPlayers.filter(x=>x.registration_status==='waitlist').length;
   $('#homeStats').innerHTML='<div class="player"><b>'+present+'</b><div class="muted">confirmés'+(t?.max_players?' / '+t.max_players:'')+'</div></div><div class="player"><b>'+wait+'</b><div class="muted">liste d’attente</div></div><div class="player"><b>'+S.teams.length+'</b><div class="muted">équipes</div></div><div class="player"><b>'+S.matches.length+'</b><div class="muted">matchs</div></div>';
@@ -1914,6 +1973,16 @@ function renderHome(){
 }
 
 document.addEventListener('click',async e=>{
+  if(e.target?.id==='homeRequestMoreCoorg'){
+    const n=Number($('#homeRequestedCoorgLimit')?.value||0);
+    const current=Number(S.workspaceFeatures.max_coorganizers||0);
+    if(!Number.isFinite(n)||n<=current)return toast('Choisis une limite supérieure à '+current+'.');
+    const b=e.target;b.disabled=true;
+    const {data,error}=await sb.rpc('request_more_coorganizers',{p_workspace_id:S.workspace.id,p_requested_limit:n});
+    b.disabled=false;if(error)return toast(error.message);
+    S.coorgQuotaRequest=data||null;renderHome();toast('Demande envoyée au Super Admin ✅');
+    return;
+  }
   if(e.target?.id==='refreshRegisteredPlayers')await renderRegisteredPlayersAdmin();
   if(e.target?.id==='manualRegisterPlayer'){
     const t=currentTour();const pid=$('#manualRegisteredPlayerSelect')?.value;
@@ -2002,7 +2071,7 @@ function renderPlayers(){
     info.innerHTML='<b>'+esc(x.name)+'</b>'+(x.is_group_member===false?'<span class="guest-badge">Guest</span>':'')+
       '<div class="muted">'+meta+'</div>';
     if(isAdmin()){
-      const toggle=document.createElement('button');toggle.textContent=x.active?'Désactiver':'Réactiver';
+      const toggle=document.createElement('button');toggle.textContent=x.active?'Désactiver':'Réactiver';toggle.className=x.active?'player-action-disable':'player-action-enable';
       toggle.onclick=async()=>{const {error}=await sb.from('players').update({active:!x.active}).eq('id',x.id);if(error)return toast(error.message);await loadAll()};
       top.append(info,toggle);
     }else if(isCoorg()&&S.myPermissions.can_delete_members){
@@ -2066,7 +2135,7 @@ function renderPlayers(){
         toast('Numéro de '+x.name+' enregistré 🔒');
       };
 
-      const save=document.createElement('button');save.textContent='Enregistrer';
+      const save=document.createElement('button');save.textContent='Enregistrer';save.className='player-action-save';
       save.onclick=async()=>{
         const isMember=status.value==='member';save.disabled=true;
         const {error}=await sb.from('players').update({is_group_member:isMember,guest_of_player_id:isMember?null:(host.value||null)}).eq('id',x.id);
@@ -2080,7 +2149,7 @@ function renderPlayers(){
         const existing=S.teamCodes.find(c=>c.player_id===x.id);
         const codeInfo=document.createElement('span');codeInfo.style.flex='1';
         codeInfo.innerHTML='<b>Code création d’équipe :</b> '+(existing?'<code style="font-size:1rem">'+esc(existing.code)+'</code> '+(existing.enabled?'🟢 Autorisé':'⚪ Désactivé'):'Aucun code');
-        const gen=document.createElement('button');gen.textContent=existing?'Régénérer':'Générer un code';
+        const gen=document.createElement('button');gen.textContent=existing?'Régénérer':'Générer un code';gen.className='player-action-code';
         gen.onclick=async()=>{
           if(existing&&!confirm('Régénérer le code de '+x.name+' ? L’ancien code ne fonctionnera plus.'))return;
           gen.disabled=true;
@@ -2090,7 +2159,7 @@ function renderPlayers(){
         };
         codeRow.append(codeInfo,gen);
         if(existing){
-          const tog=document.createElement('button');tog.textContent=existing.enabled?'Désactiver':'Réactiver';
+          const tog=document.createElement('button');tog.textContent=existing.enabled?'Désactiver':'Réactiver';tog.className=existing.enabled?'player-action-disable':'player-action-enable';
           tog.onclick=async()=>{
             const {error}=await sb.rpc('admin_set_player_team_code_enabled',{p_player_id:x.id,p_enabled:!existing.enabled});
             if(error)return toast(error.message);await loadAll();toast(existing.enabled?'Autorisation désactivée.':'Autorisation réactivée.');
@@ -2336,7 +2405,7 @@ function appendTournamentSeasonControl(container,t){
 }
 
 function renderTournaments(){
-  // V39.57 : l'éditeur de tournoi est protégé des synchronisations automatiques.
+  // V39.58 : l'éditeur de tournoi est protégé des synchronisations automatiques.
   const ss=$('#seasonSelect');
   ss.innerHTML='<option value="">Sans saison</option>'+S.seasons.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');
   const box=$('#tournamentList');box.innerHTML='';
@@ -3479,7 +3548,7 @@ async function renderLeague(){
   }
 
 
-  // V39.57 — Saisie du résultat directement depuis l'onglet Ligue.
+  // V39.58 — Saisie du résultat directement depuis l'onglet Ligue.
   const scoringCard=$('#leagueScoringCard'),scoringBody=$('#leagueScoringBody'),scoringLabel=$('#leagueScoringSessionLabel');
   if(scoringCard)scoringCard.classList.toggle('hidden',!canScoreLeague);
   if(canScoreLeague&&scoringBody){
@@ -4016,7 +4085,7 @@ $('#closeVisual').onclick=()=>$('#visualPreviewBox').classList.add('hidden');
 
 async function bootPublic(token){
   S.publicMode=true;
-  // V39.57 — état global pour éviter qu'un ancien rafraîchissement public
+  // V39.58 — état global pour éviter qu'un ancien rafraîchissement public
   // reconstruise le formulaire d'inscription équipe après validation du code.
   window.__swePublicTeamEditing=false;
   if(window.__swePublicRegistrationInterval){
@@ -4930,7 +4999,7 @@ async function bootPublic(token){
   const pmap=new Map(players.map(x=>[x.id,x]));
   const tmap=new Map(teams.map(x=>[x.id,x]));
 
-  // V39.57 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
+  // V39.58 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
   if(wantsLeagueSession&&regTour){
     const linkedLeague=leagues.find(l=>l.id===regTour.league_id)||null;
     const linkLeagueId=publicParams.get('league');
