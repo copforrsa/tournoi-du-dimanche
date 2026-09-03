@@ -158,7 +158,7 @@ select{background-color:#fff} textarea{resize:vertical}
 }
 @media(max-width:650px){
   body{background:#f3f7f4}.app{padding:0 12px 100px}.top{border-radius:0 0 24px 24px;margin:0 -12px 14px;padding:18px 16px 20px}.top h1{font-size:21px}.card{border-radius:17px;padding:14px;margin:10px 0}.g2,.g3{grid-template-columns:1fr}.sectiontitle{font-size:17px}
-  /* V39.60 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
+  /* V39.61 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
   .tabs{left:0;right:0;transform:none;width:100%;display:flex;grid-template-columns:none;justify-content:flex-start;gap:5px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;border-radius:18px 18px 0 0;padding:7px 10px calc(7px + env(safe-area-inset-bottom));scroll-snap-type:x proximity;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
   .tabs button{flex:0 0 74px;min-width:74px;font-size:10px;scroll-snap-align:center;padding:5px 6px}
@@ -174,7 +174,7 @@ select{background-color:#fff} textarea{resize:vertical}
 #publicTeams .public-team-player{padding:7px 0;border-bottom:1px solid #edf2ef}
 #publicTeams .public-team-player:last-child{border-bottom:0}
 
-/* V39.60 — alignements et justification */
+/* V39.61 — alignements et justification */
 .card p,.card .muted,.player .muted,.readonly-note,.public-sub{
   text-align:justify;
   text-justify:inter-word;
@@ -261,7 +261,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.60</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.61</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -304,7 +304,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.60</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.61</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -411,45 +411,6 @@ select{background-color:#fff} textarea{resize:vertical}
         <div id="homeCoorgQuotaRequest" style="margin-top:12px"></div>
       </div>
       <div class="card">
-        <h2 class="sectiontitle">⚽ Compétition sélectionnée</h2>
-        <div id="activeTourLabel" class="muted">Aucun tournoi</div>
-        <div id="homeStats" class="grid g3" style="margin-top:12px"></div>
-        <div id="homeRegistrationShare" class="hidden" style="margin-top:12px"></div>
-      </div>
-      <div class="card hidden" id="registeredPlayersAdminCard">
-        <div class="row" style="justify-content:space-between;gap:10px;flex-wrap:wrap">
-          <div>
-            <h2 class="sectiontitle">👥 Inscriptions du Swé</h2>
-            <div id="registeredPlayersCompetitionLabel" class="muted"></div>
-          </div>
-          <button id="refreshRegisteredPlayers">Actualiser</button>
-        </div>
-        <div class="space"></div>
-        <div class="grid g2">
-          <select id="manualRegisteredPlayerSelect"><option value="">Ajouter un membre inscrit manuellement</option></select>
-          <button id="manualRegisterPlayer" class="primary">+ Ajouter le membre</button>
-        </div>
-        <div class="player" style="margin-top:12px;background:#f8fbf9">
-          <b>➕ Ajouter un invité</b>
-          <div class="muted" style="margin:5px 0 8px">L’administrateur et les co-gestionnaires peuvent ajouter autant d’invités qu’ils le souhaitent. Le quota général du Swé reste appliqué : les personnes au-delà du nombre de places passent en liste d’attente.</div>
-          <div class="row"><input id="managerGuestName" maxlength="60" placeholder="Nom de l’invité" style="flex:1"><button id="managerAddGuest" class="primary">Ajouter l’invité</button></div>
-        </div>
-        <div class="space"></div>
-        <div id="registeredPlayersAdminList"></div>
-      </div>
-
-      <div class="card hidden" id="thirdHalfAdminCard">
-        <div class="row" style="justify-content:space-between;gap:10px;flex-wrap:wrap">
-          <div>
-            <h2 class="sectiontitle">🧊 3e mi-temps & paiements</h2>
-            <div class="muted">Suivi préparé pour le paiement en ligne et le règlement direct à l’Arena.</div>
-          </div>
-          <span class="guest-badge">OPTION PAYANTE</span>
-        </div>
-        <div id="thirdHalfAdminSummary" class="muted" style="margin-top:10px">Le module est prêt mais aucune donnée de paiement n’est encore collectée tant que Stripe n’est pas raccordé.</div>
-      </div>
-
-      <div class="card">
         <h2 class="sectiontitle">Actions rapides</h2>
         <div class="grid g2">
           <button data-go="players">👥 Gérer les joueurs</button>
@@ -496,7 +457,7 @@ select{background-color:#fff} textarea{resize:vertical}
         <button id="addPlayers" class="primary">Enregistrer les joueurs</button>
         <p class="muted">Un Guest reste dans les statistiques mais sera grisé dans les classements. Tu peux aussi préciser de quel membre il est l’invité.</p>
       </div>
-      <div class="card"><div class="muted" style="margin-bottom:8px">💡 Le niveau est enregistré automatiquement dès que tu le modifies.</div><div id="playersList"></div></div>
+      <div class="card"><div class="muted" style="margin-bottom:8px">💡 Notation sur 5 : 1 Loisir • 2 Intermédiaire • 3 Bon • 4 Très bon • 5 Top level. Le niveau est enregistré automatiquement dès que tu le modifies.</div><div id="playersList"></div></div>
     </div>
 
     <div id="view-permissions" class="view">
@@ -1926,10 +1887,6 @@ async function renderRegisteredPlayersAdmin(){
 }
 
 function renderHome(){
-  const t=currentTour();
-  const lastFinished=S.tournaments.find(x=>x.status==='finished');
-  $('#activeTourLabel').textContent=t?((t.name||'Tournoi')+' • '+t.tournament_date+' • '+formatLabel(t)+' • '+seasonNameForTournament(t)):(lastFinished?'Aucun tournoi actif • dernier tournoi terminé le '+lastFinished.tournament_date+' • '+seasonNameForTournament(lastFinished):'Aucune compétition sélectionnée');
-
   const ongoingTournaments=S.tournaments.filter(x=>x.format!=='league'&&x.status!=='finished').length;
   const ongoingLeagues=S.leagues.filter(x=>x.status!=='finished').length;
   const groupMembers=S.players.filter(x=>x.active&&x.is_group_member!==false).length;
@@ -1940,35 +1897,20 @@ function renderHome(){
     wsStats.innerHTML=
       '<div class="home-kpi blue"><b>'+ongoingTournaments+'</b><div class="muted">⚽ tournoi'+(ongoingTournaments>1?'s':'')+' en cours</div></div>'+
       '<div class="home-kpi green"><b>'+ongoingLeagues+'</b><div class="muted">🏁 ligue'+(ongoingLeagues>1?'s':'')+' en cours</div></div>'+
-      '<div class="home-kpi orange"><b>'+groupMembers+'</b><div class="muted">👥 membre'+(groupMembers>1?'s':'')+' inscrit'+(groupMembers>1?'s':'')+' dans le groupe</div></div>'+
+      '<div class="home-kpi orange"><b>'+groupMembers+'</b><div class="muted">👥 membre'+(groupMembers>1?'s':'')+' dans le groupe</div></div>'+
       '<div class="home-kpi violet"><b>'+activeCoorg+' / '+allowedCoorg+'</b><div class="muted">🤝 co-gestionnaire'+(allowedCoorg>1?'s':'')+' autorisé'+(allowedCoorg>1?'s':'')+'</div></div>';
   }
-
   const quotaBox=$('#homeCoorgQuotaRequest');
   if(quotaBox){
     quotaBox.innerHTML='';
     if(isAdmin()){
       const req=S.coorgQuotaRequest;
       if(req&&req.status==='pending'){
-        quotaBox.innerHTML='<div class="player" style="background:#fff8e8;border-color:#f2d18a"><b>⏳ Demande envoyée au Super Admin</b><div class="muted" style="margin-top:5px">Limite actuelle : <b>'+allowedCoorg+'</b> • demande : <b>'+Number(req.requested_limit||allowedCoorg)+'</b> co-gestionnaires. Tu seras informé ici lorsque la demande aura été traitée.</div></div>';
+        quotaBox.innerHTML='<div class="player" style="background:#fff8e8;border-color:#f2d18a"><b>⏳ Demande envoyée au Super Admin</b><div class="muted" style="margin-top:5px">Limite actuelle : <b>'+allowedCoorg+'</b> • demande : <b>'+Number(req.requested_limit||allowedCoorg)+'</b> co-gestionnaires.</div></div>';
       }else{
-        quotaBox.innerHTML='<div class="player" style="background:#f8fbff;border-color:#bfdbfe"><b>🤝 Besoin de plus de co-gestionnaires ?</b><div class="muted" style="margin:5px 0 9px">La limite est définie par le Super Admin. Tu peux lui envoyer une demande d’augmentation.</div><div class="row"><input id="homeRequestedCoorgLimit" type="number" min="'+(allowedCoorg+1)+'" max="'+Number(S.workspaceFeatures.max_coorganizers_cap||100)+'" value="'+Math.min(Number(S.workspaceFeatures.max_coorganizers_cap||100),allowedCoorg+1)+'" style="max-width:125px"><button id="homeRequestMoreCoorg" class="primary">Demander + de co-gestionnaires</button></div></div>';
+        quotaBox.innerHTML='<div class="player" style="background:#f8fbff;border-color:#bfdbfe"><b>🤝 Besoin de plus de co-gestionnaires ?</b><div class="muted" style="margin:5px 0 9px">La limite est définie par le Super Admin.</div><div class="row"><input id="homeRequestedCoorgLimit" type="number" min="'+(allowedCoorg+1)+'" max="'+Number(S.workspaceFeatures.max_coorganizers_cap||100)+'" value="'+Math.min(Number(S.workspaceFeatures.max_coorganizers_cap||100),allowedCoorg+1)+'" style="max-width:125px"><button id="homeRequestMoreCoorg" class="primary">Demander + de co-gestionnaires</button></div></div>';
       }
     }
-  }
-
-  const present=S.tPlayers.filter(x=>x.present&&x.registration_status!=='waitlist').length;
-  const wait=S.tPlayers.filter(x=>x.registration_status==='waitlist').length;
-  $('#homeStats').innerHTML='<div class="player"><b>'+present+'</b><div class="muted">confirmés'+(t?.max_players?' / '+t.max_players:'')+'</div></div><div class="player"><b>'+wait+'</b><div class="muted">liste d’attente</div></div><div class="player"><b>'+S.teams.length+'</b><div class="muted">équipes</div></div><div class="player"><b>'+S.matches.length+'</b><div class="muted">matchs</div></div>';
-  const share=$('#homeRegistrationShare');
-  if(share){
-    if(t?.registration_open && S.workspace?.public_token){
-      const url=registrationLink(t);
-      share.classList.remove('hidden');
-      share.innerHTML='<div class="player"><b>🔗 Inscriptions ouvertes</b><div class="muted" style="margin:4px 0 8px">Envoie ce lien aux joueurs pour qu’ils s’inscrivent.</div><div class="row"><input id="homeRegLink" readonly value="'+esc(url)+'" style="flex:1"><button id="homeCopyReg">Copier</button><button id="homeWaReg" class="primary">📲 WhatsApp</button></div></div>';
-      $('#homeCopyReg').onclick=async()=>{try{await navigator.clipboard.writeText(url);toast('Lien unique du tournoi copié ✅')}catch(e){$('#homeRegLink').select();toast('Lien sélectionné : copie-le.')}};
-      $('#homeWaReg').onclick=()=>{const msg='⚽ '+(t.name||'SWÉ Tournament 5/5')+'\n📅 '+t.tournament_date+'\n\nInscriptions ouvertes :\n'+url;window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank','noopener')};
-    }else{share.classList.add('hidden');share.innerHTML=''}
   }
 }
 
@@ -2066,7 +2008,7 @@ function renderPlayers(){
     let meta=(x.active?'Actif':'Inactif')+(g?' • '+esc(g):' • Membre du groupe');
     if(isAdmin()){
       const summary=playerSkillReviewSummary(x);
-      meta+=' • Niveau admin '+(x.skill_level||2)+'/4 • Moyenne '+summary.avg.toFixed(1)+'/4';
+      meta+=' • Niveau admin '+(x.skill_level||2)+'/5 • Moyenne '+summary.avg.toFixed(1)+'/5';
     }
     info.innerHTML='<b>'+esc(x.name)+'</b>'+(x.is_group_member===false?'<span class="guest-badge">Guest</span>':'')+
       '<div class="muted">'+meta+'</div>';
@@ -2103,9 +2045,9 @@ function renderPlayers(){
     if(isAdmin()){
       const summary=playerSkillReviewSummary(x);
       const reviewBox=document.createElement('div');reviewBox.className='muted';reviewBox.style.marginTop='7px';
-      reviewBox.innerHTML='<b>Avis niveaux :</b> Admin '+(x.skill_level||2)+'/4'+
-        (summary.reviews.length?' • '+summary.reviews.map(r=>esc(r.evaluator_email||'Co-organisateur')+' '+r.rating+'/4').join(' • '):' • Aucun avis co-organisateur')+
-        ' • <b>Moyenne '+summary.avg.toFixed(1)+'/4</b>';
+      reviewBox.innerHTML='<b>Avis niveaux :</b> Admin '+(x.skill_level||2)+'/5'+
+        (summary.reviews.length?' • '+summary.reviews.map(r=>esc(r.evaluator_email||'Co-organisateur')+' '+r.rating+'/5').join(' • '):' • Aucun avis co-organisateur')+
+        ' • <b>Moyenne '+summary.avg.toFixed(1)+'/5</b>';
       d.appendChild(reviewBox);
 
       const edit=document.createElement('div');edit.className='row';edit.style.marginTop='8px';edit.style.flexWrap='wrap';
@@ -2120,7 +2062,7 @@ function renderPlayers(){
       status.onchange=()=>host.classList.toggle('hidden',status.value!=='guest');
 
       const level=document.createElement('select');level.style.flex='1';
-      level.innerHTML='<option value="1">Niveau 1 — Loisir</option><option value="2">Niveau 2 — Intermédiaire</option><option value="3">Niveau 3 — Bon</option><option value="4">Niveau 4 — Très bon</option>';
+      level.innerHTML='<option value="1">Niveau 1 — Loisir</option><option value="2">Niveau 2 — Intermédiaire</option><option value="3">Niveau 3 — Bon</option><option value="4">Niveau 4 — Très bon</option><option value="5">Niveau 5 — Top level</option>';
       level.value=String(x.skill_level||2);
       level.title='Niveau privé attribué par l’administrateur';
       level.onchange=async()=>{
@@ -2182,12 +2124,12 @@ function renderPlayers(){
     } else if(isCoorg()){
       const existing=S.myRatings.find(r=>r.player_id===x.id);
       const rate=document.createElement('div');rate.className='row';rate.style.marginTop='8px';rate.style.flexWrap='wrap';
-      const label=document.createElement('span');label.className='muted';label.style.flex='1';label.innerHTML=existing?'<b>Mon avis actuel : '+existing.rating+'/4</b><div class="muted">Tu peux le modifier à tout moment.</div>':'Ton avis sur son niveau (1 avis par joueur) :';
-      const select=document.createElement('select');select.innerHTML='<option value="">Choisir…</option><option value="1">1 — Loisir</option><option value="2">2 — Intermédiaire</option><option value="3">3 — Bon</option><option value="4">4 — Très bon</option>';
+      const label=document.createElement('span');label.className='muted';label.style.flex='1';label.innerHTML=existing?'<b>Mon avis actuel : '+existing.rating+'/5</b><div class="muted">Tu peux le modifier à tout moment.</div>':'Ton avis sur son niveau sur 5 (1 avis par joueur) :';
+      const select=document.createElement('select');select.innerHTML='<option value="">Choisir…</option><option value="1">1 — Loisir</option><option value="2">2 — Intermédiaire</option><option value="3">3 — Bon</option><option value="4">4 — Très bon</option><option value="5">5 — Top level</option>';
       if(existing)select.value=String(existing.rating);
       const send=document.createElement('button');send.textContent=existing?'Modifier mon avis':'Enregistrer mon avis';send.className='primary';
       send.onclick=async()=>{
-        const val=Number(select.value);if(!val)return toast('Choisis un niveau de 1 à 4.');
+        const val=Number(select.value);if(!val)return toast('Choisis un niveau de 1 à 5.');
         send.disabled=true;
         const {error}=await sb.rpc('submit_player_skill_rating',{p_player_id:x.id,p_rating:val});
         send.disabled=false;if(error)return toast(error.message);
@@ -2416,7 +2358,7 @@ function appendTournamentSeasonControl(container,t){
 }
 
 function renderTournaments(){
-  // V39.60 : l'éditeur de tournoi est protégé des synchronisations automatiques.
+  // V39.61 : l'éditeur de tournoi est protégé des synchronisations automatiques.
   const ss=$('#seasonSelect');
   ss.innerHTML='<option value="">Sans saison</option>'+S.seasons.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');
   const box=$('#tournamentList');box.innerHTML='';
@@ -3338,7 +3280,7 @@ async function renderLeague(){
   const canCreate=hasAdminOps()||(isCoorg()&&S.myPermissions.can_create_tournaments);
   createCard.classList.toggle('hidden',!enabled||!hasAdminOps());
   $('#leagueSessionCard')?.classList.toggle('hidden',!enabled||!canCreate);
-  $('#leagueAdminRegistrationCard')?.classList.toggle('hidden',!enabled||!hasAdminOps());
+  $('#leagueAdminRegistrationCard')?.classList.add('hidden');
   const canScoreLeague=hasAdminOps()||(isCoorg()&&S.myPermissions.can_enter_scores);
   $('#leagueScoringCard')?.classList.toggle('hidden',!enabled||!canScoreLeague);
   document.querySelectorAll('#view-league .card').forEach(c=>{if(c!==disabled)c.style.opacity=enabled?'':'0.55'});
@@ -3373,19 +3315,12 @@ async function renderLeague(){
   const list=$('#leagueList');list.innerHTML='';
   if(!S.leagues.length)list.innerHTML='<p class="muted">Aucune Ligue créée pour le moment.</p>';
   S.leagues.forEach(l=>{
-    const count=S.leaguePlayers.filter(lp=>lp.league_id===l.id&&lp.status==='confirmed').length;
     const d=document.createElement('div');d.className='player';d.style.marginBottom='10px';
-    d.innerHTML='<div class="row"><span style="flex:1"><b>'+esc(l.name)+'</b><div class="muted">'+l.starts_on+(l.ends_on?' → '+l.ends_on:'')+' • '+count+' membre'+(count>1?'s':'')+' inscrit'+(count>1?'s':'')+' • '+(l.status==='finished'?'Terminée':'Active')+'</div></span></div>';
+    d.innerHTML='<div class="row"><span style="flex:1"><b>'+esc(l.name)+'</b><div class="muted">'+l.starts_on+(l.ends_on?' → '+l.ends_on:'')+' • '+(l.status==='finished'?'Terminée':'Active')+'</div><div class="muted" style="margin-top:4px">👥 Tous les membres actifs du groupe peuvent participer. L’inscription se fait uniquement à chaque Swé de Ligue.</div></span></div>';
     const row=document.createElement('div');row.className='row';row.style.marginTop='8px';
     const open=document.createElement('button');open.textContent=l.id===S.activeLeague?'Ligue sélectionnée':'Ouvrir';open.className=l.id===S.activeLeague?'green':'';
     open.onclick=()=>{S.activeLeague=l.id;renderLeague();};
     row.appendChild(open);
-    if(l.registration_open&&S.workspace?.public_token){
-      const share=document.createElement('button');share.textContent='🔗 Lien inscription Ligue';
-      const url=leagueRegistrationLink(l);
-      share.onclick=async()=>{try{await navigator.clipboard.writeText(url);toast('Lien de la Ligue copié ✅')}catch(e){toast('Copie impossible')}};
-      row.appendChild(share);
-    }
     if(hasAdminOps()&&l.status!=='finished'){
       const finish=document.createElement('button');finish.textContent='Terminer';finish.className='danger';
       finish.onclick=async()=>{if(!confirm('Terminer cette Ligue ? Les inscriptions seront fermées.'))return;const {error}=await sb.rpc('finish_league',{p_league_id:l.id});if(error)return toast(error.message);await loadAll();setView('league');};
@@ -3424,9 +3359,8 @@ async function renderLeague(){
     if($('#leagueScoringBody'))$('#leagueScoringBody').innerHTML='<p class="muted">Sélectionne une Ligue puis un Swé pour saisir son résultat.</p>';
     return;
   }
-  const members=S.leaguePlayers.filter(lp=>lp.league_id===league.id&&lp.status==='confirmed');
-  info.innerHTML='<div class="player"><b>'+esc(league.name)+'</b><div class="muted">📅 Du '+esc(league.starts_on)+(league.ends_on?' au '+esc(league.ends_on):' • sans date de fin')+'</div><div class="muted"><b>'+members.length+' membre'+(members.length>1?'s':'')+' inscrit'+(members.length>1?'s':'')+' à la Ligue.</b> Cela donne accès aux Swés de la Ligue mais ne les inscrit pas automatiquement à chaque Swé.</div></div>'+
-    '<div class="readonly-note" style="margin-top:8px"><b>À ne pas confondre :</b> « membre de la Ligue » ≠ « inscrit au Swé ». Chaque Swé possède sa propre liste d’inscrits.</div>';
+  info.innerHTML='<div class="player"><b>'+esc(league.name)+'</b><div class="muted">📅 Du '+esc(league.starts_on)+(league.ends_on?' au '+esc(league.ends_on):' • sans date de fin')+'</div><div class="muted" style="margin-top:5px"><b>👥 Tous les membres actifs du groupe sont éligibles à cette Ligue.</b></div></div>'+
+    '<div class="readonly-note" style="margin-top:8px"><b>Fonctionnement :</b> aucune inscription à la Ligue n’est nécessaire. Un joueur s’inscrit uniquement au <b>Swé de Ligue</b> auquel il souhaite participer.</div>';
 
   const prizeCard=$('#leaguePrizesCard'),prizeToggle=$('#leaguePrizesEnabled'),prizeFields=$('#leaguePrizeFields'),prizeReadonly=$('#leaguePrizeReadonly');
   if(prizeCard){
@@ -3451,12 +3385,7 @@ async function renderLeague(){
       };
     }
   }
-  if(league.registration_open&&S.workspace?.public_token){
-    const url=leagueRegistrationLink(league);
-    shareBox.innerHTML='<div class="row"><input id="leagueJoinLink" readonly value="'+esc(url)+'" style="flex:1"><button id="copyLeagueJoin">Copier</button><button id="waLeagueJoin" class="primary">📲 WhatsApp</button></div>';
-    $('#copyLeagueJoin').onclick=async()=>{try{await navigator.clipboard.writeText(url);toast('Lien Ligue copié ✅')}catch(e){}};
-    $('#waLeagueJoin').onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent('🏁 '+league.name+'\n\nInscription à la Ligue réservée aux membres du groupe :\n'+url),'_blank','noopener');
-  }else shareBox.innerHTML='<p class="muted">Inscriptions fermées.</p>';
+  shareBox.innerHTML='<div class="readonly-note"><b>Pas d’inscription à la Ligue.</b> Utilise le lien d’inscription du Swé de Ligue concerné dans la liste ci-dessous.</div>';
 
   const leagueTours=S.tournaments.filter(t=>t.format==='league'&&t.league_id===league.id).sort((a,b)=>String(b.tournament_date).localeCompare(String(a.tournament_date)));
   const box=$('#leagueDays');box.innerHTML='';
@@ -3559,7 +3488,7 @@ async function renderLeague(){
   }
 
 
-  // V39.60 — Saisie du résultat directement depuis l'onglet Ligue.
+  // V39.61 — Saisie du résultat directement depuis l'onglet Ligue.
   const scoringCard=$('#leagueScoringCard'),scoringBody=$('#leagueScoringBody'),scoringLabel=$('#leagueScoringSessionLabel');
   if(scoringCard)scoringCard.classList.toggle('hidden',!canScoreLeague);
   if(canScoreLeague&&scoringBody){
@@ -4096,7 +4025,7 @@ $('#closeVisual').onclick=()=>$('#visualPreviewBox').classList.add('hidden');
 
 async function bootPublic(token){
   S.publicMode=true;
-  // V39.60 — état global pour éviter qu'un ancien rafraîchissement public
+  // V39.61 — état global pour éviter qu'un ancien rafraîchissement public
   // reconstruise le formulaire d'inscription équipe après validation du code.
   window.__swePublicTeamEditing=false;
   if(window.__swePublicRegistrationInterval){
@@ -4272,7 +4201,7 @@ async function bootPublic(token){
       if(!pid)return $('#publicLeagueStatus').textContent='Choisis ton nom.';
       const {error}=await sb.rpc('public_league_registration',{p_token:token,p_league_id:league.id,p_player_id:pid,p_action:'join'});
       if(error)return $('#publicLeagueStatus').textContent=error.message;
-      $('#publicLeagueStatus').textContent='🟢 Inscription à la Ligue confirmée !';
+      $('#publicLeagueStatus').textContent='🟢 Participation à la Ligue confirmée !';
       setTimeout(()=>location.reload(),500);
     };
     $('#publicLeagueLeave').onclick=async()=>{
@@ -5042,7 +4971,7 @@ async function bootPublic(token){
   const pmap=new Map(players.map(x=>[x.id,x]));
   const tmap=new Map(teams.map(x=>[x.id,x]));
 
-  // V39.60 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
+  // V39.61 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
   if(wantsLeagueSession&&regTour){
     const linkedLeague=leagues.find(l=>l.id===regTour.league_id)||null;
     const linkLeagueId=publicParams.get('league');
@@ -5056,8 +4985,7 @@ async function bootPublic(token){
     const leagueMatchIds=new Set(leagueMatches.map(m=>m.id));
     const leagueTeamIds=new Set();
     leagueMatches.forEach(m=>{leagueTeamIds.add(m.home_team_id);leagueTeamIds.add(m.away_team_id);});
-    const confirmedLeagueIds=new Set((leaguePlayers||[]).filter(lp=>lp.league_id===linkedLeague.id&&lp.status==='confirmed').map(lp=>lp.player_id));
-    const leaguePlayerIds=new Set(confirmedLeagueIds);
+    const leaguePlayerIds=new Set(players.filter(pl=>pl.active&&pl.is_group_member!==false).map(pl=>pl.id));
     teamPlayers.filter(tp=>leagueTeamIds.has(tp.team_id)).forEach(tp=>leaguePlayerIds.add(tp.player_id));
     goals.filter(g=>leagueMatchIds.has(g.match_id)).forEach(g=>{if(g.scorer_player_id)leaguePlayerIds.add(g.scorer_player_id);if(g.assister_player_id)leaguePlayerIds.add(g.assister_player_id);});
     const stats=new Map(players.filter(pl=>leaguePlayerIds.has(pl.id)).map(pl=>[pl.id,{id:pl.id,name:pl.name,g:0,a:0,w:0}]));
