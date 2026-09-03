@@ -60,7 +60,7 @@ select{background-color:#fff} textarea{resize:vertical}
 }
 @media(max-width:650px){
   body{background:#f3f7f4}.app{padding:0 12px 100px}.top{border-radius:0 0 24px 24px;margin:0 -12px 14px;padding:18px 16px 20px}.top h1{font-size:21px}.card{border-radius:17px;padding:14px;margin:10px 0}.g2,.g3{grid-template-columns:1fr}.sectiontitle{font-size:17px}
-  /* V39.47 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
+  /* V39.48 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
   .tabs{left:0;right:0;transform:none;width:100%;display:flex;grid-template-columns:none;justify-content:flex-start;gap:5px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;border-radius:18px 18px 0 0;padding:7px 10px calc(7px + env(safe-area-inset-bottom));scroll-snap-type:x proximity;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
   .tabs button{flex:0 0 74px;min-width:74px;font-size:10px;scroll-snap-align:center;padding:5px 6px}
@@ -81,7 +81,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.47</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.48</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -124,7 +124,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.47</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.48</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -662,12 +662,12 @@ select{background-color:#fff} textarea{resize:vertical}
 
     <div class="grid g2" style="align-items:start">
       <div class="card">
-        <h2 class="sectiontitle">🏆 Meilleurs buteurs</h2>
+        <h2 class="sectiontitle">🏆 Meilleurs buteurs de la saison</h2>
         <div id="publicSeasonScorers"></div>
         <button id="togglePublicSeasonScorers" type="button" class="hidden" style="margin-top:10px">Développer</button>
       </div>
       <div class="card">
-        <h2 class="sectiontitle">🎯 Meilleurs passeurs</h2>
+        <h2 class="sectiontitle">🎯 Meilleurs passeurs de la saison</h2>
         <div id="publicSeasonAssists"></div>
         <button id="togglePublicSeasonAssists" type="button" class="hidden" style="margin-top:10px">Développer</button>
       </div>
@@ -675,9 +675,14 @@ select{background-color:#fff} textarea{resize:vertical}
 
     <div class="card">
       <h2 class="sectiontitle">🏅 Victoires individuelles de la saison</h2>
-      <p class="muted">Chaque joueur cumule ses matchs gagnés avec son équipe et les tournois remportés pendant la saison.</p>
+      <p class="muted">Classement affiné par les victoires, puis les buts et les passes décisives.</p>
       <div id="publicSeasonWins"></div>
       <button id="togglePublicSeasonWins" type="button" class="hidden" style="margin-top:10px">Développer</button>
+      <div id="publicTopPlayerSeasonWrap" class="hidden" style="margin-top:16px;border-top:1px solid #e8ecef;padding-top:14px">
+        <h3 style="margin:0 0 4px">⭐ Top Player de la saison</h3>
+        <div class="muted" style="margin-bottom:8px">Moyenne des notes obtenues sur les matchs joués.</div>
+        <div id="publicSeasonTopPlayers"></div>
+      </div>
     </div>
 
     <div class="card">
@@ -689,12 +694,13 @@ select{background-color:#fff} textarea{resize:vertical}
         <button id="toggleLastTournamentPublic" type="button">Afficher</button>
       </div>
       <div id="publicLastTournamentDetails" class="hidden" style="margin-top:14px">
-        <h3>📋 Résultats</h3>
+        <h3>📋 Résultats & notes</h3>
         <div id="publicResults"></div>
-        <h3 style="margin-top:18px">⚽ Buteurs du tournoi</h3>
-        <div id="publicTournamentScorers"></div>
-        <h3 style="margin-top:18px">🎯 Passeurs du tournoi</h3>
-        <div id="publicTournamentAssists"></div>
+        <div class="grid g2" style="margin-top:18px;align-items:start">
+          <div class="player"><h3 style="margin:0 0 8px">⚽ Buteurs du tournoi</h3><div id="publicTournamentScorers"></div></div>
+          <div class="player"><h3 style="margin:0 0 8px">🎯 Passeurs du tournoi</h3><div id="publicTournamentAssists"></div></div>
+        </div>
+        <div id="publicTournamentTopPlayerWrap" class="player hidden" style="margin-top:12px;background:#fff8e8;border:1px solid #f2d18a"><h3 style="margin:0 0 8px">⭐ Top Player du tournoi</h3><div id="publicTournamentTopPlayers"></div></div>
       </div>
     </div>
 
@@ -718,7 +724,7 @@ window.addEventListener('error', (e) => {
   if(t){t.textContent='Erreur de chargement de l’application. Recharge la page.';t.style.display='block';}
 });
 
-const S={session:null,isSuperAdmin:false,superWorkspaces:[],workspace:null,members:[],coorgs:[],coorgCount:0,workspaceFeatures:{max_coorganizers:3,max_coorganizers_cap:100,rankings_enabled:true,league_enabled:true,tournaments_enabled:true,third_half_enabled:false},myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null},myRatings:[],lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],teamCodes:[],seasons:[],leagues:[],leaguePlayers:[],activeLeague:null,tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},sportsComplexes:[],sportsPitches:[],publicMode:false,publicToken:null,editingTournamentId:null};
+const S={session:null,isSuperAdmin:false,superWorkspaces:[],workspace:null,members:[],coorgs:[],coorgCount:0,workspaceFeatures:{max_coorganizers:3,max_coorganizers_cap:100,rankings_enabled:true,league_enabled:true,tournaments_enabled:true,third_half_enabled:false,player_ratings_enabled:false},myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null},myRatings:[],lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],teamCodes:[],seasons:[],leagues:[],leaguePlayers:[],activeLeague:null,tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matchAssignments:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},sportsComplexes:[],sportsPitches:[],publicMode:false,publicToken:null,editingTournamentId:null};
 
 let safeSyncTimer=null;
 let safeSyncBusy=false;
@@ -1138,6 +1144,9 @@ function renderSuperAdminWorkspaces(){
         '<label class="player row" style="justify-content:flex-start"><input data-sa-league type="checkbox" style="width:auto" '+(w.league_enabled?'checked':'')+'><span><b>Ligue</b></span></label>'+
         '<label class="player row" style="justify-content:flex-start"><input data-sa-rankings type="checkbox" style="width:auto" '+(w.rankings_enabled?'checked':'')+'><span><b>Buteurs / passeurs</b></span></label>'+
       '</div>'+
+      '<div class="player" style="margin-top:10px;background:#fff8e8;border:1px solid #f2d18a">'+
+        '<label class="row" style="justify-content:flex-start"><input data-sa-player-ratings type="checkbox" style="width:auto" '+(w.player_ratings_enabled?'checked':'')+'><span><b>⭐ Module Top Player / notes de match</b><div class="muted">Victoire 6 • nul 5 • défaite 4 • +1/but • +0,5/passe • note max 10.</div></span></label>'+
+      '</div>'+
       '<div class="player" style="margin-top:14px;background:#fffaf0;border:1px solid #f2d79a">'+
         '<b>🔄 Transférer la gestion à un autre administrateur</b>'+
         '<div class="muted" style="margin:5px 0 10px">Le nouveau compte doit déjà exister. Après validation, il devient immédiatement administrateur principal de cet espace.</div>'+
@@ -1187,7 +1196,8 @@ function renderSuperAdminWorkspaces(){
         p_tournaments_enabled:d.querySelector('[data-sa-tournament]').checked,
         p_league_enabled:d.querySelector('[data-sa-league]').checked,
         p_rankings_enabled:d.querySelector('[data-sa-rankings]').checked,
-        p_public_enabled:d.querySelector('[data-sa-public]').checked
+        p_public_enabled:d.querySelector('[data-sa-public]').checked,
+        p_player_ratings_enabled:d.querySelector('[data-sa-player-ratings]').checked
       });
       save.disabled=false;if(r.error)return toast(r.error.message);
       toast('Espace mis à jour ✅');await loadSuperAdminWorkspaces();
@@ -1209,7 +1219,8 @@ function renderSuperAdminWorkspaces(){
         p_tournaments_enabled:!!w.tournaments_enabled,
         p_league_enabled:!!w.league_enabled,
         p_rankings_enabled:!!w.rankings_enabled,
-        p_public_enabled:!w.public_enabled
+        p_public_enabled:!w.public_enabled,
+        p_player_ratings_enabled:!!w.player_ratings_enabled
       });
       toggle.disabled=false;if(error)return toast(error.message);
       toast(w.public_enabled?'Espace suspendu.':'Espace réactivé ✅');await loadSuperAdminWorkspaces();
@@ -1409,12 +1420,16 @@ async function loadAll(){
   await loadTournament();renderAll()
 }
 async function loadTournament(){
-  const t=currentTour();if(!t){S.tPlayers=[];S.teams=[];S.teamPlayers=[];S.matches=[];S.goals=[];return}let r;
+  const t=currentTour();if(!t){S.tPlayers=[];S.teams=[];S.teamPlayers=[];S.matchAssignments=[];S.matches=[];S.goals=[];return}let r;
   r=await sb.from('tournament_players').select('*').eq('tournament_id',t.id);S.tPlayers=r.data||[];
   r=await sb.from('teams').select('*').eq('tournament_id',t.id).order('created_at');S.teams=r.data||[];
   const tids=S.teams.map(x=>x.id);if(tids.length){r=await sb.from('team_players').select('*').in('team_id',tids);S.teamPlayers=r.data||[]}else S.teamPlayers=[];
   r=await sb.from('matches').select('*').eq('tournament_id',t.id).order('match_order');S.matches=r.data||[];
-  const mids=S.matches.map(x=>x.id);if(mids.length){r=await sb.from('goals').select('*').in('match_id',mids).order('created_at');S.goals=r.data||[]}else S.goals=[];
+  const mids=S.matches.map(x=>x.id);
+  if(mids.length){
+    r=await sb.from('goals').select('*').in('match_id',mids).order('created_at');S.goals=r.data||[];
+    r=await sb.from('match_player_assignments').select('*').in('match_id',mids);S.matchAssignments=r.data||[];
+  }else{S.goals=[];S.matchAssignments=[];}
   renderMatchPitchSelect();
 }
 const THIRD_HALF_PAYMENT_MODES={
@@ -1424,6 +1439,35 @@ const THIRD_HALF_PAYMENT_MODES={
   cooler_cash:'Participation main à main'
 };
 function currentTour(){return S.tournaments.find(x=>x.id===S.activeTour)} function p(id){return S.players.find(x=>x.id===id)} function tm(id){return S.teams.find(x=>x.id===id)}
+
+function matchTeamPlayerIds(matchId,teamId){
+  const rows=S.matchAssignments.filter(a=>String(a.match_id)===String(matchId));
+  if(rows.length)return rows.filter(a=>String(a.team_id||'')===String(teamId||'')).map(a=>a.player_id);
+  return teamPlayerIds(teamId);
+}
+function ratingForMatchPlayer(match,playerId,teamId,goalRows=S.goals){
+  if(!match||!teamId)return null;
+  const hs=Number(match.home_score||0),as=Number(match.away_score||0);
+  const isHome=String(teamId)===String(match.home_team_id),isAway=String(teamId)===String(match.away_team_id);
+  if(!isHome&&!isAway)return null;
+  const own=isHome?hs:as,opp=isHome?as:hs;
+  const base=own>opp?6:(own===opp?5:4);
+  const mg=(goalRows||[]).filter(g=>String(g.match_id)===String(match.id));
+  const goals=mg.filter(g=>String(g.scorer_player_id)===String(playerId)).length;
+  const assists=mg.filter(g=>String(g.assister_player_id||'')===String(playerId)).length;
+  return {rating:Math.min(10,base+goals+(assists*.5)),base,goals,assists,result:own>opp?'V':(own===opp?'N':'D')};
+}
+function topPlayersFromData(matchRows,goalRows,assignmentRows,playerRows,tournamentIds=null){
+  const matchMap=new Map((matchRows||[]).filter(m=>!tournamentIds||tournamentIds.has(m.tournament_id)).map(m=>[m.id,m]));
+  const stats=new Map((playerRows||[]).map(pl=>[pl.id,{id:pl.id,name:pl.name,guest:pl.is_group_member===false,total:0,matches:0,g:0,a:0,avg:0}]));
+  (assignmentRows||[]).forEach(a=>{
+    const m=matchMap.get(a.match_id);if(!m||!a.team_id||!stats.has(a.player_id))return;
+    const r=ratingForMatchPlayer(m,a.player_id,a.team_id,goalRows);if(!r)return;
+    const s=stats.get(a.player_id);s.total+=r.rating;s.matches++;s.g+=r.goals;s.a+=r.assists;
+  });
+  return [...stats.values()].filter(x=>x.matches).map(x=>({...x,avg:x.total/x.matches}))
+    .sort((a,b)=>b.avg-a.avg||b.g-a.g||b.a-a.a||a.name.localeCompare(b.name));
+}
 
 async function renderSeasonScorerSummary(){
   const box=$('#seasonScorerSummary');if(!box)return;
@@ -2106,7 +2150,7 @@ function appendTournamentSeasonControl(container,t){
 }
 
 function renderTournaments(){
-  // V39.47 : l'éditeur de tournoi est protégé des synchronisations automatiques.
+  // V39.48 : l'éditeur de tournoi est protégé des synchronisations automatiques.
   const ss=$('#seasonSelect');
   ss.innerHTML='<option value="">Sans saison</option>'+S.seasons.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');
   const box=$('#tournamentList');box.innerHTML='';
@@ -2790,6 +2834,62 @@ $('#smartAutoTeams').onclick=async()=>{
 };
 
 function matchOptions(){return '<option value="">Choisir</option>'+S.teams.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')}
+function buildMatchPlayerManager(match,home,away){
+  const wrap=document.createElement('div');
+  wrap.className='player';
+  wrap.style.marginTop='12px';
+  wrap.style.background='#f8fbf9';
+  const canMove=canEditCurrentMatches();
+  const rows=S.matchAssignments.filter(a=>String(a.match_id)===String(match.id));
+  const assignedMap=new Map(rows.map(a=>[a.player_id,a.team_id||'']));
+  const tournamentPlayers=S.tPlayers.filter(tp=>tp.present&&tp.registration_status!=='waitlist')
+    .map(tp=>({tp,pl:p(tp.player_id)})).filter(x=>x.pl)
+    .sort((a,b)=>String(a.pl.name).localeCompare(String(b.pl.name)));
+
+  wrap.innerHTML='<div class="row" style="justify-content:space-between"><div><b>🔄 Joueurs de ce match</b><div class="muted">Déplace rapidement un titulaire ou un remplaçant entre les deux équipes. Le changement peut rester limité à ce match ou être appliqué aux matchs suivants.</div></div></div>';
+  const formula=document.createElement('div');
+  formula.className='muted';
+  formula.style.marginTop='6px';
+  if(S.workspaceFeatures.player_ratings_enabled)formula.innerHTML='⭐ Note automatique : victoire 6 • nul 5 • défaite 4 • +1/but • +0,5/passe • maximum 10.';
+  wrap.appendChild(formula);
+
+  const list=document.createElement('div');
+  list.style.marginTop='8px';
+  tournamentPlayers.forEach(({tp,pl})=>{
+    const currentTeam=assignedMap.has(pl.id)?assignedMap.get(pl.id):(teamPlayerIds(home.id).includes(pl.id)?home.id:(teamPlayerIds(away.id).includes(pl.id)?away.id:''));
+    const row=document.createElement('div');row.className='row small';row.style.padding='7px 0';row.style.borderBottom='1px solid #edf2ef';
+    const name=document.createElement('span');name.style.flex='1';name.innerHTML='<b>'+esc(pl.name)+'</b>'+(tp.is_substitute?' <span class="guest-badge">Remplaçant commun</span>':'');
+    const sel=document.createElement('select');sel.style.maxWidth='190px';sel.disabled=!canMove;
+    sel.innerHTML='<option value="">Hors match / remplaçant</option><option value="'+home.id+'">'+esc(home.name)+'</option><option value="'+away.id+'">'+esc(away.name)+'</option>';
+    sel.value=currentTeam||'';
+    const future=document.createElement('label');future.className='row';future.style.justifyContent='flex-start';future.style.gap='4px';future.style.fontSize='11px';
+    const cb=document.createElement('input');cb.type='checkbox';cb.style.width='auto';cb.disabled=!canMove;
+    future.append(cb,document.createTextNode(' matchs suivants'));
+    const save=document.createElement('button');save.textContent='Déplacer';save.className='smallbtn';save.disabled=!canMove;
+    save.onclick=async()=>{
+      save.disabled=true;
+      const {error}=await sb.rpc('set_match_player_assignment',{p_match_id:match.id,p_player_id:pl.id,p_team_id:sel.value||null,p_apply_future:cb.checked});
+      if(error){save.disabled=false;return toast(error.message)}
+      await loadTournament();renderMatches();toast(cb.checked?'Joueur déplacé pour ce match et les suivants ✅':'Joueur déplacé pour ce match ✅');
+    };
+    row.append(name,sel,future,save);list.appendChild(row);
+  });
+  wrap.appendChild(list);
+
+  if(S.workspaceFeatures.player_ratings_enabled){
+    const notes=document.createElement('div');notes.style.marginTop='10px';
+    const rated=S.matchAssignments.filter(a=>a.match_id===match.id&&a.team_id).map(a=>{
+      const pl=p(a.player_id),rr=ratingForMatchPlayer(match,a.player_id,a.team_id,S.goals);
+      return pl&&rr?{pl,rr,team:a.team_id}:null;
+    }).filter(Boolean).sort((a,b)=>b.rr.rating-a.rr.rating||a.pl.name.localeCompare(b.pl.name));
+    notes.innerHTML='<b>⭐ Notes des joueurs</b><div class="muted" style="margin-top:5px">'+
+      (rated.length?rated.map(x=>esc(x.pl.name)+' <b>'+x.rr.rating.toFixed(1)+'/10</b> ('+x.rr.result+' • ⚽ '+x.rr.goals+' • 🎯 '+x.rr.assists+')').join('<br>'):'Aucune note calculable pour le moment.')+
+      '</div>';
+    wrap.appendChild(notes);
+  }
+  return wrap;
+}
+
 function renderMatches(){
   const current=currentTour();
   const selector=$('#matchCompetitionSelect');
@@ -2847,6 +2947,22 @@ function renderMatches(){
     const d=document.createElement('div');d.className='card match';
     d.innerHTML='<div class="muted">Match '+(i+1)+(m.pitch?' • '+esc(m.pitch):'')+(m.round_label?' • '+esc(m.round_label):'')+'</div><div class="row" style="justify-content:space-between"><b>'+esc(home.name)+'</b><span class="score">'+m.home_score+' - '+m.away_score+'</span><b>'+esc(away.name)+'</b></div>';
 
+    if(canEditCurrentMatches()){
+      const scoreEdit=document.createElement('div');scoreEdit.className='grid g3';scoreEdit.style.marginTop='10px';
+      const hs=document.createElement('input'),ascore=document.createElement('input'),saveScore=document.createElement('button');
+      hs.type='number';hs.min='0';hs.value=Number(m.home_score||0);hs.placeholder=home.name;
+      ascore.type='number';ascore.min='0';ascore.value=Number(m.away_score||0);ascore.placeholder=away.name;
+      saveScore.textContent='💾 Score';saveScore.className='primary';
+      saveScore.onclick=async()=>{
+        saveScore.disabled=true;
+        const {error}=await sb.from('matches').update({home_score:Math.max(0,Number(hs.value)||0),away_score:Math.max(0,Number(ascore.value)||0),status:'finished',finished_at:new Date().toISOString()}).eq('id',m.id);
+        if(error){saveScore.disabled=false;return toast(error.message)}
+        await loadTournament();renderMatches();toast('Score enregistré et notes recalculées ✅');
+      };
+      scoreEdit.append(hs,ascore,saveScore);d.appendChild(scoreEdit);
+    }
+    d.appendChild(buildMatchPlayerManager(m,home,away));
+
     if(canManageMatchStructure()){
       const actions=document.createElement('div');actions.className='row';actions.style.marginTop='8px';
       const edit=document.createElement('button');edit.textContent='Modifier';
@@ -2891,7 +3007,7 @@ function renderMatches(){
     if(savedTeam===home.id||savedTeam===away.id)team.value=savedTeam;
     function fill(){
       S.goalTeamSelections[m.id]=team.value;
-      const ids=teamPlayerIds(team.value);
+      const ids=matchTeamPlayerIds(m.id,team.value);
       sc.innerHTML='<option value="">Buteur</option>'+ids.map(id=>'<option value="'+id+'">'+esc(playerDisplayName(p(id))||'')+'</option>').join('');
       as.innerHTML='<option value="">Sans passe</option>'+ids.map(id=>'<option value="'+id+'">'+esc(playerDisplayName(p(id))||'')+'</option>').join('');
     }
@@ -3164,7 +3280,7 @@ async function renderLeague(){
   }
 
 
-  // V39.47 — Saisie du résultat directement depuis l'onglet Ligue.
+  // V39.48 — Saisie du résultat directement depuis l'onglet Ligue.
   const scoringCard=$('#leagueScoringCard'),scoringBody=$('#leagueScoringBody'),scoringLabel=$('#leagueScoringSessionLabel');
   if(scoringCard)scoringCard.classList.toggle('hidden',!canScoreLeague);
   if(canScoreLeague&&scoringBody){
@@ -3438,7 +3554,7 @@ function renderTeamRanking(){const r=S.teams.map(x=>({id:x.id,name:x.name,mj:0,v
 document.querySelectorAll('.rankMode').forEach(b=>b.onclick=()=>{S.rankMode=b.dataset.mode;document.querySelectorAll('.rankMode').forEach(x=>x.classList.toggle('primary',x===b));renderRanking()});
 $('#shareWhatsapp').onclick=async()=>{const text=$('#shareText').value;if(navigator.share){try{await navigator.share({title:'Classement du tournoi',text});return}catch{}}await navigator.clipboard.writeText(text);toast('Résumé copié')};
 
-function subscribeRealtime(){if(S.channel)sb.removeChannel(S.channel);let timer;const reload=()=>{clearTimeout(timer);timer=setTimeout(async()=>await loadAll(),250)};S.channel=sb.channel('tournoi-manager').on('postgres_changes',{event:'*',schema:'public',table:'players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'seasons'},reload).on('postgres_changes',{event:'*',schema:'public',table:'tournaments'},reload).on('postgres_changes',{event:'*',schema:'public',table:'tournament_players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'teams'},reload).on('postgres_changes',{event:'*',schema:'public',table:'team_players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'matches'},reload).on('postgres_changes',{event:'*',schema:'public',table:'goals'},reload).subscribe()}
+function subscribeRealtime(){if(S.channel)sb.removeChannel(S.channel);let timer;const reload=()=>{clearTimeout(timer);timer=setTimeout(async()=>await loadAll(),250)};S.channel=sb.channel('tournoi-manager').on('postgres_changes',{event:'*',schema:'public',table:'players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'seasons'},reload).on('postgres_changes',{event:'*',schema:'public',table:'tournaments'},reload).on('postgres_changes',{event:'*',schema:'public',table:'tournament_players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'teams'},reload).on('postgres_changes',{event:'*',schema:'public',table:'team_players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'matches'},reload).on('postgres_changes',{event:'*',schema:'public',table:'goals'},reload).on('postgres_changes',{event:'*',schema:'public',table:'match_player_assignments'},reload).subscribe()}
 
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'})
@@ -3612,7 +3728,7 @@ $('#closeVisual').onclick=()=>$('#visualPreviewBox').classList.add('hidden');
 
 async function bootPublic(token){
   S.publicMode=true;
-  // V39.47 — état global pour éviter qu'un ancien rafraîchissement public
+  // V39.48 — état global pour éviter qu'un ancien rafraîchissement public
   // reconstruise le formulaire d'inscription équipe après validation du code.
   window.__swePublicTeamEditing=false;
   if(window.__swePublicRegistrationInterval){
@@ -3637,7 +3753,8 @@ async function bootPublic(token){
   const publicThirdHalf=!!P.workspace?.third_half_enabled;
   $('#publicWorkspaceName').textContent=P.workspace?.name||'SWÉ TOURNAMENT 5/5';
   let players=P.players||[],seasons=P.seasons||[],leagues=P.leagues||[],leaguePlayers=P.league_players||[],tournaments=(P.tournaments||[]).sort((a,b)=>String(b.tournament_date).localeCompare(String(a.tournament_date)));
-  let teams=P.teams||[],teamPlayers=P.team_players||[],matches=P.matches||[],goals=P.goals||[];
+  let teams=P.teams||[],teamPlayers=P.team_players||[],matches=P.matches||[],goals=P.goals||[],matchAssignments=P.match_player_assignments||[];
+  const publicPlayerRatingsEnabled=!!P.features?.player_ratings_enabled;
   S.sportsComplexes=P.sports_complexes||[];
   S.sportsPitches=P.sports_pitches||[];
   let registrations=P.tournament_players||[];
@@ -3842,10 +3959,14 @@ async function bootPublic(token){
     let ap=null,ar=0;ass=ass.map((x,i)=>{if(x.a!==ap){ar=i+1;ap=x.a}return {...x,rank:ar}});
     const scorRows=scor.map(x=>'<div class="rank '+(x.guest?'guest-row':'')+'"><b>'+x.rank+'</b><span>'+esc(x.name)+'</span><b class="right">'+x.g+' but'+(x.g>1?'s':'')+'</b></div>').join('');
     const assRows=ass.map(x=>'<div class="rank '+(x.guest?'guest-row':'')+'"><b>'+x.rank+'</b><span>'+esc(x.name)+'</span><b class="right">'+x.a+' passe'+(x.a>1?'s':'')+'</b></div>').join('');
+    const histTop=publicPlayerRatingsEnabled?topPlayersFromData(tmatches,tgoals,matchAssignments,players,new Set([ht.id])):[];
+    const histTopRows=histTop.map((x,i)=>'<div class="rank '+(x.guest?'guest-row':'')+'"><b>'+(i===0?'👑':(i+1))+'</b><span><b>'+esc(x.name)+'</b><div class="muted">'+x.matches+' match'+(x.matches>1?'s':'')+' • ⚽ '+x.g+' • 🎯 '+x.a+'</div></span><b class="right">⭐ '+x.avg.toFixed(1)+'</b></div>').join('');
     const matchRows=tmatches.map((m,i)=>{
       const mg=tgoals.filter(g=>g.match_id===m.id);
       const gl=mg.map(g=>{const sc=pmap2.get(g.scorer_player_id),as=g.assister_player_id?pmap2.get(g.assister_player_id):null;return '<div class="small" style="margin-top:5px">⚽ '+esc(sc?.name||'?')+(as?' <span class="muted">← passe '+esc(as.name)+'</span>':'')+'</div>'}).join('');
-      return '<div class="player"><div class="muted">Match '+(i+1)+(m.pitch?' • '+esc(m.pitch):'')+'</div><div><b>'+esc(tmap2.get(m.home_team_id)||'?')+' '+m.home_score+' - '+m.away_score+' '+esc(tmap2.get(m.away_team_id)||'?')+'</b></div>'+gl+'</div>';
+      const notes=publicPlayerRatingsEnabled?matchAssignments.filter(a=>a.match_id===m.id&&a.team_id).map(a=>{const pl=pmap2.get(a.player_id),rr=ratingForMatchPlayer(m,a.player_id,a.team_id,tgoals);return rr&&pl?{name:pl.name,r:rr.rating}:null}).filter(Boolean).sort((a,b)=>b.r-a.r||a.name.localeCompare(b.name)):[];
+      const noteHtml=notes.length?'<div class="small" style="margin-top:7px"><b>⭐ Notes :</b> '+notes.map(n=>esc(n.name)+' '+n.r.toFixed(1)).join(' • ')+'</div>':'';
+      return '<div class="player"><div class="muted">Match '+(i+1)+(m.pitch?' • '+esc(m.pitch):'')+'</div><div><b>'+esc(tmap2.get(m.home_team_id)||'?')+' '+m.home_score+' - '+m.away_score+' '+esc(tmap2.get(m.away_team_id)||'?')+'</b></div>'+gl+noteHtml+'</div>';
     }).join('');
     const teamsRows=tteams.map(team=>{
       const ids=teamPlayers.filter(tp=>tp.team_id===team.id).map(tp=>tp.player_id);
@@ -3855,9 +3976,10 @@ async function bootPublic(token){
       '<header class="top"><div class="row" style="justify-content:space-between"><div><h1>⚽ '+esc(ht.name||'SWÉ TOURNAMENT 5/5')+'</h1><div class="public-sub">'+ht.tournament_date+' • Historique</div></div><button id="backPublic">← Retour</button></div></header>'+
       '<div class="card"><h2 class="sectiontitle">👥 Équipes</h2>'+ (teamsRows||'<p class="muted">Aucune équipe.</p>') +'</div>'+
       '<div class="card"><h2 class="sectiontitle">🏆 Classement final</h2>'+ (teamRows||'<p class="muted">Aucun classement.</p>') +'</div>'+
-      '<div class="card"><h2 class="sectiontitle">⚽ Buteurs</h2>'+ (scorRows||'<p class="muted">Aucun buteur.</p>') +'</div>'+
-      '<div class="card"><h2 class="sectiontitle">🎯 Passeurs</h2>'+ (assRows||'<p class="muted">Aucun passeur.</p>') +'</div>'+
-      '<div class="card"><h2 class="sectiontitle">📋 Résultats</h2>'+ (matchRows||'<p class="muted">Aucun match.</p>') +'</div>';
+      '<div class="grid g2"><div class="card"><h2 class="sectiontitle">⚽ Buteurs</h2>'+ (scorRows||'<p class="muted">Aucun buteur.</p>') +'</div>'+
+      '<div class="card"><h2 class="sectiontitle">🎯 Passeurs</h2>'+ (assRows||'<p class="muted">Aucun passeur.</p>') +'</div></div>'+
+      (publicPlayerRatingsEnabled?'<div class="card"><h2 class="sectiontitle">⭐ Top Player du tournoi</h2><div class="muted" style="margin-bottom:8px">Moyenne des notes : victoire 6 • nul 5 • défaite 4 • +1/but • +0,5/passe • max 10.</div>'+ (histTopRows||'<p class="muted">Aucune note disponible.</p>') +'</div>':'')+
+      '<div class="card"><h2 class="sectiontitle">📋 Résultats & notes</h2>'+ (matchRows||'<p class="muted">Aucun match.</p>') +'</div>';
     $('#backPublic').onclick=()=>location.href=APP_URL+'?public='+encodeURIComponent(token);
     return;
   }
@@ -3992,7 +4114,8 @@ async function bootPublic(token){
     const publicTerrainLabel=reservedPitchNames.length?reservedPitchNames.join(', '):(regTour.venue||'À préciser');
     const publicTime=regTour.start_time?String(regTour.start_time).slice(0,5):'À préciser';
     regBox.innerHTML=
-      '<div class="player"><b>'+esc(regTour.name||('Tournoi du '+regTour.tournament_date))+'</b><div id="publicRegCount" class="muted">'+confirmed+'/'+(regTour.max_players||20)+' confirmés'+(waiting?' • '+waiting+' remplaçant'+(waiting>1?'s':''):'')+'</div>'+
+      '<div class="player"><b>'+esc(regTour.name||('Tournoi du '+regTour.tournament_date))+'</b><div id="publicRegCount" class="muted">'+confirmed+'/'+(regTour.max_players||35)+' confirmés'+(waiting?' • '+waiting+' remplaçant'+(waiting>1?'s':''):'')+'</div>'+
+      (regTour.format!=='league'?(()=>{const plan=tournamentAutoPlan(confirmed);return '<div style="margin-top:7px;font-weight:800">⚙️ Scénario actuel : '+(plan.teams?plan.teams+' équipe'+(plan.teams>1?'s':'')+' • '+plan.pitches+' terrain'+(plan.pitches>1?'s':'')+(plan.subs?' • '+plan.subs+' remplaçant'+(plan.subs>1?'s':'')+' commun'+(plan.subs>1?'s':''):''):'moins de 10 joueurs — équipes non générables')+'</div>'})():'')+
       (regTour.format!=='league'&&regTour.registration_deadline?'<div data-registration-deadline="'+esc(regTour.registration_deadline)+'" style="margin-top:7px"></div><div class="muted">Clôture automatique la veille à 17h'+(Number(regTour.registration_extension_hours||0)===3?' • prolongation +3h activée':'')+'</div>':'')+'</div>'+
       (regTour.format!=='league'
         ? '<div class="player" style="margin-top:12px;background:#eef8f2;border:1px solid #b7dfc4"><b>📍 Infos pratiques</b><div class="muted" style="margin-top:6px;line-height:1.7">Complexe / terrains : <b>'+esc(publicTerrainLabel)+'</b><br>Heure de réservation : <b>'+esc(publicTime)+'</b><br>Prix : <b>'+esc(publicFee)+' € / participant</b>'+(regTour.reservation_reference?'<br>Réservation : <b>'+esc(regTour.reservation_reference)+'</b>':'')+'</div><div class="muted" style="margin-top:8px;line-height:1.7"><b>Programme :</b><br>8h45 : arrivée, paiement + échauffement<br>9h00 : début du tournoi — les premières équipes arrivées commencent<br>11h00 : 3e mi-temps</div></div>'
@@ -4111,6 +4234,7 @@ async function bootPublic(token){
         registrations=data.tournament_players||registrations;
         teams=data.teams||teams;
         teamPlayers=data.team_players||teamPlayers;
+        matchAssignments=data.match_player_assignments||matchAssignments;
         renderPublicRegistrationList();
         refreshPublicPlayerSelect();
         updateSelectedRegistrationStatus();
@@ -4440,7 +4564,7 @@ async function bootPublic(token){
   const pmap=new Map(players.map(x=>[x.id,x]));
   const tmap=new Map(teams.map(x=>[x.id,x]));
 
-  // V39.47 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
+  // V39.48 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
   if(wantsLeagueSession&&regTour){
     const linkedLeague=leagues.find(l=>l.id===regTour.league_id)||null;
     const linkLeagueId=publicParams.get('league');
@@ -4556,39 +4680,61 @@ async function bootPublic(token){
   renderPublicSeasonAssists();
   if($('#togglePublicSeasonAssists'))$('#togglePublicSeasonAssists').onclick=()=>{publicAssistsExpanded=!publicAssistsExpanded;renderPublicSeasonAssists();};
 
-  const seasonWinStats=new Map(players.map(x=>[x.id,{id:x.id,name:x.name,matchWins:0,tournamentWins:0,guest:x.is_group_member===false}]));
+  const seasonWinStats=new Map(players.map(x=>[x.id,{id:x.id,name:x.name,matchWins:0,tournamentWins:0,g:0,a:0,avg:0,ratingTotal:0,ratingMatches:0,guest:x.is_group_member===false}]));
   const seasonTours=tournaments.filter(t=>t.format!=='league'&&t.status==='finished'&&(!activeSeason||t.season_id===activeSeason.id));
-  seasonTours.forEach(t=>{
-    const tTeams=teams.filter(tm=>tm.tournament_id===t.id);
-    const teamPlayerMap=new Map(tTeams.map(tm=>[tm.id,teamPlayers.filter(tp=>tp.team_id===tm.id).map(tp=>tp.player_id)]));
-    matches.filter(m=>m.tournament_id===t.id).forEach(m=>{
-      let winner=null;
-      if(Number(m.home_score)>Number(m.away_score))winner=m.home_team_id;
-      else if(Number(m.away_score)>Number(m.home_score))winner=m.away_team_id;
-      if(winner){
-        (teamPlayerMap.get(winner)||[]).forEach(pid=>{if(seasonWinStats.has(pid))seasonWinStats.get(pid).matchWins++});
+  const seasonTourIdsForWins=new Set(seasonTours.map(t=>t.id));
+  const seasonMatchesForWins=matches.filter(m=>seasonTourIdsForWins.has(m.tournament_id));
+  const seasonMatchIdsForWins=new Set(seasonMatchesForWins.map(m=>m.id));
+
+  goals.filter(g=>seasonMatchIdsForWins.has(g.match_id)).forEach(g=>{
+    if(seasonWinStats.has(g.scorer_player_id))seasonWinStats.get(g.scorer_player_id).g++;
+    if(g.assister_player_id&&seasonWinStats.has(g.assister_player_id))seasonWinStats.get(g.assister_player_id).a++;
+  });
+
+  seasonMatchesForWins.forEach(m=>{
+    let winner=null;
+    if(Number(m.home_score)>Number(m.away_score))winner=m.home_team_id;
+    else if(Number(m.away_score)>Number(m.home_score))winner=m.away_team_id;
+    matchAssignments.filter(a=>a.match_id===m.id&&a.team_id).forEach(a=>{
+      const s=seasonWinStats.get(a.player_id);if(!s)return;
+      if(winner&&String(a.team_id)===String(winner))s.matchWins++;
+      if(publicPlayerRatingsEnabled){
+        const rr=ratingForMatchPlayer(m,a.player_id,a.team_id,goals);
+        if(rr){s.ratingTotal+=rr.rating;s.ratingMatches++;}
       }
     });
+  });
+
+  seasonTours.forEach(t=>{
     const standings=tournamentStandings(t.id);
     const champion=standings[0];
-    if(champion){
-      (teamPlayerMap.get(champion.id)||[]).forEach(pid=>{if(seasonWinStats.has(pid))seasonWinStats.get(pid).tournamentWins++});
-    }
+    if(!champion)return;
+    const tMatchIds=new Set(matches.filter(m=>m.tournament_id===t.id).map(m=>m.id));
+    const championPlayers=new Set(matchAssignments.filter(a=>tMatchIds.has(a.match_id)&&String(a.team_id)===String(champion.id)).map(a=>a.player_id));
+    championPlayers.forEach(pid=>{if(seasonWinStats.has(pid))seasonWinStats.get(pid).tournamentWins++});
   });
-  const winRows=[...seasonWinStats.values()].filter(x=>x.matchWins||x.tournamentWins)
-    .sort((a,b)=>b.tournamentWins-a.tournamentWins||b.matchWins-a.matchWins||a.name.localeCompare(b.name));
+  seasonWinStats.forEach(s=>{s.avg=s.ratingMatches?s.ratingTotal/s.ratingMatches:0;});
+  const winRows=[...seasonWinStats.values()].filter(x=>x.matchWins||x.tournamentWins||x.g||x.a)
+    .sort((a,b)=>b.tournamentWins-a.tournamentWins||b.matchWins-a.matchWins||b.g-a.g||b.a-a.a||b.avg-a.avg||a.name.localeCompare(b.name));
   let publicWinsExpanded=false;
   const renderPublicSeasonWins=()=>{
     const visible=publicWinsExpanded?winRows:winRows.slice(0,5);
     $('#publicSeasonWins').innerHTML=visible.map((x,i)=>
       '<div class="rank '+(x.guest?'guest-row':'')+'"><b>'+(winRows.indexOf(x)+1)+'</b><span><b>'+esc(x.name)+'</b>'+(x.guest?' <span class="guest-badge">Guest</span>':'')+
-      '<div class="muted">'+x.matchWins+' match'+(x.matchWins>1?'s':'')+' gagné'+(x.matchWins>1?'s':'')+'</div></span>'+
-      '<b class="right">🏆 '+x.tournamentWins+' tournoi'+(x.tournamentWins>1?'s':'')+'</b></div>'
+      '<div class="muted">'+x.matchWins+' victoire'+(x.matchWins>1?'s':'')+' • ⚽ '+x.g+' • 🎯 '+x.a+(publicPlayerRatingsEnabled&&x.ratingMatches?' • ⭐ '+x.avg.toFixed(1)+'/10':'')+'</div></span>'+
+      '<b class="right">🏆 '+x.tournamentWins+'</b></div>'
     ).join('')||'<p class="muted">Aucune victoire enregistrée pour cette saison.</p>';
     const b=$('#togglePublicSeasonWins');if(b){b.classList.toggle('hidden',winRows.length<=5);b.textContent=publicWinsExpanded?'Réduire':'Développer la liste';}
   };
   renderPublicSeasonWins();
   if($('#togglePublicSeasonWins'))$('#togglePublicSeasonWins').onclick=()=>{publicWinsExpanded=!publicWinsExpanded;renderPublicSeasonWins();};
+
+  if(publicPlayerRatingsEnabled){
+    const topWrap=$('#publicTopPlayerSeasonWrap'),topBox=$('#publicSeasonTopPlayers');
+    if(topWrap)topWrap.classList.remove('hidden');
+    const top=topPlayersFromData(seasonMatchesForWins,goals,matchAssignments,players,seasonTourIdsForWins).slice(0,10);
+    if(topBox)topBox.innerHTML=top.map((x,i)=>'<div class="rank '+(x.guest?'guest-row':'')+'"><b>'+(i===0?'👑':(i+1))+'</b><span><b>'+esc(x.name)+'</b><div class="muted">'+x.matches+' match'+(x.matches>1?'s':'')+' • ⚽ '+x.g+' • 🎯 '+x.a+'</div></span><b class="right">⭐ '+x.avg.toFixed(1)+'</b></div>').join('')||'<p class="muted">Aucune note disponible.</p>';
+  }
 
   const latest=tournaments.find(t=>t.format!=='league'&&t.status==='finished')||tournaments.find(t=>t.format!=='league');
   if(latest){
@@ -4622,6 +4768,12 @@ async function bootPublic(token){
     $('#publicTournamentAssists').innerHTML=tournamentAss.map(x=>
       '<div class="rank '+(x.guest?'guest-row':'')+'"><b>'+x.rank+'</b><span>'+esc(x.name)+(x.guest?' <span class="guest-badge">Guest</span>':'')+'</span><b class="right">'+x.a+' passe'+(x.a>1?'s':'')+'</b></div>'
     ).join('')||'<p class="muted">Aucune passe enregistrée.</p>';
+    if(publicPlayerRatingsEnabled){
+      const wrap=$('#publicTournamentTopPlayerWrap'),boxTop=$('#publicTournamentTopPlayers');
+      if(wrap)wrap.classList.remove('hidden');
+      const topTournament=topPlayersFromData(lm,goals,matchAssignments,players,new Set([latest.id])).slice(0,10);
+      if(boxTop)boxTop.innerHTML=topTournament.map((x,i)=>'<div class="rank '+(x.guest?'guest-row':'')+'"><b>'+(i===0?'👑':(i+1))+'</b><span><b>'+esc(x.name)+'</b><div class="muted">'+x.matches+' match'+(x.matches>1?'s':'')+' • ⚽ '+x.g+' • 🎯 '+x.a+'</div></span><b class="right">⭐ '+x.avg.toFixed(1)+'</b></div>').join('')||'<p class="muted">Aucune note disponible.</p>';
+    }
     const trs=lteams.map(x=>({id:x.id,name:x.name,mj:0,v:0,n:0,d:0,bp:0,bc:0,pts:0}));
     const trm=new Map(trs.map(x=>[x.id,x]));
     lm.forEach(m=>{
@@ -4651,11 +4803,13 @@ async function bootPublic(token){
         const team=tmap.get(g.team_id);
         return '<div class="small" style="margin-top:5px">⚽ '+esc(scorer?.name||'?')+(assister?' <span class="muted">← passe '+esc(assister.name)+'</span>':'')+(team?' <span class="muted">• '+esc(team.name)+'</span>':'')+'</div>';
       }).join('');
-      return '<div class="player" style="padding:10px 0"><div class="muted" style="font-weight:700;margin-bottom:4px">Match '+(i+1)+'</div><div style="font-size:1.05rem">'+esc(tmap.get(m.home_team_id)?.name||'?')+' <b>'+m.home_score+' - '+m.away_score+'</b> '+esc(tmap.get(m.away_team_id)?.name||'?')+'</div>'+(goalLines||'<div class="small muted" style="margin-top:5px">Aucun buteur enregistré</div>')+'</div>';
+      const notes=publicPlayerRatingsEnabled?matchAssignments.filter(a=>a.match_id===m.id&&a.team_id).map(a=>{const pl=pmap.get(a.player_id),rr=ratingForMatchPlayer(m,a.player_id,a.team_id,goals);return rr&&pl?{name:pl.name,r:rr.rating,team:a.team_id}:null}).filter(Boolean).sort((a,b)=>b.r-a.r||a.name.localeCompare(b.name)):[];
+      const noteHtml=notes.length?'<div class="small" style="margin-top:8px"><b>⭐ Notes :</b> '+notes.map(n=>esc(n.name)+' '+n.r.toFixed(1)).join(' • ')+'</div>':'';
+      return '<div class="player" style="padding:10px 0"><div class="muted" style="font-weight:700;margin-bottom:4px">Match '+(i+1)+'</div><div style="font-size:1.05rem">'+esc(tmap.get(m.home_team_id)?.name||'?')+' <b>'+m.home_score+' - '+m.away_score+'</b> '+esc(tmap.get(m.away_team_id)?.name||'?')+'</div>'+(goalLines||'<div class="small muted" style="margin-top:5px">Aucun buteur enregistré</div>')+noteHtml+'</div>';
     }).join('')||'<p class="muted">Aucun résultat.</p>';
   } else {
     $('#publicTeamRanking').innerHTML='<p class="muted">Aucun tournoi disponible.</p>';
-    $('#publicTournamentScorers').innerHTML='<p class="muted">Aucun tournoi disponible.</p>'; $('#publicTournamentAssists').innerHTML='<p class="muted">Aucun tournoi disponible.</p>';
+    $('#publicTournamentScorers').innerHTML='<p class="muted">Aucun tournoi disponible.</p>'; $('#publicTournamentAssists').innerHTML='<p class="muted">Aucun tournoi disponible.</p>'; if($('#publicTournamentTopPlayers'))$('#publicTournamentTopPlayers').innerHTML='<p class="muted">Aucune note disponible.</p>';
     $('#publicTeams').innerHTML='<p class="muted">Aucune équipe.</p>';
     $('#publicResults').innerHTML='<p class="muted">Aucun résultat.</p>';
   }
