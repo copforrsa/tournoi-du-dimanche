@@ -1063,7 +1063,8 @@ document.addEventListener('click',e=>{
 let recoveryMode=/type=recovery/i.test(location.hash+location.search);
 const APP_URL=location.origin+location.pathname.substring(0,location.pathname.lastIndexOf('/')+1);
 const urlParams=new URLSearchParams(location.search);
-const publicTokenFromUrl=urlParams.get('public');
+let publicTokenFromUrl=urlParams.get('public');
+const shortCodeFromUrl=(urlParams.get('s')||'').trim().toUpperCase();
 const inviteIdFromUrl=urlParams.get('invite');
 const inviteEmailFromUrl=(urlParams.get('email')||'').trim().toLowerCase();
 function isAdmin(){return S.workspace?.role==='admin'}
@@ -1076,6 +1077,7 @@ function hasAdminOps(){return isAdmin()||hasTemporaryAdmin()}
 function formatLabel(t){return t?.format==='king_of_pitch'?'Roi du terrain':(t?.format==='league'?'Ligue':'Classique')}
 function registrationLink(t){
   if(!t||!S.workspace?.public_token)return '';
+  if(t.short_code)return APP_URL+'?s='+encodeURIComponent(String(t.short_code).toUpperCase());
   if(t.format==='league'){
     return APP_URL+'?public='+encodeURIComponent(S.workspace.public_token)+'&view=league-session&league='+encodeURIComponent(t.league_id||'')+'&tournament='+encodeURIComponent(t.id);
   }
@@ -1159,6 +1161,30 @@ function friendlyAuthError(error){
   return error?.message||'Une erreur est survenue.';
 }
 async function authState(){
+  if(shortCodeFromUrl&&!publicTokenFromUrl){
+    try{
+      const {data,error}=await sb.rpc('resolve_public_tournament_short_link',{p_code:shortCodeFromUrl});
+      if(error)throw error;
+      if(!data?.public_token||!data?.tournament_id)throw new Error('Lien court invalide ou expiré.');
+      publicTokenFromUrl=data.public_token;
+      urlParams.set('public',data.public_token);
+      urlParams.set('tournament',data.tournament_id);
+      urlParams.set('view',data.view||'tournament');
+      if(data.league_id)urlParams.set('league',data.league_id);
+      // Keep the visible ?s= URL unchanged; bootPublic reads the resolved context below.
+      window.__sweResolvedShortLink={
+        tournament:String(data.tournament_id),
+        view:String(data.view||'tournament'),
+        league:data.league_id?String(data.league_id):''
+      };
+    }catch(e){
+      $('#auth').classList.add('hidden');
+      $('#main').classList.add('hidden');
+      $('#publicView').classList.remove('hidden');
+      $('#publicView').innerHTML='<header class="top"><h1>⚽ SWÉ TOURNAMENT 5/5</h1></header><div class="card"><h2>Lien indisponible</h2><p class="muted">'+esc(e.message||e)+'</p></div>';
+      return;
+    }
+  }
   if(publicTokenFromUrl){
     await bootPublic(publicTokenFromUrl);
     return;
@@ -4067,7 +4093,7 @@ $('#shareVisual').onclick=shareCurrentVisual;
 $('#closeVisual').onclick=()=>$('#visualPreviewBox').classList.add('hidden');
 
 function publicHistoryReturnUrl(token){
-  const q=new URLSearchParams(location.search);
+  const q=swePublicParams();
   const out=new URLSearchParams();
   out.set('public',token);
   for(const key of ['tournament','view','mode','league']){
@@ -4077,7 +4103,7 @@ function publicHistoryReturnUrl(token){
   return APP_URL+'?'+out.toString();
 }
 function publicHistoryUrl(token,historyId){
-  const q=new URLSearchParams(location.search);
+  const q=swePublicParams();
   const remembered=sweStoredPublicRegistrationContext();
   const out=new URLSearchParams();
   out.set('public',token);
@@ -4089,7 +4115,7 @@ function publicHistoryUrl(token,historyId){
   return APP_URL+'?'+out.toString();
 }
 function publicHistoryBackUrl(token){
-  const q=new URLSearchParams(location.search);
+  const q=swePublicParams();
   const remembered=sweStoredPublicRegistrationContext();
   const out=new URLSearchParams();
   out.set('public',token);
@@ -4100,8 +4126,18 @@ function publicHistoryBackUrl(token){
   return APP_URL+'?'+out.toString();
 }
 
-function sweRememberPublicRegistrationContext(){
+function swePublicParams(){
   const q=new URLSearchParams(location.search);
+  const r=window.__sweResolvedShortLink;
+  if(r){
+    if(r.tournament)q.set('tournament',r.tournament);
+    if(r.view)q.set('view',r.view);
+    if(r.league)q.set('league',r.league);
+  }
+  return q;
+}
+function sweRememberPublicRegistrationContext(){
+  const q=swePublicParams();
   if(q.get('history'))return;
   const ctx={};
   for(const key of ['tournament','view','mode','league']){
@@ -4121,6 +4157,14 @@ function sweStoredPublicRegistrationContext(){
 }
 async function bootPublic(token){
   S.publicMode=true;
+  if(window.__sweResolvedShortLink){
+    const r=window.__sweResolvedShortLink;
+    // Inject resolved values into the in-memory URL parameter object only.
+    // The browser address remains the original short URL (?s=...).
+    if(r.tournament)urlParams.set('tournament',r.tournament);
+    if(r.view)urlParams.set('view',r.view);
+    if(r.league)urlParams.set('league',r.league);
+  }
   sweRememberPublicRegistrationContext();
   // V39.61 — état global pour éviter qu'un ancien rafraîchissement public
   // reconstruise le formulaire d'inscription équipe après validation du code.
@@ -4152,7 +4196,7 @@ async function bootPublic(token){
   S.sportsComplexes=P.sports_complexes||[];
   S.sportsPitches=P.sports_pitches||[];
   let registrations=P.tournament_players||[];
-  const publicParamsTop=new URLSearchParams(location.search);
+  const publicParamsTop=swePublicParams();
   const requestedPublicView=publicParamsTop.get('view')||'';
   const legacyMode=publicParamsTop.get('mode')||'';
   const leagueJoinId=publicParamsTop.get('league');
@@ -4322,7 +4366,7 @@ async function bootPublic(token){
     return;
   }
 
-  const historyId=new URLSearchParams(location.search).get('history');
+  const historyId=swePublicParams().get('history');
   if(historyId){
     // The shared registration link is never modified. We only remember its context locally
     // so every "Retour" from history returns to the exact tournament / Swé that opened it.
@@ -4416,7 +4460,7 @@ async function bootPublic(token){
     return;
   }
   const openTours=[...tournaments].filter(t=>t.status!=='finished'&&t.registration_open).sort((a,b)=>String(a.tournament_date).localeCompare(String(b.tournament_date)));
-  const publicParams=new URLSearchParams(location.search);
+  const publicParams=swePublicParams();
   const requestedTournament=publicParams.get('tournament');
   const requestedView=publicParams.get('view')||'';
   const requestedMode=publicParams.get('mode')||'';
