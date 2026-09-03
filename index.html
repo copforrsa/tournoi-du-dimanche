@@ -60,7 +60,7 @@ select{background-color:#fff} textarea{resize:vertical}
 }
 @media(max-width:650px){
   body{background:#f3f7f4}.app{padding:0 12px 100px}.top{border-radius:0 0 24px 24px;margin:0 -12px 14px;padding:18px 16px 20px}.top h1{font-size:21px}.card{border-radius:17px;padding:14px;margin:10px 0}.g2,.g3{grid-template-columns:1fr}.sectiontitle{font-size:17px}
-  /* V39.52 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
+  /* V39.54 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
   .tabs{left:0;right:0;transform:none;width:100%;display:flex;grid-template-columns:none;justify-content:flex-start;gap:5px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;border-radius:18px 18px 0 0;padding:7px 10px calc(7px + env(safe-area-inset-bottom));scroll-snap-type:x proximity;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
   .tabs button{flex:0 0 74px;min-width:74px;font-size:10px;scroll-snap-align:center;padding:5px 6px}
@@ -76,7 +76,7 @@ select{background-color:#fff} textarea{resize:vertical}
 #publicTeams .public-team-player{padding:7px 0;border-bottom:1px solid #edf2ef}
 #publicTeams .public-team-player:last-child{border-bottom:0}
 
-/* V39.52 — alignements et justification */
+/* V39.54 — alignements et justification */
 .card p,.card .muted,.player .muted,.readonly-note,.public-sub{
   text-align:justify;
   text-justify:inter-word;
@@ -163,7 +163,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.52</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.54</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -206,7 +206,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.52</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.54</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -646,6 +646,21 @@ select{background-color:#fff} textarea{resize:vertical}
         <div class="card"><h2 class="sectiontitle">⚽ Buteurs</h2><div id="scorerRank"></div></div>
         <div class="card"><h2 class="sectiontitle">🎯 Passeurs</h2><div id="assistRank"></div></div>
       </div>
+      <div class="grid g2">
+        <div class="card">
+          <h2 class="sectiontitle">🏆 Trophées remportés par joueur</h2>
+          <p class="muted">Classement privé réservé à l’administrateur et aux co-gestionnaires. Le nombre de tournois remportés prime toujours sur la note individuelle.</p>
+          <div id="playerTrophyRank"></div>
+          <button id="togglePlayerTrophyRank" type="button" class="hidden" style="margin-top:10px">Développer</button>
+          <button id="sharePlayerTrophyRank" type="button" style="margin-top:10px">📲 Partager ce classement</button>
+        </div>
+        <div class="card">
+          <h2 class="sectiontitle">⭐ Top Player</h2>
+          <p class="muted">Classement basé sur la moyenne des notes de match. Il reste distinct du classement des trophées remportés.</p>
+          <div id="adminTopPlayerRank"></div>
+          <button id="toggleAdminTopPlayerRank" type="button" class="hidden" style="margin-top:10px">Développer</button>
+        </div>
+      </div>
       <div class="card"><h2 class="sectiontitle">🏆 Classement équipes</h2><div id="teamRank"></div></div>
       <div class="card"><h2 class="sectiontitle">Partager</h2><textarea id="shareText" rows="10" readonly></textarea><div class="space"></div><button id="shareWhatsapp" class="primary">Partager le résumé</button></div>
       <div class="card">
@@ -756,15 +771,13 @@ select{background-color:#fff} textarea{resize:vertical}
     </div>
 
     <div class="card">
-      <h2 class="sectiontitle">🏅 Victoires individuelles de la saison</h2>
-      <p class="muted">Le classement tient compte des victoires individuelles, puis utilise les buts et les passes décisives pour départager les joueurs.</p>
-      <div id="publicSeasonWins"></div>
-      <button id="togglePublicSeasonWins" type="button" class="hidden" style="margin-top:10px">Développer</button>
-      <div id="publicTopPlayerSeasonWrap" class="hidden" style="margin-top:16px;border-top:1px solid #e8ecef;padding-top:14px">
-        <h3 style="margin:0 0 4px">⭐ Top Player de la saison</h3>
-        <div class="muted" style="margin-bottom:8px">La moyenne est calculée à partir des notes obtenues sur l’ensemble des matchs réellement disputés.</div>
+      <h2 class="sectiontitle">⭐ Top Player de la saison</h2>
+      <p class="muted">La moyenne est calculée à partir des notes obtenues sur l’ensemble des matchs réellement disputés.</p>
+      <div id="publicTopPlayerSeasonWrap" class="hidden">
         <div id="publicSeasonTopPlayers"></div>
       </div>
+      <div id="publicSeasonWins" class="hidden"></div>
+      <button id="togglePublicSeasonWins" type="button" class="hidden">Développer</button>
     </div>
 
     <div class="card">
@@ -2232,7 +2245,7 @@ function appendTournamentSeasonControl(container,t){
 }
 
 function renderTournaments(){
-  // V39.52 : l'éditeur de tournoi est protégé des synchronisations automatiques.
+  // V39.54 : l'éditeur de tournoi est protégé des synchronisations automatiques.
   const ss=$('#seasonSelect');
   ss.innerHTML='<option value="">Sans saison</option>'+S.seasons.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');
   const box=$('#tournamentList');box.innerHTML='';
@@ -3362,7 +3375,7 @@ async function renderLeague(){
   }
 
 
-  // V39.52 — Saisie du résultat directement depuis l'onglet Ligue.
+  // V39.54 — Saisie du résultat directement depuis l'onglet Ligue.
   const scoringCard=$('#leagueScoringCard'),scoringBody=$('#leagueScoringBody'),scoringLabel=$('#leagueScoringSessionLabel');
   if(scoringCard)scoringCard.classList.toggle('hidden',!canScoreLeague);
   if(canScoreLeague&&scoringBody){
@@ -3609,6 +3622,89 @@ async function renderRanking(){
     }
   }
 
+  const allMatchIds=matches.map(m=>m.id);
+  let rankingAssignments=[];
+  if(allMatchIds.length){
+    const {data:ma,error:maError}=await sb.from('match_player_assignments').select('*').in('match_id',allMatchIds);
+    if(!maError)rankingAssignments=ma||[];
+  }
+
+  const playerSeasonStats=new Map(S.players.map(x=>[x.id,{
+    id:x.id,name:x.name,is_group_member:x.is_group_member,
+    trophies:0,matchWins:0,g:0,a:0,ratingTotal:0,ratingMatches:0,avg:0
+  }]));
+  goals.forEach(g=>{
+    if(playerSeasonStats.has(g.scorer_player_id))playerSeasonStats.get(g.scorer_player_id).g++;
+    if(g.assister_player_id&&playerSeasonStats.has(g.assister_player_id))playerSeasonStats.get(g.assister_player_id).a++;
+  });
+
+  matches.forEach(m=>{
+    const winner=Number(m.home_score)>Number(m.away_score)?m.home_team_id:(Number(m.away_score)>Number(m.home_score)?m.away_team_id:null);
+    rankingAssignments.filter(a=>a.match_id===m.id&&a.team_id).forEach(a=>{
+      const st=playerSeasonStats.get(a.player_id);if(!st)return;
+      if(winner&&String(a.team_id)===String(winner))st.matchWins++;
+      if(S.workspaceFeatures.player_ratings_enabled){
+        const rr=ratingForMatchPlayer(m,a.player_id,a.team_id,goals);
+        if(rr){st.ratingTotal+=rr.rating;st.ratingMatches++;}
+      }
+    });
+  });
+
+  for(const tour of tournaments.filter(t=>t.status==='finished')){
+    const tourMatches=matches.filter(m=>m.tournament_id===tour.id);
+    if(!tourMatches.length)continue;
+    const {data:tTeams}=await sb.from('teams').select('id,name').eq('tournament_id',tour.id);
+    const rows=(tTeams||[]).map(x=>({id:x.id,name:x.name,mj:0,v:0,n:0,d:0,bp:0,bc:0,pts:0}));
+    const sm=new Map(rows.map(x=>[x.id,x]));
+    tourMatches.forEach(m=>{
+      const a=sm.get(m.home_team_id),b=sm.get(m.away_team_id);if(!a||!b)return;
+      a.mj++;b.mj++;a.bp+=Number(m.home_score||0);a.bc+=Number(m.away_score||0);b.bp+=Number(m.away_score||0);b.bc+=Number(m.home_score||0);
+      if(Number(m.home_score)>Number(m.away_score)){a.v++;b.d++;a.pts+=3}
+      else if(Number(m.away_score)>Number(m.home_score)){b.v++;a.d++;b.pts+=3}
+      else{a.n++;b.n++;a.pts++;b.pts++}
+    });
+    rows.sort((a,b)=>b.pts-a.pts||(b.bp-b.bc)-(a.bp-a.bc)||b.bp-a.bp||a.name.localeCompare(b.name));
+    const champion=rows[0];if(!champion)continue;
+    const mids=new Set(tourMatches.map(m=>m.id));
+    const champs=new Set(rankingAssignments.filter(a=>mids.has(a.match_id)&&String(a.team_id)===String(champion.id)).map(a=>a.player_id));
+    champs.forEach(pid=>{if(playerSeasonStats.has(pid))playerSeasonStats.get(pid).trophies++;});
+  }
+  playerSeasonStats.forEach(s=>{s.avg=s.ratingMatches?s.ratingTotal/s.ratingMatches:0;});
+
+  const trophyRows=[...playerSeasonStats.values()].filter(x=>x.trophies||x.matchWins||x.g||x.a)
+    .sort((a,b)=>b.trophies-a.trophies||b.matchWins-a.matchWins||b.g-a.g||b.a-a.a||b.avg-a.avg||a.name.localeCompare(b.name));
+  const topPlayerRows=[...playerSeasonStats.values()].filter(x=>x.ratingMatches)
+    .sort((a,b)=>b.avg-a.avg||b.g-a.g||b.a-a.a||b.trophies-a.trophies||a.name.localeCompare(b.name));
+
+  let trophyExpanded=false,adminTopExpanded=false;
+  const renderTrophies=()=>{
+    const visible=trophyExpanded?trophyRows:trophyRows.slice(0,10);
+    const box=$('#playerTrophyRank');
+    if(box)box.innerHTML=visible.map((x,i)=>{
+      const pos=trophyRows.indexOf(x)+1;
+      return '<div class="rank '+(x.is_group_member===false?'guest-row':'')+'"><b>'+(pos===1?'👑':pos)+'</b><span><b>'+esc(x.name)+'</b><div class="muted">'+x.matchWins+' victoire'+(x.matchWins>1?'s':'')+' de match • ⚽ '+x.g+' • 🎯 '+x.a+(x.ratingMatches?' • ⭐ '+x.avg.toFixed(1):'')+'</div></span><b class="right">🏆 '+x.trophies+'</b></div>';
+    }).join('')||'<p class="muted">Aucun trophée enregistré.</p>';
+    const b=$('#togglePlayerTrophyRank');if(b){b.classList.toggle('hidden',trophyRows.length<=10);b.textContent=trophyExpanded?'Réduire':'Développer';}
+  };
+  const renderAdminTop=()=>{
+    const visible=adminTopExpanded?topPlayerRows:topPlayerRows.slice(0,10);
+    const box=$('#adminTopPlayerRank');
+    if(box)box.innerHTML=visible.map((x,i)=>{
+      const pos=topPlayerRows.indexOf(x)+1;
+      return '<div class="rank '+(x.is_group_member===false?'guest-row':'')+'"><b>'+(pos===1?'👑':pos)+'</b><span><b>'+esc(x.name)+'</b><div class="muted">'+x.ratingMatches+' match'+(x.ratingMatches>1?'s':'')+' • 🏆 '+x.trophies+' • ⚽ '+x.g+' • 🎯 '+x.a+'</div></span><b class="right">⭐ '+x.avg.toFixed(1)+'</b></div>';
+    }).join('')||'<p class="muted">Aucune note disponible.</p>';
+    const b=$('#toggleAdminTopPlayerRank');if(b){b.classList.toggle('hidden',topPlayerRows.length<=10);b.textContent=adminTopExpanded?'Réduire':'Développer';}
+  };
+  renderTrophies();renderAdminTop();
+  if($('#togglePlayerTrophyRank'))$('#togglePlayerTrophyRank').onclick=()=>{trophyExpanded=!trophyExpanded;renderTrophies();};
+  if($('#toggleAdminTopPlayerRank'))$('#toggleAdminTopPlayerRank').onclick=()=>{adminTopExpanded=!adminTopExpanded;renderAdminTop();};
+  if($('#sharePlayerTrophyRank'))$('#sharePlayerTrophyRank').onclick=async()=>{
+    let text='🏆 TROPHÉES REMPORTÉS PAR JOUEUR\\n\\n';
+    trophyRows.forEach((x,i)=>text+=(i+1)+'. '+x.name+' — '+x.trophies+' trophée'+(x.trophies>1?'s':'')+' • '+x.matchWins+' victoire'+(x.matchWins>1?'s':'')+' • ⚽ '+x.g+' • 🎯 '+x.a+'\\n');
+    if(navigator.share){try{await navigator.share({title:'Trophées remportés par joueur',text});return}catch(e){}}
+    try{await navigator.clipboard.writeText(text);toast('Classement des trophées copié ✅')}catch(e){toast('Copie impossible')}
+  };
+
   let scor=[...stats.values()].filter(x=>x.g||x.matchIds.size||x.tournamentIds.size)
     .sort((a,b)=>b.g-a.g||b.a-a.a||a.name.localeCompare(b.name));
   let ass=[...stats.values()].filter(x=>x.a)
@@ -3629,6 +3725,12 @@ async function renderRanking(){
   scor.forEach(x=>txt+=x.rank+'. '+x.name+' — '+x.g+' but'+(x.g>1?'s':'')+' • '+x.tournamentIds.size+' tournoi'+(x.tournamentIds.size>1?'s':'')+' • '+x.matchIds.size+' match'+(x.matchIds.size>1?'s':'')+'\n');
   txt+='\n🎯 PASSEURS\n';
   ass.forEach(x=>txt+=x.rank+'. '+x.name+' — '+x.a+' passe'+(x.a>1?'s':'')+'\n');
+  txt+='\n🏆 TROPHÉES REMPORTÉS PAR JOUEUR\n';
+  trophyRows.forEach((x,i)=>txt+=(i+1)+'. '+x.name+' — '+x.trophies+' trophée'+(x.trophies>1?'s':'')+'\n');
+  if(S.workspaceFeatures.player_ratings_enabled){
+    txt+='\n⭐ TOP PLAYER\n';
+    topPlayerRows.forEach((x,i)=>txt+=(i+1)+'. '+x.name+' — '+x.avg.toFixed(1)+'/10\n');
+  }
   $('#shareText').value=txt;
 }
 
@@ -3810,7 +3912,7 @@ $('#closeVisual').onclick=()=>$('#visualPreviewBox').classList.add('hidden');
 
 async function bootPublic(token){
   S.publicMode=true;
-  // V39.52 — état global pour éviter qu'un ancien rafraîchissement public
+  // V39.54 — état global pour éviter qu'un ancien rafraîchissement public
   // reconstruise le formulaire d'inscription équipe après validation du code.
   window.__swePublicTeamEditing=false;
   if(window.__swePublicRegistrationInterval){
@@ -3835,7 +3937,7 @@ async function bootPublic(token){
   const publicThirdHalf=!!P.workspace?.third_half_enabled;
   $('#publicWorkspaceName').textContent=P.workspace?.name||'SWÉ TOURNAMENT 5/5';
   let players=P.players||[],seasons=P.seasons||[],leagues=P.leagues||[],leaguePlayers=P.league_players||[],tournaments=(P.tournaments||[]).sort((a,b)=>String(b.tournament_date).localeCompare(String(a.tournament_date)));
-  let teams=P.teams||[],teamPlayers=P.team_players||[],matches=P.matches||[],goals=P.goals||[],matchAssignments=P.match_player_assignments||[];
+  let teams=P.teams||[],teamPlayers=P.team_players||[],teamInvitations=P.team_player_invitations||[],matches=P.matches||[],goals=P.goals||[],matchAssignments=P.match_player_assignments||[];
   const publicPlayerRatingsEnabled=!!P.features?.player_ratings_enabled;
   S.sportsComplexes=P.sports_complexes||[];
   S.sportsPitches=P.sports_pitches||[];
@@ -4163,9 +4265,12 @@ async function bootPublic(token){
       ? free.map(r=>{
           const pl=pmap.get(r.player_id);
           const guest=guestText(r);
+          const pendingInvite=teamInvitations.find(i=>i.tournament_id===regTour.id&&String(i.player_id)===String(r.player_id)&&i.status==='pending');
+          const pendingTeam=pendingInvite?tourTeams.find(t=>String(t.id)===String(pendingInvite.team_id)):null;
+          const freeState=pendingTeam?'⏳ Proposition : '+pendingTeam.name:(r.is_substitute?'🟠 Remplaçant commun':'🎲 Équipe aléatoire');
           return '<div class="player row"><span style="flex:1">'+esc(pl?.name||'Joueur')+
             (guest?' <span class="guest-badge">'+esc(guest)+'</span>':'')+
-            '</span><span class="muted">'+(r.is_substitute?'🟠 Remplaçant commun':'Équipe aléatoire')+'</span></div>';
+            '</span><span class="muted">'+esc(freeState)+'</span></div>';
         }).join('')
       : '<p class="muted">Aucun joueur en équipe aléatoire.</p>';
 
@@ -4173,14 +4278,20 @@ async function bootPublic(token){
       ? tourTeams.map(team=>{
           const rows=tpRows.filter(tp=>tp.team_id===team.id);
           const color=colorInfo(team);
-          const membersHtml=rows.length?rows.map(tp=>{
-            const pl=pmap.get(tp.player_id);
-            const guest=guestText(regMap.get(tp.player_id));
-            return '<div style="margin-top:4px">• '+esc(pl?.name||'Joueur')+(guest?' <span class="guest-badge">'+esc(guest)+'</span>':'')+'</div>';
-          }).join(''):'<div class="muted" style="margin-top:5px">Aucun joueur</div>';
+          const pendingRows=teamInvitations.filter(i=>i.tournament_id===regTour.id&&String(i.team_id)===String(team.id)&&i.status==='pending');
+          const membersHtml=(rows.length||pendingRows.length)
+            ? rows.map(tp=>{
+                const pl=pmap.get(tp.player_id);
+                const guest=guestText(regMap.get(tp.player_id));
+                return '<div style="margin-top:4px">✅ '+esc(pl?.name||'Joueur')+(guest?' <span class="guest-badge">'+esc(guest)+'</span>':'')+'</div>';
+              }).join('')+pendingRows.map(inv=>{
+                const pl=pmap.get(inv.player_id);
+                return '<div style="margin-top:4px">⏳ '+esc(pl?.name||'Joueur')+' <span class="muted">• en attente d’accord</span></div>';
+              }).join('')
+            : '<div class="muted" style="margin-top:5px">Aucun joueur</div>';
           return '<div class="player" style="margin-top:8px"><div class="row">'+
             '<span style="width:18px;height:18px;border-radius:50%;background:'+esc(color.hex)+';border:1px solid #cbd5e1;flex:0 0 auto"></span>'+
-            '<b style="flex:1">'+esc(team.name||'Équipe')+'</b><span class="muted">'+rows.length+' joueur'+(rows.length>1?'s':'')+'</span></div>'+
+            '<b style="flex:1">'+esc(team.name||'Équipe')+'</b><span class="muted">'+rows.length+'/5 confirmé'+(rows.length>1?'s':'')+(pendingRows.length?' • '+pendingRows.length+' en attente':'')+'</span></div>'+
             '<div class="muted" style="margin-top:4px">Couleur : <b>'+esc(color.label)+'</b></div>'+membersHtml+'</div>';
         }).join('')
       : '<p class="muted">Aucune équipe composée.</p>';
@@ -4240,7 +4351,7 @@ async function bootPublic(token){
       (publicAutoPlan&&confirmed>=10?'<div class="player" style="margin-top:12px;background:#eef8f2;border:1px solid #b7dfc4"><b>⚙️ Format prévu avec '+confirmed+' inscrits</b><div class="muted" style="margin-top:5px;line-height:1.6">'+publicAutoPlan.teams+' équipes • '+publicAutoPlan.pitches+' terrain'+(publicAutoPlan.pitches>1?'s':'')+(publicAutoPlan.subs?' • '+publicAutoPlan.subs+' remplaçant'+(publicAutoPlan.subs>1?'s':'')+' commun'+(publicAutoPlan.subs>1?'s':''):'')+'.'+(publicAutoPlan.subs?' Les remplaçants pourront jouer pour n’importe quelle équipe.':'')+'</div></div>':'')+
       '<div class="player" style="margin-top:12px;background:#f8fbf9"><b>✅ Inscription</b><div class="muted" style="margin-top:6px;line-height:1.6">Inscris-toi en cliquant sur <b>« Je participe »</b>. Si tu viens accompagné, indique le nom de tes invités. Chaque membre peut ajouter jusqu’à <b>5 invités maximum</b>.</div></div>'+
       '<div class="space"></div><select id="publicPlayerSelect"><option value="">Choisis ton nom</option></select>'+
-      '<div id="publicSelectedStatus" class="muted" style="margin-top:7px">Choisis ton nom pour voir ton statut.</div>'+
+      '<div id="publicSelectedStatus" class="muted" style="margin-top:7px">Choisis ton nom pour voir ton statut.</div><div id="publicTeamInvitationDecision" class="hidden" style="margin-top:10px"></div>'+
       '<div class="space"></div><div class="row"><button id="publicJoin" class="primary">✅ Je participe</button><button id="publicLeave">❌ Je ne participe pas</button></div>'+
       (regTour.format==='league'
         ? '<div class="player" style="margin-top:12px;background:#fffdf4;border:1px solid #f2df9b"><b>🆕 Première fois ?</b><div class="muted" style="margin:5px 0 8px">Tu n’es pas encore membre du groupe ? Entre ton nom pour t’inscrire à cette Ligue.</div><input id="publicNewPlayerName" maxlength="60" placeholder="Ton prénom / nom"><div class="space"></div><button id="publicNewPlayerJoin" class="primary">M’inscrire pour la première fois</button></div>'
@@ -4328,9 +4439,37 @@ async function bootPublic(token){
           :'+ Ajouter mon invité ('+usage.remaining+' restant'+(usage.remaining>1?'s':'')+')';
       }
     }
+    function renderTeamInvitationDecision(){
+      const box=$('#publicTeamInvitationDecision');
+      const pid=$('#publicPlayerSelect')?.value;
+      if(!box)return;
+      const inv=teamInvitations.find(i=>i.tournament_id===regTour.id&&String(i.player_id)===String(pid||'')&&i.status==='pending');
+      if(!inv){box.classList.add('hidden');box.innerHTML='';return}
+      const team=teams.find(t=>String(t.id)===String(inv.team_id));
+      const inviter=players.find(pl=>String(pl.id)===String(inv.invited_by_player_id||''));
+      box.classList.remove('hidden');box.className='player';
+      box.style.background='#fff8e8';box.style.border='1px solid #f2d18a';
+      box.innerHTML='<b>👥 Proposition d’équipe</b><div class="muted" style="margin-top:5px;line-height:1.6">'+
+        (inviter?'<b>'+esc(inviter.name)+'</b> t’a proposé de rejoindre ':'Tu as été ajouté à ')+
+        '<b>'+esc(team?.name||'cette équipe')+'</b>. Tu restes libre de choisir : si tu refuses, ton inscription est conservée en <b>Équipe aléatoire</b>.</div>'+
+        '<div class="row" style="margin-top:10px"><button id="acceptTeamInvitation" class="primary">✅ Accepter l’équipe</button><button id="declineTeamInvitation">🎲 Refuser / équipe aléatoire</button></div>';
+      $('#acceptTeamInvitation').onclick=async()=>{
+        const b=$('#acceptTeamInvitation');b.disabled=true;
+        const {error}=await sb.rpc('public_respond_team_invitation',{p_token:token,p_tournament_id:regTour.id,p_player_id:pid,p_accept:true});
+        b.disabled=false;if(error)return toast(error.message);
+        toast('Équipe acceptée ✅');await refreshPublicRegistration();
+      };
+      $('#declineTeamInvitation').onclick=async()=>{
+        const b=$('#declineTeamInvitation');b.disabled=true;
+        const {error}=await sb.rpc('public_respond_team_invitation',{p_token:token,p_tournament_id:regTour.id,p_player_id:pid,p_accept:false});
+        b.disabled=false;if(error)return toast(error.message);
+        toast('Tu restes en Équipe aléatoire 🎲');await refreshPublicRegistration();
+      };
+    }
     refreshPublicPlayerSelect();
-    $('#publicPlayerSelect').onchange=updateSelectedRegistrationStatus;
+    $('#publicPlayerSelect').onchange=()=>{updateSelectedRegistrationStatus();renderTeamInvitationDecision();};
     updateSelectedRegistrationStatus();
+    renderTeamInvitationDecision();
     $('#publicGuestMember').onchange=()=>{
       const wrap=$('#publicGuestPhoneWrap');
       const phone=$('#publicGuestPhone');
@@ -4351,10 +4490,12 @@ async function bootPublic(token){
         registrations=data.tournament_players||registrations;
         teams=data.teams||teams;
         teamPlayers=data.team_players||teamPlayers;
+        teamInvitations=data.team_player_invitations||teamInvitations;
         matchAssignments=data.match_player_assignments||matchAssignments;
         renderPublicRegistrationList();
         refreshPublicPlayerSelect();
         updateSelectedRegistrationStatus();
+        renderTeamInvitationDecision();
         // Ne pas reconstruire le formulaire équipe pendant que l’utilisateur le remplit.
         // Le rafraîchissement automatique de 8 s reste actif pour les données, mais ne reset plus l'inscription équipe.
         if(typeof renderPublicTeamBuilder==='function'&&!window.__swePublicTeamEditing)renderPublicTeamBuilder();
@@ -4479,13 +4620,14 @@ async function bootPublic(token){
     const confirmedIds=new Set(regs.map(r=>r.player_id));
     const currentTeamIds=new Set(teams.filter(t=>t.tournament_id===regTour.id).map(t=>t.id));
     const alreadyAssigned=new Set(teamPlayers.filter(tp=>currentTeamIds.has(tp.team_id)).map(tp=>tp.player_id));
+    const pendingTeamInviteIds=new Set(teamInvitations.filter(i=>i.tournament_id===regTour.id&&i.status==='pending').map(i=>i.player_id));
     const creators=players.filter(pl=>pl.active&&pl.is_group_member!==false).sort((a,b)=>a.name.localeCompare(b.name));
     teamBuilder.innerHTML=
-      '<div class="player" style="background:linear-gradient(145deg,#eef5ff,#f8fbff);border:1px solid #d7e7fb"><div style="font-size:1.05rem;font-weight:800">🔐 Étape 1 — Code équipe</div><div class="muted" style="margin-top:5px;line-height:1.6">Entre d’abord ton code secret équipe. Les champs d’inscription ne s’afficheront qu’après validation du code.</div><div class="space"></div><input id="publicTeamCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="Code secret équipe (6 chiffres)"><div class="space"></div><button id="publicValidateTeamCode" type="button" class="primary" style="width:100%">Valider le code</button><div id="publicTeamCodeStatus" class="muted" style="margin-top:8px"></div></div>'+
+      '<div class="player" style="background:linear-gradient(145deg,#eef5ff,#f8fbff);border:1px solid #d7e7fb"><div style="font-size:1.05rem;font-weight:800">🔐 Étape 1 — Code équipe</div><div class="muted" style="margin-top:5px;line-height:1.6"><b>Tu souhaites inscrire une équipe ?</b> Fais la demande à l’administrateur ou à un co-gestionnaire afin qu’il te transmette ton code équipe personnel. Ce code reste valable tant qu’il n’est pas régénéré ou désactivé par l’organisation.</div><div class="space"></div><input id="publicTeamCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="Code équipe personnel (6 chiffres)"><div class="space"></div><button id="publicValidateTeamCode" type="button" class="primary" style="width:100%">Valider le code</button><div id="publicTeamCodeStatus" class="muted" style="margin-top:8px"></div></div>'+
       '<div id="publicTeamFormAfterCode" class="hidden">'+
       '<div class="player" style="margin-top:12px;background:#fbfcfd"><div style="font-size:1.05rem;font-weight:800">🙋🏽‍♂️ Étape 2 — Identifie-toi</div><div class="muted" style="margin-top:5px">Choisis ton nom parmi les membres actifs du groupe.</div><div class="space"></div><select id="publicTeamCreator"><option value="">Choisis ton nom</option>'+creators.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')+'</select></div>'+
       '<div class="player" style="margin-top:12px;background:#fbfcfd"><div style="font-size:1.05rem;font-weight:800">🛡️ Étape 3 — Identité de l’équipe</div><div class="muted" style="margin-top:5px">Choisis un nom court et indique obligatoirement la couleur des maillots.</div><div class="space"></div><input id="publicTeamName" maxlength="30" placeholder="Ex. Les Lions, Team Nord, FC Poto..."><div class="space"></div><div id="publicTeamColorChoices" class="row" style="gap:8px;flex-wrap:wrap"><button type="button" data-team-color="#111827" style="background:#111827;color:white">Noir</button><button type="button" data-team-color="#2563eb" style="background:#2563eb;color:white">Bleu</button><button type="button" data-team-color="#f8fafc" style="background:#f8fafc;color:#111827;border:1px solid #cbd5e1">Blanc</button><button type="button" data-team-color="#dc2626" style="background:#dc2626;color:white">Rouge</button><button type="button" data-team-color="#16a34a" style="background:#16a34a;color:white">Vert</button><button type="button" data-team-color="#eab308" style="background:#eab308;color:#111827">Jaune</button><button type="button" data-team-color="#f97316" style="background:#f97316;color:white">Orange</button><button type="button" data-team-color="#7c3aed" style="background:#7c3aed;color:white">Violet</button><button type="button" data-team-color="#ec4899" style="background:#ec4899;color:white">Rose</button><button type="button" data-team-color="#78350f" style="background:#78350f;color:white">Marron</button><button type="button" data-team-color="#64748b" style="background:#64748b;color:white">Gris</button></div><div id="publicTeamColorStatus" class="muted" style="margin-top:6px">Aucune couleur sélectionnée.</div></div>'+
-      '<div class="player" style="margin-top:12px"><div style="font-size:1.05rem;font-weight:800">👥 Étape 4 — Compose ton groupe</div><div class="muted" style="margin-top:5px">Choisis les joueurs qui feront partie de cette équipe. Avec toi, l’équipe ne peut pas dépasser 5 joueurs. <b>Tu peux aussi inviter d’autres personnes au Swé sans les mettre dans ton équipe</b> : après la création de ton équipe, reviens dans « Mon inscription & mes invités ». Chaque membre peut ajouter jusqu’à 5 invités au total.</div><div id="publicTeamMateBox" style="margin-top:12px"><p class="muted">Sélectionne d’abord ton nom.</p></div><div id="publicTeamSlotsStatus" class="muted" style="margin-top:8px"><b>0/4 coéquipiers ajoutés</b> • 4 places restantes</div><div style="height:1px;background:#e8ecef;margin:14px 0"></div><b>👥 Composition de ton équipe</b><div class="muted" style="margin:4px 0 8px;line-height:1.6">Tu peux compléter les 4 places autour de toi comme tu veux : <b>1 membre + 3 invités</b>, <b>2 membres + 2 invités</b>, <b>3 membres + 1 invité</b> ou <b>4 membres</b>. Le total reste limité à 4 coéquipiers en plus de toi.</div><div class="player" style="background:#fff8e8;border:1px solid #f2d18a;margin:8px 0"><b>⚠️ Important</b><div class="muted" style="margin-top:4px;line-height:1.55">Arrange-toi bien avec les membres du groupe que tu sélectionnes pour ton équipe avant de valider, afin d’éviter qu’un même joueur soit prévu dans plusieurs équipes.</div></div><b>➕ Invités hors groupe</b><div id="publicTeamGuests"><input data-team-guest placeholder="Nom de l’invité 1"></div><div class="row" style="margin-top:8px"><button id="publicAddTeamGuest" type="button" class="primary">+ Ajouter un autre invité</button></div></div>'+
+      '<div class="player" style="margin-top:12px"><div style="font-size:1.05rem;font-weight:800">👥 Étape 4 — Compose ton groupe</div><div class="muted" style="margin-top:5px">Ton équipe peut être créée avec <b>1 à 5 joueurs</b>. Tu n’es donc pas obligé de la compléter tout de suite : lors de la génération finale, les places encore libres seront remplies avec les joueurs inscrits en <b>Équipe aléatoire</b>. Les membres du groupe que tu sélectionnes devront confirmer qu’ils acceptent de rejoindre ton équipe. Les invités hors groupe sont ajoutés directement.</div><div id="publicTeamMateBox" style="margin-top:12px"><p class="muted">Sélectionne d’abord ton nom.</p></div><div id="publicTeamSlotsStatus" class="muted" style="margin-top:8px"><b>0/4 coéquipiers ajoutés</b> • 4 places restantes</div><div style="height:1px;background:#e8ecef;margin:14px 0"></div><b>👥 Composition de ton équipe</b><div class="muted" style="margin:4px 0 8px;line-height:1.6">Tu peux compléter les 4 places autour de toi comme tu veux : <b>1 membre + 3 invités</b>, <b>2 membres + 2 invités</b>, <b>3 membres + 1 invité</b> ou <b>4 membres</b>. Le total reste limité à 4 coéquipiers en plus de toi.</div><div class="player" style="background:#fff8e8;border:1px solid #f2d18a;margin:8px 0"><b>ℹ️ Accord des membres</b><div class="muted" style="margin-top:4px;line-height:1.55">Un membre du groupe ajouté ici reçoit une <b>proposition d’équipe</b>. Lorsqu’il sélectionnera son nom sur le lien d’inscription, il pourra <b>accepter</b> ou <b>refuser</b>. S’il refuse, il reste inscrit mais repasse en <b>Équipe aléatoire</b>.</div></div><b>➕ Invités hors groupe</b><div id="publicTeamGuests"><input data-team-guest placeholder="Nom de l’invité 1"></div><div class="row" style="margin-top:8px"><button id="publicAddTeamGuest" type="button" class="primary">+ Ajouter un autre invité</button></div></div>'+
       '<div class="space"></div><button id="publicCreateTeam" class="primary" style="width:100%;padding:14px;font-size:1.05rem">🔥 Valider mon équipe</button>'+
       '<div id="publicTeamStatus" class="muted" style="margin-top:8px"></div></div>';
 
@@ -4499,7 +4641,7 @@ async function bootPublic(token){
       const code=codeInput.value.trim();
       if(!/^\d{6}$/.test(code)){codeStatus.textContent='Entre un code secret valide à 6 chiffres.';return}
       const {data,error}=await sb.rpc('public_validate_team_code',{p_token:token,p_tournament_id:regTour.id,p_code:code});
-      if(error||!data){codeStatus.textContent=error?.message||'Code secret invalide ou expiré.';formAfterCode.classList.add('hidden');validatedTeamCode='';return}
+      if(error||!data){codeStatus.textContent=error?.message||'Code équipe invalide ou non autorisé. Demande ton code à l’administrateur.';formAfterCode.classList.add('hidden');validatedTeamCode='';return}
       validatedTeamCode=code;
       window.__swePublicTeamEditing=true;
       const ownerId=String(data);
@@ -4538,11 +4680,13 @@ async function bootPublic(token){
       }
       const available=players.filter(pl=>pl.active&&pl.is_group_member!==false&&pl.id!==creator).sort((a,b)=>a.name.localeCompare(b.name));
       mateBox.innerHTML=(confirmedIds.has(creator)?'<div class="readonly-note" style="margin-bottom:10px">ℹ️ Tu es déjà inscrit à ce Swé. Tu peux quand même créer ton équipe : ton inscription existante sera conservée.</div>':'')+
-        '<b>Membres du groupe</b><div class="muted" style="margin:3px 0 8px;line-height:1.55">Choisis les membres du groupe avec qui tu t’es arrangé. Ils resteront identifiés comme « Membre du groupe ». Seules les personnes hors du groupe seront affichées comme Guest. Un joueur déjà affecté à une autre équipe ne peut pas être sélectionné.</div>'+
+        '<b>Membres du groupe</b><div class="muted" style="margin:3px 0 8px;line-height:1.55">Choisis les membres du groupe que tu souhaites avoir dans ton équipe. Ils seront inscrits au tournoi, mais leur place dans ton équipe restera en attente tant qu’ils n’auront pas accepté. Un joueur déjà affecté ou ayant déjà une proposition en attente ne peut pas être sélectionné.</div>'+
         (available.map(pl=>{
           const assigned=alreadyAssigned.has(pl.id);
+          const pending=pendingTeamInviteIds.has(pl.id);
+          const unavailable=assigned||pending;
           const registered=confirmedIds.has(pl.id);
-          return '<label class="row" style="justify-content:flex-start;margin:5px 0;opacity:'+(assigned?'.55':'1')+'"><input type="checkbox" data-team-mate="'+pl.id+'" style="width:auto" '+(assigned?'disabled':'')+'><span>'+esc(pl.name)+(assigned?' <span class="muted">• déjà dans une équipe</span>':(registered?' <span class="muted">• déjà inscrit</span>':''))+'</span></label>';
+          return '<label class="row" style="justify-content:flex-start;margin:5px 0;opacity:'+(unavailable?'.55':'1')+'"><input type="checkbox" data-team-mate="'+pl.id+'" style="width:auto" '+(unavailable?'disabled':'')+'><span>'+esc(pl.name)+(assigned?' <span class="muted">• déjà dans une équipe</span>':(pending?' <span class="muted">• proposition d’équipe en attente</span>':(registered?' <span class="muted">• déjà inscrit</span>':'')))+'</span></label>';
         }).join('')||'<p class="muted">Aucun autre joueur disponible.</p>');
       mateBox.querySelectorAll('[data-team-mate]').forEach(cb=>cb.onchange=()=>{
         const info=teamMateUsage();
@@ -4632,14 +4776,14 @@ async function bootPublic(token){
         if(/déjà inscrit|already registered/i.test(msg))return status.textContent='Un joueur sélectionné est déjà inscrit. Il peut être ajouté uniquement s’il n’appartient pas déjà à une autre équipe.';
         return status.textContent=msg;
       }
-      status.textContent='🟢 Équipe créée ! Les joueurs déjà inscrits ont été conservés et les autres ont été inscrits automatiquement. Tu peux ensuite revenir dans « Mon inscription & mes invités » pour ajouter jusqu’à 5 invités au Swé.';
+      status.textContent='🟢 Équipe créée ! Les membres du groupe sélectionnés ont une proposition d’équipe à accepter ou refuser. Ton équipe peut rester incomplète : les places libres seront complétées avec les joueurs en Équipe aléatoire lors de la génération finale.';
       window.__swePublicTeamEditing=false;
       $('#publicTeamCode').value='';$('#publicTeamName').value='';validatedTeamCode='';selectedTeamColor='';creatorSel.disabled=false;creatorSel.value='';$('#publicTeamFormAfterCode')?.classList.add('hidden');
       try{
         const snap=await sb.rpc('get_public_workspace_snapshot',{p_token:token});
         if(!snap.error&&snap.data){
           players=snap.data.players||players;registrations=snap.data.tournament_players||registrations;
-          teams=snap.data.teams||teams;teamPlayers=snap.data.team_players||teamPlayers;
+          teams=snap.data.teams||teams;teamPlayers=snap.data.team_players||teamPlayers;teamInvitations=snap.data.team_player_invitations||teamInvitations;
           renderPublicTeamBuilder();
         }
       }catch(e){}
@@ -4681,7 +4825,7 @@ async function bootPublic(token){
   const pmap=new Map(players.map(x=>[x.id,x]));
   const tmap=new Map(teams.map(x=>[x.id,x]));
 
-  // V39.52 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
+  // V39.54 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
   if(wantsLeagueSession&&regTour){
     const linkedLeague=leagues.find(l=>l.id===regTour.league_id)||null;
     const linkLeagueId=publicParams.get('league');
