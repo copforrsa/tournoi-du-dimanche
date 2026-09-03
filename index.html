@@ -60,7 +60,7 @@ select{background-color:#fff} textarea{resize:vertical}
 }
 @media(max-width:650px){
   body{background:#f3f7f4}.app{padding:0 12px 100px}.top{border-radius:0 0 24px 24px;margin:0 -12px 14px;padding:18px 16px 20px}.top h1{font-size:21px}.card{border-radius:17px;padding:14px;margin:10px 0}.g2,.g3{grid-template-columns:1fr}.sectiontitle{font-size:17px}
-  /* V39.39 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
+  /* V39.40 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
   .tabs{left:0;right:0;transform:none;width:100%;display:flex;grid-template-columns:none;justify-content:flex-start;gap:5px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;border-radius:18px 18px 0 0;padding:7px 10px calc(7px + env(safe-area-inset-bottom));scroll-snap-type:x proximity;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
   .tabs button{flex:0 0 74px;min-width:74px;font-size:10px;scroll-snap-align:center;padding:5px 6px}
@@ -81,7 +81,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.39</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.40</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -124,7 +124,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.39</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.40</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -1942,7 +1942,7 @@ function seasonNameForTournament(t){
 }
 
 function renderTournaments(){
-  // V39.39 : l'éditeur de tournoi est protégé des synchronisations automatiques.
+  // V39.40 : l'éditeur de tournoi est protégé des synchronisations automatiques.
   const ss=$('#seasonSelect');
   ss.innerHTML='<option value="">Sans saison</option>'+S.seasons.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');
   const box=$('#tournamentList');box.innerHTML='';
@@ -2902,7 +2902,7 @@ async function renderLeague(){
   }
 
 
-  // V39.39 — Saisie du résultat directement depuis l'onglet Ligue.
+  // V39.40 — Saisie du résultat directement depuis l'onglet Ligue.
   const scoringCard=$('#leagueScoringCard'),scoringBody=$('#leagueScoringBody'),scoringLabel=$('#leagueScoringSessionLabel');
   if(scoringCard)scoringCard.classList.toggle('hidden',!canScoreLeague);
   if(canScoreLeague&&scoringBody){
@@ -3349,7 +3349,7 @@ $('#closeVisual').onclick=()=>$('#visualPreviewBox').classList.add('hidden');
 
 async function bootPublic(token){
   S.publicMode=true;
-  // V39.39 — état global pour éviter qu'un ancien rafraîchissement public
+  // V39.40 — état global pour éviter qu'un ancien rafraîchissement public
   // reconstruise le formulaire d'inscription équipe après validation du code.
   window.__swePublicTeamEditing=false;
   if(window.__swePublicRegistrationInterval){
@@ -3907,7 +3907,7 @@ async function bootPublic(token){
       '<div id="publicTeamFormAfterCode" class="hidden">'+
       '<div class="player" style="margin-top:12px;background:#fbfcfd"><div style="font-size:1.05rem;font-weight:800">🙋🏽‍♂️ Étape 2 — Identifie-toi</div><div class="muted" style="margin-top:5px">Choisis ton nom parmi les membres actifs du groupe.</div><div class="space"></div><select id="publicTeamCreator"><option value="">Choisis ton nom</option>'+creators.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')+'</select></div>'+
       '<div class="player" style="margin-top:12px;background:#fbfcfd"><div style="font-size:1.05rem;font-weight:800">🛡️ Étape 3 — Identité de l’équipe</div><div class="muted" style="margin-top:5px">Choisis un nom court et indique obligatoirement la couleur des maillots.</div><div class="space"></div><input id="publicTeamName" maxlength="30" placeholder="Ex. Les Lions, Team Nord, FC Poto..."><div class="space"></div><div id="publicTeamColorChoices" class="row" style="gap:8px;flex-wrap:wrap"><button type="button" data-team-color="#111827" style="background:#111827;color:white">Noir</button><button type="button" data-team-color="#2563eb" style="background:#2563eb;color:white">Bleu</button><button type="button" data-team-color="#f8fafc" style="background:#f8fafc;color:#111827;border:1px solid #cbd5e1">Blanc</button><button type="button" data-team-color="#dc2626" style="background:#dc2626;color:white">Rouge</button><button type="button" data-team-color="#16a34a" style="background:#16a34a;color:white">Vert</button><button type="button" data-team-color="#eab308" style="background:#eab308;color:#111827">Jaune</button><button type="button" data-team-color="#f97316" style="background:#f97316;color:white">Orange</button><button type="button" data-team-color="#7c3aed" style="background:#7c3aed;color:white">Violet</button><button type="button" data-team-color="#ec4899" style="background:#ec4899;color:white">Rose</button><button type="button" data-team-color="#78350f" style="background:#78350f;color:white">Marron</button><button type="button" data-team-color="#64748b" style="background:#64748b;color:white">Gris</button></div><div id="publicTeamColorStatus" class="muted" style="margin-top:6px">Aucune couleur sélectionnée.</div></div>'+
-      '<div class="player" style="margin-top:12px"><div style="font-size:1.05rem;font-weight:800">👥 Étape 4 — Compose ton groupe</div><div class="muted" style="margin-top:5px">Choisis les joueurs qui feront partie de cette équipe. Avec toi, l’équipe ne peut pas dépasser 5 joueurs. <b>Tu peux aussi inviter d’autres personnes au Swé sans les mettre dans ton équipe</b> : après la création de ton équipe, reviens dans « Mon inscription & mes invités ». Chaque membre peut ajouter jusqu’à 5 invités au total.</div><div id="publicTeamMateBox" style="margin-top:12px"><p class="muted">Sélectionne d’abord ton nom.</p></div><div id="publicTeamSlotsStatus" class="muted" style="margin-top:8px"><b>0/4 coéquipiers ajoutés</b> • 4 places restantes</div><div style="height:1px;background:#e8ecef;margin:14px 0"></div><b>➕ Ajouter des invités</b><div class="muted" style="margin:4px 0 8px">Tu peux ajouter jusqu’à 4 invités si tu ne sélectionnes aucun autre membre.</div><div id="publicTeamGuests"><input data-team-guest placeholder="Nom de l’invité 1"></div><div class="row" style="margin-top:8px"><button id="publicAddTeamGuest" type="button">+ Ajouter un invité</button></div></div>'+
+      '<div class="player" style="margin-top:12px"><div style="font-size:1.05rem;font-weight:800">👥 Étape 4 — Compose ton groupe</div><div class="muted" style="margin-top:5px">Choisis les joueurs qui feront partie de cette équipe. Avec toi, l’équipe ne peut pas dépasser 5 joueurs. <b>Tu peux aussi inviter d’autres personnes au Swé sans les mettre dans ton équipe</b> : après la création de ton équipe, reviens dans « Mon inscription & mes invités ». Chaque membre peut ajouter jusqu’à 5 invités au total.</div><div id="publicTeamMateBox" style="margin-top:12px"><p class="muted">Sélectionne d’abord ton nom.</p></div><div id="publicTeamSlotsStatus" class="muted" style="margin-top:8px"><b>0/4 coéquipiers ajoutés</b> • 4 places restantes</div><div style="height:1px;background:#e8ecef;margin:14px 0"></div><b>👥 Composition de ton équipe</b><div class="muted" style="margin:4px 0 8px;line-height:1.6">Tu peux compléter les 4 places autour de toi comme tu veux : <b>1 membre + 3 invités</b>, <b>2 membres + 2 invités</b>, <b>3 membres + 1 invité</b> ou <b>4 membres</b>. Le total reste limité à 4 coéquipiers en plus de toi.</div><div class="player" style="background:#fff8e8;border:1px solid #f2d18a;margin:8px 0"><b>⚠️ Important</b><div class="muted" style="margin-top:4px;line-height:1.55">Arrange-toi bien avec les membres du groupe que tu sélectionnes pour ton équipe avant de valider, afin d’éviter qu’un même joueur soit prévu dans plusieurs équipes.</div></div><b>➕ Invités hors groupe</b><div id="publicTeamGuests"><input data-team-guest placeholder="Nom de l’invité 1"></div><div class="row" style="margin-top:8px"><button id="publicAddTeamGuest" type="button" class="primary">+ Ajouter un autre invité</button></div></div>'+
       '<div class="space"></div><button id="publicCreateTeam" class="primary" style="width:100%;padding:14px;font-size:1.05rem">🔥 Valider mon équipe</button>'+
       '<div id="publicTeamStatus" class="muted" style="margin-top:8px"></div></div>';
 
@@ -3930,7 +3930,12 @@ async function bootPublic(token){
         creatorSel.disabled=true;
         renderMates();
         const ownerName=players.find(x=>x.id===ownerId)?.name||'membre';
-        codeStatus.textContent='🟢 Code validé pour '+ownerName+'. Tu peux maintenant composer ton équipe.';
+        if(alreadyAssigned.has(ownerId)){
+          codeStatus.textContent='🔒 '+ownerName+' est déjà inscrit dans une équipe. Impossible de créer une seconde équipe, mais les invitations restent possibles dans « Mon inscription & mes invités ».';
+          const createBtn=$('#publicCreateTeam');if(createBtn)createBtn.disabled=true;
+        }else{
+          codeStatus.textContent='🟢 Code validé pour '+ownerName+'. Tu peux maintenant composer ton équipe.';
+        }
       }else{
         creatorSel.disabled=false;
         codeStatus.textContent='🟢 Code validé. Choisis ton nom puis compose ton équipe.';
@@ -3951,11 +3956,11 @@ async function bootPublic(token){
       const creator=creatorSel.value;
       if(!creator){mateBox.innerHTML='<p class="muted">Sélectionne d’abord ton nom.</p>';return}
       if(alreadyAssigned.has(creator)){
-        mateBox.innerHTML='<p class="muted">Tu appartiens déjà à une équipe pour cette compétition. Tu ne peux pas créer une seconde équipe.</p>';return;
+        mateBox.innerHTML='<div class="player" style="background:#fff7ed;border:1px solid #fed7aa"><b>🔒 Tu es déjà inscrit dans une équipe.</b><div class="muted" style="margin-top:5px;line-height:1.6">Tu ne peux pas t’inscrire dans une deuxième équipe. En revanche, tu peux toujours ajouter tes invités au Swé depuis <b>« Mon inscription & mes invités »</b>.</div></div>';return;
       }
       const available=players.filter(pl=>pl.active&&pl.is_group_member!==false&&pl.id!==creator).sort((a,b)=>a.name.localeCompare(b.name));
       mateBox.innerHTML=(confirmedIds.has(creator)?'<div class="readonly-note" style="margin-bottom:10px">ℹ️ Tu es déjà inscrit à ce Swé. Tu peux quand même créer ton équipe : ton inscription existante sera conservée.</div>':'')+
-        '<b>Membres du groupe</b><div class="muted" style="margin:3px 0 8px">Choisis jusqu’à 4 joueurs. Un joueur déjà inscrit mais sans équipe peut être ajouté. Un joueur déjà affecté à une autre équipe ne peut pas être sélectionné.</div>'+
+        '<b>Membres du groupe</b><div class="muted" style="margin:3px 0 8px;line-height:1.55">Choisis les membres avec qui tu t’es arrangé. Tu peux mélanger membres et invités librement dans les 4 places disponibles. Un joueur déjà affecté à une autre équipe ne peut pas être sélectionné.</div>'+
         (available.map(pl=>{
           const assigned=alreadyAssigned.has(pl.id);
           const registered=confirmedIds.has(pl.id);
@@ -3988,7 +3993,7 @@ async function bootPublic(token){
       const addBtn=$('#publicAddTeamGuest');
       if(addBtn){
         addBtn.disabled=info.remaining<=0;
-        addBtn.textContent=info.remaining<=0?'Équipe complète (5 joueurs)':' + Ajouter un invité';
+        addBtn.textContent=info.remaining<=0?'Équipe complète (5 joueurs)':'+ Ajouter un autre invité';
       }
     }
 
@@ -4097,7 +4102,7 @@ async function bootPublic(token){
   const pmap=new Map(players.map(x=>[x.id,x]));
   const tmap=new Map(teams.map(x=>[x.id,x]));
 
-  // V39.39 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
+  // V39.40 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
   if(wantsLeagueSession&&regTour){
     const linkedLeague=leagues.find(l=>l.id===regTour.league_id)||null;
     const linkLeagueId=publicParams.get('league');
