@@ -2250,10 +2250,13 @@ function formatCountdown(ms){
 }
 function updateTournamentCountdowns(){
   document.querySelectorAll('[data-registration-deadline]').forEach(el=>{
-    const ms=new Date(el.dataset.registrationDeadline).getTime()-Date.now();
+    const deadline=new Date(el.dataset.registrationDeadline).getTime();
+    if(!Number.isFinite(deadline)){el.textContent='⚠️ Date de clôture invalide';return}
+    const ms=deadline-Date.now();
     const expired=ms<=0;
     el.textContent=expired?'⛔ Inscriptions terminées':('⏱️ Clôture dans '+formatCountdown(ms));
-    el.style.fontWeight='700';
+    el.style.fontWeight='800';
+    el.style.fontSize='1.05rem';
     el.style.color=expired?'#b91c1c':'#166534';
   });
 }
@@ -4497,7 +4500,7 @@ async function bootPublic(token){
     regBox.innerHTML=
       '<div class="player"><b>'+esc(regTour.name||('Tournoi du '+regTour.tournament_date))+'</b><div id="publicRegCount" class="muted">'+confirmed+'/'+(regTour.max_players||35)+' confirmés'+(waiting?' • '+waiting+' remplaçant'+(waiting>1?'s':''):'')+'</div>'+
       (regTour.format!=='league'?(()=>{const plan=tournamentAutoPlan(confirmed);return '<div style="margin-top:7px;font-weight:800">⚙️ Scénario actuel : '+(plan.teams?plan.teams+' équipe'+(plan.teams>1?'s':'')+' • '+plan.pitches+' terrain'+(plan.pitches>1?'s':'')+(plan.subs?' • '+plan.subs+' remplaçant'+(plan.subs>1?'s':'')+' commun'+(plan.subs>1?'s':''):''):'moins de 10 joueurs — équipes non générables')+'</div>'})():'')+
-      (regTour.registration_deadline?'<div data-registration-deadline="'+esc(regTour.registration_deadline)+'" style="margin-top:7px"></div><div class="muted">Fin des inscriptions : '+new Date(regTour.registration_deadline).toLocaleString('fr-FR',{timeZone:'America/Martinique',dateStyle:'short',timeStyle:'short'})+'</div>':'')+'</div>'+
+      (regTour.registration_deadline?'<div style="margin-top:8px;padding:9px 11px;border-radius:10px;background:#f0fdf4;border:1px solid #bbf7d0"><b>⏱️ Compte à rebours des inscriptions</b><div data-registration-deadline="'+esc(regTour.registration_deadline)+'" style="margin-top:4px"></div><div class="muted">Fin des inscriptions : '+new Date(regTour.registration_deadline).toLocaleString('fr-FR',{timeZone:'America/Martinique',dateStyle:'short',timeStyle:'short'})+'</div></div>':'')+'</div>'+
       (regTour.format!=='league'
         ? '<div class="player" style="margin-top:12px;background:#eef8f2;border:1px solid #b7dfc4"><b>📍 Infos pratiques</b><div class="muted" style="margin-top:6px;line-height:1.7">Complexe / terrains : <b>'+esc(publicTerrainLabel)+'</b><br>Heure de réservation : <b>'+esc(publicTime)+'</b><br>Prix : <b>'+esc(publicFee)+' € / participant</b>'+(regTour.reservation_reference?'<br>Réservation : <b>'+esc(regTour.reservation_reference)+'</b>':'')+'</div><div class="muted" style="margin-top:8px;line-height:1.7"><b>Programme :</b><br>8h45 : arrivée, paiement + échauffement<br>9h00 : début du tournoi — les premières équipes arrivées commencent<br>11h00 : 3e mi-temps</div></div>'
         : '')+
@@ -4534,6 +4537,7 @@ async function bootPublic(token){
       regBox.parentElement?.insertBefore(donorCard,regBox.nextSibling);
     }
 
+    setTimeout(updateTournamentCountdowns,0);
     const PUBLIC_GUEST_LIMIT=5;
 
     function publicGuestUsage(hostId){
