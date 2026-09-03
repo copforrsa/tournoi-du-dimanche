@@ -1,4 +1,4 @@
-const CACHE='swe-tournament-5v5-v39-65';
+const CACHE='swe-tournament-5v5-v39-63';
 const STATIC_ASSETS=['./','./index.html','./manifest.webmanifest','./favicon.png','./icon-192.png','./icon-512.png'];
 
 self.addEventListener('install',event=>{
@@ -9,7 +9,7 @@ self.addEventListener('install',event=>{
 self.addEventListener('activate',event=>{
   event.waitUntil((async()=>{
     const keys=await caches.keys();
-    await Promise.all(keys.filter(k=>k.startsWith('tournoi-foot-') && k!==CACHE).map(k=>caches.delete(k)));
+    await Promise.all(keys.filter(k=>(k.startsWith('tournoi-foot-')||k.startsWith('swe-tournament-5v5-')) && k!==CACHE).map(k=>caches.delete(k)));
     await self.clients.claim();
   })());
 });
