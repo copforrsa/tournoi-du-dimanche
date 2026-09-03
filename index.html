@@ -60,7 +60,7 @@ select{background-color:#fff} textarea{resize:vertical}
 }
 @media(max-width:650px){
   body{background:#f3f7f4}.app{padding:0 12px 100px}.top{border-radius:0 0 24px 24px;margin:0 -12px 14px;padding:18px 16px 20px}.top h1{font-size:21px}.card{border-radius:17px;padding:14px;margin:10px 0}.g2,.g3{grid-template-columns:1fr}.sectiontitle{font-size:17px}
-  /* V39.44 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
+  /* V39.46 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
   .tabs{left:0;right:0;transform:none;width:100%;display:flex;grid-template-columns:none;justify-content:flex-start;gap:5px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;border-radius:18px 18px 0 0;padding:7px 10px calc(7px + env(safe-area-inset-bottom));scroll-snap-type:x proximity;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
   .tabs button{flex:0 0 74px;min-width:74px;font-size:10px;scroll-snap-align:center;padding:5px 6px}
@@ -81,7 +81,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.44</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.46</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -124,7 +124,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.44</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.46</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -332,7 +332,7 @@ select{background-color:#fff} textarea{resize:vertical}
         </div>
       </div>
       <div class="card" id="tournamentAdminCard">
-        <h2 class="sectiontitle">Créer un tournoi</h2><p class="muted">Pour chaque nouveau tournoi, renseigne obligatoirement le complexe, 1 à 3 terrains réservés, l’heure de réservation et le prix par participant. Ces informations pourront ensuite être modifiées tant que le tournoi est en cours.</p>
+        <h2 class="sectiontitle">Créer un tournoi</h2><p class="muted">Le tournoi ferme automatiquement ses inscriptions la veille à 17h. La capacité par défaut est de 35 joueurs. Après la génération des équipes, l’application adapte automatiquement le nombre d’équipes et de terrains : 10 joueurs = 2 équipes / 1 terrain, 15 = 3 / 1, 20 = 4 / 2, 25 = 5 / 2, 30 = 6 / 3 et 35 = 7 / 3.</p>
         <div class="grid g2"><input id="tourDate" type="date"><select id="tourFormat"><option value="classic">Classique</option><option value="king_of_pitch">Roi du terrain</option></select></div>
         <div class="space"></div><input id="tourName" placeholder="Nom facultatif"><div class="space"></div>
         <div class="player" style="background:#f8fbf9">
@@ -350,7 +350,7 @@ select{background-color:#fff} textarea{resize:vertical}
         </div>
         <div class="space"></div>
         <div class="grid g2">
-          <label class="player"><span class="muted">Places maximum</span><input id="tourMaxPlayers" type="number" min="2" max="100" value="20"></label>
+          <label class="player"><span class="muted">Places maximum</span><input id="tourMaxPlayers" type="number" min="10" max="35" value="35"></label>
           <label class="player row" style="justify-content:flex-start"><input id="tourRegistrationOpen" type="checkbox" style="width:auto" checked><span><b>Ouvrir les inscriptions</b><div class="muted">Les joueurs pourront s’inscrire via le lien public.</div></span></label>
         </div>
         <div id="thirdHalfTournamentCreate" class="player hidden" style="margin-top:12px;background:#fff8ed;border:1px solid #fed7aa">
@@ -1942,6 +1942,51 @@ function seasonNameForTournament(t){
 }
 
 
+
+function tournamentDeadlineMs(t){
+  if(!t||t.format==='league'||!t.registration_deadline)return null;
+  const ms=new Date(t.registration_deadline).getTime();
+  return Number.isFinite(ms)?ms:null;
+}
+function formatCountdown(ms){
+  if(ms<=0)return 'Inscriptions terminées';
+  const total=Math.floor(ms/1000);
+  const d=Math.floor(total/86400);
+  const hh=Math.floor((total%86400)/3600);
+  const mm=Math.floor((total%3600)/60);
+  const ss=total%60;
+  return (d?d+'j ':'')+String(hh).padStart(2,'0')+'h '+String(mm).padStart(2,'0')+'m '+String(ss).padStart(2,'0')+'s';
+}
+function updateTournamentCountdowns(){
+  document.querySelectorAll('[data-registration-deadline]').forEach(el=>{
+    const ms=new Date(el.dataset.registrationDeadline).getTime()-Date.now();
+    const expired=ms<=0;
+    el.textContent=expired?'⛔ Inscriptions terminées':('⏱️ Clôture dans '+formatCountdown(ms));
+    el.style.fontWeight='700';
+    el.style.color=expired?'#b91c1c':'#166534';
+  });
+}
+if(!window.__sweDeadlineTimer){
+  window.__sweDeadlineTimer=setInterval(updateTournamentCountdowns,1000);
+}
+function tournamentAutoPlan(count){
+  const n=Math.max(0,Math.min(35,Number(count||0)));
+  if(n<10)return {teams:0,pitches:0,core:0,subs:n,rule:'10 joueurs minimum pour créer 2 équipes'};
+  const teams=Math.floor(n/5);
+  const core=teams*5;
+  const subs=n-core;
+  const pitches=teams<=3?1:(teams<=5?2:3);
+  return {
+    teams,
+    pitches,
+    core,
+    subs,
+    rule:teams%2
+      ?'2 buts d’écart = l’équipe dehors rentre, ou 10 min maximum'
+      :'Matchs de 10 min'
+  };
+}
+
 function registrationColorInfo(team){
   const hex=String(team?.color||'#64748b').toLowerCase();
   const names={
@@ -1977,7 +2022,7 @@ function registrationSummaryHtml(tournamentId){
         const guest=registrationGuestText(r,playerMap);
         return '<div class="player row"><span style="flex:1">'+esc(pl?.name||'Joueur')+
           (guest?' <span class="guest-badge">'+esc(guest)+'</span>':'')+
-          '</span><span class="muted">Équipe aléatoire</span></div>';
+          '</span><span class="muted">'+(r.is_substitute?'🟠 Remplaçant commun':'Équipe aléatoire')+'</span></div>';
       }).join('')
     : '<p class="muted">Aucun joueur en équipe aléatoire.</p>';
 
@@ -2003,7 +2048,7 @@ function registrationSummaryHtml(tournamentId){
 }
 
 function renderTournaments(){
-  // V39.44 : l'éditeur de tournoi est protégé des synchronisations automatiques.
+  // V39.46 : l'éditeur de tournoi est protégé des synchronisations automatiques.
   const ss=$('#seasonSelect');
   ss.innerHTML='<option value="">Sans saison</option>'+S.seasons.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');
   const box=$('#tournamentList');box.innerHTML='';
@@ -2022,6 +2067,8 @@ function renderTournaments(){
     top.innerHTML='<span style="flex:1"><b>'+esc(t.name||('Tournoi du '+t.tournament_date))+'</b><div class="muted">'+t.tournament_date+' • '+formatLabel(t)+'</div><div class="muted">📅 '+esc(seasonNameForTournament(t))+'</div>'+
       '<div class="muted" style="margin-top:3px">📍 '+esc(pitchLabels.length?(complexLabel(t.complex_id)+' • '+pitchLabels.join(', ')):(t.venue||'Terrains non renseignés'))+(t.start_time?' • 🕘 '+esc(String(t.start_time).slice(0,5)):'')+' • 💶 '+(Number(t.entry_fee_cents||0)/100).toLocaleString('fr-FR')+' €</div>'+
       (t.reservation_reference?'<div class="muted">Réservation : '+esc(t.reservation_reference)+'</div>':'')+
+      (t.format!=='league'&&t.registration_deadline?'<div data-registration-deadline="'+esc(t.registration_deadline)+'" style="margin-top:5px"></div><div class="muted">Clôture prévue la veille à 17h'+(Number(t.registration_extension_hours||0)===3?' • prolongée de 3h':'')+'</div>':'')+
+      (t.generated_team_count?(()=>{const pc=S.activeTour===t.id?S.tPlayers.filter(x=>x.present&&x.registration_status!=='waitlist').length:0;const pl=pc?tournamentAutoPlan(pc):null;return '<div class="muted" style="margin-top:5px">⚙️ '+t.generated_team_count+' équipes • '+(t.recommended_pitch_count||1)+' terrain'+((t.recommended_pitch_count||1)>1?'s':'')+' • '+(t.odd_team_rotation_rule?'Règle 2 buts d’écart / 10 min':'Matchs de 10 min')+(pl?.subs?' • '+pl.subs+' remplaçant'+(pl.subs>1?'s':'')+' commun'+(pl.subs>1?'s':''):'')+'</div>'})():'')+
       '</span>';
     const open=document.createElement('button');open.textContent=t.id===S.activeTour?'Actif':'Ouvrir';if(t.id===S.activeTour)open.className='green';
     open.onclick=async()=>{S.activeTour=t.id;await loadTournament();renderAll();toast('Tournoi sélectionné')};
@@ -2032,12 +2079,27 @@ function renderTournaments(){
       const confirmed=S.activeTour===t.id?S.tPlayers.filter(x=>x.registration_status!=='waitlist'&&x.present).length:null;
       reg.innerHTML='<div class="row"><span style="flex:1"><b>Inscriptions : '+(t.registration_open?'🟢 ouvertes':'🔴 fermées')+'</b><div class="muted">Maximum '+(t.max_players||20)+' joueurs'+(confirmed!==null?' • '+confirmed+' confirmé'+(confirmed>1?'s':''):'')+'</div></span></div>';
       const row=document.createElement('div');row.className='row';row.style.marginTop='8px';
-      const max=document.createElement('input');max.type='number';max.min='2';max.max='100';max.value=t.max_players||20;max.style.maxWidth='105px';
+      const max=document.createElement('input');max.type='number';max.min='10';max.max='35';max.value=t.max_players||35;max.style.maxWidth='105px';
       const toggle=document.createElement('button');toggle.textContent=t.registration_open?'Fermer les inscriptions':'Ouvrir les inscriptions';toggle.className=t.registration_open?'danger':'primary';
       const saveMax=document.createElement('button');saveMax.textContent='Modifier places';
       toggle.onclick=async()=>{const {error}=await sb.from('tournaments').update({registration_open:!t.registration_open}).eq('id',t.id);if(error)return toast(error.message);await loadAll();toast(!t.registration_open?'Inscriptions ouvertes ✅':'Inscriptions fermées')};
-      saveMax.onclick=async()=>{const n=Math.max(2,Math.min(100,Number(max.value)||20));const {error}=await sb.from('tournaments').update({max_players:n}).eq('id',t.id);if(error)return toast(error.message);await loadAll();toast('Nombre de places mis à jour ✅')};
-      row.append(max,saveMax,toggle);reg.appendChild(row);
+      saveMax.onclick=async()=>{const n=Math.max(10,Math.min(35,Number(max.value)||35));const {error}=await sb.from('tournaments').update({max_players:n}).eq('id',t.id);if(error)return toast(error.message);await loadAll();toast('Nombre de places mis à jour ✅')};
+      row.append(max,saveMax,toggle);
+      if(t.format!=='league'&&Number(t.registration_extension_hours||0)<3){
+        const extend=document.createElement('button');
+        extend.type='button';
+        extend.textContent='+3h inscriptions';
+        extend.title='Disponible une seule fois si le nombre maximum d’inscrits n’est pas atteint.';
+        extend.onclick=async()=>{
+          extend.disabled=true;
+          const {data,error}=await sb.rpc('extend_tournament_registration_3h',{p_tournament_id:t.id});
+          if(error){extend.disabled=false;return toast(error.message)}
+          await loadAll();
+          toast('Inscriptions prolongées de 3 heures ✅');
+        };
+        row.appendChild(extend);
+      }
+      reg.appendChild(row);
 
 
       const editDetails=document.createElement('div');
@@ -2309,6 +2371,7 @@ function renderTournaments(){
   });
 
   if(!tournamentOnly.length)box.innerHTML='<p class="muted">Aucun tournoi pour le moment.</p>';
+  updateTournamentCountdowns();
 }
 
 async function showTournamentHistory(t){
@@ -2410,7 +2473,7 @@ $('#createTournament').onclick=async()=>{
       tournament_date:date,
       format:$('#tourFormat').value,
       status:'draft',
-      max_players:Math.max(2,Math.min(100,Number($('#tourMaxPlayers').value)||20)),
+      max_players:Math.max(10,Math.min(35,Number($('#tourMaxPlayers').value)||35)),
       registration_open:$('#tourRegistrationOpen').checked,
       complex_id:complexId,
       reserved_pitch_ids:pitchIds,
@@ -2430,7 +2493,7 @@ $('#createTournament').onclick=async()=>{
     setView('tournaments');
     await loadAll();
     setView('tournaments');
-    toast('Nouveau tournoi créé avec '+pitchIds.length+' terrain'+(pitchIds.length>1?'s':'')+' réservé'+(pitchIds.length>1?'s':'')+' ✅');
+    toast('Nouveau tournoi créé ✅ Clôture automatique la veille à 17h.');
   }catch(error){
     toast(error.message||'Impossible de créer le tournoi');
   }finally{
@@ -2478,8 +2541,15 @@ function renderTeams(){
     if(controls)controls.classList.add('hidden');
     return;
   }
-  if(compStatus)compStatus.innerHTML='<b>'+esc(t.format==='league'?'Swé de Ligue':'Tournoi')+' :</b> '+esc(t.name||t.tournament_date)+' • '+esc(t.tournament_date);
+  if(compStatus){
+    const confirmedCount=S.tPlayers.filter(tp=>tp.present&&tp.registration_status!=='waitlist').length;
+    const plan=t.format==='league'?null:tournamentAutoPlan(confirmedCount);
+    compStatus.innerHTML='<b>'+esc(t.format==='league'?'Swé de Ligue':'Tournoi')+' :</b> '+esc(t.name||t.tournament_date)+' • '+esc(t.tournament_date)+
+      (plan?'<div class="player" style="margin-top:8px;background:#eef8f2"><b>⚙️ Configuration automatique avec '+confirmedCount+' inscrit'+(confirmedCount>1?'s':'')+'</b><div class="muted" style="margin-top:5px">'+plan.teams+' équipes • '+plan.pitches+' terrain'+(plan.pitches>1?'s':'')+(plan.subs?' • '+plan.subs+' remplaçant'+(plan.subs>1?'s':'')+' commun'+(plan.subs>1?'s':'')+' (derniers inscrits)':'')+'<br>Règle : '+esc(plan.rule)+(plan.subs?'<br>Les remplaçants peuvent jouer pour n’importe quelle équipe.':'')+'</div></div>':'');
+  }
 
+  const ppt=$('#playersPerTeam');
+  if(ppt)ppt.classList.toggle('hidden',t.format!=='league');
 
   const canGenerate=hasAdminOps()||(isCoorg()&&S.myPermissions.can_generate_teams);
   const canFullEdit=hasAdminOps();
@@ -2614,17 +2684,32 @@ $('#smartAutoTeams').onclick=async()=>{
   if(isCoorg()&&!hasTemporaryAdmin()&&!S.myPermissions.can_generate_teams)return toast('Tu n’es pas autorisé à générer les équipes.');
   const t=currentTour();if(!t)return toast('Choisis d’abord le tournoi ou le Swé de Ligue concerné.');
   const confirmed=S.tPlayers.filter(tp=>tp.present&&tp.registration_status!=='waitlist').length;
-  if(confirmed<4)return toast('Il faut au moins 4 joueurs confirmés.');
+  if(t.format!=='league'&&confirmed<10)return toast('Il faut au moins 10 joueurs confirmés pour créer 2 équipes.');
+  if(t.format==='league'&&confirmed<4)return toast('Il faut au moins 4 joueurs confirmés.');
   const perTeam=Math.max(2,Math.min(11,Number($('#playersPerTeam').value)||5));
   if((S.matches.length||S.teams.length)&&!confirm('La génération va remplacer les équipes actuelles et supprimer les matchs/buts associés. Continuer ?'))return;
   const btn=$('#smartAutoTeams');btn.disabled=true;btn.textContent='Génération…';
   try{
-    const {data,error}=await sb.rpc('generate_balanced_teams',{p_tournament_id:t.id,p_players_per_team:perTeam});
+    const call=t.format==='league'
+      ? sb.rpc('generate_balanced_teams',{p_tournament_id:t.id,p_players_per_team:perTeam})
+      : sb.rpc('generate_swe_tournament_teams',{p_tournament_id:t.id});
+    const {data,error}=await call;
     if(error)throw error;
-    await loadTournament();renderAll();
+    await loadAll();
+    S.activeTour=t.id;
+    await loadTournament();
+    renderAll();
     const n=Number(data?.team_count||S.teams.length||0);
-    $('#teamBalanceInfo').textContent=n+' équipes générées automatiquement selon les niveaux privés définis par l’administrateur.';
-    toast(n+' équipes équilibrées générées ✅');
+    if(t.format==='league'){
+      $('#teamBalanceInfo').textContent=n+' équipes générées automatiquement selon les niveaux privés définis par l’administrateur.';
+    }else{
+      const subs=Number(data?.substitute_count||0),pitches=Number(data?.pitch_count||1);
+      $('#teamBalanceInfo').innerHTML='<b>'+n+' équipes • '+pitches+' terrain'+(pitches>1?'s':'')+'</b>'+
+        (subs?' • '+subs+' remplaçant'+(subs>1?'s':'')+' parmi les derniers inscrits':'')+
+        '<br>Règle automatique : '+(data?.odd_team_rule?'2 buts d’écart = l’équipe dehors rentre, sinon 10 min maximum.':'matchs de 10 min.')+
+        (subs?' <br><b>🟠 '+subs+' remplaçant'+(subs>1?'s':'')+' commun'+(subs>1?'s':'')+'</b> : ils peuvent jouer pour n’importe quelle équipe du tournoi.':'');
+    }
+    toast(n+' équipes générées et format du tournoi configuré ✅');
   }catch(e){toast(e.message||'Impossible de générer les équipes')}
   finally{btn.disabled=false;btn.textContent='⚡ Générer équipes équilibrées'}
 };
@@ -2660,9 +2745,16 @@ function renderMatches(){
     accessHelp.innerHTML='Ton profil est autorisé à <b>saisir les scores et les buteurs/passeurs pendant les matchs</b>. Choisis la compétition ci-dessous.';
   }
   if(selectorStatus){
-    selectorStatus.textContent=current
-      ? ((current.format==='league'?'Swé de Ligue : ':'Tournoi : ')+(current.name||current.tournament_date)+' • '+S.matches.length+' match'+(S.matches.length>1?'s':''))
-      : 'Aucune compétition sélectionnée.';
+    if(current){
+      selectorStatus.innerHTML=(current.format==='league'?'Swé de Ligue : ':'Tournoi : ')+esc(current.name||current.tournament_date)+' • '+S.matches.length+' match'+(S.matches.length>1?'s':'')+
+        (current.format!=='league'&&S.teams.length
+          ?'<div class="player" style="margin-top:8px;background:#fff8e8;border:1px solid #f2d18a"><b>⏱️ Règle de rotation automatique</b><div class="muted" style="margin-top:5px">'+
+             (S.teams.length%2
+               ?'Nombre d’équipes impair ('+S.teams.length+') : <b>2 buts d’écart = l’équipe dehors rentre</b>. Sinon, le match s’arrête à <b>10 minutes</b>.'
+               :'Nombre d’équipes pair ('+S.teams.length+') : tous les matchs durent <b>10 minutes</b>.')+
+           '</div></div>'
+          :'');
+    }else selectorStatus.textContent='Aucune compétition sélectionnée.';
   }
   const isLeagueMatch=current?.format==='league';
   const req=$('#leaguePitchRequirement');
@@ -2997,7 +3089,7 @@ async function renderLeague(){
   }
 
 
-  // V39.44 — Saisie du résultat directement depuis l'onglet Ligue.
+  // V39.46 — Saisie du résultat directement depuis l'onglet Ligue.
   const scoringCard=$('#leagueScoringCard'),scoringBody=$('#leagueScoringBody'),scoringLabel=$('#leagueScoringSessionLabel');
   if(scoringCard)scoringCard.classList.toggle('hidden',!canScoreLeague);
   if(canScoreLeague&&scoringBody){
@@ -3444,7 +3536,7 @@ $('#closeVisual').onclick=()=>$('#visualPreviewBox').classList.add('hidden');
 
 async function bootPublic(token){
   S.publicMode=true;
-  // V39.44 — état global pour éviter qu'un ancien rafraîchissement public
+  // V39.46 — état global pour éviter qu'un ancien rafraîchissement public
   // reconstruise le formulaire d'inscription équipe après validation du code.
   window.__swePublicTeamEditing=false;
   if(window.__swePublicRegistrationInterval){
@@ -3758,7 +3850,7 @@ async function bootPublic(token){
           const guest=guestText(r);
           return '<div class="player row"><span style="flex:1">'+esc(pl?.name||'Joueur')+
             (guest?' <span class="guest-badge">'+esc(guest)+'</span>':'')+
-            '</span><span class="muted">Équipe aléatoire</span></div>';
+            '</span><span class="muted">'+(r.is_substitute?'🟠 Remplaçant commun':'Équipe aléatoire')+'</span></div>';
         }).join('')
       : '<p class="muted">Aucun joueur en équipe aléatoire.</p>';
 
@@ -3818,15 +3910,18 @@ async function bootPublic(token){
     const regs=registrations.filter(r=>r.tournament_id===regTour.id);
     const confirmed=regs.filter(r=>r.registration_status!=='waitlist'&&r.present).length;
     const waiting=regs.filter(r=>r.registration_status==='waitlist').length;
+    const publicAutoPlan=regTour.format==='league'?null:tournamentAutoPlan(confirmed);
     const publicFee=(Number(regTour.entry_fee_cents||0)/100).toLocaleString('fr-FR',{minimumFractionDigits:Number(regTour.entry_fee_cents||0)%100?2:0,maximumFractionDigits:2});
     const reservedPitchNames=(regTour.reserved_pitch_ids||[]).map(id=>S.sportsPitches.find(p=>p.id===id)?.name).filter(Boolean);
     const publicTerrainLabel=reservedPitchNames.length?reservedPitchNames.join(', '):(regTour.venue||'À préciser');
     const publicTime=regTour.start_time?String(regTour.start_time).slice(0,5):'À préciser';
     regBox.innerHTML=
-      '<div class="player"><b>'+esc(regTour.name||('Tournoi du '+regTour.tournament_date))+'</b><div id="publicRegCount" class="muted">'+confirmed+'/'+(regTour.max_players||20)+' confirmés'+(waiting?' • '+waiting+' remplaçant'+(waiting>1?'s':''):'')+'</div></div>'+
+      '<div class="player"><b>'+esc(regTour.name||('Tournoi du '+regTour.tournament_date))+'</b><div id="publicRegCount" class="muted">'+confirmed+'/'+(regTour.max_players||20)+' confirmés'+(waiting?' • '+waiting+' remplaçant'+(waiting>1?'s':''):'')+'</div>'+
+      (regTour.format!=='league'&&regTour.registration_deadline?'<div data-registration-deadline="'+esc(regTour.registration_deadline)+'" style="margin-top:7px"></div><div class="muted">Clôture automatique la veille à 17h'+(Number(regTour.registration_extension_hours||0)===3?' • prolongation +3h activée':'')+'</div>':'')+'</div>'+
       (regTour.format!=='league'
         ? '<div class="player" style="margin-top:12px;background:#eef8f2;border:1px solid #b7dfc4"><b>📍 Infos pratiques</b><div class="muted" style="margin-top:6px;line-height:1.7">Complexe / terrains : <b>'+esc(publicTerrainLabel)+'</b><br>Heure de réservation : <b>'+esc(publicTime)+'</b><br>Prix : <b>'+esc(publicFee)+' € / participant</b>'+(regTour.reservation_reference?'<br>Réservation : <b>'+esc(regTour.reservation_reference)+'</b>':'')+'</div><div class="muted" style="margin-top:8px;line-height:1.7"><b>Programme :</b><br>8h45 : arrivée, paiement + échauffement<br>9h00 : début du tournoi — les premières équipes arrivées commencent<br>11h00 : 3e mi-temps</div></div>'
         : '')+
+      (publicAutoPlan&&confirmed>=10?'<div class="player" style="margin-top:12px;background:#eef8f2;border:1px solid #b7dfc4"><b>⚙️ Format prévu avec '+confirmed+' inscrits</b><div class="muted" style="margin-top:5px;line-height:1.6">'+publicAutoPlan.teams+' équipes • '+publicAutoPlan.pitches+' terrain'+(publicAutoPlan.pitches>1?'s':'')+(publicAutoPlan.subs?' • '+publicAutoPlan.subs+' remplaçant'+(publicAutoPlan.subs>1?'s':'')+' commun'+(publicAutoPlan.subs>1?'s':''):'')+'.'+(publicAutoPlan.subs?' Les remplaçants pourront jouer pour n’importe quelle équipe.':'')+'</div></div>':'')+
       '<div class="player" style="margin-top:12px;background:#f8fbf9"><b>✅ Inscription</b><div class="muted" style="margin-top:6px;line-height:1.6">Inscris-toi en cliquant sur <b>« Je participe »</b>. Si tu viens accompagné, indique le nom de tes invités. Chaque membre peut ajouter jusqu’à <b>5 invités maximum</b>.</div></div>'+
       '<div class="space"></div><select id="publicPlayerSelect"><option value="">Choisis ton nom</option></select>'+
       '<div id="publicSelectedStatus" class="muted" style="margin-top:7px">Choisis ton nom pour voir ton statut.</div>'+
@@ -3843,6 +3938,14 @@ async function bootPublic(token){
       '<h3 style="margin-top:18px">👥 Liste des inscrits</h3><div id="publicRegisteredList"></div>'+
       '<div id="publicWaitWrap" class="'+(waiting?'':'hidden')+'"><h3 style="margin-top:14px">🟠 Remplaçants</h3><div id="publicWaitList"></div></div>';
     renderPublicRegistrationList();
+    updateTournamentCountdowns();
+    const publicDeadline=tournamentDeadlineMs(regTour);
+    const publicRegistrationExpired=regTour.format!=='league'&&publicDeadline!==null&&Date.now()>=publicDeadline;
+    if(publicRegistrationExpired){
+      const st=$('#publicRegStatus');
+      if(st)st.innerHTML='<b>⛔ Inscriptions terminées.</b> La clôture était fixée la veille du tournoi à 17h.';
+      ['publicJoin','publicAddGuest','publicNewPlayerJoin'].forEach(id=>{const b=$('#'+id);if(b)b.disabled=true;});
+    }
 
     if(publicThirdHalf){
       const donorCard=document.createElement('div');
@@ -3942,6 +4045,7 @@ async function bootPublic(token){
     }
 
     $('#publicJoin').onclick=async()=>{
+      if(regTour.format!=='league'&&tournamentDeadlineMs(regTour)!==null&&Date.now()>=tournamentDeadlineMs(regTour))return $('#publicRegStatus').textContent='⛔ Les inscriptions sont terminées.';
       const pid=$('#publicPlayerSelect').value;if(!pid)return $('#publicRegStatus').textContent='Choisis ton nom.';
       const b=$('#publicJoin');b.disabled=true;
       const {data,error}=await sb.rpc('public_tournament_registration',{p_token:token,p_tournament_id:regTour.id,p_player_id:pid,p_action:'join'});
@@ -3971,6 +4075,7 @@ async function bootPublic(token){
       await refreshPublicRegistration();
     };
     $('#publicAddGuest').onclick=async()=>{
+      if(regTour.format!=='league'&&tournamentDeadlineMs(regTour)!==null&&Date.now()>=tournamentDeadlineMs(regTour))return $('#publicRegStatus').textContent='⛔ Les inscriptions sont terminées.';
       const host=$('#publicPlayerSelect').value;
       const guestName=$('#publicGuestName').value.trim();
       if(!host)return $('#publicRegStatus').textContent='Choisis d’abord ton nom dans la liste ci-dessus. Tu peux ajouter un invité même si tu es déjà inscrit.';
@@ -4186,6 +4291,7 @@ async function bootPublic(token){
     });
 
     $('#publicCreateTeam').onclick=async()=>{
+      if(regTour.format!=='league'&&tournamentDeadlineMs(regTour)!==null&&Date.now()>=tournamentDeadlineMs(regTour))return status.textContent='⛔ Les inscriptions sont terminées.';
       const creator=creatorSel.value;
       const code=validatedTeamCode;
       const name=$('#publicTeamName').value.trim();
@@ -4258,7 +4364,7 @@ async function bootPublic(token){
   const pmap=new Map(players.map(x=>[x.id,x]));
   const tmap=new Map(teams.map(x=>[x.id,x]));
 
-  // V39.44 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
+  // V39.46 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
   if(wantsLeagueSession&&regTour){
     const linkedLeague=leagues.find(l=>l.id===regTour.league_id)||null;
     const linkLeagueId=publicParams.get('league');
