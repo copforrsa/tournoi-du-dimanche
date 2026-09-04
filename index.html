@@ -258,7 +258,7 @@ select{background-color:#fff} textarea{resize:vertical}
 }
 
 
-/* V40.03 — inscription: liste des membres plus ergonomique */
+/* V40.04 — inscription: liste des membres plus ergonomique */
 #publicPlayerSelect,#publicLeaguePlayer,#leagueSessionPublicPlayer,#publicTeamCreator{
   min-height:64px;
   font-size:1.08rem;
@@ -288,7 +288,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1><img src="./favicon.png?v=4001" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V40.03</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1><img src="./favicon.png?v=4001" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V40.04</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -331,7 +331,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1><img src="./favicon.png?v=4001" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V40.03</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1><img src="./favicon.png?v=4001" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V40.04</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -5023,7 +5023,7 @@ async function bootPublic(token){
 
   function renderPublicRegistrationList(){
     if(!regTour||!regBox)return;
-    const regs=registrations.filter(r=>r.tournament_id===regTour.id).sort((a,b)=>String(a.registered_at||'').localeCompare(String(b.registered_at||'')));
+    const regs=registrations.filter(r=>r.tournament_id===regTour.id).sort((a,b)=>String(a.registered_at||a.created_at||'').localeCompare(String(b.registered_at||b.created_at||'')));
     const confirmed=regs.filter(r=>r.registration_status!=='waitlist'&&r.present);
     const waiting=regs.filter(r=>r.registration_status==='waitlist');
     const playerMap=new Map(players.map(x=>[x.id,x]));
@@ -5032,7 +5032,7 @@ async function bootPublic(token){
       const host=(pl?.is_group_member===false&&r.registered_by_player_id)?playerMap.get(r.registered_by_player_id):null;
       const guest=pl?.is_group_member!==false?'Membre du groupe':(host?('Guest de '+host.name):publicGuestLabel(pl));
       const first=isFirstTimePublicPlayer(pl.id,regTour.id);
-      const when=publicRegistrationDateTime(r.registered_at);
+      const when=publicRegistrationDateTime(r.registered_at||r.created_at);
       return '<div class="player row" style="align-items:flex-start"><b style="min-width:34px">'+(i+1)+'.</b><span style="flex:1">'+esc(pl.name)+(first?' <span class="guest-badge">🆕 1ère fois</span>':'')+(guest&&!first?' <span class="guest-badge">'+esc(guest)+'</span>':'')+(when?'<div class="muted" style="margin-top:3px;font-size:12px">🕒 Inscrit le '+esc(when)+'</div>':'')+'</span><span style="font-weight:700;color:'+(r.is_substitute?'#b45309':'#15803d')+'">'+(r.is_substitute?'Remplaçant':'Confirmé')+'</span></div>';
     }).join('');
     const waitRows=waiting.map((r,i)=>{
@@ -5040,7 +5040,7 @@ async function bootPublic(token){
       const host=(pl?.is_group_member===false&&r.registered_by_player_id)?playerMap.get(r.registered_by_player_id):null;
       const guest=pl?.is_group_member!==false?'Membre du groupe':(host?('Guest de '+host.name):publicGuestLabel(pl));
       const first=isFirstTimePublicPlayer(pl.id,regTour.id);
-      const when=publicRegistrationDateTime(r.registered_at);
+      const when=publicRegistrationDateTime(r.registered_at||r.created_at);
       return '<div class="player row" style="align-items:flex-start"><b style="min-width:34px">'+(i+1)+'.</b><span style="flex:1">'+esc(pl.name)+(first?' <span class="guest-badge">🆕 1ère fois</span>':'')+(guest&&!first?' <span class="guest-badge">'+esc(guest)+'</span>':'')+(when?'<div class="muted" style="margin-top:3px;font-size:12px">🕒 Inscrit le '+esc(when)+'</div>':'')+'</span><span style="font-weight:700;color:#b45309">Attente</span></div>';
     }).join('');
     const maxPublic=Number(regTour.max_players||20);
@@ -5088,7 +5088,7 @@ async function bootPublic(token){
           ? 'Sélectionne ton nom ci-dessus puis ajoute tes invités un par un. Tu peux en ajouter jusqu’à <b>5 au total</b> pour ce Swé.'
           : 'Pour un tournoi, une personne extérieure ne peut pas s’inscrire seule : elle doit être <b>invitée par un membre du groupe</b>. Sélectionne ton nom puis ajoute ton ou tes invités, même si toi-même tu ne participes pas. Tu peux en ajouter jusqu’à <b>5 au total</b>.')+
       '</div><input id="publicGuestName" placeholder="Nom de l’invité"><label class="row" style="margin-top:8px;justify-content:flex-start"><input id="publicGuestMember" type="checkbox" style="width:auto"><span>Ajouter cet invité comme membre du groupe</span></label><div id="publicGuestPhoneWrap" class="hidden" style="margin-top:8px"><input id="publicGuestPhone" type="tel" inputmode="tel" placeholder="Numéro de mobile de l’invité"><div class="muted" style="margin-top:4px">Le numéro est demandé uniquement pour créer sa fiche membre. Il reste privé et visible uniquement par l’administrateur.</div></div><div class="space"></div><button id="publicAddGuest" class="primary">+ Ajouter mon invité</button></div>'+
-      '<div id="publicRegStatus" class="player" style="margin-top:12px;background:#fff7ed;border:1px solid #fed7aa;line-height:1.6"><b>🟠 Comment fonctionne le statut « Remplaçant » ?</b><div class="muted" style="margin-top:6px">Le statut remplaçant est attribué uniquement lorsqu’il n’y a pas encore assez de joueurs pour constituer une équipe complète supplémentaire de <b>5 joueurs</b>.<br><br><b>Exemple :</b> avec <b>14 inscrits</b>, on peut former <b>2 équipes complètes de 5</b> : les joueurs classés de la 11e à la 14e place sont donc <b>4 remplaçants</b>. Dès qu’un <b>15e joueur</b> s’inscrit, ces 5 joueurs forment la <b>3e équipe complète</b> et ne sont plus remplaçants.<br><br>Même principe ensuite : 16 à 19 inscrits = remplaçants pour préparer la 4e équipe ; à 20 inscrits = 4 équipes complètes. L’ordre est basé sur la <b>date et l’heure d’inscription</b>.</div></div>'+
+      '<div id="publicRegStatus" class="player" style="margin-top:12px;background:#fff7ed;border:1px solid #fed7aa;line-height:1.6"><b>🟠 Comment fonctionne le statut « Remplaçant » ?</b><div class="muted" style="margin-top:6px">Le statut remplaçant est attribué uniquement lorsqu’il n’y a pas encore assez de joueurs pour constituer une équipe complète supplémentaire de <b>5 joueurs</b>.<br><br><b>Exemple :</b> avec <b>14 inscrits</b>, on peut former <b>2 équipes complètes de 5</b> : les joueurs classés de la 11e à la 14e place sont donc <b>4 remplaçants</b>. Dès qu’un <b>15e joueur</b> s’inscrit, ces 5 joueurs forment la <b>3e équipe complète</b> et ne sont plus remplaçants.<br><br>Même principe ensuite : 16 à 19 inscrits = remplaçants pour préparer la 4e équipe ; à 20 inscrits = 4 équipes complètes. L’ordre est basé sur la <b>date et l’heure d’inscription</b>, affichées sous le nom de chaque joueur dans la liste.</div></div>'+
       '<h3 style="margin-top:18px">👥 Liste des inscrits</h3><div id="publicRegisteredList"></div>'+
       '<div id="publicWaitWrap" class="'+(waiting?'':'hidden')+'"><h3 style="margin-top:14px">⏳ Liste d’attente</h3><div id="publicWaitList"></div></div>';
     renderPublicRegistrationList();
