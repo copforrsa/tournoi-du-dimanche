@@ -9,8 +9,8 @@
   <meta name="apple-mobile-web-app-title" content="Tournoi Foot">
   <link rel="apple-touch-icon" href="./icon-192.png?v=4001">
   <link rel="manifest" href="./manifest.webmanifest">
-  <title>SWÉ TOURNAMENT 5/5 • V40.06</title>
-<link rel="icon" type="image/png" href="./favicon.png?v=4001">
+  <title>SWÉ TOURNAMENT 5/5 • V40.07</title>
+<link rel="icon" type="image/png" href="./favicon.png?v=4007">
 <link rel="apple-touch-icon" href="./icon-192.png?v=4001">
   <style>
 :root{
@@ -156,7 +156,7 @@ select{background-color:#fff} textarea{resize:vertical}
 .tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:40;width:min(760px,calc(100% - 20px));display:grid;grid-template-columns:repeat(auto-fit,minmax(72px,1fr));gap:3px;background:rgba(11,11,10,.97);border:1px solid rgba(255,255,255,.08);border-radius:20px 20px 0 0;padding:7px 7px calc(7px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(7,27,18,.22);backdrop-filter:blur(14px)}
 .tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:51px;background:transparent;color:#b9cabf;border:0;font-size:10px;padding:5px 4px;border-radius:13px}.tabs button:before{font-size:19px;line-height:1}.tabs button[data-view="home"]:before{content:"⌂"}.tabs button[data-view="players"]:before{content:"♟"}.tabs button[data-view="permissions"]:before{content:"🔐"}.tabs button[data-view="permissions"].disabled-tab{opacity:.35;filter:grayscale(1);cursor:not-allowed;pointer-events:none}.tabs button[data-view="tournaments"]:before{content:"▣"}.tabs button[data-view="teams"]:before{content:"♙"}.tabs button[data-view="matches"]:before{content:"⚽"}.tabs button[data-view="league"]:before{content:"🏁"}.tabs button[data-view="ranking"]:before{content:"★"}.tabs button.active{background:linear-gradient(135deg,#17803d,#22a34a);color:#fff;box-shadow:0 5px 12px rgba(25,152,67,.26)}
 @media(min-width:900px){
-  .app{padding-left:224px;padding-bottom:28px}.tabs{left:max(20px,calc(50% - 590px));top:18px;bottom:18px;transform:none;width:190px;height:auto;display:flex;flex-direction:column;justify-content:flex-start;border-radius:22px;padding:18px 10px;background:#0b0b0a}.tabs:before{content:"SWÉ TOURNAMENT 5/5";display:block;color:#fff;font-weight:900;font-size:14px;line-height:1.2;padding:6px 8px 18px 42px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:8px;background:url("./favicon.png?v=4001") no-repeat 8px 2px/28px 28px}.tabs button{flex-direction:row;justify-content:flex-start;gap:10px;padding:10px 12px;font-size:13px;min-height:46px}.tabs button:before{font-size:17px;width:22px;text-align:center}.top{margin-top:0}.card{padding:19px 20px}
+  .app{padding-left:224px;padding-bottom:28px}.tabs{left:max(20px,calc(50% - 590px));top:18px;bottom:18px;transform:none;width:190px;height:auto;display:flex;flex-direction:column;justify-content:flex-start;border-radius:22px;padding:18px 10px;background:#0b0b0a}.tabs:before{content:"SWÉ TOURNAMENT 5/5";display:block;color:#fff;font-weight:900;font-size:14px;line-height:1.2;padding:6px 8px 18px 42px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:8px;background:url("./favicon.png?v=4007") no-repeat 8px 2px/28px 28px}.tabs button{flex-direction:row;justify-content:flex-start;gap:10px;padding:10px 12px;font-size:13px;min-height:46px}.tabs button:before{font-size:17px;width:22px;text-align:center}.top{margin-top:0}.card{padding:19px 20px}
 }
 @media(max-width:650px){
   body{background:#f3f7f4}.app{padding:0 12px 100px}.top{border-radius:0 0 24px 24px;margin:0 -12px 14px;padding:18px 16px 20px}.top h1{font-size:21px}.card{border-radius:17px;padding:14px;margin:10px 0}.g2,.g3{grid-template-columns:1fr}.sectiontitle{font-size:17px}
@@ -288,7 +288,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1><img src="./favicon.png?v=4001" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V40.06</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1><img src="./favicon.png?v=4007" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V40.07</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -331,7 +331,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1><img src="./favicon.png?v=4001" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V40.06</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1><img src="./favicon.png?v=4007" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V40.07</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -447,6 +447,30 @@ select{background-color:#fff} textarea{resize:vertical}
         <div id="homeWorkspaceStats" class="grid g2" style="margin-top:12px"></div>
         <div id="homeCoorgQuotaRequest" style="margin-top:12px"></div>
       </div>
+      <div class="card" id="homeEcosystemCard" style="border:2px solid #d9eadf;background:linear-gradient(180deg,#fbfffc 0%,#f7fbf8 100%)">
+        <div class="row" style="justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div><h2 class="sectiontitle" style="margin-bottom:4px">💎 Mon abonnement & options SWÉ</h2><div class="muted">Fais évoluer ton espace à mesure que ton groupe grandit.</div></div>
+          <span id="homePlanBadge" class="guest-badge">FREE</span>
+        </div>
+        <div id="homeSpecialAccessNotice" class="hidden" style="margin-top:12px"></div>
+        <div class="grid g2" style="margin-top:12px">
+          <div class="player" style="background:#fff;border-color:#cfe4d7">
+            <div class="row" style="justify-content:space-between;gap:8px;align-items:flex-start"><div><b>🤝 Co-gestionnaire supplémentaire</b><div class="muted" style="margin-top:4px">Ajoute un accès de gestion à ton espace.</div></div><b style="font-size:1.15rem;color:#166534;white-space:nowrap">4,99 €<span class="muted" style="font-size:.72rem;font-weight:600"> / mois</span></b></div>
+            <button id="homeBuyCoorg" class="primary" style="margin-top:10px;width:100%">+ Ajouter 1 co-gestionnaire</button>
+          </div>
+          <div class="player" style="background:#fff;border-color:#cfe4d7">
+            <b>⬆️ Upgrade ton abonnement</b><div class="muted" style="margin-top:5px;line-height:1.65">Débloque les modules avancés SWÉ selon la formule choisie.</div>
+            <button id="homeRequestUpgrade" class="primary" style="margin-top:10px;width:100%">Voir / demander l’upgrade</button>
+          </div>
+        </div>
+        <div class="grid g3" style="margin-top:10px">
+          <div class="player" id="ecoRatingsModule"><b>⭐ Notation & équilibrage</b><div class="muted" style="margin-top:4px">Notation des joueurs, équipes générées automatiquement et équilibrées, Top Players.</div></div>
+          <div class="player" id="ecoThirdHalfModule"><b>🍻 Module 3e mi-temps</b><div class="muted" style="margin-top:4px">Organisation et suivi de la 3e mi-temps.</div></div>
+          <div class="player" id="ecoTournamentModule"><b>🏆 Module Tournoi</b><div class="muted" style="margin-top:4px">Création et gestion complète des tournois SWÉ.</div></div>
+        </div>
+        <div class="muted" style="margin-top:10px;font-size:12px">Les paiements des joueurs via Stripe restent distincts de l’abonnement et des options de l’organisateur.</div>
+      </div>
+
       <div class="card" id="homeCoorgVotesCard">
         <div class="row" style="justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
           <div>
@@ -836,7 +860,7 @@ select{background-color:#fff} textarea{resize:vertical}
 
   <section id="publicView" class="hidden">
     <header class="top">
-      <h1 class="public-title"><img src="./favicon.png?v=4001" class="brand-mark" alt="SWÉ"><span id="publicWorkspaceName">SWÉ TOURNAMENT 5/5</span></h1>
+      <h1 class="public-title"><img src="./favicon.png?v=4007" class="brand-mark" alt="SWÉ"><span id="publicWorkspaceName">SWÉ TOURNAMENT 5/5</span></h1>
       <div class="public-sub">Consultation publique • lecture seule</div>
     </header>
 
@@ -962,7 +986,7 @@ window.addEventListener('error', (e) => {
   if(t){t.textContent='Erreur de chargement de l’application. Recharge la page.';t.style.display='block';}
 });
 
-const S={session:null,adminProfile:null,isSuperAdmin:false,superWorkspaces:[],workspace:null,members:[],coorgs:[],coorgCount:0,workspaceFeatures:{max_coorganizers:3,max_coorganizers_cap:100,rankings_enabled:true,league_enabled:true,tournaments_enabled:true,third_half_enabled:false,player_ratings_enabled:false,max_players_cap:35,payments_enabled:true,top_player_enabled:false,match_ratings_enabled:false},billingStatus:null,myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null},myRatings:[],lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],skillAggregates:[],teamCodes:[],seasons:[],leagues:[],leaguePlayers:[],activeLeague:null,tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matchAssignments:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},sportsComplexes:[],sportsPitches:[],publicMode:false,publicToken:null,editingTournamentId:null,teamCompetitionId:null,lastView:null,coorgQuotaRequest:null,superCoorgQuotaRequests:[],myLinkedPlayerId:null};
+const S={session:null,adminProfile:null,isSuperAdmin:false,superWorkspaces:[],workspace:null,members:[],coorgs:[],coorgCount:0,workspaceFeatures:{max_coorganizers:3,max_coorganizers_cap:100,rankings_enabled:true,league_enabled:true,tournaments_enabled:true,third_half_enabled:false,player_ratings_enabled:false,max_players_cap:35,payments_enabled:true,top_player_enabled:false,match_ratings_enabled:false},commercialAccess:{subscription_plan:'free',special_access_enabled:false,upgrade_requested_at:null},billingStatus:null,myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null},myRatings:[],lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],skillAggregates:[],teamCodes:[],seasons:[],leagues:[],leaguePlayers:[],activeLeague:null,tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matchAssignments:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},sportsComplexes:[],sportsPitches:[],publicMode:false,publicToken:null,editingTournamentId:null,teamCompetitionId:null,lastView:null,coorgQuotaRequest:null,superCoorgQuotaRequests:[],myLinkedPlayerId:null};
 
 let safeSyncTimer=null;
 let safeSyncBusy=false;
@@ -1011,13 +1035,27 @@ function syncRegistrationDeadline(dateSelector,deadlineSelector){
 syncRegistrationDeadline('#tourDate','#tourRegistrationDeadline');
 syncRegistrationDeadline('#leagueSessionDate','#leagueSessionRegistrationDeadline');
 
-async function loadSportsVenues(){
+const DEFAULT_VENUE_META={
+  'mada football club':{city:'Ducos',type:'Outdoor',hours:'Lun 16h-23h ; Mar 15h-23h ; Mer 14h-23h ; Jeu-Ven 15h-23h ; Sam 14h-23h ; Dim 15h-20h'},
+  'arena martinique / arena play on':{city:'Schœlcher',type:'Indoor',hours:'Environ 9h-22h30, 7j/7'}
+};
+function venueMeta(c){return DEFAULT_VENUE_META[String(c?.name||'').trim().toLowerCase()]||null}
+async function ensureDefaultSportsVenues(){
+  if(!S.isSuperAdmin)return;
+  const wanted=[{name:'Mada football club',city:'Ducos',pitches:['Terrain 1','Terrain 2','Terrain 3']},{name:'Arena Martinique / Arena Play On',city:'Schœlcher',pitches:['Terrain 1','Terrain 2','Terrain 3','Terrain 4']}];
+  let changed=false;
+  for(const v of wanted){let c=(S.sportsComplexes||[]).find(x=>String(x.name||'').trim().toLowerCase()===v.name.toLowerCase());if(!c){const created=await sb.rpc('super_admin_manage_sports_complex',{p_action:'create',p_name:v.name,p_city:v.city,p_active:true});if(created.error){console.warn('seed complex',v.name,created.error);continue}changed=true;const rr=await sb.rpc('get_sports_venues');if(!rr.error){S.sportsComplexes=Array.isArray(rr.data?.complexes)?rr.data.complexes:[];S.sportsPitches=Array.isArray(rr.data?.pitches)?rr.data.pitches:[];}c=(S.sportsComplexes||[]).find(x=>String(x.name||'').trim().toLowerCase()===v.name.toLowerCase());}if(!c)continue;const current=(S.sportsPitches||[]).filter(p=>String(p.complex_id)===String(c.id));for(const pitch of v.pitches){if(!current.some(p=>String(p.name||'').trim().toLowerCase()===pitch.toLowerCase())){const rr=await sb.rpc('super_admin_manage_sports_pitch',{p_action:'create',p_complex_id:c.id,p_name:pitch,p_active:true});if(!rr.error)changed=true;}}}
+  if(changed){const rr=await sb.rpc('get_sports_venues');if(!rr.error){S.sportsComplexes=Array.isArray(rr.data?.complexes)?rr.data.complexes:[];S.sportsPitches=Array.isArray(rr.data?.pitches)?rr.data.pitches:[];renderVenueSelectors();renderSuperAdminVenues();}}
+}
+
+async function loadSportsVenues(autoSeed=true){
   const {data,error}=await sb.rpc('get_sports_venues');
   if(error){console.warn('sports venues',error);return}
   S.sportsComplexes=Array.isArray(data?.complexes)?data.complexes:[];
   S.sportsPitches=Array.isArray(data?.pitches)?data.pitches:[];
   renderVenueSelectors();
   if(S.isSuperAdmin)renderSuperAdminVenues();
+  if(autoSeed&&S.isSuperAdmin)await ensureDefaultSportsVenues();
 }
 function complexLabel(id){
   const c=S.sportsComplexes.find(x=>x.id===id);return c?([c.name,c.city].filter(Boolean).join(' • ')):'Complexe';
@@ -1264,7 +1302,7 @@ async function authState(){
       $('#auth').classList.add('hidden');
       $('#main').classList.add('hidden');
       $('#publicView').classList.remove('hidden');
-      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=4001" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><h2>Lien indisponible</h2><p class="muted">'+esc(e.message||e)+'</p></div>';
+      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=4007" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><h2>Lien indisponible</h2><p class="muted">'+esc(e.message||e)+'</p></div>';
       return;
     }
   }
@@ -1344,6 +1382,7 @@ function renderSuperAdminVenues(){
         '<input data-complex-city value="'+esc(c.city||'')+'" placeholder="Ville / commune">'+
         '<label class="player row" style="justify-content:flex-start"><input data-complex-active type="checkbox" style="width:auto" '+(c.active!==false?'checked':'')+'><span>Actif</span></label>'+
       '</div>'+
+      (venueMeta(c)?'<div class="muted" style="margin-top:7px;padding:8px 10px;background:#f7fbf8;border-radius:10px"><b>'+esc(venueMeta(c).type)+'</b> • '+esc(venueMeta(c).hours)+'</div>':'')+
       '<div class="row" style="margin-top:8px;flex-wrap:wrap"><button data-complex-save class="primary">💾 Enregistrer le complexe</button><button data-complex-delete class="danger">Supprimer</button></div>'+
       '<div style="height:1px;background:#e8ecef;margin:12px 0"></div>'+
       '<b>Terrains</b><div data-pitch-list style="margin-top:8px"></div>'+
@@ -1383,6 +1422,8 @@ async function loadSuperAdminWorkspaces(){
   const {data,error}=await sb.rpc('super_admin_get_workspaces');
   if(error){toast(error.message);return}
   S.superWorkspaces=Array.isArray(data)?data:[];
+  const commercial=await sb.rpc('super_admin_get_commercial_access');
+  if(!commercial.error){const map=new Map((Array.isArray(commercial.data)?commercial.data:[]).map(x=>[String(x.workspace_id),x]));S.superWorkspaces=S.superWorkspaces.map(w=>({...w,...(map.get(String(w.workspace_id))||{})}));}
   const requests=await sb.rpc('super_admin_get_coorganizer_quota_requests');
   S.superCoorgQuotaRequests=requests.error?[]:(Array.isArray(requests.data)?requests.data:[]);
   renderSuperAdminWorkspaces();
@@ -1447,6 +1488,11 @@ function renderSuperAdminWorkspaces(){
       '<div class="player" style="margin-top:10px;background:#fff8e8;border:1px solid #f2d18a">'+
         '<label class="row" style="justify-content:flex-start"><input data-sa-player-ratings type="checkbox" style="width:auto" '+(w.player_ratings_enabled?'checked':'')+'><span><b>⭐ Module Top Player / notes de match</b><div class="muted">Victoire 6 • nul 5 • défaite 4 • +1/but • +0,5/passe • note max 10.</div></span></label>'+
       '</div>'+
+      '<div class="player" style="margin-top:14px;background:#f5fbf7;border:1px solid #b7dfc4">'+
+        '<div class="row" style="justify-content:space-between;gap:10px;flex-wrap:wrap"><div><b>💎 Abonnement & accès commercial</b><div class="muted" style="margin-top:4px">Le Super Admin peut attribuer un plan ou une autorisation spéciale de démonstration.</div></div><span class="guest-badge">'+esc(String(w.subscription_plan||'free').toUpperCase())+'</span></div>'+
+        '<div class="grid g2" style="margin-top:10px"><label><span class="muted">Abonnement</span><select data-sa-plan><option value="free" '+((w.subscription_plan||'free')==='free'?'selected':'')+'>FREE</option><option value="standard" '+(w.subscription_plan==='standard'?'selected':'')+'>STANDARD</option><option value="pro" '+(w.subscription_plan==='pro'?'selected':'')+'>PRO</option></select></label><label class="player row" style="justify-content:flex-start;background:#fff"><input data-sa-special-access type="checkbox" style="width:auto" '+(w.special_access_enabled?'checked':'')+'><span><b>🎁 Autorisation spéciale</b><div class="muted">Débloque tous les modules, même sans upgrade. Idéal pour démonstration / ambassadeur.</div></span></label></div>'+
+        (w.upgrade_requested_at?'<div class="player" style="margin-top:9px;background:#fff8e8;border-color:#f2d18a"><b>🔔 Demande d’upgrade reçue</b><div class="muted">'+new Date(w.upgrade_requested_at).toLocaleString('fr-FR')+'</div></div>':'')+
+      '</div>'+ 
       '<div class="player" style="margin-top:14px;background:#fffaf0;border:1px solid #f2d79a">'+
         '<b>🔄 Transférer la gestion à un autre administrateur</b>'+
         '<div class="muted" style="margin:5px 0 10px">Le nouveau compte doit déjà exister. Après validation, il devient immédiatement administrateur principal de cet espace.</div>'+
@@ -1499,6 +1545,7 @@ function renderSuperAdminWorkspaces(){
         p_public_enabled:d.querySelector('[data-sa-public]').checked,
         p_player_ratings_enabled:d.querySelector('[data-sa-player-ratings]').checked
       });
+      if(!r.error)r=await sb.rpc('super_admin_set_commercial_access',{p_workspace_id:w.workspace_id,p_subscription_plan:d.querySelector('[data-sa-plan]').value,p_special_access_enabled:d.querySelector('[data-sa-special-access]').checked});
       save.disabled=false;if(r.error)return toast(r.error.message);
       toast('Espace mis à jour ✅');await loadSuperAdminWorkspaces();
     };
@@ -1698,6 +1745,9 @@ async function loadAll(){
   r=await sb.rpc('get_workspace_coorganizer_count',{p_workspace_id:w});S.coorgCount=Number(r.data||0);
   r=await sb.rpc('get_workspace_features',{p_workspace_id:w});
   if(!r.error){const f=Array.isArray(r.data)?r.data[0]:r.data;if(f)S.workspaceFeatures={...S.workspaceFeatures,...f};}
+  const commercial=await sb.rpc('get_workspace_commercial_access',{p_workspace_id:w});
+  if(!commercial.error){const c=Array.isArray(commercial.data)?commercial.data[0]:commercial.data;if(c)S.commercialAccess={...S.commercialAccess,...c};}
+  if(S.commercialAccess.special_access_enabled){S.workspaceFeatures={...S.workspaceFeatures,tournaments_enabled:true,league_enabled:true,rankings_enabled:true,third_half_enabled:true,player_ratings_enabled:true,top_player_enabled:true,match_ratings_enabled:true};}
   S.billingStatus=null;
   if(isAdmin()){
     r=await sb.rpc('get_workspace_billing_status',{p_workspace_id:w});
@@ -2181,7 +2231,17 @@ function renderHomeCoorgVotes(){
   }));
 }
 
+function renderEcosystemCommercial(){
+  const c=S.commercialAccess||{};
+  const badge=$('#homePlanBadge');if(badge)badge.textContent=(c.special_access_enabled?'ACCÈS SPÉCIAL • ':'')+String(c.subscription_plan||'free').toUpperCase();
+  const special=$('#homeSpecialAccessNotice');if(special){special.classList.toggle('hidden',!c.special_access_enabled);special.innerHTML=c.special_access_enabled?'<div class="player" style="background:#ecfdf3;border-color:#86d6a3"><b>🎁 Autorisation spéciale SWÉ active</b><div class="muted" style="margin-top:4px">Tous les modules sont débloqués pour faire découvrir la solution, sans modifier ton abonnement commercial.</div></div>':'';}
+  const paint=(id,on)=>{const el=$(id);if(!el)return;el.style.borderColor=on?'#86d6a3':'#e3e7e5';el.style.background=on?'#f0fdf4':'#fff';const old=el.querySelector('[data-module-status]');if(old)old.remove();const st=document.createElement('div');st.dataset.moduleStatus='1';st.style.marginTop='7px';st.innerHTML=on?'<span class="guest-badge" style="background:#dcfce7;color:#166534">✓ ACTIF</span>':'<span class="guest-badge" style="background:#f3f4f6;color:#6b7280">À DÉBLOQUER</span>';el.appendChild(st)};
+  paint('#ecoRatingsModule',!!S.workspaceFeatures.player_ratings_enabled);paint('#ecoThirdHalfModule',!!S.workspaceFeatures.third_half_enabled);paint('#ecoTournamentModule',!!S.workspaceFeatures.tournaments_enabled);
+  const up=$('#homeRequestUpgrade');if(up){up.textContent=c.upgrade_requested_at?'⏳ Demande d’upgrade envoyée':'Voir / demander l’upgrade';up.disabled=!!c.upgrade_requested_at;}
+}
+
 function renderHome(){
+  renderEcosystemCommercial();
   const ongoingTournaments=S.tournaments.filter(x=>x.format!=='league'&&x.status!=='finished').length;
   const ongoingLeagues=S.leagues.filter(x=>x.status!=='finished').length;
   const groupMembers=S.players.filter(x=>x.active&&x.is_group_member!==false).length;
@@ -2203,7 +2263,7 @@ function renderHome(){
       if(req&&req.status==='pending'){
         quotaBox.innerHTML='<div class="player" style="background:#fff8e8;border-color:#f2d18a"><b>⏳ Demande envoyée au Super Admin</b><div class="muted" style="margin-top:5px">Limite actuelle : <b>'+allowedCoorg+'</b> • demande : <b>'+Number(req.requested_limit||allowedCoorg)+'</b> co-gestionnaires.</div></div>';
       }else{
-        quotaBox.innerHTML='<div class="player" style="background:#f8fbff;border-color:#bfdbfe"><b>🤝 Besoin de plus de co-gestionnaires ?</b><div class="muted" style="margin:5px 0 9px">La limite est définie par le Super Admin.</div><div class="row"><input id="homeRequestedCoorgLimit" type="number" min="'+(allowedCoorg+1)+'" max="'+Number(S.workspaceFeatures.max_coorganizers_cap||100)+'" value="'+Math.min(Number(S.workspaceFeatures.max_coorganizers_cap||100),allowedCoorg+1)+'" style="max-width:125px"><button id="homeRequestMoreCoorg" class="primary">Demander + de co-gestionnaires</button></div></div>';
+        quotaBox.innerHTML='<div class="player" style="background:#f8fbff;border-color:#bfdbfe"><b>🤝 Besoin de plus de co-gestionnaires ?</b><div class="muted" style="margin:5px 0 9px">Option : <b>4,99 € / mois par co-gestionnaire supplémentaire</b>. Validation par le Super Admin.</div><div class="row"><input id="homeRequestedCoorgLimit" type="number" min="'+(allowedCoorg+1)+'" max="'+Number(S.workspaceFeatures.max_coorganizers_cap||100)+'" value="'+Math.min(Number(S.workspaceFeatures.max_coorganizers_cap||100),allowedCoorg+1)+'" style="max-width:125px"><button id="homeRequestMoreCoorg" class="primary">Demander + de co-gestionnaires</button></div></div>';
       }
     }
   }
@@ -2242,6 +2302,18 @@ document.addEventListener('click',async e=>{
     $('#managerGuestName').value='';
     await loadTournament();renderRegisteredPlayersAdmin();renderHome();renderTeams();
     toast(data?.status==='waitlist'?'Invité ajouté comme remplaçant.':'Invité ajouté ✅');
+  }
+});
+
+document.addEventListener('click',async e=>{
+  if(e.target?.id==='homeBuyCoorg'){
+    if(!isAdmin())return toast('Réservé à l’administrateur.');const current=Number(S.workspaceFeatures.max_coorganizers||0),cap=Number(S.workspaceFeatures.max_coorganizers_cap||100);if(current>=cap)return toast('Plafond de co-gestionnaires atteint.');
+    if(!confirm('Ajouter 1 co-gestionnaire supplémentaire pour 4,99 € / mois ?\n\nLa demande sera transmise au Super Admin pour activation commerciale.'))return;
+    const {data,error}=await sb.rpc('request_coorganizer_quota_increase',{p_workspace_id:S.workspace.id,p_requested_limit:current+1});if(error)return toast(error.message);S.coorgQuotaRequest=data||{status:'pending',requested_limit:current+1};renderHome();toast('Demande +1 co-gestionnaire envoyée ✅');return;
+  }
+  if(e.target?.id==='homeRequestUpgrade'){
+    if(!isAdmin())return toast('Réservé à l’administrateur.');if(!confirm('Demander un upgrade de ton abonnement SWÉ pour débloquer les modules avancés ?'))return;
+    const {error}=await sb.rpc('request_workspace_upgrade',{p_workspace_id:S.workspace.id});if(error)return toast(error.message);S.commercialAccess.upgrade_requested_at=new Date().toISOString();renderHome();toast('Demande d’upgrade envoyée ✅');return;
   }
 });
 
@@ -4504,7 +4576,7 @@ async function bootPaymentDesk(token){
   $('#main').classList.add('hidden');
   $('#publicView').classList.remove('hidden');
   const root=$('#publicView');
-  root.innerHTML='<header class="top"><h1 class="public-title"><img src="./favicon.png?v=4001" class="brand-mark" alt="SWÉ">Validation des paiements</h1><div class="public-sub">Lien réservé au complexe • SWÉ TOURNAMENT 5/5</div></header><div class="card"><div id="paymentDeskContent"><p class="muted">Chargement de la liste des inscrits…</p></div></div>';
+  root.innerHTML='<header class="top"><h1 class="public-title"><img src="./favicon.png?v=4007" class="brand-mark" alt="SWÉ">Validation des paiements</h1><div class="public-sub">Lien réservé au complexe • SWÉ TOURNAMENT 5/5</div></header><div class="card"><div id="paymentDeskContent"><p class="muted">Chargement de la liste des inscrits…</p></div></div>';
   const money=cents=>(Number(cents||0)/100).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
   let snapshot=null;
   let stripeMap=new Map();
@@ -4627,7 +4699,7 @@ async function bootPublic(token){
   if(isLeagueRegistration&&leagueJoinId&&!publicParamsTop.get('tournament')){
     const league=leagues.find(l=>l.id===leagueJoinId);
     if(!league){
-      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=4001" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><p>Ligue introuvable.</p></div>';return;
+      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=4007" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><p>Ligue introuvable.</p></div>';return;
     }
 
     const groupMembers=players.filter(p=>p.active&&p.is_group_member!==false).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
@@ -4796,7 +4868,7 @@ async function bootPublic(token){
 
     const ht=tournaments.find(x=>x.id===historyId);
     if(!ht){
-      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=4001" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><p>Tournoi introuvable.</p><button id="backPublic">← Retour à mon inscription</button></div>';
+      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=4007" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><p>Tournoi introuvable.</p><button id="backPublic">← Retour à mon inscription</button></div>';
       $('#backPublic').onclick=()=>location.href=publicHistoryBackUrl(token);
       return;
     }
@@ -4898,7 +4970,7 @@ async function bootPublic(token){
   }
   const regBox=$('#publicRegistration');
   if(requestedTournament&&!regTour){
-    $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=4001" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><h2 class="sectiontitle">Lien d’inscription indisponible</h2><p class="muted">Ce lien ne correspond pas à une inscription ouverte, ou le type de compétition ne correspond pas au lien généré. Aucun autre tournoi ni aucune Ligue ne sera affiché à sa place.</p></div>';
+    $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=4007" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><h2 class="sectiontitle">Lien d’inscription indisponible</h2><p class="muted">Ce lien ne correspond pas à une inscription ouverte, ou le type de compétition ne correspond pas au lien généré. Aucun autre tournoi ni aucune Ligue ne sera affiché à sa place.</p></div>';
     return;
   }
 
@@ -5785,7 +5857,7 @@ async function bootPublic(token){
     const linkedLeague=leagues.find(l=>l.id===regTour.league_id)||null;
     const linkLeagueId=publicParams.get('league');
     if(!linkedLeague || (linkLeagueId&&linkLeagueId!==regTour.league_id)){
-      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=4001" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><h2 class="sectiontitle">Lien de Ligue indisponible</h2><p class="muted">Ce lien ne correspond pas à la Ligue de ce Swé. Aucun tournoi ne sera affiché à sa place.</p></div>';
+      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=4007" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><h2 class="sectiontitle">Lien de Ligue indisponible</h2><p class="muted">Ce lien ne correspond pas à la Ligue de ce Swé. Aucun tournoi ne sera affiché à sa place.</p></div>';
       return;
     }
 
