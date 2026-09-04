@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Tournoi Foot">
   <link rel="apple-touch-icon" href="./icon-192.png?v=4001">
   <link rel="manifest" href="./manifest.webmanifest">
-  <title>SWÉ TOURNAMENT 5/5 • V40.05</title>
+  <title>SWÉ TOURNAMENT 5/5 • V40.06</title>
 <link rel="icon" type="image/png" href="./favicon.png?v=4001">
 <link rel="apple-touch-icon" href="./icon-192.png?v=4001">
   <style>
@@ -288,7 +288,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1><img src="./favicon.png?v=4001" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V40.05</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1><img src="./favicon.png?v=4001" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V40.06</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -331,7 +331,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1><img src="./favicon.png?v=4001" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V40.05</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1><img src="./favicon.png?v=4001" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V40.06</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -4265,7 +4265,7 @@ $('#shareWhatsapp').onclick=async()=>{const text=$('#shareText').value;if(naviga
 function subscribeRealtime(){if(S.channel)sb.removeChannel(S.channel);let timer;const reload=()=>{clearTimeout(timer);timer=setTimeout(async()=>await loadAll(),250)};S.channel=sb.channel('tournoi-manager').on('postgres_changes',{event:'*',schema:'public',table:'players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'seasons'},reload).on('postgres_changes',{event:'*',schema:'public',table:'tournaments'},reload).on('postgres_changes',{event:'*',schema:'public',table:'tournament_players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'teams'},reload).on('postgres_changes',{event:'*',schema:'public',table:'team_players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'matches'},reload).on('postgres_changes',{event:'*',schema:'public',table:'goals'},reload).on('postgres_changes',{event:'*',schema:'public',table:'match_player_assignments'},reload).subscribe()}
 
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('./sw.js?v=4005',{updateViaCache:'none'})
+  navigator.serviceWorker.register('./sw.js?v=4006',{updateViaCache:'none'})
     .then(reg=>reg.update())
     .catch(()=>{});
 }
@@ -4981,9 +4981,11 @@ async function bootPublic(token){
           const pendingInvite=teamInvitations.find(i=>i.tournament_id===regTour.id&&String(i.player_id)===String(r.player_id)&&i.status==='pending');
           const pendingTeam=pendingInvite?tourTeams.find(t=>String(t.id)===String(pendingInvite.team_id)):null;
           const freeState=pendingTeam?'⏳ Proposition : '+pendingTeam.name:(r.is_substitute?'🟠 Remplaçant commun':'🎲 Équipe aléatoire');
-          return '<div class="player row"><span style="flex:1">'+esc(pl?.name||'Joueur')+
+          const when=publicRegistrationDateTime(r.registered_at||r.created_at);
+          return '<div class="player row" style="align-items:flex-start"><span style="flex:1">'+esc(pl?.name||'Joueur')+
             (guest?' <span class="guest-badge">'+esc(guest)+'</span>':'')+
-            '</span><span class="muted">'+esc(freeState)+'</span></div>';
+            (when?'<div class="muted" style="margin-top:3px;font-size:12px">🕒 Inscrit le '+esc(when)+'</div>':'')+
+            '</span><span class="muted" style="padding-top:2px">'+esc(freeState)+'</span></div>';
         }).join('')
       : '<p class="muted">Aucun joueur en équipe aléatoire.</p>';
 
@@ -4996,7 +4998,9 @@ async function bootPublic(token){
             ? rows.map(tp=>{
                 const pl=pmap.get(tp.player_id);
                 const guest=guestText(regMap.get(tp.player_id));
-                return '<div style="margin-top:4px">✅ '+esc(pl?.name||'Joueur')+(guest?' <span class="guest-badge">'+esc(guest)+'</span>':'')+'</div>';
+                const reg=regMap.get(tp.player_id);
+                const when=publicRegistrationDateTime(reg?.registered_at||reg?.created_at);
+                return '<div style="margin-top:7px">✅ '+esc(pl?.name||'Joueur')+(guest?' <span class="guest-badge">'+esc(guest)+'</span>':'')+(when?'<div class="muted" style="margin:2px 0 0 22px;font-size:12px">🕒 Inscrit le '+esc(when)+'</div>':'')+'</div>';
               }).join('')+pendingRows.map(inv=>{
                 const pl=pmap.get(inv.player_id);
                 return '<div style="margin-top:4px">⏳ '+esc(pl?.name||'Joueur')+' <span class="muted">• en attente d’accord</span></div>';
