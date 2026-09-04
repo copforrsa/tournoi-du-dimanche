@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Tournoi Foot">
   <link rel="apple-touch-icon" href="./icon-192.png?v=3978">
   <link rel="manifest" href="./manifest.webmanifest">
-  <title>SWÉ TOURNAMENT 5/5 • V39.79</title>
+  <title>SWÉ TOURNAMENT 5/5 • V39.80</title>
 <link rel="icon" type="image/png" href="./favicon.png?v=3978">
 <link rel="apple-touch-icon" href="./icon-192.png?v=3978">
   <style>
@@ -160,7 +160,7 @@ select{background-color:#fff} textarea{resize:vertical}
 }
 @media(max-width:650px){
   body{background:#f3f7f4}.app{padding:0 12px 100px}.top{border-radius:0 0 24px 24px;margin:0 -12px 14px;padding:18px 16px 20px}.top h1{font-size:21px}.card{border-radius:17px;padding:14px;margin:10px 0}.g2,.g3{grid-template-columns:1fr}.sectiontitle{font-size:17px}
-  /* V39.79 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
+  /* V39.80 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
   .tabs{left:0;right:0;transform:none;width:100%;display:flex;grid-template-columns:none;justify-content:flex-start;gap:5px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;border-radius:18px 18px 0 0;padding:7px 10px calc(7px + env(safe-area-inset-bottom));scroll-snap-type:x proximity;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
   .tabs button{flex:0 0 74px;min-width:74px;font-size:10px;scroll-snap-align:center;padding:5px 6px}
@@ -176,7 +176,7 @@ select{background-color:#fff} textarea{resize:vertical}
 #publicTeams .public-team-player{padding:7px 0;border-bottom:1px solid #edf2ef}
 #publicTeams .public-team-player:last-child{border-bottom:0}
 
-/* V39.79 — alignements et justification */
+/* V39.80 — alignements et justification */
 .card p,.card .muted,.player .muted,.readonly-note,.public-sub{
   text-align:justify;
   text-justify:inter-word;
@@ -263,7 +263,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1><img src="./favicon.png?v=3978" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.79</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1><img src="./favicon.png?v=3978" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.80</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -306,7 +306,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1><img src="./favicon.png?v=3978" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.79</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1><img src="./favicon.png?v=3978" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.80</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -411,6 +411,15 @@ select{background-color:#fff} textarea{resize:vertical}
         <h2 class="sectiontitle">📊 Vue d’ensemble</h2>
         <div id="homeWorkspaceStats" class="grid g2" style="margin-top:12px"></div>
         <div id="homeCoorgQuotaRequest" style="margin-top:12px"></div>
+      </div>
+      <div class="card" id="homeCoorgVotesCard">
+        <div class="row" style="justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+          <div>
+            <h2 class="sectiontitle" style="margin-bottom:4px">🗳️ Suivi des évaluations</h2>
+            <div class="muted">Nombre de joueurs évalués par chaque co-gestionnaire.</div>
+          </div>
+        </div>
+        <div id="homeCoorgVotes" style="margin-top:12px"></div>
       </div>
       <div class="card">
         <h2 class="sectiontitle">Actions rapides</h2>
@@ -2073,6 +2082,38 @@ async function renderRegisteredPlayersAdmin(){
   });
 }
 
+function renderHomeCoorgVotes(){
+  const card=$('#homeCoorgVotesCard');
+  const box=$('#homeCoorgVotes');
+  if(!card||!box)return;
+  const show=isAdmin();
+  card.classList.toggle('hidden',!show);
+  if(!show)return;
+  const active=(S.coorgs||[]).filter(c=>c.active!==false);
+  if(!active.length){
+    box.innerHTML='<div class="muted">Aucun co-gestionnaire actif pour le moment.</div>';
+    return;
+  }
+  const reviews=Array.isArray(S.skillReviews)?S.skillReviews:[];
+  const rows=active.map(c=>{
+    const linked=(S.players||[]).find(p=>String(p.id)===String(c.linked_player_id));
+    const label=linked?.name||((c.email||'Co-gestionnaire').split('@')[0]);
+    const voted=new Set(reviews.filter(r=>String(r.evaluator_user_id)===String(c.user_id)&&r.player_id).map(r=>String(r.player_id))).size;
+    const max=Math.max(0,(S.players||[]).filter(p=>p.active&&p.is_group_member!==false&&String(p.id)!==String(c.linked_player_id||'')).length);
+    return {label,email:c.email||'',voted,max};
+  }).sort((a,b)=>b.voted-a.voted||a.label.localeCompare(b.label,'fr'));
+  box.innerHTML='<div style="display:grid;gap:8px">'+rows.map(r=>{
+    const pct=r.max?Math.min(100,Math.round(r.voted/r.max*100)):0;
+    return '<div class="player" style="padding:10px 12px">'+
+      '<div class="row" style="justify-content:space-between;align-items:center;gap:10px">'+
+        '<div style="min-width:0"><b>'+esc(r.label)+'</b>'+(r.email&&r.email.split('@')[0]!==r.label?'<div class="muted" style="font-size:12px">'+esc(r.email)+'</div>':'')+'</div>'+
+        '<div style="text-align:right;white-space:nowrap"><b style="font-size:18px">'+r.voted+'</b><span class="muted"> vote'+(r.voted>1?'s':'')+'</span><div class="muted" style="font-size:12px">sur '+r.max+' joueur'+(r.max>1?'s':'')+'</div></div>'+
+      '</div>'+
+      '<div style="height:6px;background:#e8ecea;border-radius:999px;overflow:hidden;margin-top:8px"><div style="height:100%;width:'+pct+'%;background:#b38b2e;border-radius:999px"></div></div>'+
+    '</div>';
+  }).join('')+'</div>';
+}
+
 function renderHome(){
   const ongoingTournaments=S.tournaments.filter(x=>x.format!=='league'&&x.status!=='finished').length;
   const ongoingLeagues=S.leagues.filter(x=>x.status!=='finished').length;
@@ -2099,6 +2140,7 @@ function renderHome(){
       }
     }
   }
+  renderHomeCoorgVotes();
 }
 
 document.addEventListener('click',async e=>{
@@ -2623,7 +2665,7 @@ function appendTournamentSeasonControl(container,t){
 }
 
 function renderTournaments(){
-  // V39.79 : l'éditeur de tournoi est protégé des synchronisations automatiques.
+  // V39.80 : l'éditeur de tournoi est protégé des synchronisations automatiques.
   const ss=$('#seasonSelect');
   ss.innerHTML='<option value="">Sans saison</option>'+S.seasons.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');
   const box=$('#tournamentList');box.innerHTML='';
@@ -3762,7 +3804,7 @@ async function renderLeague(){
   }
 
 
-  // V39.79 — Saisie du résultat directement depuis l'onglet Ligue.
+  // V39.80 — Saisie du résultat directement depuis l'onglet Ligue.
   const scoringCard=$('#leagueScoringCard'),scoringBody=$('#leagueScoringBody'),scoringLabel=$('#leagueScoringSessionLabel');
   if(scoringCard)scoringCard.classList.toggle('hidden',!canScoreLeague);
   if(canScoreLeague&&scoringBody){
@@ -4379,7 +4421,7 @@ async function bootPublic(token){
     if(r.league)urlParams.set('league',r.league);
   }
   sweRememberPublicRegistrationContext();
-  // V39.79 — état global pour éviter qu'un ancien rafraîchissement public
+  // V39.80 — état global pour éviter qu'un ancien rafraîchissement public
   // reconstruise le formulaire d'inscription équipe après validation du code.
   window.__swePublicTeamEditing=false;
   if(window.__swePublicRegistrationInterval){
@@ -5329,7 +5371,7 @@ async function bootPublic(token){
   const pmap=new Map(players.map(x=>[x.id,x]));
   const tmap=new Map(teams.map(x=>[x.id,x]));
 
-  // V39.79 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
+  // V39.80 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
   if(wantsLeagueSession&&regTour){
     const linkedLeague=leagues.find(l=>l.id===regTour.league_id)||null;
     const linkLeagueId=publicParams.get('league');
