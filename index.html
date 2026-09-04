@@ -258,18 +258,37 @@ select{background-color:#fff} textarea{resize:vertical}
 }
 
 
-/* V40.02 — inscription: sélecteur de nom plus visible */
+/* V40.03 — inscription: liste des membres plus ergonomique */
 #publicPlayerSelect,#publicLeaguePlayer,#leagueSessionPublicPlayer,#publicTeamCreator{
-  min-height:64px;font-size:1.12rem;font-weight:800;color:#1456b8;border:2px solid #8eb7ef;border-radius:15px;padding:14px 16px;background:#f7fbff;
+  min-height:64px;
+  font-size:1.08rem;
+  font-weight:850;
+  color:#174f8a;
+  border:2px solid #8fd0a6;
+  border-left:6px solid var(--accent);
+  border-radius:15px;
+  padding:14px 44px 14px 16px;
+  background:#f8fcf9;
+  text-align:left;
+  text-align-last:left;
+  box-shadow:0 4px 12px rgba(23,128,61,.08);
 }
-#publicPlayerSelect option,#publicLeaguePlayer option,#leagueSessionPublicPlayer option,#publicTeamCreator option{color:#1456b8;font-weight:800;background:#fff}
+#publicPlayerSelect:focus,#publicLeaguePlayer:focus,#leagueSessionPublicPlayer:focus,#publicTeamCreator:focus{
+  outline:none;border-color:var(--accent2);box-shadow:0 0 0 4px rgba(34,163,74,.12);
+}
+#publicPlayerSelect option,#publicLeaguePlayer option,#leagueSessionPublicPlayer option,#publicTeamCreator option{
+  color:#174f8a;
+  font-weight:800;
+  background:#fff;
+  text-align:left;
+}
 </style>
 </head>
 <body>
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1><img src="./favicon.png?v=4001" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V40.02</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1><img src="./favicon.png?v=4001" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V40.03</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -312,7 +331,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1><img src="./favicon.png?v=4001" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V40.02</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1><img src="./favicon.png?v=4001" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V40.03</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -5106,15 +5125,8 @@ async function bootPublic(token){
       const previous=sel.value;
       const members=players.filter(x=>x.active&&x.is_group_member!==false).sort((a,b)=>a.name.localeCompare(b.name));
       sel.innerHTML='<option value="">Choisis ton nom</option>'+members.map(x=>{
-        const reg=registrations.find(r=>r.tournament_id===regTour.id&&String(r.player_id)===String(x.id)&&r.present);
-        const usage=publicGuestUsage(x.id);
-        const state=reg
-          ? ((reg.registration_status==='waitlist'||reg.is_substitute)?'🟠 Remplaçant':'✅ Déjà inscrit')
-          : '⚪ Non inscrit';
-        const guestInfo=usage.used
-          ? ' • '+usage.used+' invité'+(usage.used>1?'s':'')+' • '+usage.remaining+' restant'+(usage.remaining>1?'s':'')
-          : ' • '+PUBLIC_GUEST_LIMIT+' invités possibles';
-        return '<option value="'+x.id+'">'+esc(x.name)+' — '+state+guestInfo+'</option>';
+        // La liste reste volontairement simple : le statut et les invités sont affichés juste en dessous après sélection.
+        return '<option value="'+x.id+'">'+esc(x.name)+'</option>';
       }).join('');
       if([...sel.options].some(o=>o.value===previous))sel.value=previous;
     }
