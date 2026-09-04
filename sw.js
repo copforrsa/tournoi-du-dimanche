@@ -1,5 +1,5 @@
-const CACHE='swe-tournament-5v5-v40-09';
-const STATIC_ASSETS=['./','./index.html','./manifest.webmanifest','./favicon.png','./icon-192.png','./icon-512.png'];
+const CACHE='swe-tournament-5v5-v41-00';
+const STATIC_ASSETS=['./','./index.html','./styles.css','./app.js','./manifest.webmanifest','./favicon.png','./icon-192.png','./icon-512.png'];
 
 self.addEventListener('install',event=>{
   self.skipWaiting();
