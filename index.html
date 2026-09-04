@@ -7,11 +7,11 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Tournoi Foot">
-  <link rel="apple-touch-icon" href="./icon-192.png?v=3992">
+  <link rel="apple-touch-icon" href="./icon-192.png?v=3993">
   <link rel="manifest" href="./manifest.webmanifest">
-  <title>SWÉ TOURNAMENT 5/5 • V39.92</title>
-<link rel="icon" type="image/png" href="./favicon.png?v=3992">
-<link rel="apple-touch-icon" href="./icon-192.png?v=3992">
+  <title>SWÉ TOURNAMENT 5/5 • V39.93</title>
+<link rel="icon" type="image/png" href="./favicon.png?v=3993">
+<link rel="apple-touch-icon" href="./icon-192.png?v=3993">
   <style>
 :root{
   --bg:#f5f1e7;--card:#fff;--text:#18150f;--muted:#746b5b;--border:#e8dfca;
@@ -156,11 +156,11 @@ select{background-color:#fff} textarea{resize:vertical}
 .tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:40;width:min(760px,calc(100% - 20px));display:grid;grid-template-columns:repeat(auto-fit,minmax(72px,1fr));gap:3px;background:rgba(11,11,10,.97);border:1px solid rgba(255,255,255,.08);border-radius:20px 20px 0 0;padding:7px 7px calc(7px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(7,27,18,.22);backdrop-filter:blur(14px)}
 .tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:51px;background:transparent;color:#b9cabf;border:0;font-size:10px;padding:5px 4px;border-radius:13px}.tabs button:before{font-size:19px;line-height:1}.tabs button[data-view="home"]:before{content:"⌂"}.tabs button[data-view="players"]:before{content:"♟"}.tabs button[data-view="permissions"]:before{content:"🔐"}.tabs button[data-view="permissions"].disabled-tab{opacity:.35;filter:grayscale(1);cursor:not-allowed;pointer-events:none}.tabs button[data-view="tournaments"]:before{content:"▣"}.tabs button[data-view="teams"]:before{content:"♙"}.tabs button[data-view="matches"]:before{content:"⚽"}.tabs button[data-view="league"]:before{content:"🏁"}.tabs button[data-view="ranking"]:before{content:"★"}.tabs button.active{background:linear-gradient(135deg,#17803d,#22a34a);color:#fff;box-shadow:0 5px 12px rgba(25,152,67,.26)}
 @media(min-width:900px){
-  .app{padding-left:224px;padding-bottom:28px}.tabs{left:max(20px,calc(50% - 590px));top:18px;bottom:18px;transform:none;width:190px;height:auto;display:flex;flex-direction:column;justify-content:flex-start;border-radius:22px;padding:18px 10px;background:#0b0b0a}.tabs:before{content:"SWÉ TOURNAMENT 5/5";display:block;color:#fff;font-weight:900;font-size:14px;line-height:1.2;padding:6px 8px 18px 42px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:8px;background:url("./favicon.png?v=3992") no-repeat 8px 2px/28px 28px}.tabs button{flex-direction:row;justify-content:flex-start;gap:10px;padding:10px 12px;font-size:13px;min-height:46px}.tabs button:before{font-size:17px;width:22px;text-align:center}.top{margin-top:0}.card{padding:19px 20px}
+  .app{padding-left:224px;padding-bottom:28px}.tabs{left:max(20px,calc(50% - 590px));top:18px;bottom:18px;transform:none;width:190px;height:auto;display:flex;flex-direction:column;justify-content:flex-start;border-radius:22px;padding:18px 10px;background:#0b0b0a}.tabs:before{content:"SWÉ TOURNAMENT 5/5";display:block;color:#fff;font-weight:900;font-size:14px;line-height:1.2;padding:6px 8px 18px 42px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:8px;background:url("./favicon.png?v=3993") no-repeat 8px 2px/28px 28px}.tabs button{flex-direction:row;justify-content:flex-start;gap:10px;padding:10px 12px;font-size:13px;min-height:46px}.tabs button:before{font-size:17px;width:22px;text-align:center}.top{margin-top:0}.card{padding:19px 20px}
 }
 @media(max-width:650px){
   body{background:#f3f7f4}.app{padding:0 12px 100px}.top{border-radius:0 0 24px 24px;margin:0 -12px 14px;padding:18px 16px 20px}.top h1{font-size:21px}.card{border-radius:17px;padding:14px;margin:10px 0}.g2,.g3{grid-template-columns:1fr}.sectiontitle{font-size:17px}
-  /* V39.92 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
+  /* V39.93 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
   .tabs{left:0;right:0;transform:none;width:100%;display:flex;grid-template-columns:none;justify-content:flex-start;gap:5px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;border-radius:18px 18px 0 0;padding:7px 10px calc(7px + env(safe-area-inset-bottom));scroll-snap-type:x proximity;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
   .tabs button{flex:0 0 74px;min-width:74px;font-size:10px;scroll-snap-align:center;padding:5px 6px}
@@ -176,7 +176,7 @@ select{background-color:#fff} textarea{resize:vertical}
 #publicTeams .public-team-player{padding:7px 0;border-bottom:1px solid #edf2ef}
 #publicTeams .public-team-player:last-child{border-bottom:0}
 
-/* V39.92 — alignements et justification */
+/* V39.93 — alignements et justification */
 .card p,.card .muted,.player .muted,.readonly-note,.public-sub{
   text-align:justify;
   text-justify:inter-word;
@@ -263,7 +263,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1><img src="./favicon.png?v=3992" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.92</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1><img src="./favicon.png?v=3993" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.93</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -306,7 +306,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1><img src="./favicon.png?v=3992" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.92</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1><img src="./favicon.png?v=3993" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.93</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -811,7 +811,7 @@ select{background-color:#fff} textarea{resize:vertical}
 
   <section id="publicView" class="hidden">
     <header class="top">
-      <h1 class="public-title"><img src="./favicon.png?v=3992" class="brand-mark" alt="SWÉ"><span id="publicWorkspaceName">SWÉ TOURNAMENT 5/5</span></h1>
+      <h1 class="public-title"><img src="./favicon.png?v=3993" class="brand-mark" alt="SWÉ"><span id="publicWorkspaceName">SWÉ TOURNAMENT 5/5</span></h1>
       <div class="public-sub">Consultation publique • lecture seule</div>
     </header>
 
@@ -1234,7 +1234,7 @@ async function authState(){
       $('#auth').classList.add('hidden');
       $('#main').classList.add('hidden');
       $('#publicView').classList.remove('hidden');
-      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=3992" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><h2>Lien indisponible</h2><p class="muted">'+esc(e.message||e)+'</p></div>';
+      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=3993" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><h2>Lien indisponible</h2><p class="muted">'+esc(e.message||e)+'</p></div>';
       return;
     }
   }
@@ -2094,7 +2094,7 @@ async function renderRegisteredPlayersAdmin(){
   box.innerHTML='';
   rows.filter(r=>r.present).forEach((r,i)=>{
     const d=document.createElement('div');d.className='player row';d.style.marginBottom='8px';
-    d.innerHTML='<b style="min-width:28px">'+(i+1)+'.</b><span style="flex:1">'+esc(r.player_name)+(r.is_group_member===false?' <span class="guest-badge">Guest</span>':'')+'</span><span class="guest-badge">'+(r.registration_status==='waitlist'?'Remplaçant':'Confirmé')+'</span>';
+    d.innerHTML='<b style="min-width:28px">'+(i+1)+'.</b><span style="flex:1">'+esc(r.player_name)+(r.is_group_member===false?' <span class="guest-badge">Guest</span>':'')+'</span><span class="guest-badge">'+(r.registration_status==='waitlist'||r.is_substitute?'Remplaçant':'Confirmé')+'</span>';
     const remove=document.createElement('button');remove.className='danger';remove.textContent='Retirer';remove.onclick=async()=>{
       if(!confirm('Retirer '+r.player_name+' de cette inscription ?'))return;
       const {error}=await sb.rpc('remove_registered_member_from_tournament',{p_tournament_id:t.id,p_player_id:r.player_id});
@@ -2702,7 +2702,7 @@ function appendTournamentSeasonControl(container,t){
 }
 
 function renderTournaments(){
-  // V39.92 : l'éditeur de tournoi est protégé des synchronisations automatiques.
+  // V39.93 : l'éditeur de tournoi est protégé des synchronisations automatiques.
   const ss=$('#seasonSelect');
   ss.innerHTML='<option value="">Sans saison</option>'+S.seasons.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');
   const box=$('#tournamentList');box.innerHTML='';
@@ -3255,7 +3255,7 @@ function renderTeams(){
     att.innerHTML+='<div class="muted" style="margin:10px 0 6px">'+(t.format==='league'
       ?'<b>Important :</b> cette liste contient uniquement les inscrits à ce Swé, pas tous les membres de la Ligue.'
       :'Liste des inscrits à ce tournoi.')+'</div>'+
-      (registeredPlayers.map(x=>'<div class="player row"><span style="flex:1">'+esc(playerDisplayName(x))+'</span><span class="guest-badge">'+((S.tPlayers.find(tp=>tp.player_id===x.id)?.registration_status==='waitlist')?'Remplaçant':'Inscrit au Swé')+'</span></div>').join('')||'<p class="muted">Aucun inscrit à cette compétition.</p>');
+      (registeredPlayers.map(x=>'<div class="player row"><span style="flex:1">'+esc(playerDisplayName(x))+'</span><span class="guest-badge">'+((()=>{const z=S.tPlayers.find(tp=>tp.player_id===x.id);return z&&(z.registration_status==='waitlist'||z.is_substitute)})()?'Remplaçant':'Inscrit au Swé')+'</span></div>').join('')||'<p class="muted">Aucun inscrit à cette compétition.</p>');
   }else{
     const prs=presentIds();
     if(t.format==='league'){
@@ -3263,7 +3263,7 @@ function renderTeams(){
       att.innerHTML='<div class="readonly-note"><b>🏁 Inscrits à CE Swé de Ligue uniquement</b><div style="margin-top:5px">Être membre de la Ligue ne signifie pas participer automatiquement à ce Swé. Les membres de la Ligue qui ne se sont pas inscrits à ce Swé ne sont pas affichés ici.</div></div>'+
         (sessionRows.map(tp=>{
           const x=p(tp.player_id);if(!x)return '';
-          return '<div class="player row"><span style="flex:1">'+esc(playerDisplayName(x))+'</span><span class="guest-badge">'+(tp.registration_status==='waitlist'?'Remplaçant':'Inscrit au Swé')+'</span></div>';
+          return '<div class="player row"><span style="flex:1">'+esc(playerDisplayName(x))+'</span><span class="guest-badge">'+((tp.registration_status==='waitlist'||tp.is_substitute)?'Remplaçant':'Inscrit au Swé')+'</span></div>';
         }).join('')||'<p class="muted">Aucun joueur inscrit à ce Swé pour le moment.</p>');
     }else{
       S.players.filter(x=>x.active).forEach(x=>{
@@ -3825,7 +3825,7 @@ async function renderLeague(){
       if(count)count.textContent=presentRows.length+' participant'+(presentRows.length>1?'s':'')+' à ce Swé';
       const list=$('#leagueRegisteredPlayersList');
       if(list){
-        list.innerHTML=presentRows.length?presentRows.map((r,i)=>'<div class="player row"><b style="min-width:30px">'+(i+1)+'.</b><span style="flex:1">'+esc(r.player_name)+(r.is_group_member===false?' <span class="guest-badge">Invité</span>':'')+'</span><span class="guest-badge">'+(r.registration_status==='waitlist'?'Remplaçant':'Confirmé')+'</span></div>').join(''):'<p class="muted">Aucun inscrit pour ce Swé.</p>';
+        list.innerHTML=presentRows.length?presentRows.map((r,i)=>'<div class="player row"><b style="min-width:30px">'+(i+1)+'.</b><span style="flex:1">'+esc(r.player_name)+(r.is_group_member===false?' <span class="guest-badge">Invité</span>':'')+'</span><span class="guest-badge">'+(r.registration_status==='waitlist'||r.is_substitute?'Remplaçant':'Confirmé')+'</span></div>').join(''):'<p class="muted">Aucun inscrit pour ce Swé.</p>';
       }
 
       const saved=$('#leagueSavedTeams');
@@ -3852,7 +3852,7 @@ async function renderLeague(){
   }
 
 
-  // V39.92 — Saisie du résultat directement depuis l'onglet Ligue.
+  // V39.93 — Saisie du résultat directement depuis l'onglet Ligue.
   const scoringCard=$('#leagueScoringCard'),scoringBody=$('#leagueScoringBody'),scoringLabel=$('#leagueScoringSessionLabel');
   if(scoringCard)scoringCard.classList.toggle('hidden',!canScoreLeague);
   if(canScoreLeague&&scoringBody){
@@ -4469,7 +4469,7 @@ async function bootPublic(token){
     if(r.league)urlParams.set('league',r.league);
   }
   sweRememberPublicRegistrationContext();
-  // V39.92 — état global pour éviter qu'un ancien rafraîchissement public
+  // V39.93 — état global pour éviter qu'un ancien rafraîchissement public
   // reconstruise le formulaire d'inscription équipe après validation du code.
   window.__swePublicTeamEditing=false;
   if(window.__swePublicRegistrationInterval){
@@ -4508,7 +4508,7 @@ async function bootPublic(token){
   if(isLeagueRegistration&&leagueJoinId&&!publicParamsTop.get('tournament')){
     const league=leagues.find(l=>l.id===leagueJoinId);
     if(!league){
-      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=3992" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><p>Ligue introuvable.</p></div>';return;
+      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=3993" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><p>Ligue introuvable.</p></div>';return;
     }
 
     const groupMembers=players.filter(p=>p.active&&p.is_group_member!==false).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
@@ -4677,7 +4677,7 @@ async function bootPublic(token){
 
     const ht=tournaments.find(x=>x.id===historyId);
     if(!ht){
-      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=3992" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><p>Tournoi introuvable.</p><button id="backPublic">← Retour à mon inscription</button></div>';
+      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=3993" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><p>Tournoi introuvable.</p><button id="backPublic">← Retour à mon inscription</button></div>';
       $('#backPublic').onclick=()=>location.href=publicHistoryBackUrl(token);
       return;
     }
@@ -4779,17 +4779,19 @@ async function bootPublic(token){
   }
   const regBox=$('#publicRegistration');
   if(requestedTournament&&!regTour){
-    $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=3992" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><h2 class="sectiontitle">Lien d’inscription indisponible</h2><p class="muted">Ce lien ne correspond pas à une inscription ouverte, ou le type de compétition ne correspond pas au lien généré. Aucun autre tournoi ni aucune Ligue ne sera affiché à sa place.</p></div>';
+    $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=3993" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><h2 class="sectiontitle">Lien d’inscription indisponible</h2><p class="muted">Ce lien ne correspond pas à une inscription ouverte, ou le type de compétition ne correspond pas au lien généré. Aucun autre tournoi ni aucune Ligue ne sera affiché à sa place.</p></div>';
     return;
   }
 
-  // V39.92 — informations utiles visibles dès la première page, avant le choix solo/équipe.
+  // V39.93 — informations utiles visibles dès la première page, avant le choix solo/équipe.
   function renderPublicQuickStats(){
     const box=$('#publicQuickStats');
     if(!box)return;
     if(!regTour){box.innerHTML='';return;}
-    const confirmed=registrations.filter(r=>r.tournament_id===regTour.id&&r.present&&r.registration_status!=='waitlist').length;
-    const waiting=registrations.filter(r=>r.tournament_id===regTour.id&&r.present&&r.registration_status==='waitlist').length;
+    const activeRegs=registrations.filter(r=>r.tournament_id===regTour.id&&r.present);
+    const confirmed=activeRegs.filter(r=>r.registration_status!=='waitlist').length;
+    const waiting=activeRegs.filter(r=>r.registration_status==='waitlist').length;
+    const substitutes=activeRegs.filter(r=>r.registration_status!=='waitlist'&&r.is_substitute).length;
     const maxPlayers=Number(regTour.max_players||35);
     const remaining=Math.max(0,maxPlayers-confirmed);
     const fee=(Number(regTour.entry_fee_cents||0)/100).toLocaleString('fr-FR',{minimumFractionDigits:Number(regTour.entry_fee_cents||0)%100?2:0,maximumFractionDigits:2});
@@ -4800,8 +4802,8 @@ async function bootPublic(token){
     }
     const item=(icon,label,value,extra='')=>'<div class="player" style="margin:0;background:#fbfaf6;border:1px solid #eadfca;min-height:74px"><div class="muted" style="font-size:.78rem">'+icon+' '+label+'</div><div style="font-size:1.08rem;font-weight:900;margin-top:3px">'+value+'</div>'+(extra?'<div class="muted" style="font-size:.75rem;margin-top:2px">'+extra+'</div>':'')+'</div>';
     box.innerHTML=
-      item('👥','Inscrits',confirmed+' / '+maxPlayers,waiting?waiting+' remplaçant'+(waiting>1?'s':'')+' en attente':'')+
-      item('🎟️','Places restantes',remaining,remaining===0?'Complet — inscription en remplaçant':'')+
+      item('👥','Inscrits',activeRegs.length+' / '+maxPlayers,(substitutes?substitutes+' remplaçant'+(substitutes>1?'s':''):'')+(waiting?(substitutes?' • ':'')+waiting+' en attente':''))+
+      item('🎟️','Places restantes',Math.max(0,maxPlayers-activeRegs.length),activeRegs.length>=maxPlayers?'Complet — liste d’attente':'')+
       (()=>{
         const gl=tournamentGroupLevels.find(x=>String(x.tournament_id)===String(regTour.id));
         const score=gl&&Number.isFinite(Number(gl.avg_rating))?Number(gl.avg_rating):null;
@@ -4904,7 +4906,7 @@ async function bootPublic(token){
       const host=(pl?.is_group_member===false&&r.registered_by_player_id)?playerMap.get(r.registered_by_player_id):null;
       const guest=pl?.is_group_member!==false?'Membre du groupe':(host?('Guest de '+host.name):publicGuestLabel(pl));
       const first=isFirstTimePublicPlayer(pl.id,regTour.id);
-      return '<div class="player row"><b style="min-width:34px">'+(i+1)+'.</b><span style="flex:1">'+esc(pl.name)+(first?' <span class="guest-badge">🆕 1ère fois</span>':'')+(guest&&!first?' <span class="guest-badge">'+esc(guest)+'</span>':'')+'</span><span style="font-weight:700;color:#15803d">Confirmé</span></div>';
+      return '<div class="player row"><b style="min-width:34px">'+(i+1)+'.</b><span style="flex:1">'+esc(pl.name)+(first?' <span class="guest-badge">🆕 1ère fois</span>':'')+(guest&&!first?' <span class="guest-badge">'+esc(guest)+'</span>':'')+'</span><span style="font-weight:700;color:'+(r.is_substitute?'#b45309':'#15803d')+'">'+(r.is_substitute?'Remplaçant':'Confirmé')+'</span></div>';
     }).join('');
     const waitRows=waiting.map((r,i)=>{
       const pl=playerMap.get(r.player_id);if(!pl)return '';
@@ -4914,8 +4916,10 @@ async function bootPublic(token){
       return '<div class="player row"><b style="min-width:34px">'+(i+1)+'.</b><span style="flex:1">'+esc(pl.name)+(first?' <span class="guest-badge">🆕 1ère fois</span>':'')+(guest&&!first?' <span class="guest-badge">'+esc(guest)+'</span>':'')+'</span><span style="font-weight:700;color:#b45309">Attente</span></div>';
     }).join('');
     const maxPublic=Number(regTour.max_players||20);
-    const remainingPublic=Math.max(0,maxPublic-confirmed.length);
-    const count=$('#publicRegCount');if(count)count.textContent=confirmed.length+'/'+maxPublic+' confirmés • '+remainingPublic+' place'+(remainingPublic>1?'s':'')+' restante'+(remainingPublic>1?'s':'')+(waiting.length?' • '+waiting.length+' remplaçant'+(waiting.length>1?'s':''):'');
+    const activePublic=regs.filter(r=>r.present);
+    const subsPublic=confirmed.filter(r=>r.is_substitute);
+    const remainingPublic=Math.max(0,maxPublic-activePublic.length);
+    const count=$('#publicRegCount');if(count)count.textContent=activePublic.length+'/'+maxPublic+' inscrits • '+remainingPublic+' place'+(remainingPublic>1?'s':'')+' restante'+(remainingPublic>1?'s':'')+(subsPublic.length?' • '+subsPublic.length+' remplaçant'+(subsPublic.length>1?'s':''):'')+(waiting.length?' • '+waiting.length+' en attente':'');
     const list=$('#publicRegisteredList');if(list)list.innerHTML=publicRegistrationSummaryHtml();
     const wlist=$('#publicWaitList');if(wlist){wlist.innerHTML=waitRows;wlist.parentElement.classList.toggle('hidden',!waiting.length)}
   }
@@ -4926,15 +4930,17 @@ async function bootPublic(token){
       ?(regTour.name||('Swé de '+(linkedLeague?.name||'Ligue')))
       :(regTour.name||('Tournoi du '+regTour.tournament_date));
     const regs=registrations.filter(r=>r.tournament_id===regTour.id);
-    const confirmed=regs.filter(r=>r.registration_status!=='waitlist'&&r.present).length;
-    const waiting=regs.filter(r=>r.registration_status==='waitlist').length;
+    const confirmedRows=regs.filter(r=>r.registration_status!=='waitlist'&&r.present);
+    const confirmed=confirmedRows.length;
+    const substitutes=confirmedRows.filter(r=>r.is_substitute).length;
+    const waiting=regs.filter(r=>r.registration_status==='waitlist'&&r.present).length;
     const publicAutoPlan=regTour.format==='league'?null:tournamentAutoPlan(confirmed);
     const publicFee=(Number(regTour.entry_fee_cents||0)/100).toLocaleString('fr-FR',{minimumFractionDigits:Number(regTour.entry_fee_cents||0)%100?2:0,maximumFractionDigits:2});
     const reservedPitchNames=(regTour.reserved_pitch_ids||[]).map(id=>S.sportsPitches.find(p=>p.id===id)?.name).filter(Boolean);
     const publicTerrainLabel=reservedPitchNames.length?reservedPitchNames.join(', '):(regTour.venue||'À préciser');
     const publicTime=regTour.start_time?String(regTour.start_time).slice(0,5):'À préciser';
     regBox.innerHTML=
-      '<div class="player"><b>'+esc(regTour.name||('Tournoi du '+regTour.tournament_date))+'</b><div id="publicRegCount" class="muted">'+confirmed+'/'+(regTour.max_players||35)+' confirmés'+(waiting?' • '+waiting+' remplaçant'+(waiting>1?'s':''):'')+'</div>'+
+      '<div class="player"><b>'+esc(regTour.name||('Tournoi du '+regTour.tournament_date))+'</b><div id="publicRegCount" class="muted">'+confirmed+'/'+(regTour.max_players||35)+' inscrits'+(substitutes?' • '+substitutes+' remplaçant'+(substitutes>1?'s':''):'')+(waiting?' • '+waiting+' en attente':'')+'</div>'+
       (regTour.format!=='league'?(()=>{const plan=tournamentAutoPlan(confirmed);return '<div style="margin-top:7px;font-weight:800">⚙️ Scénario actuel : '+(plan.teams?plan.teams+' équipe'+(plan.teams>1?'s':'')+' • '+plan.pitches+' terrain'+(plan.pitches>1?'s':'')+(plan.subs?' • '+plan.subs+' remplaçant'+(plan.subs>1?'s':'')+' commun'+(plan.subs>1?'s':''):''):'moins de 10 joueurs — équipes non générables')+'</div>'})():'')+
       (regTour.registration_deadline?'<div style="margin-top:8px;padding:9px 11px;border-radius:10px;background:#f0fdf4;border:1px solid #bbf7d0"><b>⏱️ Compte à rebours des inscriptions</b><div data-registration-deadline="'+esc(regTour.registration_deadline)+'" style="margin-top:4px"></div><div class="muted">Fin des inscriptions : '+new Date(regTour.registration_deadline).toLocaleString('fr-FR',{timeZone:'America/Martinique',dateStyle:'short',timeStyle:'short'})+'</div></div>':'')+'</div>'+
       (regTour.format!=='league'
@@ -4954,9 +4960,9 @@ async function bootPublic(token){
           ? 'Sélectionne ton nom ci-dessus puis ajoute tes invités un par un. Tu peux en ajouter jusqu’à <b>5 au total</b> pour ce Swé.'
           : 'Pour un tournoi, une personne extérieure ne peut pas s’inscrire seule : elle doit être <b>invitée par un membre du groupe</b>. Sélectionne ton nom puis ajoute ton ou tes invités, même si toi-même tu ne participes pas. Tu peux en ajouter jusqu’à <b>5 au total</b>.')+
       '</div><input id="publicGuestName" placeholder="Nom de l’invité"><label class="row" style="margin-top:8px;justify-content:flex-start"><input id="publicGuestMember" type="checkbox" style="width:auto"><span>Ajouter cet invité comme membre du groupe</span></label><div id="publicGuestPhoneWrap" class="hidden" style="margin-top:8px"><input id="publicGuestPhone" type="tel" inputmode="tel" placeholder="Numéro de mobile de l’invité"><div class="muted" style="margin-top:4px">Le numéro est demandé uniquement pour créer sa fiche membre. Il reste privé et visible uniquement par l’administrateur.</div></div><div class="space"></div><button id="publicAddGuest" class="primary">+ Ajouter mon invité</button></div>'+
-      '<div id="publicRegStatus" class="muted" style="margin-top:8px">Les places sont attribuées dans l’ordre des inscriptions. Quand le quota est atteint, les inscriptions suivantes sont automatiquement inscrites comme remplaçants.</div>'+
+      '<div id="publicRegStatus" class="muted" style="margin-top:8px">Les inscriptions sont classées dans l’ordre d’arrivée. Après 10 joueurs, les suivants sont remplaçants tant qu’une nouvelle équipe complète de 5 n’est pas atteinte : 11 à 14 remplaçants, puis 15 joueurs confirmés ; 16 à 19 remplaçants, puis 20 confirmés, et ainsi de suite.</div>'+
       '<h3 style="margin-top:18px">👥 Liste des inscrits</h3><div id="publicRegisteredList"></div>'+
-      '<div id="publicWaitWrap" class="'+(waiting?'':'hidden')+'"><h3 style="margin-top:14px">🟠 Remplaçants</h3><div id="publicWaitList"></div></div>';
+      '<div id="publicWaitWrap" class="'+(waiting?'':'hidden')+'"><h3 style="margin-top:14px">⏳ Liste d’attente</h3><div id="publicWaitList"></div></div>';
     renderPublicRegistrationList();
     updateTournamentCountdowns();
     const publicDeadline=tournamentDeadlineMs(regTour);
@@ -4994,7 +5000,7 @@ async function bootPublic(token){
         const reg=registrations.find(r=>r.tournament_id===regTour.id&&String(r.player_id)===String(x.id)&&r.present);
         const usage=publicGuestUsage(x.id);
         const state=reg
-          ? (reg.registration_status==='waitlist'?'🟠 Remplaçant':'✅ Déjà inscrit')
+          ? ((reg.registration_status==='waitlist'||reg.is_substitute)?'🟠 Remplaçant':'✅ Déjà inscrit')
           : '⚪ Non inscrit';
         const guestInfo=usage.used
           ? ' • '+usage.used+' invité'+(usage.used>1?'s':'')+' • '+usage.remaining+' restant'+(usage.remaining>1?'s':'')
@@ -5024,8 +5030,8 @@ async function bootPublic(token){
       }else{
         const assignedTeamIds=new Set(teams.filter(t=>t.tournament_id===regTour.id).map(t=>t.id));
         const inTeam=teamPlayers.some(tp=>String(tp.player_id)===String(pid)&&assignedTeamIds.has(tp.team_id));
-        status.textContent=(reg.registration_status==='waitlist'
-          ?'🟠 Tu es déjà inscrit comme remplaçant.'
+        status.textContent=((reg.registration_status==='waitlist'||reg.is_substitute)
+          ?'🟠 Tu es déjà inscrit comme remplaçant pour compléter la prochaine équipe.'
           :(inTeam?'🟢 Tu es déjà inscrit dans une équipe.':'🟢 Tu es déjà inscrit et confirmé.'))+inviteText;
       }
       const addGuestBtn=$('#publicAddGuest');
@@ -5189,13 +5195,33 @@ async function bootPublic(token){
       }catch(e){}
     }
 
+    function showRegistrationConfirmation(playerName,data){
+      const pos=Number(data?.position||0);
+      const isSub=!!data?.is_substitute;
+      const subPos=Number(data?.substitute_position||0);
+      const nextTeam=Math.ceil(Math.max(11,pos)/5)*5;
+      const title=isSub?'🟠 Inscription confirmée — remplaçant':'✅ Inscription confirmée';
+      const detail=isSub
+        ? `<b>${esc(playerName)}</b>, tu es le <b>${pos}e inscrit</b> et actuellement <b>remplaçant${subPos?' n°'+subPos:''}</b>.<br><br>Dès que nous atteignons <b>${nextTeam} inscrits</b>, une équipe complète supplémentaire pourra être formée et ton statut sera automatiquement mis à jour.`
+        : `<b>${esc(playerName)}</b>, ton inscription est bien enregistrée.<br><br>Tu es actuellement le <b>${pos}e inscrit</b>.`;
+      const old=document.getElementById('registrationConfirmOverlay');if(old)old.remove();
+      const ov=document.createElement('div');ov.id='registrationConfirmOverlay';ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px';
+      ov.innerHTML=`<div style="width:min(92vw,440px);background:#fff;border-radius:18px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.28);text-align:center"><div style="font-size:21px;font-weight:900;margin-bottom:12px">${title}</div><div style="font-size:16px;line-height:1.55;color:#334155">${detail}</div><button id="registrationConfirmOk" class="primary" style="margin-top:20px;min-width:150px">OK</button></div>`;
+      document.body.appendChild(ov);
+      const close=()=>ov.remove();
+      ov.querySelector('#registrationConfirmOk').onclick=close;
+      ov.onclick=e=>{if(e.target===ov)close()};
+    }
+
     $('#publicJoin').onclick=async()=>{
       if(regTour.format!=='league'&&tournamentDeadlineMs(regTour)!==null&&Date.now()>=tournamentDeadlineMs(regTour))return $('#publicRegStatus').textContent='⛔ Les inscriptions sont terminées.';
       const pid=$('#publicPlayerSelect').value;if(!pid)return $('#publicRegStatus').textContent='Choisis ton nom.';
       const b=$('#publicJoin');b.disabled=true;
       const {data,error}=await sb.rpc('public_tournament_registration',{p_token:token,p_tournament_id:regTour.id,p_player_id:pid,p_action:'join'});
       b.disabled=false;if(error)return $('#publicRegStatus').textContent=error.message;
-      $('#publicRegStatus').textContent=data?.status==='waitlist'?'🟠 Le quota est atteint : tu es inscrit comme remplaçant.':'🟢 Inscription confirmée !';
+      const selectedName=($('#publicPlayerSelect').selectedOptions?.[0]?.textContent||'Joueur').replace(/\s+—.*$/,'').trim();
+      $('#publicRegStatus').textContent=data?.is_substitute?'🟠 Inscription confirmée : tu es actuellement remplaçant.':'🟢 Inscription confirmée !';
+      showRegistrationConfirmation(selectedName,data);
       await refreshPublicRegistration();
     };
     if($('#publicNewPlayerJoin'))$('#publicNewPlayerJoin').onclick=async()=>{
@@ -5544,12 +5570,12 @@ async function bootPublic(token){
   const pmap=new Map(players.map(x=>[x.id,x]));
   const tmap=new Map(teams.map(x=>[x.id,x]));
 
-  // V39.92 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
+  // V39.93 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
   if(wantsLeagueSession&&regTour){
     const linkedLeague=leagues.find(l=>l.id===regTour.league_id)||null;
     const linkLeagueId=publicParams.get('league');
     if(!linkedLeague || (linkLeagueId&&linkLeagueId!==regTour.league_id)){
-      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=3992" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><h2 class="sectiontitle">Lien de Ligue indisponible</h2><p class="muted">Ce lien ne correspond pas à la Ligue de ce Swé. Aucun tournoi ne sera affiché à sa place.</p></div>';
+      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=3993" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><h2 class="sectiontitle">Lien de Ligue indisponible</h2><p class="muted">Ce lien ne correspond pas à la Ligue de ce Swé. Aucun tournoi ne sera affiché à sa place.</p></div>';
       return;
     }
 
@@ -5607,7 +5633,7 @@ async function bootPublic(token){
         '<div class="card"><h2 class="sectiontitle">👑 Top Player</h2><div class="muted" style="margin-bottom:8px">Nombre de Swés de Ligue gagnés.</div>'+(winners.map(x=>'<div class="rank"><b>'+(x.rank===1?'👑':x.rank)+'</b><span>'+esc(x.name)+'</span><b class="right">'+x.w+' victoire'+(x.w>1?'s':'')+'</b></div>').join('')||'<p class="muted">Aucune victoire pour le moment.</p>')+'</div>'+
       '</div>'+lastSweHtml;
 
-    const renderRegistered=()=>{$('#leagueSessionPublicRegistered').innerHTML=sessionRegs.filter(r=>r.present).map(r=>{const pl=pmap.get(r.player_id);return '<div class="player row"><span style="flex:1">'+esc(pl?.name||'Joueur')+'</span><span class="guest-badge">'+(r.registration_status==='waitlist'?'Remplaçant':'Confirmé')+'</span></div>';}).join('')||'<p class="muted">Aucun inscrit pour le moment.</p>';};
+    const renderRegistered=()=>{$('#leagueSessionPublicRegistered').innerHTML=sessionRegs.filter(r=>r.present).map(r=>{const pl=pmap.get(r.player_id);return '<div class="player row"><span style="flex:1">'+esc(pl?.name||'Joueur')+'</span><span class="guest-badge">'+(r.registration_status==='waitlist'||r.is_substitute?'Remplaçant':'Confirmé')+'</span></div>';}).join('')||'<p class="muted">Aucun inscrit pour le moment.</p>';};
     renderRegistered();
     $('#leagueSessionPublicJoin').onclick=async()=>{const pid=$('#leagueSessionPublicPlayer').value;if(!pid)return $('#leagueSessionPublicStatus').textContent='Choisis ton nom.';const b=$('#leagueSessionPublicJoin');b.disabled=true;const {data,error}=await sb.rpc('public_tournament_registration',{p_token:token,p_tournament_id:regTour.id,p_player_id:pid,p_action:'join'});b.disabled=false;if(error)return $('#leagueSessionPublicStatus').textContent=error.message;$('#leagueSessionPublicStatus').textContent=data?.status==='waitlist'?'🟠 Tu es inscrit comme remplaçant.':'🟢 Inscription au Swé confirmée !';setTimeout(()=>location.reload(),450);};
     $('#leagueSessionPublicLeave').onclick=async()=>{const pid=$('#leagueSessionPublicPlayer').value;if(!pid)return $('#leagueSessionPublicStatus').textContent='Choisis ton nom.';const b=$('#leagueSessionPublicLeave');b.disabled=true;const {error}=await sb.rpc('public_tournament_registration',{p_token:token,p_tournament_id:regTour.id,p_player_id:pid,p_action:'absent'});b.disabled=false;if(error)return $('#leagueSessionPublicStatus').textContent=error.message;$('#leagueSessionPublicStatus').textContent='Inscription retirée.';setTimeout(()=>location.reload(),450);};
