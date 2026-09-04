@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Tournoi Foot">
   <link rel="apple-touch-icon" href="./icon-192.png">
   <link rel="manifest" href="./manifest.webmanifest">
-  <title>SWÉ TOURNAMENT 5/5 • V39.73</title>
+  <title>SWÉ TOURNAMENT 5/5 • V39.74</title>
 <link rel="icon" type="image/png" href="./favicon.png">
 <link rel="apple-touch-icon" href="./icon-192.png">
   <style>
@@ -158,7 +158,7 @@ select{background-color:#fff} textarea{resize:vertical}
 }
 @media(max-width:650px){
   body{background:#f3f7f4}.app{padding:0 12px 100px}.top{border-radius:0 0 24px 24px;margin:0 -12px 14px;padding:18px 16px 20px}.top h1{font-size:21px}.card{border-radius:17px;padding:14px;margin:10px 0}.g2,.g3{grid-template-columns:1fr}.sectiontitle{font-size:17px}
-  /* V39.73 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
+  /* V39.74 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
   .tabs{left:0;right:0;transform:none;width:100%;display:flex;grid-template-columns:none;justify-content:flex-start;gap:5px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;border-radius:18px 18px 0 0;padding:7px 10px calc(7px + env(safe-area-inset-bottom));scroll-snap-type:x proximity;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
   .tabs button{flex:0 0 74px;min-width:74px;font-size:10px;scroll-snap-align:center;padding:5px 6px}
@@ -174,7 +174,7 @@ select{background-color:#fff} textarea{resize:vertical}
 #publicTeams .public-team-player{padding:7px 0;border-bottom:1px solid #edf2ef}
 #publicTeams .public-team-player:last-child{border-bottom:0}
 
-/* V39.73 — alignements et justification */
+/* V39.74 — alignements et justification */
 .card p,.card .muted,.player .muted,.readonly-note,.public-sub{
   text-align:justify;
   text-justify:inter-word;
@@ -261,7 +261,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.73</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.74</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -304,7 +304,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.73</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.74</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -461,6 +461,20 @@ select{background-color:#fff} textarea{resize:vertical}
     </div>
 
     <div id="view-permissions" class="view">
+      <div class="card" id="stripeBillingCard">
+        <div class="row" style="justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div style="flex:1;min-width:240px">
+            <h2 class="sectiontitle">💳 Paiements Stripe</h2>
+            <p class="muted">Connecte le compte de l’organisateur pour encaisser les participations au Swé. Ce socle servira ensuite aux abonnements, options et à la cagnotte 3e mi-temps.</p>
+          </div>
+          <span id="stripeStatusBadge" class="guest-badge">Non configuré</span>
+        </div>
+        <div id="stripeBillingStatus" class="player" style="margin-top:10px;background:#f8fbff"></div>
+        <div class="row" style="margin-top:10px;flex-wrap:wrap">
+          <button id="stripeConnectBtn" class="primary">🔗 Configurer Stripe</button>
+          <button id="stripeRefreshBtn">↻ Actualiser le statut</button>
+        </div>
+      </div>
       <div class="card">
         <h2 class="sectiontitle">🔐 Autorisations des co-organisateurs</h2>
         <p class="muted">Définis précisément ce que chaque co-organisateur peut faire. Les autorisations s’appliquent immédiatement et sont contrôlées côté serveur.</p>
@@ -885,7 +899,7 @@ window.addEventListener('error', (e) => {
   if(t){t.textContent='Erreur de chargement de l’application. Recharge la page.';t.style.display='block';}
 });
 
-const S={session:null,isSuperAdmin:false,superWorkspaces:[],workspace:null,members:[],coorgs:[],coorgCount:0,workspaceFeatures:{max_coorganizers:3,max_coorganizers_cap:100,rankings_enabled:true,league_enabled:true,tournaments_enabled:true,third_half_enabled:false,player_ratings_enabled:false},myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null},myRatings:[],lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],skillAggregates:[],teamCodes:[],seasons:[],leagues:[],leaguePlayers:[],activeLeague:null,tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matchAssignments:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},sportsComplexes:[],sportsPitches:[],publicMode:false,publicToken:null,editingTournamentId:null,teamCompetitionId:null,lastView:null,coorgQuotaRequest:null,superCoorgQuotaRequests:[],myLinkedPlayerId:null};
+const S={session:null,isSuperAdmin:false,superWorkspaces:[],workspace:null,members:[],coorgs:[],coorgCount:0,workspaceFeatures:{max_coorganizers:3,max_coorganizers_cap:100,rankings_enabled:true,league_enabled:true,tournaments_enabled:true,third_half_enabled:false,player_ratings_enabled:false,max_players_cap:35,payments_enabled:true,top_player_enabled:false,match_ratings_enabled:false},billingStatus:null,myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null},myRatings:[],lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],skillAggregates:[],teamCodes:[],seasons:[],leagues:[],leaguePlayers:[],activeLeague:null,tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matchAssignments:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},sportsComplexes:[],sportsPitches:[],publicMode:false,publicToken:null,editingTournamentId:null,teamCompetitionId:null,lastView:null,coorgQuotaRequest:null,superCoorgQuotaRequests:[],myLinkedPlayerId:null};
 
 let safeSyncTimer=null;
 let safeSyncBusy=false;
@@ -1610,6 +1624,11 @@ async function loadAll(){
   r=await sb.rpc('get_workspace_coorganizer_count',{p_workspace_id:w});S.coorgCount=Number(r.data||0);
   r=await sb.rpc('get_workspace_features',{p_workspace_id:w});
   if(!r.error){const f=Array.isArray(r.data)?r.data[0]:r.data;if(f)S.workspaceFeatures={...S.workspaceFeatures,...f};}
+  S.billingStatus=null;
+  if(isAdmin()){
+    r=await sb.rpc('get_workspace_billing_status',{p_workspace_id:w});
+    if(!r.error){const b=Array.isArray(r.data)?r.data[0]:r.data;S.billingStatus=b||null;}
+  }
   S.myRatings=[];
   if(isAdmin()){
     S.myPermissions={can_invite_coorganizers:true,can_enter_scores:true,can_add_members:true,can_delete_members:true,can_create_tournaments:true,can_view_players:true,can_generate_teams:true,temporary_admin_until:null};
@@ -1836,6 +1855,50 @@ function renderAccess(){
 
   if(!S.coorgs.length&&!pending.length)box.innerHTML+='<div class="muted">Aucun co-organisateur pour le moment.</div>';
 }
+
+function renderStripeBilling(){
+  const card=$('#stripeBillingCard');if(!card)return;
+  card.classList.toggle('hidden',!isAdmin());
+  if(!isAdmin())return;
+  const b=S.billingStatus||{};
+  const connected=!!b.stripe_connect_account_id,ready=!!b.connect_charges_enabled;
+  const badge=$('#stripeStatusBadge');
+  if(badge)badge.textContent=ready?'🟢 Paiements actifs':(connected?'🟠 Vérification Stripe':'⚪ Non configuré');
+  const plan=b.plan_code==='pro_dev'?'PRO • test':String(b.plan_code||'free').toUpperCase();
+  $('#stripeBillingStatus').innerHTML='<div class="grid g2">'+
+    '<div><span class="muted">Formule</span><div><b>'+esc(plan)+'</b></div></div>'+
+    '<div><span class="muted">Compte organisateur</span><div><b>'+(connected?'Connecté':'À connecter')+'</b></div></div>'+
+    '<div><span class="muted">Encaissements</span><div><b>'+(ready?'✅ Autorisés':'⏳ En attente')+'</b></div></div>'+
+    '<div><span class="muted">Virements</span><div><b>'+(b.connect_payouts_enabled?'✅ Autorisés':'⏳ En attente')+'</b></div></div>'+
+  '</div>';
+  const btn=$('#stripeConnectBtn');if(btn)btn.textContent=connected?'🔗 Continuer / mettre à jour Stripe':'🔗 Configurer Stripe';
+}
+async function refreshStripeConnectStatus(showToast=true){
+  if(!isAdmin()||!S.workspace)return;
+  const btn=$('#stripeRefreshBtn');if(btn)btn.disabled=true;
+  const {data,error}=await sb.functions.invoke('stripe-connect-status',{body:{workspace_id:S.workspace.id}});
+  if(btn)btn.disabled=false;
+  if(error||data?.error){if(showToast)toast(data?.error||error?.message||'Impossible de vérifier Stripe.');return}
+  const r=await sb.rpc('get_workspace_billing_status',{p_workspace_id:S.workspace.id});
+  if(!r.error){const b=Array.isArray(r.data)?r.data[0]:r.data;S.billingStatus=b||null;renderStripeBilling();}
+  if(showToast)toast(data?.charges_enabled?'Stripe est prêt à encaisser ✅':'Compte Stripe enregistré, vérification en cours.');
+}
+document.addEventListener('click',async(e)=>{
+  if(e.target?.id==='stripeConnectBtn'){
+    if(!isAdmin()||!S.workspace)return;
+    const b=e.target;b.disabled=true;b.textContent='Ouverture de Stripe…';
+    const {data,error}=await sb.functions.invoke('stripe-connect-onboarding',{body:{
+      workspace_id:S.workspace.id,
+      return_url:APP_URL+'?stripe=return',
+      refresh_url:APP_URL+'?stripe=refresh'
+    }});
+    b.disabled=false;renderStripeBilling();
+    if(error||data?.error)return toast(data?.error||error?.message||'Impossible d’ouvrir Stripe.');
+    if(data?.url)location.href=data.url;
+  }
+  if(e.target?.id==='stripeRefreshBtn')await refreshStripeConnectStatus(true);
+});
+
 function renderPermissions(){
   const box=$('#permissionsList');if(!box)return;
   if(!isAdmin()){box.innerHTML='';return}
@@ -1924,6 +1987,7 @@ function renderAll(){
   renderRegisteredPlayersAdmin().catch(e=>console.error('registered players',e));
   renderPlayers();
   renderPermissions();
+  renderStripeBilling();
   renderTournaments();
   renderTeams();
   renderMatches();
@@ -2514,7 +2578,7 @@ function appendTournamentSeasonControl(container,t){
 }
 
 function renderTournaments(){
-  // V39.73 : l'éditeur de tournoi est protégé des synchronisations automatiques.
+  // V39.74 : l'éditeur de tournoi est protégé des synchronisations automatiques.
   const ss=$('#seasonSelect');
   ss.innerHTML='<option value="">Sans saison</option>'+S.seasons.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');
   const box=$('#tournamentList');box.innerHTML='';
@@ -3653,7 +3717,7 @@ async function renderLeague(){
   }
 
 
-  // V39.73 — Saisie du résultat directement depuis l'onglet Ligue.
+  // V39.74 — Saisie du résultat directement depuis l'onglet Ligue.
   const scoringCard=$('#leagueScoringCard'),scoringBody=$('#leagueScoringBody'),scoringLabel=$('#leagueScoringSessionLabel');
   if(scoringCard)scoringCard.classList.toggle('hidden',!canScoreLeague);
   if(canScoreLeague&&scoringBody){
@@ -4270,7 +4334,7 @@ async function bootPublic(token){
     if(r.league)urlParams.set('league',r.league);
   }
   sweRememberPublicRegistrationContext();
-  // V39.73 — état global pour éviter qu'un ancien rafraîchissement public
+  // V39.74 — état global pour éviter qu'un ancien rafraîchissement public
   // reconstruise le formulaire d'inscription équipe après validation du code.
   window.__swePublicTeamEditing=false;
   if(window.__swePublicRegistrationInterval){
@@ -5220,7 +5284,7 @@ async function bootPublic(token){
   const pmap=new Map(players.map(x=>[x.id,x]));
   const tmap=new Map(teams.map(x=>[x.id,x]));
 
-  // V39.73 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
+  // V39.74 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
   if(wantsLeagueSession&&regTour){
     const linkedLeague=leagues.find(l=>l.id===regTour.league_id)||null;
     const linkLeagueId=publicParams.get('league');
