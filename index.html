@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Tournoi Foot">
   <link rel="apple-touch-icon" href="./icon-192.png">
   <link rel="manifest" href="./manifest.webmanifest">
-  <title>SWÉ TOURNAMENT 5/5 • V39.74</title>
+  <title>SWÉ TOURNAMENT 5/5 • V39.76</title>
 <link rel="icon" type="image/png" href="./favicon.png">
 <link rel="apple-touch-icon" href="./icon-192.png">
   <style>
@@ -158,7 +158,7 @@ select{background-color:#fff} textarea{resize:vertical}
 }
 @media(max-width:650px){
   body{background:#f3f7f4}.app{padding:0 12px 100px}.top{border-radius:0 0 24px 24px;margin:0 -12px 14px;padding:18px 16px 20px}.top h1{font-size:21px}.card{border-radius:17px;padding:14px;margin:10px 0}.g2,.g3{grid-template-columns:1fr}.sectiontitle{font-size:17px}
-  /* V39.74 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
+  /* V39.76 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
   .tabs{left:0;right:0;transform:none;width:100%;display:flex;grid-template-columns:none;justify-content:flex-start;gap:5px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;border-radius:18px 18px 0 0;padding:7px 10px calc(7px + env(safe-area-inset-bottom));scroll-snap-type:x proximity;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
   .tabs button{flex:0 0 74px;min-width:74px;font-size:10px;scroll-snap-align:center;padding:5px 6px}
@@ -174,7 +174,7 @@ select{background-color:#fff} textarea{resize:vertical}
 #publicTeams .public-team-player{padding:7px 0;border-bottom:1px solid #edf2ef}
 #publicTeams .public-team-player:last-child{border-bottom:0}
 
-/* V39.74 — alignements et justification */
+/* V39.76 — alignements et justification */
 .card p,.card .muted,.player .muted,.readonly-note,.public-sub{
   text-align:justify;
   text-justify:inter-word;
@@ -261,7 +261,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.74</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.76</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -304,7 +304,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.74</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.76</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -464,15 +464,24 @@ select{background-color:#fff} textarea{resize:vertical}
       <div class="card" id="stripeBillingCard">
         <div class="row" style="justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
           <div style="flex:1;min-width:240px">
-            <h2 class="sectiontitle">💳 Paiements Stripe</h2>
-            <p class="muted">Connecte le compte de l’organisateur pour encaisser les participations au Swé. Ce socle servira ensuite aux abonnements, options et à la cagnotte 3e mi-temps.</p>
+            <h2 class="sectiontitle">💳 Encaissement des participations</h2>
+            <p class="muted">Stripe n’est nécessaire que si tu veux recevoir automatiquement les paiements des joueurs via SWÉ. Ton rôle d’administrateur ou ta formule SWÉ ne t’obligent pas à connecter Stripe.</p>
           </div>
           <span id="stripeStatusBadge" class="guest-badge">Non configuré</span>
         </div>
-        <div id="stripeBillingStatus" class="player" style="margin-top:10px;background:#f8fbff"></div>
-        <div class="row" style="margin-top:10px;flex-wrap:wrap">
-          <button id="stripeConnectBtn" class="primary">🔗 Configurer Stripe</button>
-          <button id="stripeRefreshBtn">↻ Actualiser le statut</button>
+        <div class="player" style="margin-top:10px;background:#f8fbff">
+          <label class="row" style="gap:10px;align-items:flex-start;cursor:pointer">
+            <input id="stripePaymentsToggle" type="checkbox" style="margin-top:3px">
+            <span><b>Recevoir les participations en ligne</b><br><span class="muted">Active cette option uniquement si tu souhaites encaisser les participations par carte via SWÉ.</span></span>
+          </label>
+        </div>
+        <div id="stripeBillingDetails" class="hidden">
+          <div class="player" style="margin-top:10px;background:#fff8e8"><b>À savoir</b><div class="muted" style="margin-top:4px">Stripe vérifie directement l’identité et le statut du bénéficiaire avant d’autoriser les encaissements et virements. SWÉ ne collecte pas ces justificatifs.</div></div>
+          <div id="stripeBillingStatus" class="player" style="margin-top:10px;background:#f8fbff"></div>
+          <div class="row" style="margin-top:10px;flex-wrap:wrap">
+            <button id="stripeConnectBtn" class="primary">🔗 Activer les paiements Stripe</button>
+            <button id="stripeRefreshBtn">↻ Actualiser le statut</button>
+          </div>
         </div>
       </div>
       <div class="card">
@@ -1777,7 +1786,23 @@ function coorgInviteLink(inv){
 }
 function coorgInviteMessage(inv){
   const link=coorgInviteLink(inv);
-  return '⚽ SWÉ TOURNAMENT 5/5\n\nTu es invité comme co-organisateur.\n\n1. Ouvre ce lien.\n2. Connecte-toi ou crée ton compte avec cette adresse : '+inv.email+'\n3. Une fois connecté, accepte l’invitation.\n\n'+link;
+  return '⚽ SWÉ TOURNAMENT 5/5\n\n'+
+    'Tu es invité à rejoindre SWÉ Tournament en tant que co-gestionnaire.\n\n'+
+    'Pour activer ton accès :\n'+
+    '1. Ouvre le lien ci-dessous.\n'+
+    '2. Ajoute un mot de passe puis clique sur « Crée ton compte » avec l’adresse e-mail indiquée.\n'+
+    '3. Une fois connecté, accepte l’invitation.\n\n'+
+    '⚠️ IMPORTANT : ne modifie pas l’adresse e-mail indiquée. L’invitation est liée à cette adresse : '+inv.email+'\n\n'+
+    '🎯 TON RÔLE\n'+
+    'Dans ton espace, tu peux notamment évaluer les joueurs que tu connais suffisamment. Tu n’es pas obligé de noter tout le monde : si tu ne connais pas assez un joueur, ne le note pas.\n\n'+
+    'Les évaluations doivent être objectives, impartiales et faites sans concertation. Elles seront croisées avec celles d’autres co-gestionnaires afin d’obtenir une vision plus homogène des joueurs et d’aider SWÉ Tournament à générer des équipes aléatoires mais mieux équilibrées. ⚖️\n\n'+
+    '🔒 CONFIDENTIALITÉ\n'+
+    'Ton rôle de co-gestionnaire/notateur ainsi que tes notes individuelles doivent rester confidentiels. Les autres évaluateurs travaillent également de manière indépendante afin d’éviter toute pression ou influence.\n\n'+
+    '💬 Un groupe privé Telegram est prévu uniquement pour signaler un problème, proposer une modification ou suggérer une amélioration de SWÉ Tournament.\n\n'+
+    'Si tu souhaites t’impliquer davantage dans l’organisation ou l’évolution de SWÉ Tournament, rapproche-toi directement de moi en privé. 👊🏽\n\n'+
+    'Adresse du compte : '+inv.email+'\n\n'+
+    'Lien d’invitation :\n'+link+'\n\n'+
+    'Merci pour ton aide 👊🏽⚽️';
 }
 function renderAccess(){
   const box=$('#memberList');if(!box)return;
@@ -1862,6 +1887,8 @@ function renderStripeBilling(){
   if(!isAdmin())return;
   const b=S.billingStatus||{};
   const connected=!!b.stripe_connect_account_id,ready=!!b.connect_charges_enabled;
+  const toggle=$('#stripePaymentsToggle'),details=$('#stripeBillingDetails');
+  if(toggle){ if(connected) toggle.checked=true; details?.classList.toggle('hidden',!toggle.checked); }
   const badge=$('#stripeStatusBadge');
   if(badge)badge.textContent=ready?'🟢 Paiements actifs':(connected?'🟠 Vérification Stripe':'⚪ Non configuré');
   const plan=b.plan_code==='pro_dev'?'PRO • test':String(b.plan_code||'free').toUpperCase();
@@ -1871,7 +1898,7 @@ function renderStripeBilling(){
     '<div><span class="muted">Encaissements</span><div><b>'+(ready?'✅ Autorisés':'⏳ En attente')+'</b></div></div>'+
     '<div><span class="muted">Virements</span><div><b>'+(b.connect_payouts_enabled?'✅ Autorisés':'⏳ En attente')+'</b></div></div>'+
   '</div>';
-  const btn=$('#stripeConnectBtn');if(btn)btn.textContent=connected?'🔗 Continuer / mettre à jour Stripe':'🔗 Configurer Stripe';
+  const btn=$('#stripeConnectBtn');if(btn)btn.textContent=connected?'🔗 Continuer / mettre à jour Stripe':'🔗 Activer les paiements Stripe';
 }
 async function refreshStripeConnectStatus(showToast=true){
   if(!isAdmin()||!S.workspace)return;
@@ -1883,6 +1910,16 @@ async function refreshStripeConnectStatus(showToast=true){
   if(!r.error){const b=Array.isArray(r.data)?r.data[0]:r.data;S.billingStatus=b||null;renderStripeBilling();}
   if(showToast)toast(data?.charges_enabled?'Stripe est prêt à encaisser ✅':'Compte Stripe enregistré, vérification en cours.');
 }
+document.addEventListener('change',(e)=>{
+  if(e.target?.id==='stripePaymentsToggle'){
+    const details=$('#stripeBillingDetails');
+    details?.classList.toggle('hidden',!e.target.checked);
+    if(!e.target.checked && S.billingStatus?.stripe_connect_account_id){
+      e.target.checked=true; details?.classList.remove('hidden');
+      toast('Stripe est déjà relié à ce compte. Tu peux continuer ou mettre à jour la configuration.');
+    }
+  }
+});
 document.addEventListener('click',async(e)=>{
   if(e.target?.id==='stripeConnectBtn'){
     if(!isAdmin()||!S.workspace)return;
@@ -2578,7 +2615,7 @@ function appendTournamentSeasonControl(container,t){
 }
 
 function renderTournaments(){
-  // V39.74 : l'éditeur de tournoi est protégé des synchronisations automatiques.
+  // V39.76 : l'éditeur de tournoi est protégé des synchronisations automatiques.
   const ss=$('#seasonSelect');
   ss.innerHTML='<option value="">Sans saison</option>'+S.seasons.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');
   const box=$('#tournamentList');box.innerHTML='';
@@ -3717,7 +3754,7 @@ async function renderLeague(){
   }
 
 
-  // V39.74 — Saisie du résultat directement depuis l'onglet Ligue.
+  // V39.76 — Saisie du résultat directement depuis l'onglet Ligue.
   const scoringCard=$('#leagueScoringCard'),scoringBody=$('#leagueScoringBody'),scoringLabel=$('#leagueScoringSessionLabel');
   if(scoringCard)scoringCard.classList.toggle('hidden',!canScoreLeague);
   if(canScoreLeague&&scoringBody){
@@ -4334,7 +4371,7 @@ async function bootPublic(token){
     if(r.league)urlParams.set('league',r.league);
   }
   sweRememberPublicRegistrationContext();
-  // V39.74 — état global pour éviter qu'un ancien rafraîchissement public
+  // V39.76 — état global pour éviter qu'un ancien rafraîchissement public
   // reconstruise le formulaire d'inscription équipe après validation du code.
   window.__swePublicTeamEditing=false;
   if(window.__swePublicRegistrationInterval){
@@ -5284,7 +5321,7 @@ async function bootPublic(token){
   const pmap=new Map(players.map(x=>[x.id,x]));
   const tmap=new Map(teams.map(x=>[x.id,x]));
 
-  // V39.74 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
+  // V39.76 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
   if(wantsLeagueSession&&regTour){
     const linkedLeague=leagues.find(l=>l.id===regTour.league_id)||null;
     const linkLeagueId=publicParams.get('league');
