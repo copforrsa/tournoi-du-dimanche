@@ -7,11 +7,11 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Tournoi Foot">
-  <link rel="apple-touch-icon" href="./icon-192.png?v=4000">
+  <link rel="apple-touch-icon" href="./icon-192.png?v=4001">
   <link rel="manifest" href="./manifest.webmanifest">
-  <title>SWÉ TOURNAMENT 5/5 • V40.00</title>
-<link rel="icon" type="image/png" href="./favicon.png?v=4000">
-<link rel="apple-touch-icon" href="./icon-192.png?v=4000">
+  <title>SWÉ TOURNAMENT 5/5 • V40.01</title>
+<link rel="icon" type="image/png" href="./favicon.png?v=4001">
+<link rel="apple-touch-icon" href="./icon-192.png?v=4001">
   <style>
 :root{
   --bg:#f5f1e7;--card:#fff;--text:#18150f;--muted:#746b5b;--border:#e8dfca;
@@ -156,11 +156,11 @@ select{background-color:#fff} textarea{resize:vertical}
 .tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:40;width:min(760px,calc(100% - 20px));display:grid;grid-template-columns:repeat(auto-fit,minmax(72px,1fr));gap:3px;background:rgba(11,11,10,.97);border:1px solid rgba(255,255,255,.08);border-radius:20px 20px 0 0;padding:7px 7px calc(7px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(7,27,18,.22);backdrop-filter:blur(14px)}
 .tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:51px;background:transparent;color:#b9cabf;border:0;font-size:10px;padding:5px 4px;border-radius:13px}.tabs button:before{font-size:19px;line-height:1}.tabs button[data-view="home"]:before{content:"⌂"}.tabs button[data-view="players"]:before{content:"♟"}.tabs button[data-view="permissions"]:before{content:"🔐"}.tabs button[data-view="permissions"].disabled-tab{opacity:.35;filter:grayscale(1);cursor:not-allowed;pointer-events:none}.tabs button[data-view="tournaments"]:before{content:"▣"}.tabs button[data-view="teams"]:before{content:"♙"}.tabs button[data-view="matches"]:before{content:"⚽"}.tabs button[data-view="league"]:before{content:"🏁"}.tabs button[data-view="ranking"]:before{content:"★"}.tabs button.active{background:linear-gradient(135deg,#17803d,#22a34a);color:#fff;box-shadow:0 5px 12px rgba(25,152,67,.26)}
 @media(min-width:900px){
-  .app{padding-left:224px;padding-bottom:28px}.tabs{left:max(20px,calc(50% - 590px));top:18px;bottom:18px;transform:none;width:190px;height:auto;display:flex;flex-direction:column;justify-content:flex-start;border-radius:22px;padding:18px 10px;background:#0b0b0a}.tabs:before{content:"SWÉ TOURNAMENT 5/5";display:block;color:#fff;font-weight:900;font-size:14px;line-height:1.2;padding:6px 8px 18px 42px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:8px;background:url("./favicon.png?v=4000") no-repeat 8px 2px/28px 28px}.tabs button{flex-direction:row;justify-content:flex-start;gap:10px;padding:10px 12px;font-size:13px;min-height:46px}.tabs button:before{font-size:17px;width:22px;text-align:center}.top{margin-top:0}.card{padding:19px 20px}
+  .app{padding-left:224px;padding-bottom:28px}.tabs{left:max(20px,calc(50% - 590px));top:18px;bottom:18px;transform:none;width:190px;height:auto;display:flex;flex-direction:column;justify-content:flex-start;border-radius:22px;padding:18px 10px;background:#0b0b0a}.tabs:before{content:"SWÉ TOURNAMENT 5/5";display:block;color:#fff;font-weight:900;font-size:14px;line-height:1.2;padding:6px 8px 18px 42px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:8px;background:url("./favicon.png?v=4001") no-repeat 8px 2px/28px 28px}.tabs button{flex-direction:row;justify-content:flex-start;gap:10px;padding:10px 12px;font-size:13px;min-height:46px}.tabs button:before{font-size:17px;width:22px;text-align:center}.top{margin-top:0}.card{padding:19px 20px}
 }
 @media(max-width:650px){
   body{background:#f3f7f4}.app{padding:0 12px 100px}.top{border-radius:0 0 24px 24px;margin:0 -12px 14px;padding:18px 16px 20px}.top h1{font-size:21px}.card{border-radius:17px;padding:14px;margin:10px 0}.g2,.g3{grid-template-columns:1fr}.sectiontitle{font-size:17px}
-  /* V40.00 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
+  /* V40.01 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
   .tabs{left:0;right:0;transform:none;width:100%;display:flex;grid-template-columns:none;justify-content:flex-start;gap:5px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;border-radius:18px 18px 0 0;padding:7px 10px calc(7px + env(safe-area-inset-bottom));scroll-snap-type:x proximity;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
   .tabs button{flex:0 0 74px;min-width:74px;font-size:10px;scroll-snap-align:center;padding:5px 6px}
@@ -176,7 +176,7 @@ select{background-color:#fff} textarea{resize:vertical}
 #publicTeams .public-team-player{padding:7px 0;border-bottom:1px solid #edf2ef}
 #publicTeams .public-team-player:last-child{border-bottom:0}
 
-/* V40.00 — alignements et justification */
+/* V40.01 — alignements et justification */
 .card p,.card .muted,.player .muted,.readonly-note,.public-sub{
   text-align:justify;
   text-justify:inter-word;
@@ -263,7 +263,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1><img src="./favicon.png?v=4000" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V40.00</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1><img src="./favicon.png?v=4001" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V40.01</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -306,7 +306,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1><img src="./favicon.png?v=4000" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V40.00</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1><img src="./favicon.png?v=4001" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V40.01</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -811,7 +811,7 @@ select{background-color:#fff} textarea{resize:vertical}
 
   <section id="publicView" class="hidden">
     <header class="top">
-      <h1 class="public-title"><img src="./favicon.png?v=4000" class="brand-mark" alt="SWÉ"><span id="publicWorkspaceName">SWÉ TOURNAMENT 5/5</span></h1>
+      <h1 class="public-title"><img src="./favicon.png?v=4001" class="brand-mark" alt="SWÉ"><span id="publicWorkspaceName">SWÉ TOURNAMENT 5/5</span></h1>
       <div class="public-sub">Consultation publique • lecture seule</div>
     </header>
 
@@ -1117,6 +1117,7 @@ let recoveryMode=/type=recovery/i.test(location.hash+location.search);
 const APP_URL=location.origin+location.pathname.substring(0,location.pathname.lastIndexOf('/')+1);
 const urlParams=new URLSearchParams(location.search);
 let publicTokenFromUrl=urlParams.get('public');
+const paymentDeskTokenFromUrl=(urlParams.get('paydesk')||'').trim();
 const shortCodeFromUrl=(urlParams.get('s')||'').trim().toUpperCase();
 const inviteIdFromUrl=urlParams.get('invite');
 const inviteEmailFromUrl=(urlParams.get('email')||'').trim().toLowerCase();
@@ -1214,6 +1215,10 @@ function friendlyAuthError(error){
   return error?.message||'Une erreur est survenue.';
 }
 async function authState(){
+  if(paymentDeskTokenFromUrl){
+    await bootPaymentDesk(paymentDeskTokenFromUrl);
+    return;
+  }
   if(shortCodeFromUrl&&!publicTokenFromUrl){
     try{
       const {data,error}=await sb.rpc('resolve_public_tournament_short_link',{p_code:shortCodeFromUrl});
@@ -1234,7 +1239,7 @@ async function authState(){
       $('#auth').classList.add('hidden');
       $('#main').classList.add('hidden');
       $('#publicView').classList.remove('hidden');
-      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=4000" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><h2>Lien indisponible</h2><p class="muted">'+esc(e.message||e)+'</p></div>';
+      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=4001" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><h2>Lien indisponible</h2><p class="muted">'+esc(e.message||e)+'</p></div>';
       return;
     }
   }
@@ -2702,7 +2707,7 @@ function appendTournamentSeasonControl(container,t){
 }
 
 function renderTournaments(){
-  // V40.00 : l'éditeur de tournoi est protégé des synchronisations automatiques.
+  // V40.01 : l'éditeur de tournoi est protégé des synchronisations automatiques.
   const ss=$('#seasonSelect');
   ss.innerHTML='<option value="">Sans saison</option>'+S.seasons.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');
   const box=$('#tournamentList');box.innerHTML='';
@@ -2966,6 +2971,15 @@ function renderTournaments(){
         window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank','noopener');
       };
       linkRow.append(linkInput,copyBtn,waBtn);shareBox.appendChild(linkRow);reg.appendChild(shareBox);
+
+      const deskBox=document.createElement('div');deskBox.style.marginTop='10px';
+      const deskUrl=t.payment_validation_token?APP_URL+'?paydesk='+encodeURIComponent(t.payment_validation_token):'';
+      deskBox.innerHTML='<div class="muted" style="margin-bottom:6px"><b>💶 Lien encaissement du complexe</b><br>Lien privé à transmettre au complexe pour voir qui a payé et confirmer les paiements reçus sur place.</div>';
+      const deskRow=document.createElement('div');deskRow.className='row';
+      const deskInput=document.createElement('input');deskInput.readOnly=true;deskInput.value=deskUrl||'Migration paiement sur place à installer';deskInput.style.flex='1';
+      const deskCopy=document.createElement('button');deskCopy.textContent='Copier le lien encaissement';deskCopy.disabled=!deskUrl;
+      deskCopy.onclick=async()=>{try{await navigator.clipboard.writeText(deskUrl);toast('Lien encaissement copié ✅')}catch(e){deskInput.focus();deskInput.select();toast('Lien sélectionné : copie-le.')}};
+      deskRow.append(deskInput,deskCopy);deskBox.appendChild(deskRow);reg.appendChild(deskBox);
       d.appendChild(reg);
     }
 
@@ -3852,7 +3866,7 @@ async function renderLeague(){
   }
 
 
-  // V40.00 — Saisie du résultat directement depuis l'onglet Ligue.
+  // V40.01 — Saisie du résultat directement depuis l'onglet Ligue.
   const scoringCard=$('#leagueScoringCard'),scoringBody=$('#leagueScoringBody'),scoringLabel=$('#leagueScoringSessionLabel');
   if(scoringCard)scoringCard.classList.toggle('hidden',!canScoreLeague);
   if(canScoreLeague&&scoringBody){
@@ -4458,6 +4472,86 @@ function sweStoredPublicRegistrationContext(){
     return obj&&typeof obj==='object'?obj:{};
   }catch(e){return {}}
 }
+async function bootPaymentDesk(token){
+  S.publicMode=true;
+  if(window.__swePublicRegistrationInterval){clearInterval(window.__swePublicRegistrationInterval);window.__swePublicRegistrationInterval=null;}
+  $('#auth').classList.add('hidden');
+  $('#main').classList.add('hidden');
+  $('#publicView').classList.remove('hidden');
+  const root=$('#publicView');
+  root.innerHTML='<header class="top"><h1 class="public-title"><img src="./favicon.png?v=4001" class="brand-mark" alt="SWÉ">Validation des paiements</h1><div class="public-sub">Lien réservé au complexe • SWÉ TOURNAMENT 5/5</div></header><div class="card"><div id="paymentDeskContent"><p class="muted">Chargement de la liste des inscrits…</p></div></div>';
+  const money=cents=>(Number(cents||0)/100).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+  let snapshot=null;
+  let stripeMap=new Map();
+  async function loadDesk(){
+    const content=$('#paymentDeskContent');
+    if(!content)return;
+    const {data,error}=await sb.rpc('payment_desk_snapshot',{p_token:token});
+    if(error||!data){content.innerHTML='<h2 class="sectiontitle">Lien indisponible</h2><p class="muted">'+esc(error?.message||'Ce lien de validation est invalide ou désactivé.')+'</p>';return;}
+    snapshot=data;
+    const rows=Array.isArray(data.players)?data.players:[];
+    const publicToken=data.public_token||null;
+    stripeMap=new Map();
+    if(publicToken){
+      await Promise.all(rows.map(async r=>{
+        try{
+          const {data:st}=await sb.rpc('public_tournament_payment_status',{p_token:publicToken,p_tournament_id:data.tournament_id,p_player_id:r.player_id});
+          if(st)stripeMap.set(String(r.player_id),st);
+        }catch(_e){}
+      }));
+    }
+    renderDesk();
+  }
+  function renderDesk(){
+    const content=$('#paymentDeskContent');if(!content||!snapshot)return;
+    const all=(snapshot.players||[]).filter(r=>r.present);
+    const confirmed=all.filter(r=>r.registration_status!=='waitlist'&&!r.is_substitute);
+    const paidCount=confirmed.filter(r=>{
+      const st=stripeMap.get(String(r.player_id));return !!r.manual_paid_at||st?.payment_status==='paid';
+    }).length;
+    const unpaidCount=Math.max(0,confirmed.length-paidCount);
+    content.innerHTML='<div class="row" style="align-items:flex-start;gap:12px;flex-wrap:wrap"><div style="flex:1;min-width:230px"><h2 class="sectiontitle" style="margin-bottom:5px">💶 '+esc(snapshot.tournament_name||('Swé du '+snapshot.tournament_date))+'</h2><div class="muted">📅 '+esc(snapshot.tournament_date||'')+' • Participation : <b>'+money(snapshot.entry_fee_cents)+'</b></div><div class="muted" style="margin-top:5px">Le complexe utilise ce lien uniquement pour confirmer les paiements reçus sur place.</div></div><button id="paymentDeskRefresh">↻ Actualiser</button></div>'+ 
+      '<div class="grid g3" style="margin-top:14px"><div class="player" style="background:#eef8f2"><b style="font-size:1.2rem">'+paidCount+'</b><div class="muted">Payé'+(paidCount>1?'s':'')+'</div></div><div class="player" style="background:#fff3e8"><b style="font-size:1.2rem">'+unpaidCount+'</b><div class="muted">À encaisser</div></div><div class="player"><b style="font-size:1.2rem">'+confirmed.length+'</b><div class="muted">Confirmé'+(confirmed.length>1?'s':'')+'</div></div></div>'+ 
+      '<div style="margin-top:14px"><input id="paymentDeskSearch" placeholder="🔎 Rechercher un joueur" autocomplete="off"></div><div id="paymentDeskRows" style="margin-top:10px"></div>'+ 
+      '<div class="readonly-note" style="margin-top:12px">🔐 Ce lien permet de modifier le statut de paiement. Ne le partage qu’avec le complexe ou une personne autorisée à encaisser.</div>';
+    const rowsBox=$('#paymentDeskRows');
+    const draw=()=>{
+      const q=($('#paymentDeskSearch')?.value||'').trim().toLowerCase();
+      const rows=all.filter(r=>!q||String(r.player_name||'').toLowerCase().includes(q));
+      rowsBox.innerHTML='';
+      if(!rows.length){rowsBox.innerHTML='<p class="muted">Aucun joueur correspondant.</p>';return;}
+      rows.forEach(r=>{
+        const wait=r.registration_status==='waitlist'||r.is_substitute;
+        const st=stripeMap.get(String(r.player_id))||{};
+        const stripePaid=st.payment_status==='paid';
+        const manualPaid=!!r.manual_paid_at;
+        const paid=stripePaid||manualPaid;
+        const method=stripePaid?'Payé en ligne':(manualPaid?'Payé sur place':(r.payment_preference==='onsite'?'Paiement sur place prévu':(r.payment_preference==='online'?'Paiement en ligne prévu':'Mode non choisi')));
+        const d=document.createElement('div');d.className='player row';d.style.marginBottom='8px';d.style.gap='8px';d.style.flexWrap='wrap';
+        d.innerHTML='<span style="flex:1;min-width:170px"><b>'+esc(r.player_name||'Joueur')+'</b><div class="muted" style="margin-top:3px">'+(wait?'🟠 Remplaçant':'✅ Inscrit confirmé')+' • '+esc(method)+'</div></span>'+
+          '<span class="guest-badge" style="background:'+(paid?'#e8f7ec':(wait?'#fff1d6':'#ffe9e7'))+';color:'+(paid?'#176a36':(wait?'#9a5b00':'#b3261e'))+'">'+(paid?'PAYÉ':(wait?'REMPLAÇANT':'NON PAYÉ'))+'</span>';
+        if(!wait&&!stripePaid){
+          const b=document.createElement('button');b.className=manualPaid?'danger':'primary';b.textContent=manualPaid?'↩ Annuler payé':'✅ Marquer payé';
+          b.onclick=async()=>{
+            if(manualPaid&&!confirm('Annuler le statut payé de '+r.player_name+' ?'))return;
+            b.disabled=true;
+            const {error}=await sb.rpc('payment_desk_set_paid',{p_token:token,p_player_id:r.player_id,p_paid:!manualPaid});
+            if(error){b.disabled=false;return toast(error.message);}
+            toast(!manualPaid?'Paiement confirmé ✅':'Statut paiement annulé.');
+            await loadDesk();
+          };
+          d.appendChild(b);
+        }
+        rowsBox.appendChild(d);
+      });
+    };
+    $('#paymentDeskSearch').oninput=draw;
+    $('#paymentDeskRefresh').onclick=loadDesk;
+    draw();
+  }
+  await loadDesk();
+}
+
 async function bootPublic(token){
   S.publicMode=true;
   if(window.__sweResolvedShortLink){
@@ -4469,7 +4563,7 @@ async function bootPublic(token){
     if(r.league)urlParams.set('league',r.league);
   }
   sweRememberPublicRegistrationContext();
-  // V40.00 — état global pour éviter qu'un ancien rafraîchissement public
+  // V40.01 — état global pour éviter qu'un ancien rafraîchissement public
   // reconstruise le formulaire d'inscription équipe après validation du code.
   window.__swePublicTeamEditing=false;
   if(window.__swePublicRegistrationInterval){
@@ -4508,7 +4602,7 @@ async function bootPublic(token){
   if(isLeagueRegistration&&leagueJoinId&&!publicParamsTop.get('tournament')){
     const league=leagues.find(l=>l.id===leagueJoinId);
     if(!league){
-      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=4000" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><p>Ligue introuvable.</p></div>';return;
+      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=4001" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><p>Ligue introuvable.</p></div>';return;
     }
 
     const groupMembers=players.filter(p=>p.active&&p.is_group_member!==false).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
@@ -4677,7 +4771,7 @@ async function bootPublic(token){
 
     const ht=tournaments.find(x=>x.id===historyId);
     if(!ht){
-      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=4000" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><p>Tournoi introuvable.</p><button id="backPublic">← Retour à mon inscription</button></div>';
+      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=4001" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><p>Tournoi introuvable.</p><button id="backPublic">← Retour à mon inscription</button></div>';
       $('#backPublic').onclick=()=>location.href=publicHistoryBackUrl(token);
       return;
     }
@@ -4779,11 +4873,11 @@ async function bootPublic(token){
   }
   const regBox=$('#publicRegistration');
   if(requestedTournament&&!regTour){
-    $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=4000" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><h2 class="sectiontitle">Lien d’inscription indisponible</h2><p class="muted">Ce lien ne correspond pas à une inscription ouverte, ou le type de compétition ne correspond pas au lien généré. Aucun autre tournoi ni aucune Ligue ne sera affiché à sa place.</p></div>';
+    $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=4001" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><h2 class="sectiontitle">Lien d’inscription indisponible</h2><p class="muted">Ce lien ne correspond pas à une inscription ouverte, ou le type de compétition ne correspond pas au lien généré. Aucun autre tournoi ni aucune Ligue ne sera affiché à sa place.</p></div>';
     return;
   }
 
-  // V40.00 — informations utiles visibles dès la première page, avant le choix solo/équipe.
+  // V40.01 — informations utiles visibles dès la première page, avant le choix solo/équipe.
   function renderPublicQuickStats(){
     const box=$('#publicQuickStats');
     if(!box)return;
@@ -5102,7 +5196,10 @@ async function bootPublic(token){
       }
       publicPaymentLoadingFor=pid;
       try{
-        const {data,error}=await sb.rpc('public_tournament_payment_status',{p_token:token,p_tournament_id:regTour.id,p_player_id:pid});
+        const [{data,error},{data:choiceData,error:choiceError}]=await Promise.all([
+          sb.rpc('public_tournament_payment_status',{p_token:token,p_tournament_id:regTour.id,p_player_id:pid}),
+          sb.rpc('public_tournament_payment_choice_status',{p_token:token,p_tournament_id:regTour.id,p_player_id:pid})
+        ]);
         if(seq!==publicPaymentSeq)return;
         if(error){if(!publicPaymentCache.html)box.innerHTML='<b>💳 Paiement de la participation</b><div class="muted" style="margin-top:5px">Statut indisponible pour le moment.</div>';return;}
         const st=data||{};
@@ -5113,8 +5210,20 @@ async function bootPublic(token){
         }
         if(st.reason==='free'||Number(st.entry_fee_cents||0)<=0){box.className='hidden';box.innerHTML='';return;}
         if(st.payment_status==='paid'){
-          const html='<b>✅ Participation payée</b><div class="muted" style="margin-top:5px">Paiement confirmé'+(st.paid_at?' • '+new Date(st.paid_at).toLocaleString('fr-FR',{timeZone:'America/Martinique',dateStyle:'short',timeStyle:'short'}):'')+'.</div>';
+          const html='<b>✅ Participation payée en ligne</b><div class="muted" style="margin-top:5px">Paiement confirmé par Stripe'+(st.paid_at?' • '+new Date(st.paid_at).toLocaleString('fr-FR',{timeZone:'America/Martinique',dateStyle:'short',timeStyle:'short'}):'')+'.</div>';
           publicPaymentCache={playerId:pid,status:st,html,bg:'#eef8f2',border:'1px solid #b7dfc4'};applyPublicPaymentView(box,html,publicPaymentCache.bg,publicPaymentCache.border);
+          return;
+        }
+        const choice=choiceData||{};
+        if(choice.manual_paid_at){
+          const html='<b>✅ Participation payée sur place</b><div class="muted" style="margin-top:5px">Le complexe a confirmé la réception de ton paiement'+(choice.manual_paid_at?' • '+new Date(choice.manual_paid_at).toLocaleString('fr-FR',{timeZone:'America/Martinique',dateStyle:'short',timeStyle:'short'}):'')+'.</div>';
+          publicPaymentCache={playerId:pid,status:st,html,bg:'#eef8f2',border:'1px solid #b7dfc4'};applyPublicPaymentView(box,html,publicPaymentCache.bg,publicPaymentCache.border);
+          return;
+        }
+        if(choice.payment_preference==='onsite'){
+          const html='<b>🏟️ Paiement sur place choisi</b><div style="margin-top:7px">À régler au complexe : <b style="font-size:1.05rem">'+publicMoney(st.entry_fee_cents)+'</b></div><div class="muted" style="margin-top:5px">Ton inscription est enregistrée. Le complexe confirmera ton paiement lorsqu’il le recevra.</div><button id="publicSwitchOnline" style="width:100%;margin-top:10px">💳 Finalement payer en ligne</button>';
+          publicPaymentCache={playerId:pid,status:st,html,bg:'#fff8e8',border:'1px solid #f2d18a'};applyPublicPaymentView(box,html,publicPaymentCache.bg,publicPaymentCache.border);
+          $('#publicSwitchOnline').onclick=async()=>{await sb.rpc('public_set_tournament_payment_preference',{p_token:token,p_tournament_id:regTour.id,p_player_id:pid,p_preference:'online'});publicPaymentCache={playerId:null,status:null,html:null,bg:null,border:null};await renderPublicPaymentBox({skipStripeReconcile:true});};
           return;
         }
         if(!st.available){
@@ -5128,22 +5237,24 @@ async function bootPublic(token){
           // ne doit jamais déclencher un popup de confirmation.
           confirmPublicStripePayment(pid,null,false).then(async paid=>{if(paid){await renderPublicPaymentBox({skipStripeReconcile:true});}});
         }
-        const html='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">'+
-          '<b>💳 Payer ma participation</b><span style="font-size:.76rem;font-weight:800;color:#178a43;background:#eef8f2;border:1px solid #b7dfc4;border-radius:999px;padding:5px 9px">🔒 Paiement sécurisé</span></div>'+ 
-          '<div style="margin-top:10px;line-height:1.7"><div class="row"><span>Participation</span><b>'+publicMoney(st.entry_fee_cents)+'</b></div><div class="row"><span>Frais SWÉ</span><b>'+publicMoney(st.service_fee_cents)+'</b></div><div class="row" style="padding-top:7px;border-top:1px solid #dbe5f1"><span><b>Total à payer</b></span><b style="font-size:1.05rem;color:#178a43">'+publicMoney(st.total_cents)+'</b></div></div>'+ 
-          '<div style="margin-top:12px;padding:10px;border-radius:12px;background:#fff;border:1px solid #e4e8ee"><div style="font-weight:850;font-size:.88rem">Moyens de paiement acceptés</div><div class="muted" style="font-size:.70rem;line-height:1.35;margin:3px 0 8px">Selon ton appareil, ton navigateur et les moyens de paiement disponibles sur Stripe.</div><div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px">'+
+        const html='<div><b style="font-size:1.02rem">💶 Comment veux-tu payer ?</b><div class="muted" style="margin-top:5px">Choisis ton mode de paiement pour cette inscription.</div></div>'+ 
+          '<div class="grid g2" style="gap:9px;margin-top:12px">'+
+            '<button id="publicPayEntry" class="primary" style="min-height:64px"><span style="font-size:1.05rem">💳 Payer en ligne</span><br><span style="font-size:.76rem;font-weight:700">'+publicMoney(st.total_cents)+' • sécurisé par Stripe</span></button>'+ 
+            '<button id="publicPayOnsite" style="min-height:64px;background:#fff;border:2px solid #178a43;color:#126b34"><span style="font-size:1.05rem">🏟️ Payer sur place</span><br><span style="font-size:.76rem;font-weight:700">'+publicMoney(st.entry_fee_cents)+' au complexe</span></button>'+ 
+          '</div>'+ 
+          '<div style="margin-top:12px;padding:10px;border-radius:12px;background:#fff;border:1px solid #e4e8ee"><div style="font-weight:850;font-size:.88rem">Paiement en ligne accepté</div><div class="muted" style="font-size:.70rem;line-height:1.35;margin:3px 0 8px">Selon ton appareil, ton navigateur et les moyens de paiement disponibles sur Stripe.</div><div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px">'+
             '<div style="border:1px solid #dfe4ea;border-radius:10px;padding:8px 5px;text-align:center;background:#fff"><div style="display:flex;align-items:center;justify-content:center;gap:6px;height:28px"><span style="font-weight:950;font-size:.72rem;background:#1434CB;color:#fff;border-radius:4px;padding:3px 5px;font-style:italic">VISA</span><span aria-label="Mastercard" style="display:inline-flex;align-items:center"><i style="display:inline-block;width:15px;height:15px;border-radius:50%;background:#EB001B;margin-right:-5px"></i><i style="display:inline-block;width:15px;height:15px;border-radius:50%;background:#F79E1B;opacity:.92"></i></span></div><div class="muted" style="font-size:.67rem">Carte bancaire</div></div>'+
             '<div style="border:1px solid #dfe4ea;border-radius:10px;padding:8px 5px;text-align:center;background:#fff"><div style="height:28px;display:flex;align-items:center;justify-content:center"><img src="https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg" alt="Apple Pay" style="display:block;max-width:58px;max-height:24px;width:auto;height:auto"></div><div class="muted" style="font-size:.67rem">Apple Pay</div></div>'+
             '<div style="border:1px solid #dfe4ea;border-radius:10px;padding:8px 5px;text-align:center;background:#fff"><div style="height:28px;display:flex;align-items:center;justify-content:center"><img src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg" alt="Google Pay" style="display:block;max-width:64px;max-height:24px;width:auto;height:auto"></div><div class="muted" style="font-size:.67rem">Google Pay</div></div>'+
             '<div style="border:1px solid #dfe4ea;border-radius:10px;padding:8px 5px;text-align:center;background:#fff"><div style="height:28px;display:flex;align-items:center;justify-content:center"><img src="https://upload.wikimedia.org/wikipedia/commons/7/73/Revolut_logo.svg" alt="Revolut Pay" style="display:block;max-width:72px;max-height:22px;width:auto;height:auto"></div><div class="muted" style="font-size:.67rem">Revolut Pay</div></div>'+
           '</div></div>'+ 
-          (pending?'<div class="muted" style="margin-top:8px">Un paiement a déjà été commencé mais n’est pas encore confirmé. Tu peux reprendre le paiement.</div>':'')+
-          '<button id="publicPayEntry" class="primary" style="width:100%;margin-top:12px">🔒 Payer '+publicMoney(st.total_cents)+'</button>'+ 
-          '<div class="muted" style="margin-top:7px;font-size:.76rem;text-align:center">Paiement traité de manière sécurisée par Stripe. Un moyen de paiement peut ne pas être proposé s’il n’est pas disponible sur ton appareil ou ton navigateur.</div>';
+          (pending?'<div class="muted" style="margin-top:8px">Un paiement en ligne a déjà été commencé mais n’est pas encore confirmé.</div>':'')+
+          '<div class="muted" style="margin-top:8px;font-size:.76rem;text-align:center">Le paiement sur place ne comprend pas les frais de paiement en ligne SWÉ.</div>';
         publicPaymentCache={playerId:pid,status:st,html,bg:'#f8fbff',border:'1px solid #cbdcf5'};
         applyPublicPaymentView(box,html,publicPaymentCache.bg,publicPaymentCache.border);
         $('#publicPayEntry').onclick=async()=>{
           const b=$('#publicPayEntry');if(!b)return;b.disabled=true;b.textContent='Ouverture du paiement…';
+          await sb.rpc('public_set_tournament_payment_preference',{p_token:token,p_tournament_id:regTour.id,p_player_id:pid,p_preference:'online'});
           const u=new URL(location.href);u.searchParams.delete('stripe');u.searchParams.delete('session_id');u.searchParams.delete('pay_player');
           const sep=u.search?'&':'?';
           const success=u.toString()+sep+'stripe=success&pay_player='+encodeURIComponent(pid)+'&session_id={CHECKOUT_SESSION_ID}';
@@ -5151,7 +5262,16 @@ async function bootPublic(token){
           const {data:checkout,error:checkoutError}=await sb.functions.invoke('stripe-create-entry-checkout',{body:{public_token:token,tournament_id:regTour.id,player_id:pid,success_url:success,cancel_url:cancel}});
           if(checkoutError||checkout?.error){b.disabled=false;b.textContent='💳 Payer '+publicMoney(st.total_cents);return toast(checkout?.error||checkoutError?.message||'Impossible d’ouvrir le paiement.');}
           if(checkout?.url)location.href=checkout.url;
-          else{b.disabled=false;b.textContent='💳 Payer '+publicMoney(st.total_cents);toast('Lien de paiement indisponible.');}
+          else{b.disabled=false;b.textContent='💳 Payer en ligne';toast('Lien de paiement indisponible.');}
+        };
+        const onsiteBtn=$('#publicPayOnsite');
+        if(onsiteBtn)onsiteBtn.onclick=async()=>{
+          onsiteBtn.disabled=true;onsiteBtn.textContent='Enregistrement…';
+          const {error}=await sb.rpc('public_set_tournament_payment_preference',{p_token:token,p_tournament_id:regTour.id,p_player_id:pid,p_preference:'onsite'});
+          if(error){onsiteBtn.disabled=false;onsiteBtn.textContent='🏟️ Payer sur place';return toast(error.message);}
+          publicPaymentCache={playerId:null,status:null,html:null,bg:null,border:null};
+          toast('Paiement sur place enregistré ✅');
+          await renderPublicPaymentBox({skipStripeReconcile:true});
         };
       }catch(e){
         if(seq===publicPaymentSeq&&!publicPaymentCache.html)box.innerHTML='<b>💳 Paiement de la participation</b><div class="muted" style="margin-top:5px">Statut indisponible pour le moment.</div>';
@@ -5638,12 +5758,12 @@ async function bootPublic(token){
   const pmap=new Map(players.map(x=>[x.id,x]));
   const tmap=new Map(teams.map(x=>[x.id,x]));
 
-  // V40.00 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
+  // V40.01 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
   if(wantsLeagueSession&&regTour){
     const linkedLeague=leagues.find(l=>l.id===regTour.league_id)||null;
     const linkLeagueId=publicParams.get('league');
     if(!linkedLeague || (linkLeagueId&&linkLeagueId!==regTour.league_id)){
-      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=4000" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><h2 class="sectiontitle">Lien de Ligue indisponible</h2><p class="muted">Ce lien ne correspond pas à la Ligue de ce Swé. Aucun tournoi ne sera affiché à sa place.</p></div>';
+      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=4001" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><h2 class="sectiontitle">Lien de Ligue indisponible</h2><p class="muted">Ce lien ne correspond pas à la Ligue de ce Swé. Aucun tournoi ne sera affiché à sa place.</p></div>';
       return;
     }
 
