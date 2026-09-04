@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Tournoi Foot">
   <link rel="apple-touch-icon" href="./icon-192.png">
   <link rel="manifest" href="./manifest.webmanifest">
-  <title>SWÉ TOURNAMENT 5/5</title>
+  <title>SWÉ TOURNAMENT 5/5 • V39.70</title>
 <link rel="icon" type="image/png" href="./favicon.png">
 <link rel="apple-touch-icon" href="./icon-192.png">
   <style>
@@ -158,7 +158,7 @@ select{background-color:#fff} textarea{resize:vertical}
 }
 @media(max-width:650px){
   body{background:#f3f7f4}.app{padding:0 12px 100px}.top{border-radius:0 0 24px 24px;margin:0 -12px 14px;padding:18px 16px 20px}.top h1{font-size:21px}.card{border-radius:17px;padding:14px;margin:10px 0}.g2,.g3{grid-template-columns:1fr}.sectiontitle{font-size:17px}
-  /* V39.61 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
+  /* V39.70 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
   .tabs{left:0;right:0;transform:none;width:100%;display:flex;grid-template-columns:none;justify-content:flex-start;gap:5px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;border-radius:18px 18px 0 0;padding:7px 10px calc(7px + env(safe-area-inset-bottom));scroll-snap-type:x proximity;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
   .tabs button{flex:0 0 74px;min-width:74px;font-size:10px;scroll-snap-align:center;padding:5px 6px}
@@ -174,7 +174,7 @@ select{background-color:#fff} textarea{resize:vertical}
 #publicTeams .public-team-player{padding:7px 0;border-bottom:1px solid #edf2ef}
 #publicTeams .public-team-player:last-child{border-bottom:0}
 
-/* V39.61 — alignements et justification */
+/* V39.70 — alignements et justification */
 .card p,.card .muted,.player .muted,.readonly-note,.public-sub{
   text-align:justify;
   text-justify:inter-word;
@@ -261,7 +261,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.61</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.70</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -304,7 +304,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.61</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1>⚽ SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.70</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -457,7 +457,7 @@ select{background-color:#fff} textarea{resize:vertical}
         <button id="addPlayers" class="primary">Enregistrer les joueurs</button>
         <p class="muted">Un Guest reste dans les statistiques mais sera grisé dans les classements. Tu peux aussi préciser de quel membre il est l’invité.</p>
       </div>
-      <div class="card"><div class="muted" style="margin-bottom:8px">💡 Les co-gestionnaires évaluent confidentiellement Cardio, Dribble, Collectif et Frappe sur 5, puis indiquent le rôle de prédilection. L'avis sert uniquement à améliorer l'équilibrage des équipes.</div><div id="playersList"></div></div>
+      <div class="card"><div class="muted" style="margin-bottom:8px">💡 Administrateur et co-gestionnaires évaluent confidentiellement Cardio, Dribble, Collectif et Frappe sur 5, puis indiquent le rôle de prédilection. Chaque avis reste personnel et sert uniquement à améliorer l’équilibrage des équipes.</div><div id="playersList"></div></div>
     </div>
 
     <div id="view-permissions" class="view">
@@ -1620,22 +1620,29 @@ async function loadAll(){
     r=await sb.rpc('get_my_coorganizer_permissions',{p_workspace_id:w});
     if(r.error)console.error('permissions coorganisateur',r.error);
     const mp=Array.isArray(r.data)?(r.data[0]||null):r.data;
-    S.myPermissions={can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:false,can_generate_teams:false,temporary_admin_until:null,...(mp||{})};
+    S.myPermissions={can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:false,can_generate_teams:false,can_generate_team_codes:false,can_edit_player_personal_info:false,temporary_admin_until:null,...(mp||{})};
     r=await sb.rpc('get_my_player_skill_ratings',{p_workspace_id:w});
     if(!r.error)S.myRatings=Array.isArray(r.data)?r.data:[];
   }else{S.invites=[];S.coorgs=[];}
   if(isAdmin()){
     r=await sb.rpc('get_admin_workspace_players',{p_workspace_id:w});S.players=r.data||[];
-    r=await sb.from('player_private_contacts').select('player_id,phone_number').eq('workspace_id',w);S.contacts=r.data||[];
+    r=await sb.rpc('get_manager_player_contacts',{p_workspace_id:w});S.contacts=r.error?[]:(r.data||[]);
     r=await sb.rpc('get_admin_player_skill_reviews',{p_workspace_id:w});S.skillReviews=r.data||[];
-    r=await sb.from('player_team_codes').select('player_id,code,enabled,updated_at').eq('workspace_id',w);S.teamCodes=r.data||[];
+    r=await sb.rpc('get_manager_player_team_codes',{p_workspace_id:w});S.teamCodes=r.error?[]:(r.data||[]);
+    r=await sb.rpc('get_my_player_skill_ratings',{p_workspace_id:w});if(!r.error)S.myRatings=Array.isArray(r.data)?r.data:[];
   }else{
     if(isCoorg()){
       r=await sb.rpc('get_workspace_players_safe',{p_workspace_id:w});
       if(r.error){console.error('players safe',r.error);S.players=[];toast('Impossible de charger la liste des joueurs.')}
       else S.players=Array.isArray(r.data)?r.data:[];
-    }else S.players=[];
-    S.contacts=[];S.skillReviews=[];S.teamCodes=[];
+      if(S.myPermissions.can_edit_player_personal_info){
+        r=await sb.rpc('get_manager_player_contacts',{p_workspace_id:w});S.contacts=r.error?[]:(r.data||[]);
+      }else S.contacts=[];
+      if(S.myPermissions.can_generate_team_codes){
+        r=await sb.rpc('get_manager_player_team_codes',{p_workspace_id:w});S.teamCodes=r.error?[]:(r.data||[]);
+      }else S.teamCodes=[];
+    }else {S.players=[];S.contacts=[];S.teamCodes=[];}
+    S.skillReviews=[];
   }
   if(isAdmin()){
     const qr=await sb.rpc('get_my_coorganizer_quota_request',{p_workspace_id:w});
@@ -1835,7 +1842,9 @@ function renderPermissions(){
 
     ['can_create_tournaments','Créer un nouveau tournoi','Peut créer un nouveau tournoi depuis l’onglet Tournois.'],
     ['can_view_players','Voir la liste des joueurs','Affiche l’onglet Joueurs et permet de consulter la liste et donner un avis de niveau.'],
-    ['can_generate_teams','Générer des équipes','Peut lancer la génération automatique des équipes équilibrées sans voir les niveaux privés de l’administrateur.']
+    ['can_generate_teams','Générer des équipes','Peut lancer la génération automatique des équipes équilibrées sans voir les niveaux privés de l’administrateur.'],
+    ['can_generate_team_codes','Générer les codes équipe','Peut générer, régénérer, activer ou désactiver le code équipe personnel d’un joueur.'],
+    ['can_edit_player_personal_info','Modifier les informations personnelles des joueurs','Peut modifier le nom, le statut membre/guest, le rattachement Guest de… et le numéro de téléphone.']
   ];
   S.coorgs.forEach(c=>{
     const card=document.createElement('div');card.className='player';card.style.marginBottom='12px';
@@ -1869,6 +1878,8 @@ function renderPermissions(){
         p_can_create_tournaments:!!vals.can_create_tournaments,
         p_can_view_players:!!vals.can_view_players,
         p_can_generate_teams:!!vals.can_generate_teams,
+        p_can_generate_team_codes:!!vals.can_generate_team_codes,
+        p_can_edit_player_personal_info:!!vals.can_edit_player_personal_info,
         p_temporary_admin_until:tempUntil
       });
       if(error){save.disabled=false;return toast(error.message);}
@@ -1882,7 +1893,7 @@ function renderPermissions(){
       // Vérification serveur légère, sans quitter ni reconstruire l'onglet.
       try{
         const {data:fresh,error:freshError}=await sb.from('coorganizer_permissions')
-          .select('can_invite_coorganizers,can_enter_scores,can_add_members,can_delete_members,can_create_tournaments,can_view_players,can_generate_teams,temporary_admin_until')
+          .select('can_invite_coorganizers,can_enter_scores,can_add_members,can_delete_members,can_create_tournaments,can_view_players,can_generate_teams,can_generate_team_codes,can_edit_player_personal_info,temporary_admin_until')
           .eq('workspace_id',S.workspace.id).eq('user_id',c.user_id).maybeSingle();
         if(!freshError&&fresh)Object.assign(c,fresh);
       }catch(e){console.warn('permission verification',e)}
@@ -2096,12 +2107,13 @@ function renderPlayers(){
     if(isAdmin()){
       const summary=playerSkillReviewSummary(x);
       const reviewBox=document.createElement('div');reviewBox.className='muted';reviewBox.style.marginTop='7px';
-      reviewBox.innerHTML='<b>Avis niveaux :</b> Admin '+(x.skill_level||2)+'/5'+
+      reviewBox.innerHTML='<b>Synthèse des avis :</b> Niveau admin '+(x.skill_level||2)+'/5'+
         (summary.reviews.length?' • '+summary.reviews.map(r=>esc(r.evaluator_email||'Co-organisateur')+' '+r.rating+'/5').join(' • '):' • Aucun avis co-organisateur')+
         ' • <b>Moyenne '+summary.avg.toFixed(1)+'/5</b>';
       d.appendChild(reviewBox);
 
       const edit=document.createElement('div');edit.className='row';edit.style.marginTop='8px';edit.style.flexWrap='wrap';
+      const nameInput=document.createElement('input');nameInput.style.flex='1';nameInput.value=x.name||'';nameInput.placeholder='Nom du joueur';
       const status=document.createElement('select');status.style.flex='1';
       status.innerHTML='<option value="member">Membre</option><option value="guest">Guest</option>';
       status.value=x.is_group_member===false?'guest':'member';
@@ -2123,30 +2135,25 @@ function renderPlayers(){
         level.disabled=false;
         if(error){level.value=String(x.skill_level||2);return toast(error.message)}
         x.skill_level=newLevel;
-        renderPlayers();
         toast('Niveau admin de '+x.name+' enregistré ✅');
       };
 
-      const phone=document.createElement('input');phone.type='tel';phone.inputMode='tel';phone.placeholder='Mobile (privé admin)';
+      const phone=document.createElement('input');phone.type='tel';phone.inputMode='tel';phone.placeholder='Mobile (privé)';
       phone.style.flex='1';phone.value=(S.contacts.find(c=>c.player_id===x.id)?.phone_number)||'';
-      phone.onchange=async()=>{
-        const value=phone.value.trim();phone.disabled=true;
-        const {error}=await sb.from('player_private_contacts').upsert({player_id:x.id,workspace_id:S.workspace.id,phone_number:value||null},{onConflict:'player_id'});
-        phone.disabled=false;
-        if(error)return toast(error.message);
-        const found=S.contacts.find(c=>c.player_id===x.id);
-        if(found)found.phone_number=value||null;else S.contacts.push({player_id:x.id,phone_number:value||null});
-        toast('Numéro de '+x.name+' enregistré 🔒');
-      };
 
-      const save=document.createElement('button');save.textContent='Enregistrer';save.className='player-action-save';
+      const save=document.createElement('button');save.textContent='Enregistrer les infos';save.className='player-action-save';
       save.onclick=async()=>{
         const isMember=status.value==='member';save.disabled=true;
-        const {error}=await sb.from('players').update({is_group_member:isMember,guest_of_player_id:isMember?null:(host.value||null)}).eq('id',x.id);
+        const {error}=await sb.rpc('manager_update_player_personal_info',{
+          p_player_id:x.id,p_name:nameInput.value.trim(),p_is_group_member:isMember,
+          p_guest_of_player_id:isMember?null:(host.value||null),p_phone_number:phone.value.trim()||null
+        });
         save.disabled=false;if(error)return toast(error.message);
-        await loadAll();toast('Statut du joueur mis à jour ✅');
+        x.name=nameInput.value.trim();x.is_group_member=isMember;x.guest_of_player_id=isMember?null:(host.value||null);
+        const found=S.contacts.find(c=>c.player_id===x.id);if(found)found.phone_number=phone.value.trim()||null;else S.contacts.push({player_id:x.id,phone_number:phone.value.trim()||null});
+        toast('Informations de '+x.name+' mises à jour ✅');
       };
-      edit.append(status,host,level,phone,save);d.appendChild(edit);
+      edit.append(nameInput,status,host,level,phone,save);d.appendChild(edit);
 
       if(x.is_group_member!==false){
         const codeRow=document.createElement('div');codeRow.className='row';codeRow.style.marginTop='8px';codeRow.style.flexWrap='wrap';
@@ -2172,7 +2179,28 @@ function renderPlayers(){
         }
         d.appendChild(codeRow);
       }
-    } else if(isCoorg()){
+    }
+    if(isCoorg()&&S.myPermissions.can_edit_player_personal_info){
+      const edit=document.createElement('div');edit.className='row';edit.style.cssText='margin-top:8px;flex-wrap:wrap;padding:10px;background:#f7f9ff;border:1px solid #dfe5f4;border-radius:14px';
+      const nameInput=document.createElement('input');nameInput.style.flex='1';nameInput.value=x.name||'';nameInput.placeholder='Nom du joueur';
+      const status=document.createElement('select');status.style.flex='1';status.innerHTML='<option value="member">Membre</option><option value="guest">Guest</option>';status.value=x.is_group_member===false?'guest':'member';
+      const host=document.createElement('select');host.style.flex='1';host.innerHTML='<option value="">Guest de…</option>'+S.players.filter(y=>y.id!==x.id&&y.active&&y.is_group_member!==false).map(y=>'<option value="'+y.id+'">'+esc(y.name)+'</option>').join('');host.value=x.guest_of_player_id||'';host.classList.toggle('hidden',status.value!=='guest');status.onchange=()=>host.classList.toggle('hidden',status.value!=='guest');
+      const phone=document.createElement('input');phone.type='tel';phone.inputMode='tel';phone.placeholder='Mobile (privé)';phone.style.flex='1';phone.value=(S.contacts.find(c=>c.player_id===x.id)?.phone_number)||'';
+      const saveInfo=document.createElement('button');saveInfo.textContent='💾 Infos joueur';saveInfo.className='primary';
+      saveInfo.onclick=async()=>{const isMember=status.value==='member';saveInfo.disabled=true;const {error}=await sb.rpc('manager_update_player_personal_info',{p_player_id:x.id,p_name:nameInput.value.trim(),p_is_group_member:isMember,p_guest_of_player_id:isMember?null:(host.value||null),p_phone_number:phone.value.trim()||null});saveInfo.disabled=false;if(error)return toast(error.message);x.name=nameInput.value.trim();x.is_group_member=isMember;x.guest_of_player_id=isMember?null:(host.value||null);const found=S.contacts.find(c=>c.player_id===x.id);if(found)found.phone_number=phone.value.trim()||null;else S.contacts.push({player_id:x.id,phone_number:phone.value.trim()||null});toast('Informations mises à jour ✅');};
+      edit.append(nameInput,status,host,phone,saveInfo);d.appendChild(edit);
+    }
+    if(isCoorg()&&S.myPermissions.can_generate_team_codes&&x.is_group_member!==false){
+      const codeRow=document.createElement('div');codeRow.className='row';codeRow.style.cssText='margin-top:8px;flex-wrap:wrap;padding:10px;background:#fffaf0;border:1px solid #f3dfae;border-radius:14px';
+      const existingCode=S.teamCodes.find(c=>c.player_id===x.id);
+      const codeInfo=document.createElement('span');codeInfo.style.flex='1';codeInfo.innerHTML='<b>Code équipe :</b> '+(existingCode?'<code>'+esc(existingCode.code)+'</code> '+(existingCode.enabled?'🟢':'⚪'):'Aucun code');
+      const gen=document.createElement('button');gen.textContent=existingCode?'Régénérer':'Générer';gen.className='player-action-code';
+      gen.onclick=async()=>{if(existingCode&&!confirm('Régénérer le code de '+x.name+' ?'))return;gen.disabled=true;const {data,error}=await sb.rpc('admin_generate_player_team_code',{p_player_id:x.id});gen.disabled=false;if(error)return toast(error.message);const cur=S.teamCodes.find(c=>c.player_id===x.id);if(cur){cur.code=data;cur.enabled=true}else S.teamCodes.push({player_id:x.id,code:data,enabled:true,updated_at:new Date().toISOString()});renderPlayers();toast('Code équipe généré : '+data);};
+      codeRow.append(codeInfo,gen);
+      if(existingCode){const tog=document.createElement('button');tog.textContent=existingCode.enabled?'Désactiver':'Réactiver';tog.className=existingCode.enabled?'player-action-disable':'player-action-enable';tog.onclick=async()=>{const {error}=await sb.rpc('admin_set_player_team_code_enabled',{p_player_id:x.id,p_enabled:!existingCode.enabled});if(error)return toast(error.message);existingCode.enabled=!existingCode.enabled;renderPlayers();};codeRow.appendChild(tog);}
+      d.appendChild(codeRow);
+    }
+    if((isAdmin()||isCoorg())){
       const existing=S.myRatings.find(r=>r.player_id===x.id);
       const rate=document.createElement('div');rate.className='player-skill-review';rate.style.cssText='margin-top:10px;padding:12px;border:1px solid #dce9e1;border-radius:16px;background:#f8fcfa';
       const title=document.createElement('div');title.innerHTML='<b>⚽ Mon évaluation confidentielle</b><div class="muted small">Visible uniquement pour toi et l’administrateur. 1 = faible • 5 = excellent.</div>';
@@ -2428,7 +2456,7 @@ function appendTournamentSeasonControl(container,t){
 }
 
 function renderTournaments(){
-  // V39.61 : l'éditeur de tournoi est protégé des synchronisations automatiques.
+  // V39.70 : l'éditeur de tournoi est protégé des synchronisations automatiques.
   const ss=$('#seasonSelect');
   ss.innerHTML='<option value="">Sans saison</option>'+S.seasons.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');
   const box=$('#tournamentList');box.innerHTML='';
@@ -3567,7 +3595,7 @@ async function renderLeague(){
   }
 
 
-  // V39.61 — Saisie du résultat directement depuis l'onglet Ligue.
+  // V39.70 — Saisie du résultat directement depuis l'onglet Ligue.
   const scoringCard=$('#leagueScoringCard'),scoringBody=$('#leagueScoringBody'),scoringLabel=$('#leagueScoringSessionLabel');
   if(scoringCard)scoringCard.classList.toggle('hidden',!canScoreLeague);
   if(canScoreLeague&&scoringBody){
@@ -4184,7 +4212,7 @@ async function bootPublic(token){
     if(r.league)urlParams.set('league',r.league);
   }
   sweRememberPublicRegistrationContext();
-  // V39.61 — état global pour éviter qu'un ancien rafraîchissement public
+  // V39.70 — état global pour éviter qu'un ancien rafraîchissement public
   // reconstruise le formulaire d'inscription équipe après validation du code.
   window.__swePublicTeamEditing=false;
   if(window.__swePublicRegistrationInterval){
@@ -5134,7 +5162,7 @@ async function bootPublic(token){
   const pmap=new Map(players.map(x=>[x.id,x]));
   const tmap=new Map(teams.map(x=>[x.id,x]));
 
-  // V39.61 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
+  // V39.70 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
   if(wantsLeagueSession&&regTour){
     const linkedLeague=leagues.find(l=>l.id===regTour.league_id)||null;
     const linkLeagueId=publicParams.get('league');
