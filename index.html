@@ -7,11 +7,11 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Tournoi Foot">
-  <link rel="apple-touch-icon" href="./icon-192.png?v=3990">
+  <link rel="apple-touch-icon" href="./icon-192.png?v=3991">
   <link rel="manifest" href="./manifest.webmanifest">
-  <title>SWÉ TOURNAMENT 5/5 • V39.90</title>
-<link rel="icon" type="image/png" href="./favicon.png?v=3990">
-<link rel="apple-touch-icon" href="./icon-192.png?v=3990">
+  <title>SWÉ TOURNAMENT 5/5 • V39.91</title>
+<link rel="icon" type="image/png" href="./favicon.png?v=3991">
+<link rel="apple-touch-icon" href="./icon-192.png?v=3991">
   <style>
 :root{
   --bg:#f5f1e7;--card:#fff;--text:#18150f;--muted:#746b5b;--border:#e8dfca;
@@ -156,11 +156,11 @@ select{background-color:#fff} textarea{resize:vertical}
 .tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:40;width:min(760px,calc(100% - 20px));display:grid;grid-template-columns:repeat(auto-fit,minmax(72px,1fr));gap:3px;background:rgba(11,11,10,.97);border:1px solid rgba(255,255,255,.08);border-radius:20px 20px 0 0;padding:7px 7px calc(7px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(7,27,18,.22);backdrop-filter:blur(14px)}
 .tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:51px;background:transparent;color:#b9cabf;border:0;font-size:10px;padding:5px 4px;border-radius:13px}.tabs button:before{font-size:19px;line-height:1}.tabs button[data-view="home"]:before{content:"⌂"}.tabs button[data-view="players"]:before{content:"♟"}.tabs button[data-view="permissions"]:before{content:"🔐"}.tabs button[data-view="permissions"].disabled-tab{opacity:.35;filter:grayscale(1);cursor:not-allowed;pointer-events:none}.tabs button[data-view="tournaments"]:before{content:"▣"}.tabs button[data-view="teams"]:before{content:"♙"}.tabs button[data-view="matches"]:before{content:"⚽"}.tabs button[data-view="league"]:before{content:"🏁"}.tabs button[data-view="ranking"]:before{content:"★"}.tabs button.active{background:linear-gradient(135deg,#17803d,#22a34a);color:#fff;box-shadow:0 5px 12px rgba(25,152,67,.26)}
 @media(min-width:900px){
-  .app{padding-left:224px;padding-bottom:28px}.tabs{left:max(20px,calc(50% - 590px));top:18px;bottom:18px;transform:none;width:190px;height:auto;display:flex;flex-direction:column;justify-content:flex-start;border-radius:22px;padding:18px 10px;background:#0b0b0a}.tabs:before{content:"SWÉ TOURNAMENT 5/5";display:block;color:#fff;font-weight:900;font-size:14px;line-height:1.2;padding:6px 8px 18px 42px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:8px;background:url("./favicon.png?v=3990") no-repeat 8px 2px/28px 28px}.tabs button{flex-direction:row;justify-content:flex-start;gap:10px;padding:10px 12px;font-size:13px;min-height:46px}.tabs button:before{font-size:17px;width:22px;text-align:center}.top{margin-top:0}.card{padding:19px 20px}
+  .app{padding-left:224px;padding-bottom:28px}.tabs{left:max(20px,calc(50% - 590px));top:18px;bottom:18px;transform:none;width:190px;height:auto;display:flex;flex-direction:column;justify-content:flex-start;border-radius:22px;padding:18px 10px;background:#0b0b0a}.tabs:before{content:"SWÉ TOURNAMENT 5/5";display:block;color:#fff;font-weight:900;font-size:14px;line-height:1.2;padding:6px 8px 18px 42px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:8px;background:url("./favicon.png?v=3991") no-repeat 8px 2px/28px 28px}.tabs button{flex-direction:row;justify-content:flex-start;gap:10px;padding:10px 12px;font-size:13px;min-height:46px}.tabs button:before{font-size:17px;width:22px;text-align:center}.top{margin-top:0}.card{padding:19px 20px}
 }
 @media(max-width:650px){
   body{background:#f3f7f4}.app{padding:0 12px 100px}.top{border-radius:0 0 24px 24px;margin:0 -12px 14px;padding:18px 16px 20px}.top h1{font-size:21px}.card{border-radius:17px;padding:14px;margin:10px 0}.g2,.g3{grid-template-columns:1fr}.sectiontitle{font-size:17px}
-  /* V39.90 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
+  /* V39.91 : menu mobile horizontal coulissant, de droite à gauche / gauche à droite */
   .tabs{left:0;right:0;transform:none;width:100%;display:flex;grid-template-columns:none;justify-content:flex-start;gap:5px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;border-radius:18px 18px 0 0;padding:7px 10px calc(7px + env(safe-area-inset-bottom));scroll-snap-type:x proximity;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
   .tabs button{flex:0 0 74px;min-width:74px;font-size:10px;scroll-snap-align:center;padding:5px 6px}
@@ -176,7 +176,7 @@ select{background-color:#fff} textarea{resize:vertical}
 #publicTeams .public-team-player{padding:7px 0;border-bottom:1px solid #edf2ef}
 #publicTeams .public-team-player:last-child{border-bottom:0}
 
-/* V39.90 — alignements et justification */
+/* V39.91 — alignements et justification */
 .card p,.card .muted,.player .muted,.readonly-note,.public-sub{
   text-align:justify;
   text-justify:inter-word;
@@ -263,7 +263,7 @@ select{background-color:#fff} textarea{resize:vertical}
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1><img src="./favicon.png?v=3990" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.90</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1><img src="./favicon.png?v=3991" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V39.91</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -306,7 +306,7 @@ select{background-color:#fff} textarea{resize:vertical}
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1><img src="./favicon.png?v=3990" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.90</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1><img src="./favicon.png?v=3991" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V39.91</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -811,7 +811,7 @@ select{background-color:#fff} textarea{resize:vertical}
 
   <section id="publicView" class="hidden">
     <header class="top">
-      <h1 class="public-title"><img src="./favicon.png?v=3990" class="brand-mark" alt="SWÉ"><span id="publicWorkspaceName">SWÉ TOURNAMENT 5/5</span></h1>
+      <h1 class="public-title"><img src="./favicon.png?v=3991" class="brand-mark" alt="SWÉ"><span id="publicWorkspaceName">SWÉ TOURNAMENT 5/5</span></h1>
       <div class="public-sub">Consultation publique • lecture seule</div>
     </header>
 
@@ -1234,7 +1234,7 @@ async function authState(){
       $('#auth').classList.add('hidden');
       $('#main').classList.add('hidden');
       $('#publicView').classList.remove('hidden');
-      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=3990" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><h2>Lien indisponible</h2><p class="muted">'+esc(e.message||e)+'</p></div>';
+      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=3991" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><h2>Lien indisponible</h2><p class="muted">'+esc(e.message||e)+'</p></div>';
       return;
     }
   }
@@ -2702,7 +2702,7 @@ function appendTournamentSeasonControl(container,t){
 }
 
 function renderTournaments(){
-  // V39.90 : l'éditeur de tournoi est protégé des synchronisations automatiques.
+  // V39.91 : l'éditeur de tournoi est protégé des synchronisations automatiques.
   const ss=$('#seasonSelect');
   ss.innerHTML='<option value="">Sans saison</option>'+S.seasons.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');
   const box=$('#tournamentList');box.innerHTML='';
@@ -3852,7 +3852,7 @@ async function renderLeague(){
   }
 
 
-  // V39.90 — Saisie du résultat directement depuis l'onglet Ligue.
+  // V39.91 — Saisie du résultat directement depuis l'onglet Ligue.
   const scoringCard=$('#leagueScoringCard'),scoringBody=$('#leagueScoringBody'),scoringLabel=$('#leagueScoringSessionLabel');
   if(scoringCard)scoringCard.classList.toggle('hidden',!canScoreLeague);
   if(canScoreLeague&&scoringBody){
@@ -4469,7 +4469,7 @@ async function bootPublic(token){
     if(r.league)urlParams.set('league',r.league);
   }
   sweRememberPublicRegistrationContext();
-  // V39.90 — état global pour éviter qu'un ancien rafraîchissement public
+  // V39.91 — état global pour éviter qu'un ancien rafraîchissement public
   // reconstruise le formulaire d'inscription équipe après validation du code.
   window.__swePublicTeamEditing=false;
   if(window.__swePublicRegistrationInterval){
@@ -4508,7 +4508,7 @@ async function bootPublic(token){
   if(isLeagueRegistration&&leagueJoinId&&!publicParamsTop.get('tournament')){
     const league=leagues.find(l=>l.id===leagueJoinId);
     if(!league){
-      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=3990" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><p>Ligue introuvable.</p></div>';return;
+      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=3991" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><p>Ligue introuvable.</p></div>';return;
     }
 
     const groupMembers=players.filter(p=>p.active&&p.is_group_member!==false).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
@@ -4677,7 +4677,7 @@ async function bootPublic(token){
 
     const ht=tournaments.find(x=>x.id===historyId);
     if(!ht){
-      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=3990" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><p>Tournoi introuvable.</p><button id="backPublic">← Retour à mon inscription</button></div>';
+      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=3991" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><p>Tournoi introuvable.</p><button id="backPublic">← Retour à mon inscription</button></div>';
       $('#backPublic').onclick=()=>location.href=publicHistoryBackUrl(token);
       return;
     }
@@ -4779,11 +4779,11 @@ async function bootPublic(token){
   }
   const regBox=$('#publicRegistration');
   if(requestedTournament&&!regTour){
-    $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=3990" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><h2 class="sectiontitle">Lien d’inscription indisponible</h2><p class="muted">Ce lien ne correspond pas à une inscription ouverte, ou le type de compétition ne correspond pas au lien généré. Aucun autre tournoi ni aucune Ligue ne sera affiché à sa place.</p></div>';
+    $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=3991" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><h2 class="sectiontitle">Lien d’inscription indisponible</h2><p class="muted">Ce lien ne correspond pas à une inscription ouverte, ou le type de compétition ne correspond pas au lien généré. Aucun autre tournoi ni aucune Ligue ne sera affiché à sa place.</p></div>';
     return;
   }
 
-  // V39.90 — informations utiles visibles dès la première page, avant le choix solo/équipe.
+  // V39.91 — informations utiles visibles dès la première page, avant le choix solo/équipe.
   function renderPublicQuickStats(){
     const box=$('#publicQuickStats');
     if(!box)return;
@@ -4945,6 +4945,7 @@ async function bootPublic(token){
       '<div class="space"></div><select id="publicPlayerSelect"><option value="">Choisis ton nom</option></select>'+
       '<div id="publicSelectedStatus" class="muted" style="margin-top:7px">Choisis ton nom pour voir ton statut.</div><div class="muted" style="margin-top:5px">Si un autre joueur t’a proposé une équipe, les boutons <b>Accepter</b> / <b>Refuser</b> apparaîtront ici après sélection de ton nom.</div><div id="publicTeamInvitationDecision" class="hidden" style="margin-top:10px"></div>'+
       '<div class="space"></div><div class="row"><button id="publicJoin" class="primary">✅ Je participe</button><button id="publicLeave">❌ Je ne participe pas</button></div>'+
+      '<div id="publicPaymentBox" class="hidden" style="margin-top:12px"></div>'+
       (regTour.format==='league'
         ? '<div class="player" style="margin-top:12px;background:#fffdf4;border:1px solid #f2df9b"><b>🆕 Première fois ?</b><div class="muted" style="margin:5px 0 8px">Tu n’es pas encore membre du groupe ? Entre ton nom pour t’inscrire à cette Ligue.</div><input id="publicNewPlayerName" maxlength="60" placeholder="Ton prénom / nom"><div class="space"></div><button id="publicNewPlayerJoin" class="primary">M’inscrire pour la première fois</button></div>'
         : '<div class="player" style="margin-top:12px;background:#fff7ed;border:1px solid #fed7aa"><b>🤝 Tu ne participes pas mais tu invites quelqu’un ?</b><div class="muted" style="margin-top:6px;line-height:1.6">Aucun problème : <b>sélectionne simplement ton nom</b> dans la liste ci-dessus, sans cliquer sur « Je participe », puis saisis le nom de ton invité ci-dessous. Ton invité sera rattaché à ton nom et <b>toi, tu ne seras pas inscrit au tournoi</b>.</div></div>')+
@@ -5035,6 +5036,62 @@ async function bootPublic(token){
           :'+ Ajouter mon invité ('+usage.remaining+' restant'+(usage.remaining>1?'s':'')+')';
       }
     }
+    let publicPaymentSeq=0;
+    const publicMoney=cents=>(Number(cents||0)/100).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+    async function renderPublicPaymentBox(){
+      const box=$('#publicPaymentBox');
+      if(!box)return;
+      const pid=$('#publicPlayerSelect')?.value;
+      if(!pid){box.className='hidden';box.innerHTML='';return;}
+      const reg=registrations.find(r=>r.tournament_id===regTour.id&&String(r.player_id)===String(pid)&&r.present);
+      if(!reg){box.className='hidden';box.innerHTML='';return;}
+      const seq=++publicPaymentSeq;
+      box.className='player';
+      box.style.background='#f8fbff';box.style.border='1px solid #cbdcf5';
+      box.innerHTML='<b>💳 Paiement de la participation</b><div class="muted" style="margin-top:5px">Vérification du statut…</div>';
+      try{
+        const {data,error}=await sb.rpc('public_tournament_payment_status',{p_token:token,p_tournament_id:regTour.id,p_player_id:pid});
+        if(seq!==publicPaymentSeq)return;
+        if(error){box.innerHTML='<b>💳 Paiement de la participation</b><div class="muted" style="margin-top:5px">Statut indisponible pour le moment.</div>';return;}
+        const st=data||{};
+        if(st.reason==='waitlist'){
+          box.style.background='#fff8e8';box.style.border='1px solid #f2d18a';
+          box.innerHTML='<b>🟠 Paiement en attente de confirmation</b><div class="muted" style="margin-top:5px;line-height:1.6">Tu es actuellement remplaçant. Le paiement sera proposé automatiquement lorsqu’une place confirmée se libérera.</div>';
+          return;
+        }
+        if(st.reason==='free'||Number(st.entry_fee_cents||0)<=0){box.className='hidden';box.innerHTML='';return;}
+        if(st.payment_status==='paid'){
+          box.style.background='#eef8f2';box.style.border='1px solid #b7dfc4';
+          box.innerHTML='<b>✅ Participation payée</b><div class="muted" style="margin-top:5px">Paiement confirmé'+(st.paid_at?' • '+new Date(st.paid_at).toLocaleString('fr-FR',{timeZone:'America/Martinique',dateStyle:'short',timeStyle:'short'}):'')+'.</div>';
+          return;
+        }
+        if(!st.available){
+          box.style.background='#fff8e8';box.style.border='1px solid #f2d18a';
+          box.innerHTML='<b>💳 Paiement en ligne momentanément indisponible</b><div class="muted" style="margin-top:5px">L’organisateur finalise actuellement la configuration des paiements.</div>';
+          return;
+        }
+        const pending=['created','pending'].includes(String(st.payment_status||''));
+        box.innerHTML='<b>💳 Payer ma participation</b>'+ 
+          '<div style="margin-top:8px;line-height:1.7"><div class="row"><span>Participation</span><b>'+publicMoney(st.entry_fee_cents)+'</b></div><div class="row"><span>Frais SWÉ</span><b>'+publicMoney(st.service_fee_cents)+'</b></div><div class="row" style="padding-top:6px;border-top:1px solid #dbe5f1"><span><b>Total</b></span><b>'+publicMoney(st.total_cents)+'</b></div></div>'+ 
+          (pending?'<div class="muted" style="margin-top:6px">Un paiement a déjà été commencé mais n’est pas encore confirmé. Tu peux reprendre le paiement.</div>':'')+
+          '<button id="publicPayEntry" class="primary" style="width:100%;margin-top:10px">💳 Payer '+publicMoney(st.total_cents)+'</button>'+ 
+          '<div class="muted" style="margin-top:6px;font-size:.78rem">Paiement sécurisé par Stripe. Le statut sera mis à jour automatiquement après confirmation.</div>';
+        $('#publicPayEntry').onclick=async()=>{
+          const b=$('#publicPayEntry');if(!b)return;b.disabled=true;b.textContent='Ouverture du paiement…';
+          const u=new URL(location.href);u.searchParams.delete('stripe');u.searchParams.delete('session_id');u.searchParams.delete('pay_player');
+          const sep=u.search?'&':'?';
+          const success=u.toString()+sep+'stripe=success&pay_player='+encodeURIComponent(pid)+'&session_id={CHECKOUT_SESSION_ID}';
+          const cancel=u.toString()+sep+'stripe=cancel&pay_player='+encodeURIComponent(pid);
+          const {data:checkout,error:checkoutError}=await sb.functions.invoke('stripe-create-entry-checkout',{body:{public_token:token,tournament_id:regTour.id,player_id:pid,success_url:success,cancel_url:cancel}});
+          if(checkoutError||checkout?.error){b.disabled=false;b.textContent='💳 Payer '+publicMoney(st.total_cents);return toast(checkout?.error||checkoutError?.message||'Impossible d’ouvrir le paiement.');}
+          if(checkout?.url)location.href=checkout.url;
+          else{b.disabled=false;b.textContent='💳 Payer '+publicMoney(st.total_cents);toast('Lien de paiement indisponible.');}
+        };
+      }catch(e){
+        if(seq===publicPaymentSeq)box.innerHTML='<b>💳 Paiement de la participation</b><div class="muted" style="margin-top:5px">Statut indisponible pour le moment.</div>';
+      }
+    }
+
     function renderTeamInvitationDecision(){
       const box=$('#publicTeamInvitationDecision');
       const pid=$('#publicPlayerSelect')?.value;
@@ -5064,9 +5121,14 @@ async function bootPublic(token){
       };
     }
     refreshPublicPlayerSelect();
-    $('#publicPlayerSelect').onchange=()=>{updateSelectedRegistrationStatus();renderTeamInvitationDecision();};
+    $('#publicPlayerSelect').onchange=()=>{updateSelectedRegistrationStatus();renderTeamInvitationDecision();renderPublicPaymentBox();};
+    const payPlayerFromUrl=publicParams.get('pay_player');
+    if(payPlayerFromUrl&&[...$('#publicPlayerSelect').options].some(o=>o.value===payPlayerFromUrl))$('#publicPlayerSelect').value=payPlayerFromUrl;
     updateSelectedRegistrationStatus();
     renderTeamInvitationDecision();
+    renderPublicPaymentBox();
+    if(publicParams.get('stripe')==='success')toast('Paiement envoyé ✅ Vérification de la confirmation Stripe…');
+    if(publicParams.get('stripe')==='cancel')toast('Paiement annulé. Tu peux le reprendre quand tu veux.');
     $('#publicGuestMember').onchange=()=>{
       const wrap=$('#publicGuestPhoneWrap');
       const phone=$('#publicGuestPhone');
@@ -5097,6 +5159,7 @@ async function bootPublic(token){
         refreshPublicPlayerSelect();
         updateSelectedRegistrationStatus();
         renderTeamInvitationDecision();
+        renderPublicPaymentBox();
         // Ne pas reconstruire le formulaire équipe pendant que l’utilisateur le remplit.
         // Le rafraîchissement automatique de 8 s reste actif pour les données, mais ne reset plus l'inscription équipe.
         if(typeof renderPublicTeamBuilder==='function'&&!window.__swePublicTeamEditing)renderPublicTeamBuilder();
@@ -5458,12 +5521,12 @@ async function bootPublic(token){
   const pmap=new Map(players.map(x=>[x.id,x]));
   const tmap=new Map(teams.map(x=>[x.id,x]));
 
-  // V39.90 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
+  // V39.91 — Vue publique dédiée aux Swés de Ligue : aucune donnée de tournoi classique.
   if(wantsLeagueSession&&regTour){
     const linkedLeague=leagues.find(l=>l.id===regTour.league_id)||null;
     const linkLeagueId=publicParams.get('league');
     if(!linkedLeague || (linkLeagueId&&linkLeagueId!==regTour.league_id)){
-      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=3990" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><h2 class="sectiontitle">Lien de Ligue indisponible</h2><p class="muted">Ce lien ne correspond pas à la Ligue de ce Swé. Aucun tournoi ne sera affiché à sa place.</p></div>';
+      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=3991" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><h2 class="sectiontitle">Lien de Ligue indisponible</h2><p class="muted">Ce lien ne correspond pas à la Ligue de ce Swé. Aucun tournoi ne sera affiché à sa place.</p></div>';
       return;
     }
 
