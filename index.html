@@ -457,7 +457,7 @@ select{background-color:#fff} textarea{resize:vertical}
         <button id="addPlayers" class="primary">Enregistrer les joueurs</button>
         <p class="muted">Un Guest reste dans les statistiques mais sera grisé dans les classements. Tu peux aussi préciser de quel membre il est l’invité.</p>
       </div>
-      <div class="card"><div class="muted" style="margin-bottom:8px">💡 Notation sur 5 : 1 Loisir • 2 Intermédiaire • 3 Bon • 4 Très bon • 5 Top level. Le niveau est enregistré automatiquement dès que tu le modifies.</div><div id="playersList"></div></div>
+      <div class="card"><div class="muted" style="margin-bottom:8px">💡 Les co-gestionnaires évaluent confidentiellement Cardio, Dribble, Collectif et Frappe sur 5, puis indiquent le rôle de prédilection. L'avis sert uniquement à améliorer l'équilibrage des équipes.</div><div id="playersList"></div></div>
     </div>
 
     <div id="view-permissions" class="view">
@@ -1650,7 +1650,9 @@ async function loadAll(){
   if(!S.activeLeague){const al=S.leagues.find(l=>l.status==='active')||S.leagues[0];S.activeLeague=al?.id||null;}
   r=await sb.from('tournaments').select('*').eq('workspace_id',w).order('tournament_date',{ascending:false});S.tournaments=r.data||[];
   if(!S.activeTour){const next=S.tournaments.find(t=>t.status!=='finished');S.activeTour=next?next.id:null;}
-  await loadTournament();renderAll()
+  await loadTournament();
+  const editingReview=document.activeElement?.closest?.('.player-skill-review');
+  if(!editingReview)renderAll();
 }
 async function loadTournament(){
   const t=currentTour();if(!t){S.tPlayers=[];S.teams=[];S.teamPlayers=[];S.matchAssignments=[];S.matches=[];S.goals=[];return}let r;
@@ -2172,21 +2174,37 @@ function renderPlayers(){
       }
     } else if(isCoorg()){
       const existing=S.myRatings.find(r=>r.player_id===x.id);
-      const rate=document.createElement('div');rate.className='row';rate.style.marginTop='8px';rate.style.flexWrap='wrap';
-      const label=document.createElement('span');label.className='muted';label.style.flex='1';label.innerHTML=existing?'<b>Mon avis actuel : '+existing.rating+'/5</b><div class="muted">Tu peux le modifier à tout moment.</div>':'Ton avis sur son niveau sur 5 (1 avis par joueur) :';
-      const select=document.createElement('select');select.innerHTML='<option value="">Choisir…</option><option value="1">1 — Loisir</option><option value="2">2 — Intermédiaire</option><option value="3">3 — Bon</option><option value="4">4 — Très bon</option><option value="5">5 — Top level</option>';
-      if(existing)select.value=String(existing.rating);
-      const send=document.createElement('button');send.textContent=existing?'Modifier mon avis':'Enregistrer mon avis';send.className='primary';
+      const rate=document.createElement('div');rate.className='player-skill-review';rate.style.cssText='margin-top:10px;padding:12px;border:1px solid #dce9e1;border-radius:16px;background:#f8fcfa';
+      const title=document.createElement('div');title.innerHTML='<b>⚽ Mon évaluation confidentielle</b><div class="muted small">Visible uniquement pour toi et l’administrateur. 1 = faible • 5 = excellent.</div>';
+      const criteria=document.createElement('div');criteria.style.cssText='display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px';
+      const values={};
+      const labels={cardio:'❤️ Cardio',dribble:'🪄 Dribble',collectif:'🤝 Collectif',frappe:'🎯 Frappe'};
+      Object.entries(labels).forEach(([key,txt])=>{
+        const wrap=document.createElement('label');wrap.style.cssText='display:block;padding:9px;background:white;border:1px solid #e4eee8;border-radius:12px';
+        const cap=document.createElement('div');cap.style.cssText='font-weight:700;margin-bottom:6px';cap.textContent=txt;
+        const sel=document.createElement('select');sel.style.width='100%';sel.innerHTML='<option value="">— /5</option>'+[1,2,3,4,5].map(n=>'<option value="'+n+'">'+n+' / 5</option>').join('');
+        if(existing?.[key])sel.value=String(existing[key]);
+        values[key]=sel;wrap.append(cap,sel);criteria.appendChild(wrap);
+      });
+      const roleWrap=document.createElement('label');roleWrap.style.cssText='display:block;margin-top:10px;padding:9px;background:white;border:1px solid #e4eee8;border-radius:12px';
+      roleWrap.innerHTML='<div style="font-weight:700;margin-bottom:6px">🧭 Rôle de prédilection</div>';
+      const role=document.createElement('select');role.style.width='100%';
+      role.innerHTML='<option value="">Choisir…</option><option value="defenseur">🛡️ Défenseur</option><option value="metronome">🎼 Métronome</option><option value="ratisseur">🧹 Ratisseur</option><option value="finisseur">🥅 Finisseur</option><option value="top_player">⭐ Top player</option>';
+      if(existing?.preferred_role)role.value=existing.preferred_role;roleWrap.appendChild(role);
+      const send=document.createElement('button');send.textContent=existing?'💾 Mettre à jour mon évaluation':'💾 Enregistrer mon évaluation';send.className='primary';send.style.cssText='width:100%;margin-top:10px';
       send.onclick=async()=>{
-        const val=Number(select.value);if(!val)return toast('Choisis un niveau de 1 à 5.');
-        send.disabled=true;
-        const {error}=await sb.rpc('submit_player_skill_rating',{p_player_id:x.id,p_rating:val});
-        send.disabled=false;if(error)return toast(error.message);
-        const cur=S.myRatings.find(r=>r.player_id===x.id);
-        if(cur){cur.rating=val;cur.updated_at=new Date().toISOString()}else S.myRatings.push({player_id:x.id,rating:val,updated_at:new Date().toISOString()});
-        renderPlayers();toast(existing?'Avis modifié ✅':'Avis enregistré ✅');
+        const payload={p_player_id:x.id,p_cardio:Number(values.cardio.value),p_dribble:Number(values.dribble.value),p_collectif:Number(values.collectif.value),p_frappe:Number(values.frappe.value),p_preferred_role:role.value};
+        if(!payload.p_cardio||!payload.p_dribble||!payload.p_collectif||!payload.p_frappe||!payload.p_preferred_role)return toast('Complète les 4 critères et le rôle de prédilection.');
+        send.disabled=true;send.textContent='Enregistrement…';
+        const {error}=await sb.rpc('submit_player_skill_review',payload);
+        if(error){send.disabled=false;send.textContent=existing?'💾 Mettre à jour mon évaluation':'💾 Enregistrer mon évaluation';return toast(error.message)}
+        const avg=Math.round((payload.p_cardio+payload.p_dribble+payload.p_collectif+payload.p_frappe)/4);
+        const saved={player_id:x.id,rating:avg,cardio:payload.p_cardio,dribble:payload.p_dribble,collectif:payload.p_collectif,frappe:payload.p_frappe,preferred_role:payload.p_preferred_role,updated_at:new Date().toISOString()};
+        const idx=S.myRatings.findIndex(r=>r.player_id===x.id);if(idx>=0)S.myRatings[idx]=saved;else S.myRatings.push(saved);
+        send.disabled=false;send.textContent='✓ Évaluation enregistrée';toast('Évaluation de '+x.name+' enregistrée 🔒');
+        setTimeout(()=>{if(send.isConnected)send.textContent='💾 Mettre à jour mon évaluation';},1600);
       };
-      rate.append(label,select,send);d.appendChild(rate);
+      rate.append(title,criteria,roleWrap,send);d.appendChild(rate);
     }
     box.appendChild(d);
   })
