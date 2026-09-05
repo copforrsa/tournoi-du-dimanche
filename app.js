@@ -1283,21 +1283,23 @@ function renderHomeCoorgVotes(){
 }
 
 
-function coorgTierUnitCents(qty){
-  qty=Math.max(1,Number(qty)||1);
-  if(qty>=10)return 349;
-  if(qty>=6)return 399;
-  if(qty>=3)return 449;
-  return 499;
+function coorgUnitCents(period){
+  return period==='year'?1990:199;
+}
+function coorgBillingPeriod(){
+  return $('#homeCoorgBillingPeriod')?.value==='year'?'year':'month';
 }
 function euroCents(c){return (Number(c||0)/100).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €'}
 function refreshCoorgPurchasePrice(){
   const input=$('#homeCoorgQty');
-  let q=Math.max(1,Math.min(100,Number(input?.value||1)||1));if(input)input.value=q;
-  const unit=coorgTierUnitCents(q),total=unit*q;
-  const u=$('#homeCoorgUnitPrice');if(u)u.textContent=euroCents(unit)+' / mois / accès';
-  const t=$('#homeCoorgTotal');if(t)t.innerHTML='<b>'+euroCents(total)+'/mois</b><div class="muted">'+q+' × '+euroCents(unit)+'</div>';
-  const b=$('#homeBuyCoorg');if(b)b.innerHTML='💳 Ajouter '+q+' co-gestionnaire'+(q>1?'s':'')+' — '+euroCents(total)+'/mois <span>→</span>';
+  let q=Math.max(1,Math.min(1000,Number(input?.value||1)||1));if(input)input.value=q;
+  const period=coorgBillingPeriod(),unit=coorgUnitCents(period),total=unit*q;
+  const suffix=period==='year'?'/an':'/mois';
+  const wording=period==='year'?'an':'mois';
+  const u=$('#homeCoorgUnitPrice');if(u)u.textContent=euroCents(unit)+' / '+wording+' / accès';
+  const label=$('#homeCoorgTotalLabel');if(label)label.textContent=period==='year'?'Total annuel':'Total mensuel';
+  const t=$('#homeCoorgTotal');if(t)t.innerHTML='<b>'+euroCents(total)+suffix+'</b><div class="muted">'+q+' × '+euroCents(unit)+' / '+wording+'</div>';
+  const b=$('#homeBuyCoorg');if(b)b.innerHTML='💳 Ajouter '+q+' accès équipe — '+euroCents(total)+suffix+' <span>→</span>';
 }
 async function confirmCoorgCheckoutFromUrl(){
   const p=new URLSearchParams(location.search);
@@ -1311,7 +1313,7 @@ async function confirmCoorgCheckoutFromUrl(){
       await loadAll();
     }
     const u=new URL(location.href);u.searchParams.delete('coorg');u.searchParams.delete('coorg_session_id');history.replaceState({},'',u.toString());
-    toast('Abonnement synchronisé avec Stripe ✅');
+    toast('Option équipe synchronisée avec Stripe ✅');
   }catch(err){
     console.warn(err);
     toast('Paiement reçu. Stripe finalise l’activation automatiquement.');
@@ -1326,7 +1328,7 @@ function renderEcosystemCommercial(){
   const special=$('#homeSpecialAccessNotice');if(special){special.classList.toggle('hidden',!c.special_access_enabled);special.innerHTML=c.special_access_enabled?'<div class="player" style="background:#ecfdf3;border-color:#86d6a3"><b>🎁 Autorisation spéciale SWÉ active</b><div class="muted" style="margin-top:4px">Tous les modules sont débloqués pour faire découvrir la solution, sans modifier ton abonnement commercial.</div></div>':'';}
   const paint=(id,on)=>{const el=$(id);if(!el)return;el.style.borderColor=on?'#86d6a3':'#e3e7e5';el.style.background=on?'#f0fdf4':'#fff';const old=el.querySelector('[data-module-status]');if(old)old.remove();const st=document.createElement('div');st.dataset.moduleStatus='1';st.style.marginTop='7px';st.innerHTML=on?'<span class="guest-badge" style="background:#dcfce7;color:#166534">✓ ACTIF</span>':'<span class="guest-badge" style="background:#f3f4f6;color:#6b7280">À DÉBLOQUER</span>';el.appendChild(st)};
   paint('#ecoRatingsModule',!!S.workspaceFeatures.player_ratings_enabled);paint('#ecoThirdHalfModule',!!S.workspaceFeatures.third_half_enabled);paint('#ecoTournamentModule',!!S.workspaceFeatures.tournaments_enabled);
-  const up=$('#homeRequestUpgrade');if(up){up.textContent=c.upgrade_requested_at?'⏳ Demande d’upgrade envoyée':'Voir / demander l’upgrade';up.disabled=!!c.upgrade_requested_at;}
+  const up=$('#homeRequestUpgrade');if(up){up.textContent=c.upgrade_requested_at?'⏳ Demande envoyée':'Voir les formules SWÉ';up.disabled=!!c.upgrade_requested_at;}
   refreshCoorgPurchasePrice();
 }
 
@@ -1393,21 +1395,32 @@ document.addEventListener('click',async e=>{
 document.addEventListener('click',async e=>{
   const stepBtn=e.target?.closest?.('[data-coorg-step]');
   if(stepBtn){const input=$('#homeCoorgQty');if(input){input.value=Math.max(1,Math.min(1000,Number(input.value||1)+Number(stepBtn.dataset.coorgStep||0)));refreshCoorgPurchasePrice();}return;}
+  const billingBtn=e.target?.closest?.('[data-coorg-billing]');
+  if(billingBtn){
+    const period=billingBtn.dataset.coorgBilling==='year'?'year':'month';
+    const hidden=$('#homeCoorgBillingPeriod');if(hidden)hidden.value=period;
+    document.querySelectorAll('[data-coorg-billing]').forEach(btn=>{const active=btn===billingBtn;btn.classList.toggle('active',active);btn.setAttribute('aria-pressed',active?'true':'false');});
+    refreshCoorgPurchasePrice();
+    return;
+  }
   if(e.target?.id==='homeBuyCoorg'){
     if(!isAdmin())return toast('Réservé à l’administrateur.');
     const qty=Math.max(1,Number($('#homeCoorgQty')?.value||1));
-    const unit=coorgTierUnitCents(qty),total=unit*qty;
-    if(!confirm('Ajouter '+qty+' accès co-gestionnaire(s) pour '+euroCents(total)+' / mois ?\n\nActivation automatique après paiement Stripe.'))return;
+    const billingPeriod=coorgBillingPeriod();
+    const unit=coorgUnitCents(billingPeriod),total=unit*qty;
+    const periodLabel=billingPeriod==='year'?'an':'mois';
+    const periodText=billingPeriod==='year'?'Facturation annuelle (19,90 € par co-gestionnaire).':'Facturation mensuelle (1,99 € par co-gestionnaire).';
+    if(!confirm('Activer '+qty+' accès équipe supplémentaire(s) pour '+euroCents(total)+' / '+periodLabel+' ?\n\n'+periodText+' Activation automatique après paiement Stripe.'))return;
     const b=e.target;b.disabled=true;b.textContent='Ouverture du paiement…';
     const requestId=crypto.randomUUID();
-    const {data,error}=await sb.functions.invoke('stripe-create-coorganizer-checkout',{body:{workspace_id:S.workspace.id,quantity:qty,request_id:requestId}});
-    if(error||data?.error){b.disabled=false;b.textContent='💳 Payer et activer';return toast(data?.error||error?.message||'Impossible d’ouvrir le paiement.');}
-    if(data?.url)location.href=data.url; else {b.disabled=false;b.textContent='💳 Payer et activer';toast('Lien de paiement indisponible.');}
+    const {data,error}=await sb.functions.invoke('stripe-create-coorganizer-checkout',{body:{workspace_id:S.workspace.id,quantity:qty,billing_period:billingPeriod,request_id:requestId}});
+    if(error||data?.error){b.disabled=false;refreshCoorgPurchasePrice();return toast(data?.error||error?.message||'Impossible d’ouvrir le paiement.');}
+    if(data?.url)location.href=data.url; else {b.disabled=false;refreshCoorgPurchasePrice();toast('Lien de paiement indisponible.');}
     return;
   }
   if(e.target?.id==='homeRequestUpgrade'){
-    if(!isAdmin())return toast('Réservé à l’administrateur.');if(!confirm('Demander un upgrade de ton abonnement SWÉ pour débloquer les modules avancés ?'))return;
-    const {error}=await sb.rpc('request_workspace_upgrade',{p_workspace_id:S.workspace.id});if(error)return toast(error.message);S.commercialAccess.upgrade_requested_at=new Date().toISOString();renderHome();toast('Demande d’upgrade envoyée ✅');return;
+    if(!isAdmin())return toast('Réservé à l’administrateur.');if(!confirm('Demander à faire évoluer ton espace SWÉ pour débloquer des modules avancés ?'))return;
+    const {error}=await sb.rpc('request_workspace_upgrade',{p_workspace_id:S.workspace.id});if(error)return toast(error.message);S.commercialAccess.upgrade_requested_at=new Date().toISOString();renderHome();toast('Demande d’évolution envoyée ✅');return;
   }
 });
 
