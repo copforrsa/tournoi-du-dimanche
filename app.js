@@ -960,7 +960,7 @@ function renderMyPlayerHub(){
   if($('#myPlayerDiscoverable')){$('#myPlayerDiscoverable').checked=!!p.discoverable;$('#myPlayerDiscoverable').disabled=!p.is_public;}
   if($('#myPlayerNotify')){$('#myPlayerNotify').checked=!!p.notify_upcoming_swes;$('#myPlayerNotify').disabled=false;}
   const rating=st.rating==null?'—':Number(st.rating).toFixed(1)+'/5';
-  if($('#myPlayerStats'))$('#myPlayerStats').innerHTML=[['🏟️','Groupes',st.groups||0],['🏆','Swés joués',st.tournaments||0],['⚽','Matchs',st.matches||0],['✅','Victoires',st.wins||0],['🥅','Buts',st.goals||0],['🎯','Passes',st.assists||0],['⭐','Note',rating]].map(x=>'<div><span>'+x[0]+'</span><small>'+x[1]+'</small><b>'+x[2]+'</b></div>').join('');
+  if($('#myPlayerStats'))$('#myPlayerStats').innerHTML=[['🏟️','Groupes',st.groups||0],['🎮','Swés joués',st.tournaments||0],['⚽','Matchs',st.matches||0],['✅','Victoires',st.wins||0],['🏆','Trophées',st.trophies||0],['🥅','Buts',st.goals||0],['🎯','Passes',st.assists||0],['⭐','Note',rating]].map(x=>'<div><span>'+x[0]+'</span><small>'+x[1]+'</small><b>'+x[2]+'</b></div>').join('');
   const groups=Array.isArray(d.groups)?d.groups:[];
   if($('#myPlayerGroups')){
     let groupHtml=groups.length?groups.map(g=>'<div class="player"><b>'+esc(g.workspace_name)+'</b><div class="muted">Profil local : '+esc(g.player_name)+(g.is_group_member?' • membre':' • invité')+'</div></div>').join(''):'<div class="muted">Aucun profil de groupe relié pour le moment.</div>';

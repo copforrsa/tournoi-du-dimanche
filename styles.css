@@ -416,3 +416,14 @@ select{background-color:#fff} textarea{resize:vertical}
 @media(max-width:620px){.auth-social-grid{grid-template-columns:1fr}.auth-login-card{margin:18px 10px;padding:20px}.auth-login-brand{align-items:flex-start}.auth-login-brand img{width:50px;height:50px}.team-review-head{flex-direction:column}.team-review-admin>*{width:100%}}
 /* V42.6 */
 .platform-footer{margin-top:28px;background:#0f2447;color:white;padding:22px 18px;border-top:4px solid #24c7d9}.platform-footer-inner{max-width:1120px;margin:auto;display:flex;justify-content:space-between;gap:18px;align-items:center;flex-wrap:wrap}.platform-footer-links{display:flex;gap:8px;flex-wrap:wrap}.platform-footer-links a{color:white;text-decoration:none;border:1px solid #ffffff38;border-radius:10px;padding:7px 10px}.sa-footer-editor textarea{width:100%}.pro-payment-warning{padding:10px;background:#fff7ed;border:1px solid #fdba74;border-radius:12px}
+
+/* V42.9 - lighter authentication typography and official social marks */
+.auth-social-btn{font-weight:600!important}
+.auth-social-btn span{font-weight:600!important}
+.auth-social-btn.apple{background:#fff!important;color:#111827!important;border-color:#d7e2ee!important}
+.auth-social-btn.apple:hover{background:#f8fafc!important;color:#111827!important}
+.auth-social-btn.apple svg{color:#111827!important}
+.authbox h2,.auth-card h2{font-weight:800}
+.authbox p,.auth-card p,.authbox small,.auth-card small{font-weight:400}
+.authbox label,.auth-card label{font-weight:600}
+.authbox input,.auth-card input,.authbox input::placeholder,.auth-card input::placeholder{font-weight:400}
