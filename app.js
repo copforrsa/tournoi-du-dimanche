@@ -577,6 +577,8 @@ async function loadSuperAdminWorkspaces(){
   const {data,error}=await sb.rpc('super_admin_get_workspaces_v5');
   if(error){toast(error.message);return}
   S.superWorkspaces=Array.isArray(data)?data:[];
+  const accountAccesses=await sb.rpc('super_admin_get_account_workspace_accesses');
+  S.superAccountAccesses=accountAccesses.error?[]:(Array.isArray(accountAccesses.data)?accountAccesses.data:[]);
   const requests=await sb.rpc('super_admin_get_coorganizer_quota_requests');
   S.superCoorgQuotaRequests=requests.error?[]:(Array.isArray(requests.data)?requests.data:[]);
   const players=await sb.rpc('super_admin_get_players_directory_v3');
@@ -659,7 +661,10 @@ function renderSuperAdminWorkspaces(){
     if(mode==='paid')return paid;
     if(mode==='trial')return trial&&!paid;
     if(mode==='free')return !paid;
-    if(mode==='multi')return Number(w.owner_owned_spaces||0)>1||Number(w.owner_admin_memberships||0)>1;
+    if(mode==='multi'){
+      const a=(S.superAccountAccesses||[]).filter(x=>String(x.user_id)===String(w.owner_user_id));
+      return a.filter(x=>x.role==='admin').length>1||a.filter(x=>x.role==='coorganizer').length>0;
+    }
     if(mode==='suspended')return !w.public_enabled;
     return true;
   };
@@ -671,6 +676,9 @@ function renderSuperAdminWorkspaces(){
     String(w.admin_phone||'').toLowerCase().includes(q)));
 
   const owners=new Map();all.forEach(w=>owners.set(String(w.owner_user_id),w));
+  const accessRows=S.superAccountAccesses||[];
+  const accessByUser=new Map();
+  accessRows.forEach(a=>{const k=String(a.user_id||'');if(!accessByUser.has(k))accessByUser.set(k,[]);accessByUser.get(k).push(a);});
   if($('#saTotalSpaces'))$('#saTotalSpaces').textContent=all.length;
   if($('#saActiveSpaces'))$('#saActiveSpaces').textContent=all.filter(w=>w.public_enabled).length;
   if($('#saSuspendedSpaces'))$('#saSuspendedSpaces').textContent=all.filter(w=>!w.public_enabled).length;
@@ -678,7 +686,10 @@ function renderSuperAdminWorkspaces(){
   if($('#saTotalCompetitions'))$('#saTotalCompetitions').textContent=all.reduce((n,w)=>n+Number(w.tournament_count||0)+Number(w.league_count||0),0);
   if($('#saPaidSpaces'))$('#saPaidSpaces').textContent=all.filter(w=>['standard','pro'].includes(String(w.subscription_plan||'free'))||w.special_access_enabled).length;
   if($('#saTotalOrganizers'))$('#saTotalOrganizers').textContent=owners.size;
-  if($('#saMultiOrganizers'))$('#saMultiOrganizers').textContent=[...owners.values()].filter(w=>Number(w.owner_owned_spaces||0)>1||Number(w.owner_admin_memberships||0)>1).length;
+  if($('#saMultiOrganizers'))$('#saMultiOrganizers').textContent=[...owners.keys()].filter(uid=>{
+    const a=accessByUser.get(uid)||[];
+    return a.filter(x=>x.role==='admin').length>1||a.filter(x=>x.role==='coorganizer').length>0;
+  }).length;
 
   box.innerHTML='';
   if(!rows.length){box.innerHTML='<p class="muted">'+(q?'Aucun espace ne correspond à la recherche.':'Aucun espace dans ce filtre.')+'</p>';return}
@@ -687,10 +698,14 @@ function renderSuperAdminWorkspaces(){
   const ensureOwnerGroup=w=>{
     const key=String(w.owner_user_id||w.owner_email||'unknown');
     if(ownerBodies.has(key))return ownerBodies.get(key);
-    const owned=Number(w.owner_owned_spaces||0),adminCount=Number(w.owner_admin_memberships||0),limit=Number(w.owner_free_workspace_limit||1);
+    const accesses=accessByUser.get(String(w.owner_user_id))||[];
+    const administered=accesses.filter(a=>a.role==='admin');
+    const coManaged=accesses.filter(a=>a.role==='coorganizer');
+    const owned=Number(w.owner_owned_spaces||0),limit=Number(w.owner_free_workspace_limit||1);
     const g=document.createElement('details');g.className='sa-owner-group';g.open=!!q||mode==='multi';
     const display=([w.admin_first_name,w.admin_last_name].filter(Boolean).join(' ')||w.owner_email||'Organisateur');
-    g.innerHTML='<summary><span><b>👤 '+esc(display)+'</b><small>'+esc(w.owner_email||'')+'</small></span><span class="sa-owner-badges"><em>'+owned+' espace'+(owned>1?'s':'')+' créé'+(owned>1?'s':'')+'</em><em>'+adminCount+' groupe'+(adminCount>1?'s':'')+' administré'+(adminCount>1?'s':'')+'</em><em class="'+(limit>1?'special':'')+'">Gratuit : '+limit+' max</em></span></summary><div class="sa-owner-tools"><div><b>Limite de groupes gratuits</b><div class="muted small">Par défaut : 1. Augmente uniquement pour un test, ambassadeur ou autorisation spéciale.</div></div><input data-owner-limit type="number" min="1" max="100" value="'+limit+'"><input data-owner-note value="'+esc(w.owner_limit_note||'')+'" placeholder="Motif / note interne"><button data-owner-save>💾 Autoriser</button></div><div class="sa-owner-workspaces"></div>';
+    const accessHtml='<div class="sa-account-access-map"><div class="sa-access-column"><b>👑 Groupes administrés</b>'+(administered.length?administered.map(a=>'<span><strong>'+esc(a.workspace_name)+'</strong><small>'+(a.is_owner?'Propriétaire':'Administrateur')+'</small></span>').join(''):'<span class="muted">Aucun</span>')+'</div><div class="sa-access-column"><b>🛠️ Groupes co-gérés</b>'+(coManaged.length?coManaged.map(a=>'<span><strong>'+esc(a.workspace_name)+'</strong><small>Co-gestionnaire uniquement</small></span>').join(''):'<span class="muted">Aucun</span>')+'</div></div>';
+    g.innerHTML='<summary><span><b>👤 '+esc(display)+'</b><small>'+esc(w.owner_email||'')+'</small></span><span class="sa-owner-badges"><em>👑 '+administered.length+' administré'+(administered.length>1?'s':'')+'</em><em>🛠️ '+coManaged.length+' co-géré'+(coManaged.length>1?'s':'')+'</em><em class="'+(limit>1?'special':'')+'">Créations gratuites : '+owned+' / '+limit+'</em></span></summary>'+accessHtml+'<div class="sa-owner-tools"><div><b>Limite de groupes créés gratuitement</b><div class="muted small">Les groupes où ce compte est seulement co-gestionnaire ne comptent jamais dans cette limite.</div></div><input data-owner-limit type="number" min="1" max="100" value="'+limit+'"><input data-owner-note value="'+esc(w.owner_limit_note||'')+'" placeholder="Motif / note interne"><button data-owner-save>💾 Autoriser</button></div><div class="sa-owner-workspaces"></div>';
     const body=g.querySelector('.sa-owner-workspaces');
     g.querySelector('[data-owner-save]').onclick=async()=>{
       const btn=g.querySelector('[data-owner-save]'),val=Math.max(1,Number(g.querySelector('[data-owner-limit]').value)||1),note=g.querySelector('[data-owner-note]').value.trim();
@@ -1088,7 +1103,13 @@ function renderWorkspaceSwitcher(){
   const rows=S.memberships||[];
   sel.classList.toggle('hidden',rows.length<2);
   if(rows.length<2){sel.innerHTML='';return;}
-  sel.innerHTML=rows.map(r=>'<option value="'+esc(r.workspace_id)+'"'+(String(r.workspace_id)===String(S.workspace?.id)?' selected':'')+'>'+esc(r.workspaces?.name||'Espace SWÉ')+' • '+(r.role==='admin'?'Admin':'Co-gestionnaire')+'</option>').join('');
+  const admins=rows.filter(r=>r.role==='admin');
+  const coorgs=rows.filter(r=>r.role!=='admin');
+  let html='';
+  if(admins.length)html+='<optgroup label="👑 Mes groupes — administrateur">'+admins.map(r=>'<option value="'+esc(r.workspace_id)+'"'+(String(r.workspace_id)===String(S.workspace?.id)?' selected':'')+'>👑 '+esc(r.workspaces?.name||'Espace SWÉ')+' — Administrateur</option>').join('')+'</optgroup>';
+  if(coorgs.length)html+='<optgroup label="🛠️ Groupes que je co-gère">'+coorgs.map(r=>'<option value="'+esc(r.workspace_id)+'"'+(String(r.workspace_id)===String(S.workspace?.id)?' selected':'')+'>🛠️ '+esc(r.workspaces?.name||'Espace SWÉ')+' — Co-gestionnaire</option>').join('')+'</optgroup>';
+  sel.innerHTML=html;
+  sel.title='Chaque groupe conserve ses propres joueurs, compétitions, droits et réglages.';
 }
 function renderOrganizerAccessBanner(){
   const box=$('#organizerAccessBanner');if(!box)return;
