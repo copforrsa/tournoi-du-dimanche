@@ -403,3 +403,6 @@ select{background-color:#fff} textarea{resize:vertical}
 /* V42.3 — liaison identité SWÉ ↔ membre organisateur */
 .swe-self-link-card{border:1px solid rgba(37,99,235,.22);background:linear-gradient(135deg,rgba(239,246,255,.96),rgba(236,254,255,.96));}
 .swe-self-link-ok{border:1px solid rgba(16,185,129,.25);background:rgba(236,253,245,.92);justify-content:space-between;gap:12px;}
+
+/* V42.4 — liaisons ID SWÉ verrouillées */
+.sa-staff-links{margin-top:10px;padding:10px;border:1px solid #d8e4f2;border-radius:12px;background:#f7fbff}.sa-staff-link{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:7px;padding-top:7px;border-top:1px solid #e7eef6}.sa-staff-link:first-of-type{border-top:0}.sa-staff-link small{opacity:.65}.swe-self-link-ok{border-color:#b8d8ff!important;background:#f3f9ff!important}

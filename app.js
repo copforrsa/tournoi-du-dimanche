@@ -545,7 +545,7 @@ async function loadSuperAdminWorkspaces(){
   if(!commercial.error){const map=new Map((Array.isArray(commercial.data)?commercial.data:[]).map(x=>[String(x.workspace_id),x]));S.superWorkspaces=S.superWorkspaces.map(w=>({...w,...(map.get(String(w.workspace_id))||{})}));}
   const requests=await sb.rpc('super_admin_get_coorganizer_quota_requests');
   S.superCoorgQuotaRequests=requests.error?[]:(Array.isArray(requests.data)?requests.data:[]);
-  const players=await sb.rpc('super_admin_get_players_directory');
+  const players=await sb.rpc('super_admin_get_players_directory_v2');
   S.superPlayers=players.error?[]:(Array.isArray(players.data)?players.data:[]);
   const signupRequests=await sb.rpc('super_admin_get_player_signup_requests');
   S.superSignupRequests=signupRequests.error?[]:(Array.isArray(signupRequests.data)?signupRequests.data:[]);
@@ -596,12 +596,13 @@ function renderSuperAdminPlayers(){
     '<div><span>🌍</span><b>'+all.filter(r=>r.discoverable).length+'</b><small>Disponibles annuaire</small></div>';
   box.innerHTML='';
   if(!rows.length){box.innerHTML='<div class="muted">Aucun joueur ne correspond à la recherche.</div>';return;}
-  box.innerHTML=rows.map(r=>'<div class="sa-player-row">'+
+  box.innerHTML=rows.map(r=>{const links=Array.isArray(r.staff_links)?r.staff_links:[];return '<div class="sa-player-row">'+
     '<div class="sa-player-main"><div class="row" style="justify-content:flex-start;gap:7px;flex-wrap:wrap"><b>'+esc(r.display_name||'Joueur SWÉ')+'</b><span class="player-id-mini">'+esc(r.public_player_id||'—')+'</span><span class="guest-badge '+(r.consent_accepted?'consent-ok':'consent-pending')+'">'+(r.consent_accepted?'CONSENTEMENT OK':'À VALIDER')+'</span></div>'+ 
     '<div class="muted">📧 '+esc(r.email||'—')+(r.phone_number?' • 📱 '+esc(r.phone_number):'')+(r.home_area?' • 📍 '+esc(r.home_area):'')+'</div></div>'+ 
     '<div class="sa-player-meta"><span><b>'+Number(r.groups_count||0)+'</b> groupe(s)</span><span><b>'+Number(r.local_profiles_count||0)+'</b> profil(s) lié(s)</span><span>'+(r.is_public?'🌐 Public':'🔒 Privé')+'</span><span>'+(r.discoverable?'🔎 Annuaire':'Annuaire désactivé')+'</span></div>'+ 
+    (links.length?'<div class="sa-staff-links"><b>🔗 Liaison organisateur / membre</b>'+links.map(l=>'<div class="sa-staff-link"><span><b>'+esc(l.player_name)+'</b> • '+esc(l.workspace_name)+' <small>('+esc(l.role)+')</small></span><button class="danger" data-sa-unlink-staff data-workspace-id="'+esc(l.workspace_id)+'" data-user-id="'+esc(l.user_id)+'" data-player-id="'+esc(l.player_id)+'" data-player-name="'+esc(l.player_name)+'">Délier</button></div>').join('')+'</div>':'')+
     (r.consent_accepted_at?'<div class="small muted">Consentement : '+new Date(r.consent_accepted_at).toLocaleString('fr-FR')+'</div>':'')+
-  '</div>').join('');
+  '</div>'}).join('');
 }
 
 function renderSuperAdminWorkspaces(){
@@ -817,6 +818,15 @@ document.addEventListener('input',e=>{
   if(e.target?.id==='saSearchWorkspace')renderSuperAdminWorkspaces();
   if(e.target?.id==='saSearchPlayer')renderSuperAdminPlayers();
 });
+document.addEventListener('click',async e=>{
+  if(!e.target?.matches?.('[data-sa-unlink-staff]'))return;
+  const b=e.target;const playerName=b.dataset.playerName||'ce joueur';
+  if(!confirm('Délier définitivement « '+playerName+' » de ce compte organisateur ? Ses statistiques resteront dans le groupe mais ne seront plus rattachées à cet ID SWÉ.'))return;
+  b.disabled=true;
+  const {error}=await sb.rpc('super_admin_unlink_staff_player',{p_workspace_id:b.dataset.workspaceId,p_user_id:b.dataset.userId,p_player_id:b.dataset.playerId});
+  b.disabled=false;if(error)return toast(error.message);
+  toast('Liaison supprimée par le Super Admin.');await loadSuperAdminWorkspaces();
+});
 function refreshSuperAdminCreateDependencies(){
   const competition=!!($('#saTournamentEnabled')?.checked||$('#saLeagueEnabled')?.checked);
   const rankings=$('#saRankingsEnabled');if(rankings){rankings.disabled=!competition;if(!competition)rankings.checked=false;}
@@ -955,7 +965,7 @@ function renderMyPlayerHub(){
     if(S.workspace&&(isAdmin()||isCoorg())){
       const linkedPlayer=(S.players||[]).find(x=>String(x.id)===String(S.myLinkedPlayerId||''));
       if(linkedPlayer){
-        groupHtml='<div class="player swe-self-link-ok"><div><b>🪪 '+esc(S.workspace.name||'Groupe actuel')+'</b><div class="muted">Ton compte organisateur est lié au membre <b>'+esc(linkedPlayer.name)+'</b>. Ses tournois, stats et notes utilisent maintenant le même ID SWÉ <b>'+esc(p.public_player_id)+'</b>.</div></div><span class="guest-badge">LIÉ</span></div>'+groupHtml;
+        groupHtml='<div class="player swe-self-link-ok"><div><b>🪪 '+esc(S.workspace.name||'Groupe actuel')+'</b><div class="muted">Ton compte organisateur est lié au membre <b>'+esc(linkedPlayer.name)+'</b>. Ses tournois, stats et notes utilisent maintenant le même ID SWÉ <b>'+esc(p.public_player_id)+'</b>. <b>Cette liaison est verrouillée</b> ; seul le Super Admin peut la supprimer.</div></div><span class="guest-badge">LIÉ</span></div>'+groupHtml;
       }else{
         const candidates=(S.players||[]).filter(x=>x.active!==false&&x.is_group_member!==false);
         groupHtml='<div class="player swe-self-link-card"><div style="flex:1"><b>🔗 Relier mon compte organisateur à mon membre joueur</b><div class="muted">Choisis ton nom dans ce groupe. Ton ID SWÉ '+esc(p.public_player_id)+' suivra alors automatiquement tes inscriptions aux tournois en cours et futurs.</div><div class="row" style="margin-top:8px;gap:8px"><select id="myPlayerSelfMember" style="flex:1"><option value="">Choisir mon profil membre…</option>'+candidates.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.name)+'</option>').join('')+'</select><button id="myPlayerSelfLink" class="primary">C’est moi</button></div></div></div>'+groupHtml;
@@ -1420,7 +1430,8 @@ function renderPermissions(){
     const linkedSel=document.createElement('select');linkedSel.dataset.linkedPlayer='1';linkedSel.style.width='100%';
     linkedSel.innerHTML='<option value="">Aucun joueur rattaché</option>'+S.players.filter(p=>p.active&&p.is_group_member!==false).map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join('');
     linkedSel.value=c.linked_player_id||'';
-    linkBox.innerHTML='<b>👤 Compte associé à un joueur</b><div class="muted small" style="margin:4px 0 7px">Permet d’identifier le co-gestionnaire dans le groupe. Il ne pourra pas voter pour son propre profil.</div>';
+    if(c.linked_player_id) linkedSel.disabled=true;
+    linkBox.innerHTML='<b>👤 Compte associé à un joueur</b><div class="muted small" style="margin:4px 0 7px">'+(c.linked_player_id?'🔒 Liaison définitive : ce membre utilise désormais le même ID SWÉ que le co-gestionnaire. Seul le Super Admin peut délier ce profil.':'Identifie le membre correspondant au co-gestionnaire. S’il possède déjà un ID SWÉ, ses statistiques seront automatiquement rattachées à cet ID.')+'</div>';
     linkBox.appendChild(linkedSel);card.appendChild(linkBox);
     defs.forEach(([key,label,help])=>{
       const row=document.createElement('label');row.className='row';row.style.justifyContent='flex-start';row.style.alignItems='flex-start';row.style.marginTop='10px';
