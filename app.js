@@ -394,9 +394,17 @@ async function authState(){
   }
   const {data}=await sb.auth.getSession();
   S.session=data.session;
+  const oauthProvider=new URLSearchParams(location.search).get('provider');
+  if(!S.session&&(oauthProvider==='google'||oauthProvider==='apple')){
+    const u=new URL(location.href);u.searchParams.delete('provider');history.replaceState({},'',u.toString());
+    await startSocialAuth(oauthProvider);return;
+  }
+  if(S.session&&new URLSearchParams(location.search).has('oauth')){const u=new URL(location.href);u.searchParams.delete('oauth');history.replaceState({},'',u.toString());}
   if(recoveryMode){showRecoveryForm();return}
   $('#loginCard').classList.remove('hidden');
   $('#resetPasswordCard').classList.add('hidden');
+  const loginEmailFromUrl=new URLSearchParams(location.search).get('email');
+  if(loginEmailFromUrl&&!$('#email').value)$('#email').value=loginEmailFromUrl;
   const landing=$('#inviteLandingCard');
   if(landing){
     landing.classList.toggle('hidden',!inviteIdFromUrl);
@@ -436,6 +444,13 @@ $('#signup').onclick=async()=>{
   if(error)return toast(friendlyAuthError(error));
   toast(data.session?'Compte créé. Ton ID SWÉ est rattaché à ton email.':'Compte créé : vérifie ton email puis reconnecte-toi avec la même adresse. Ton ID SWÉ sera retrouvé automatiquement.');
 };
+$('#authGoogle').onclick=()=>startSocialAuth('google');
+$('#authApple').onclick=()=>startSocialAuth('apple');
+async function startSocialAuth(provider){
+  const redirectTo=APP_URL+'?start=player&oauth=done';
+  const {error}=await sb.auth.signInWithOAuth({provider,options:{redirectTo}});
+  if(error)toast('Connexion '+(provider==='google'?'Google':'Apple')+' indisponible pour le moment : '+friendlyAuthError(error));
+}
 $('#forgotPassword').onclick=async()=>{
   const email=$('#email').value.trim();
   if(!email)return toast('Entre d’abord ton adresse email.');
@@ -532,13 +547,42 @@ async function loadSuperAdminWorkspaces(){
   S.superCoorgQuotaRequests=requests.error?[]:(Array.isArray(requests.data)?requests.data:[]);
   const players=await sb.rpc('super_admin_get_players_directory');
   S.superPlayers=players.error?[]:(Array.isArray(players.data)?players.data:[]);
+  const signupRequests=await sb.rpc('super_admin_get_player_signup_requests');
+  S.superSignupRequests=signupRequests.error?[]:(Array.isArray(signupRequests.data)?signupRequests.data:[]);
   const platform=await sb.rpc('super_admin_get_platform_settings');
   if(!platform.error&&platform.data)S.platformSettings={...S.platformSettings,...platform.data};
   const consentToggle=$('#saConsentGateEnabled');if(consentToggle)consentToggle.checked=!!S.platformSettings.consent_gate_enabled;
   const consentLabel=$('#saConsentGateLabel');if(consentLabel)consentLabel.textContent=S.platformSettings.consent_gate_enabled?'Visible / obligatoire':'Masqué';
   renderSuperAdminWorkspaces();
   renderSuperAdminPlayers();
+  renderSuperAdminSignupRequests();
 }
+function playerActivationLink(token){return 'https://swetournament.fr/?activate='+encodeURIComponent(token||'');}
+function signupInviteMessage(r){return 'Salut '+(r.display_name||'')+' 👋\n\nTon inscription SWÉ Tournament est prête. Active ton compte avec ce lien :\n'+playerActivationLink(r.activation_token)+'\n\nCe lien est personnel. Une fois le compte activé, tu pourras retrouver ton ID SWÉ et tes performances.';}
+function renderSuperAdminSignupRequests(){
+  const box=$('#saSignupRequestsList');if(!box)return;
+  const rows=(S.superSignupRequests||[]).filter(r=>r.status==='pending');
+  const pill=$('#saSignupRequestsCount');if(pill)pill.textContent=rows.length+' en attente';
+  if(!rows.length){box.innerHTML='<div class="muted">Aucune demande d’inscription en attente.</div>';return;}
+  box.innerHTML=rows.map(r=>{
+    const link=playerActivationLink(r.activation_token),msg=signupInviteMessage(r);
+    const mailSubject=encodeURIComponent('Activation de ton compte SWÉ Tournament');
+    const mailBody=encodeURIComponent(msg);
+    const waPhone=String(r.phone_number||'').replace(/[^0-9]/g,'');
+    const waHref=waPhone?'https://wa.me/'+waPhone+'?text='+encodeURIComponent(msg):'';
+    return '<div class="sa-signup-request">'+
+      '<div class="sa-signup-request-main"><b>'+esc(r.display_name)+'</b><div class="muted">📧 '+esc(r.email)+(r.phone_number?' • 📱 '+esc(r.phone_number):'')+'</div><div class="small muted">Demandé le '+new Date(r.created_at).toLocaleString('fr-FR')+'</div></div>'+
+      '<div class="sa-activation-link"><span>Lien d’activation</span><code>'+esc(link)+'</code></div>'+
+      '<div class="sa-signup-actions">'+
+        '<button type="button" data-copy-signup-link="'+esc(r.id)+'">📋 Copier le lien</button>'+
+        '<a class="buttonlike" href="mailto:'+encodeURIComponent(r.email)+'?subject='+mailSubject+'&body='+mailBody+'">✉️ Préparer l’e-mail</a>'+
+        (waHref?'<a class="buttonlike wa" target="_blank" rel="noopener" href="'+esc(waHref)+'">💬 WhatsApp</a>':'<button type="button" disabled title="Aucun téléphone renseigné">💬 WhatsApp</button>')+
+        '<button type="button" data-copy-signup-message="'+esc(r.id)+'">📝 Copier le message</button>'+
+        '<button type="button" data-regenerate-signup="'+esc(r.id)+'">↻ Nouveau lien</button>'+
+      '</div></div>';
+  }).join('');
+}
+
 function renderSuperAdminPlayers(){
   const box=$('#saPlayersList');if(!box)return;
   const all=S.superPlayers||[];
@@ -803,6 +847,12 @@ document.addEventListener('click',async e=>{
     $('#saSpacesSection')?.classList.toggle('hidden',section!=='spaces');$('#saPlayersSection')?.classList.toggle('hidden',section!=='players');
     if(section==='players')renderSuperAdminPlayers();return;
   }
+  const copyLinkBtn=e.target?.closest?.('[data-copy-signup-link]');
+  if(copyLinkBtn){const r=(S.superSignupRequests||[]).find(x=>String(x.id)===String(copyLinkBtn.dataset.copySignupLink));if(r){await navigator.clipboard.writeText(playerActivationLink(r.activation_token));toast('Lien d’activation copié ✅');}return;}
+  const copyMsgBtn=e.target?.closest?.('[data-copy-signup-message]');
+  if(copyMsgBtn){const r=(S.superSignupRequests||[]).find(x=>String(x.id)===String(copyMsgBtn.dataset.copySignupMessage));if(r){await navigator.clipboard.writeText(signupInviteMessage(r));toast('Message copié ✅');}return;}
+  const regenBtn=e.target?.closest?.('[data-regenerate-signup]');
+  if(regenBtn){if(!confirm('Créer un nouveau lien ? L’ancien ne fonctionnera plus.'))return;regenBtn.disabled=true;const {error}=await sb.rpc('super_admin_regenerate_player_signup_link',{p_request_id:regenBtn.dataset.regenerateSignup});regenBtn.disabled=false;if(error)return toast(error.message);await loadSuperAdminWorkspaces();toast('Nouveau lien généré ✅');return;}
   if(e.target?.dataset?.saApproveCoorgRequest){
     const b=e.target;b.disabled=true;
     const {error}=await sb.rpc('super_admin_resolve_coorganizer_quota_request',{p_request_id:b.dataset.saApproveCoorgRequest,p_approve:true});
@@ -3837,12 +3887,12 @@ $('#shareWhatsapp').onclick=async()=>{const text=$('#shareText').value;if(naviga
 function subscribeRealtime(){if(S.channel)sb.removeChannel(S.channel);let timer;const reload=()=>{clearTimeout(timer);timer=setTimeout(async()=>await loadAll(),250)};S.channel=sb.channel('tournoi-manager').on('postgres_changes',{event:'*',schema:'public',table:'players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'seasons'},reload).on('postgres_changes',{event:'*',schema:'public',table:'tournaments'},reload).on('postgres_changes',{event:'*',schema:'public',table:'tournament_players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'teams'},reload).on('postgres_changes',{event:'*',schema:'public',table:'team_players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'matches'},reload).on('postgres_changes',{event:'*',schema:'public',table:'goals'},reload).on('postgres_changes',{event:'*',schema:'public',table:'match_player_assignments'},reload).subscribe()}
 
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('./sw.js?v=4201',{updateViaCache:'none'})
+  navigator.serviceWorker.register('./sw.js?v=4202',{updateViaCache:'none'})
     .then(reg=>{
       reg.update().catch(()=>{});
       navigator.serviceWorker.addEventListener('controllerchange',()=>{
-        if(sessionStorage.getItem('SW_BUILD_RELOAD_4201'))return;
-        sessionStorage.setItem('SW_BUILD_RELOAD_4201','1');
+        if(sessionStorage.getItem('SW_BUILD_RELOAD_4202'))return;
+        sessionStorage.setItem('SW_BUILD_RELOAD_4202','1');
         location.reload();
       },{once:true});
       return reg;
