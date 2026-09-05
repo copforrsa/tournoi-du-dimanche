@@ -4284,8 +4284,12 @@ async function bootPaymentDesk(token){
   $('#main').classList.add('hidden');
   $('#publicView').classList.remove('hidden');
   const root=$('#publicView');
-  root.innerHTML='<header class="top"><h1 class="public-title"><img src="./favicon.png?v=4215" class="brand-mark" alt="SWÉ">Suivi des paiements sur place</h1><div class="public-sub">SWÉ TOURNAMENT 5/5 • saisie manuelle uniquement</div></header><div class="card"><div id="paymentDeskContent"><p class="muted">Chargement de la liste des inscrits…</p></div></div>';
+  root.innerHTML='<header class="top"><h1 class="public-title"><img src="./favicon.png?v=4216" class="brand-mark" alt="SWÉ">Suivi des paiements sur place</h1><div class="public-sub">SWÉ TOURNAMENT 5/5 • saisie manuelle uniquement</div></header><div class="card"><div id="paymentDeskContent"><p class="muted">Chargement de la liste des inscrits…</p></div></div>';
   let snapshot=null;
+  const collectorStorageKey='swe_payment_collector_name';
+  const rememberedCollector=()=>{try{return (localStorage.getItem(collectorStorageKey)||'').trim();}catch(e){return ''}};
+  const saveCollector=(name,remember)=>{try{if(remember&&name.trim())localStorage.setItem(collectorStorageKey,name.trim());else if(!remember)localStorage.removeItem(collectorStorageKey);}catch(e){}};
+  const fmtDateTime=(iso)=>{if(!iso)return '—';try{return new Intl.DateTimeFormat('fr-FR',{dateStyle:'short',timeStyle:'short'}).format(new Date(iso));}catch(e){return iso}};
   async function loadDesk(){
     const content=$('#paymentDeskContent');
     if(!content)return;
@@ -4294,16 +4298,32 @@ async function bootPaymentDesk(token){
     snapshot=data;
     renderDesk();
   }
+  function openPaymentReport(){
+    if(!snapshot)return;
+    const all=(snapshot.players||[]).filter(r=>r.present);
+    const confirmed=all.filter(r=>r.registration_status!=='waitlist'&&!r.is_substitute);
+    const collector=($('#paymentDeskCollector')?.value||'').trim();
+    const paidCount=confirmed.filter(r=>!!r.manual_paid_at).length;
+    const reportRows=confirmed.map(r=>'<tr><td>'+esc(r.player_name||'Joueur')+'</td><td>'+(r.manual_paid_at?'PAYÉ':'NON PAYÉ')+'</td><td>'+esc(r.manual_paid_collector_name||'—')+'</td><td>'+esc(fmtDateTime(r.manual_paid_at))+'</td></tr>').join('');
+    const w=window.open('','_blank');
+    if(!w){toast('Autorise les fenêtres pop-up pour imprimer le rapport.');return;}
+    const title=esc(snapshot.tournament_name||('Swé du '+(snapshot.tournament_date||'')));
+    w.document.write('<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Rapport paiements - '+title+'</title><style>body{font-family:Arial,sans-serif;color:#111;padding:28px}h1{font-size:22px;margin:0 0 6px}.meta{color:#555;margin-bottom:18px}.summary{display:flex;gap:18px;margin:16px 0 20px;font-weight:700}.summary span{border:1px solid #ddd;border-radius:8px;padding:8px 12px}table{width:100%;border-collapse:collapse;margin-top:12px}th,td{border:1px solid #ccc;padding:8px;text-align:left;font-size:13px}th{background:#f3f5f7}.foot{margin-top:18px;font-size:12px;color:#666}@media print{button{display:none}body{padding:0}}</style></head><body><button onclick="window.print()" style="float:right;padding:8px 12px">Imprimer / Enregistrer en PDF</button><h1>'+title+'</h1><div class="meta">Date du Swé : '+esc(snapshot.tournament_date||'—')+'<br>Rapport généré le : '+esc(new Intl.DateTimeFormat('fr-FR',{dateStyle:'short',timeStyle:'short'}).format(new Date()))+(collector?'<br>Personne ayant édité le rapport : '+esc(collector):'')+'</div><div class="summary"><span>'+paidCount+' payé'+(paidCount>1?'s':'')+'</span><span>'+(confirmed.length-paidCount)+' non payé'+((confirmed.length-paidCount)>1?'s':'')+'</span><span>'+confirmed.length+' inscrits</span></div><table><thead><tr><th>Joueur</th><th>Statut</th><th>Enregistré par</th><th>Date / heure</th></tr></thead><tbody>'+reportRows+'</tbody></table><div class="foot">Rapport de suivi manuel des paiements sur place — SWÉ Tournament.</div></body></html>');
+    w.document.close();
+    w.focus();
+  }
   function renderDesk(){
     const content=$('#paymentDeskContent');if(!content||!snapshot)return;
     const all=(snapshot.players||[]).filter(r=>r.present);
     const confirmed=all.filter(r=>r.registration_status!=='waitlist'&&!r.is_substitute);
     const paidCount=confirmed.filter(r=>!!r.manual_paid_at).length;
     const unpaidCount=Math.max(0,confirmed.length-paidCount);
-    content.innerHTML='<div class="row" style="align-items:flex-start;gap:12px;flex-wrap:wrap"><div style="flex:1;min-width:230px"><h2 class="sectiontitle" style="margin-bottom:5px">💶 '+esc(snapshot.tournament_name||('Swé du '+snapshot.tournament_date))+'</h2><div class="muted">📅 '+esc(snapshot.tournament_date||'')+'</div><div class="muted" style="margin-top:5px">Coche simplement qui a payé sur place. Ce lien ne déclenche aucun paiement en ligne.</div></div><button id="paymentDeskRefresh">↻ Actualiser</button></div>'+ 
+    const savedName=rememberedCollector();
+    content.innerHTML='<div class="row" style="align-items:flex-start;gap:12px;flex-wrap:wrap"><div style="flex:1;min-width:230px"><h2 class="sectiontitle" style="margin-bottom:5px">💶 '+esc(snapshot.tournament_name||('Swé du '+snapshot.tournament_date))+'</h2><div class="muted">📅 '+esc(snapshot.tournament_date||'')+'</div><div class="muted" style="margin-top:5px">Indique ton prénom, puis marque simplement qui a payé sur place.</div></div><button id="paymentDeskRefresh">↻ Actualiser</button></div>'+ 
+      '<div class="player" style="margin-top:14px;background:#f8fafc"><label for="paymentDeskCollector"><b>👤 Ton prénom / nom</b></label><input id="paymentDeskCollector" maxlength="60" placeholder="Ex. Laurent" value="'+esc(savedName)+'" autocomplete="name" style="margin-top:6px"><label class="row" style="gap:8px;margin-top:8px;justify-content:flex-start"><input id="paymentDeskRememberCollector" type="checkbox" style="width:auto" '+(savedName?'checked':'')+'><span>Mémoriser ce nom sur cet appareil pour la prochaine fois</span></label><div class="muted" style="margin-top:5px">Le nom est enregistré avec chaque validation de paiement pour assurer le suivi.</div></div>'+ 
       '<div class="grid g3" style="margin-top:14px"><div class="player" style="background:#eef8f2"><b style="font-size:1.2rem">'+paidCount+'</b><div class="muted">Payé'+(paidCount>1?'s':'')+'</div></div><div class="player" style="background:#fff3e8"><b style="font-size:1.2rem">'+unpaidCount+'</b><div class="muted">Non payé'+(unpaidCount>1?'s':'')+'</div></div><div class="player"><b style="font-size:1.2rem">'+confirmed.length+'</b><div class="muted">Inscrit'+(confirmed.length>1?'s':'')+'</div></div></div>'+ 
-      '<div style="margin-top:14px"><input id="paymentDeskSearch" placeholder="🔎 Rechercher un joueur" autocomplete="off"></div><div id="paymentDeskRows" style="margin-top:10px"></div>'+ 
-      '<div class="readonly-note" style="margin-top:12px">🔐 Lien privé : il permet uniquement de basculer manuellement un joueur entre <b>PAYÉ</b> et <b>NON PAYÉ</b>.</div>';
+      '<div class="row" style="gap:8px;flex-wrap:wrap;margin-top:14px"><div style="flex:1;min-width:220px"><input id="paymentDeskSearch" placeholder="🔎 Rechercher un joueur" autocomplete="off"></div><button id="paymentDeskPrint">🖨️ PDF / Imprimer le rapport</button></div><div id="paymentDeskRows" style="margin-top:10px"></div>'+ 
+      '<div class="readonly-note" style="margin-top:12px">🔐 Lien privé : il permet uniquement de basculer manuellement un joueur entre <b>PAYÉ</b> et <b>NON PAYÉ</b>. Le rapport imprimable indique aussi qui a enregistré chaque paiement.</div>';
     const rowsBox=$('#paymentDeskRows');
     const draw=()=>{
       const q=($('#paymentDeskSearch')?.value||'').trim().toLowerCase();
@@ -4314,13 +4334,18 @@ async function bootPaymentDesk(token){
         const wait=r.registration_status==='waitlist'||r.is_substitute;
         const paid=!!r.manual_paid_at;
         const d=document.createElement('div');d.className='player row';d.style.marginBottom='8px';d.style.gap='8px';d.style.flexWrap='wrap';
-        d.innerHTML='<span style="flex:1;min-width:170px"><b>'+esc(r.player_name||'Joueur')+'</b><div class="muted" style="margin-top:3px">'+(wait?'🟠 Remplaçant':'✅ Inscrit confirmé')+'</div></span>'+ 
+        const audit=paid&&r.manual_paid_collector_name?'<div class="muted" style="margin-top:3px">Saisi par '+esc(r.manual_paid_collector_name)+' • '+esc(fmtDateTime(r.manual_paid_at))+'</div>':'';
+        d.innerHTML='<span style="flex:1;min-width:170px"><b>'+esc(r.player_name||'Joueur')+'</b><div class="muted" style="margin-top:3px">'+(wait?'🟠 Remplaçant':'✅ Inscrit confirmé')+'</div>'+audit+'</span>'+ 
           '<span class="guest-badge" style="background:'+(paid?'#e8f7ec':(wait?'#fff1d6':'#ffe9e7'))+';color:'+(paid?'#176a36':(wait?'#9a5b00':'#b3261e'))+'">'+(paid?'PAYÉ':(wait?'REMPLAÇANT':'NON PAYÉ'))+'</span>';
         if(!wait){
           const b=document.createElement('button');b.className=paid?'danger':'primary';b.textContent=paid?'↩ Marquer non payé':'✅ Marquer payé';
           b.onclick=async()=>{
+            const collector=($('#paymentDeskCollector')?.value||'').trim();
+            if(!collector){toast('Indique ton prénom / nom avant de modifier un paiement.');$('#paymentDeskCollector')?.focus();return;}
+            const remember=!!$('#paymentDeskRememberCollector')?.checked;
+            saveCollector(collector,remember);
             b.disabled=true;
-            const {error}=await sb.rpc('payment_desk_set_paid',{p_token:token,p_player_id:r.player_id,p_paid:!paid});
+            const {error}=await sb.rpc('payment_desk_set_paid_v2',{p_token:token,p_player_id:r.player_id,p_paid:!paid,p_collector_name:collector});
             if(error){b.disabled=false;return toast(error.message);}
             await loadDesk();
           };
@@ -4331,6 +4356,11 @@ async function bootPaymentDesk(token){
     };
     $('#paymentDeskSearch').oninput=draw;
     $('#paymentDeskRefresh').onclick=loadDesk;
+    $('#paymentDeskPrint').onclick=openPaymentReport;
+    const collectorInput=$('#paymentDeskCollector');
+    const rememberBox=$('#paymentDeskRememberCollector');
+    if(collectorInput)collectorInput.onchange=()=>saveCollector(collectorInput.value,!!rememberBox?.checked);
+    if(rememberBox)rememberBox.onchange=()=>saveCollector(collectorInput?.value||'',rememberBox.checked);
     draw();
   }
   await loadDesk();
