@@ -1800,8 +1800,19 @@ function renderEcosystemCommercial(){
   if(ecosystemCard) ecosystemCard.classList.toggle('hidden',!isAdmin());
   if(!isAdmin()) return;
   const c=S.commercialAccess||{};
-  const badge=$('#homePlanBadge');if(badge)badge.textContent=(c.special_access_enabled?'ACCÈS SPÉCIAL • ':'')+String(c.subscription_plan||'free').toUpperCase();
+  const a=S.organizerAccess||{};
+  const trialActive=!!a.trial_active&&!c.special_access_enabled;
+  const badge=$('#homePlanBadge');if(badge)badge.textContent=trialActive?('ESSAI • '+Number(a.days_remaining||0)+' J'):(c.special_access_enabled?'ACCÈS SPÉCIAL • ':'')+String(c.subscription_plan||'free').toUpperCase();
   const special=$('#homeSpecialAccessNotice');if(special){special.classList.toggle('hidden',!c.special_access_enabled);special.innerHTML=c.special_access_enabled?'<div class="player" style="background:#ecfdf3;border-color:#86d6a3"><b>🎁 Autorisation spéciale SWÉ active</b><div class="muted" style="margin-top:4px">Tous les modules sont débloqués pour faire découvrir la solution, sans modifier ton abonnement commercial.</div></div>':'';}
+  const trialNotice=$('#homeTrialPricingNotice');
+  const coorgOffer=$('#homeCoorgOfferCard');
+  const upgradeCard=$('#homeUpgradeCard');
+  if(trialNotice){
+    trialNotice.classList.toggle('hidden',!trialActive);
+    trialNotice.innerHTML=trialActive?'<div class="player" style="background:#f8fbff;border-color:#c8d8ee"><b>🎁 Profite de ton essai, on ne te parle pas encore prix</b><div class="muted" style="margin-top:5px;line-height:1.55">Toutes les fonctions organisateur sont disponibles pendant encore <b>'+Number(a.days_remaining||0)+' jour'+(Number(a.days_remaining||0)>1?'s':'')+'</b>. Les tarifs et options payantes restent masqués pendant cette période.</div><button type="button" id="endTrialToPay" class="secondary" style="margin-top:10px">Je veux arrêter mon essai et voir les offres payantes</button></div>':'';
+  }
+  if(coorgOffer)coorgOffer.classList.toggle('hidden',trialActive);
+  if(upgradeCard)upgradeCard.classList.toggle('hidden',trialActive);
   const paint=(id,on)=>{const el=$(id);if(!el)return;el.style.borderColor=on?'#86d6a3':'#e3e7e5';el.style.background=on?'#f0fdf4':'#fff';const old=el.querySelector('[data-module-status]');if(old)old.remove();const st=document.createElement('div');st.dataset.moduleStatus='1';st.style.marginTop='7px';st.innerHTML=on?'<span class="guest-badge" style="background:#dcfce7;color:#166534">✓ ACTIF</span>':'<span class="guest-badge" style="background:#f3f4f6;color:#6b7280">À DÉBLOQUER</span>';el.appendChild(st)};
   paint('#ecoRatingsModule',!!S.workspaceFeatures.player_ratings_enabled);paint('#ecoThirdHalfModule',!!S.workspaceFeatures.third_half_enabled);paint('#ecoTournamentModule',!!S.workspaceFeatures.tournaments_enabled);
   const up=$('#homeRequestUpgrade');if(up){up.textContent=c.upgrade_requested_at?'⏳ Demande envoyée':'Voir les formules SWÉ';up.disabled=!!c.upgrade_requested_at;}
@@ -1947,6 +1958,18 @@ document.addEventListener('click',async e=>{
     const {data,error}=await sb.functions.invoke('stripe-create-coorganizer-checkout',{body:{workspace_id:S.workspace.id,quantity:qty,billing_period:billingPeriod,request_id:requestId}});
     if(error||data?.error){b.disabled=false;refreshCoorgPurchasePrice();return toast(data?.error||error?.message||'Impossible d’ouvrir le paiement.');}
     if(data?.url)location.href=data.url; else {b.disabled=false;refreshCoorgPurchasePrice();toast('Lien de paiement indisponible.');}
+    return;
+  }
+  if(e.target?.id==='endTrialToPay'){
+    if(!isAdmin())return toast('Réservé à l’administrateur.');
+    if(!confirm('Mettre fin maintenant à ton essai gratuit ?\n\nLes fonctions organisateur premium ne seront plus accessibles tant qu’aucun abonnement n’est actif. Tu pourras alors consulter les offres et tarifs. Cette action est immédiate.'))return;
+    const b=e.target;b.disabled=true;b.textContent='Fin de l’essai…';
+    const {data,error}=await sb.rpc('end_my_organizer_trial',{p_workspace_id:S.workspace.id});
+    if(error){b.disabled=false;b.textContent='Je veux arrêter mon essai et voir les offres payantes';return toast(error.message);}
+    S.organizerAccess=data||{trial_active:false,requires_subscription:true,days_remaining:0};
+    await loadAll();
+    renderHome();
+    toast('Essai terminé. Les offres payantes sont maintenant visibles.');
     return;
   }
   if(e.target?.id==='homeRequestUpgrade'){
