@@ -11,10 +11,10 @@
   <meta name="apple-mobile-web-app-title" content="Tournoi Foot">
   <link rel="apple-touch-icon" href="./icon-192.png?v=4112">
   <link rel="manifest" href="./manifest.webmanifest">
-  <title>SWÉ TOURNAMENT 5/5 • V42.4</title>
-<link rel="icon" type="image/png" href="./favicon.png?v=4204">
+  <title>SWÉ TOURNAMENT 5/5 • V42.5</title>
+<link rel="icon" type="image/png" href="./favicon.png?v=4205">
 <link rel="apple-touch-icon" href="./icon-192.png?v=4112">
-  <link rel="stylesheet" href="./styles.css?v=4204">
+  <link rel="stylesheet" href="./styles.css?v=4206">
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -30,7 +30,7 @@
 </div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1><img src="./favicon.png?v=4204" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V42.4</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1><img src="./favicon.png?v=4205" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V42.5</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -44,8 +44,8 @@
         </div>
       </div>
     </div>
-    <div id="loginCard" class="card">
-      <h2 class="sectiontitle">Connexion</h2>
+    <div id="loginCard" class="card auth-login-card">
+      <div class="auth-login-brand"><img src="./favicon.png?v=4205" alt="SWÉ"><div><span>SWÉ TOURNAMENT</span><h2>Bienvenue 👋</h2><p>Connecte-toi pour retrouver tes Swés, tes équipes et ton profil joueur.</p></div></div>
       <input id="email" type="email" placeholder="Email" autocomplete="email">
       <div class="space"></div>
       <input id="password" type="password" placeholder="Mot de passe" autocomplete="current-password">
@@ -56,7 +56,7 @@
         <button id="signup">Créer mon compte</button>
       </div>
       <div class="auth-social-sep"><span>ou</span></div>
-      <div class="auth-social-grid"><button type="button" id="authGoogle" class="auth-social-btn">G&nbsp; Continuer avec Google</button><button type="button" id="authApple" class="auth-social-btn apple">&nbsp; Continuer avec Apple</button></div>
+      <div class="auth-social-grid"><button type="button" id="authGoogle" class="auth-social-btn google"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.6 12.23c0-.71-.06-1.4-.18-2.07H12v3.92h5.38a4.6 4.6 0 0 1-2 3.02v2.54h3.24c1.9-1.75 2.98-4.32 2.98-7.41Z"/><path fill="#34A853" d="M12 22c2.7 0 4.96-.9 6.62-2.36l-3.24-2.54c-.9.6-2.05.96-3.38.96-2.6 0-4.8-1.76-5.59-4.12H3.06v2.62A10 10 0 0 0 12 22Z"/><path fill="#FBBC05" d="M6.41 13.94A6.02 6.02 0 0 1 6.1 12c0-.67.12-1.32.31-1.94V7.44H3.06A10 10 0 0 0 2 12c0 1.61.38 3.14 1.06 4.56l3.35-2.62Z"/><path fill="#EA4335" d="M12 5.94c1.47 0 2.79.5 3.83 1.5l2.87-2.87A9.63 9.63 0 0 0 12 2a10 10 0 0 0-8.94 5.44l3.35 2.62C7.2 7.7 9.4 5.94 12 5.94Z"/></svg><span>Continuer avec Google</span></button><button type="button" id="authApple" class="auth-social-btn apple"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.79 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.09ZM12.03 7.25C11.88 5.02 13.69 3.18 15.77 3c.29 2.58-2.34 4.5-3.74 4.25Z"/></svg><span>Continuer avec Apple</span></button></div>
       <div class="space"></div>
       <button id="forgotPassword" type="button">Mot de passe oublié ?</button>
       <p class="muted">La case d’acceptation est obligatoire uniquement pour créer un nouveau compte. Les comptes bêta existants devront valider les conditions lors d’une prochaine connexion.</p>
@@ -76,7 +76,7 @@
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1><img src="./favicon.png?v=4204" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V42.4</span></h1><div id="workspaceName" class="muted"></div><div class="build-badge" title="Version installée">MAJ 42.4</div></div>
+        <div><h1><img src="./favicon.png?v=4205" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V42.5</span></h1><div id="workspaceName" class="muted"></div><div class="build-badge" title="Version installée">MAJ 42.5</div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -103,7 +103,7 @@
 
       <div class="sa-admin-tabs"><button type="button" class="active" data-sa-tab="spaces">🏢 Espaces & offres</button><button type="button" data-sa-tab="players">👤 Joueurs SWÉ</button></div>
       <div class="card sa-consent-control" id="saConsentControl"><div class="row" style="justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap"><div><b>🛡️ Consentement joueurs</b><div class="muted" style="margin-top:4px">Tu peux préparer le dispositif sans l’afficher aux joueurs. Tant qu’il est masqué, aucune fenêtre de régularisation n’est imposée aux comptes bêta.</div></div><label class="sa-switch-line"><input id="saConsentGateEnabled" type="checkbox"><span><b id="saConsentGateLabel">Masqué</b><small>Activation globale</small></span></label></div></div>
-      <div id="saSpacesSection">
+      <div class="card sa-footer-editor"><h2 class="sectiontitle">⚖️ Pied de page & informations légales</h2><div class="grid g2"><input id="saFooterCompany" placeholder="Nom / raison sociale"><input id="saFooterEmail" type="email" placeholder="Email de contact"></div><textarea id="saFooterLegalText" rows="2" placeholder="Mention courte" style="margin-top:8px"></textarea><div class="grid g3" style="margin-top:8px"><input id="saFooterLegalUrl" type="url" placeholder="Mentions légales"><input id="saFooterPrivacyUrl" type="url" placeholder="Confidentialité"><input id="saFooterTermsUrl" type="url" placeholder="CGU / CGV"></div><div class="row" style="margin-top:8px"><label><input id="saFooterEnabled" type="checkbox" checked> Afficher</label><button id="saPreviewFooter">👁️ Aide mise en forme</button><button id="saSaveFooter" class="primary">💾 Enregistrer</button></div><div id="saFooterPreview" class="hidden"></div></div><div id="saSpacesSection">
       <div class="card sa-create-card">
         <div class="sa-section-head"><div><span class="sa-section-icon">＋</span><div><h2>Créer un espace client</h2><p>Le compte administrateur doit déjà exister dans SWÉ.</p></div></div><span class="sa-help-pill">Configuration guidée</span></div>
         <div class="grid g2">
@@ -454,10 +454,10 @@
             <label class="player row" style="justify-content:flex-start;margin:0"><input id="tourAllowExternal" type="checkbox" style="width:auto"><span><b>Accepter des joueurs externes</b><div class="muted">Crée automatiquement une fiche invitée liée à leur ID SWÉ.</div></span></label>
           </div>
           <label class="player row" style="justify-content:flex-start;margin-top:10px"><input id="tourExternalPaymentRequired" type="checkbox" style="width:auto"><span><b>Exiger le paiement en ligne pour les joueurs externes</b><div class="muted">Disponible uniquement si ton profil organisateur et Stripe sont éligibles.</div></span></label>
-          <div id="tourExternalPaymentNote" class="muted" style="margin-top:6px"></div>
+          <label class="player row" style="justify-content:flex-start;margin-top:10px"><input id="tourOnlinePaymentEnabled" type="checkbox" style="width:auto"><span><b>💳 Proposer la collecte en ligne aux membres</b><div class="muted">Si désactivé, aucune information de paiement en ligne ne sera affichée.</div></span></label><div id="tourExternalPaymentNote" class="muted" style="margin-top:6px"></div>
         </div>
         <div id="thirdHalfTournamentCreate" class="player hidden" style="margin-top:12px;background:#fff8ed;border:1px solid #fed7aa">
-          <b>🧊 3e mi-temps & participation</b>
+          <label class="row" style="justify-content:flex-start"><input id="tourThirdHalfActive" type="checkbox" style="width:auto"><span><b>🧊 Activer la 3e mi-temps / Glacière pour ce tournoi</b></span></label>
           <div class="muted" style="margin:5px 0 10px">Module 3e mi-temps actif. Tu peux suggérer une contribution à la cagnotte aux joueurs, y compris aux joueurs solo qui s’inscrivent ou demandent une place.</div>
           <label><span class="muted">Participation glacière conseillée (€)</span><input id="tourCoolerSuggested" type="number" min="0" step="0.50" value="0"></label>
         </div>
@@ -484,6 +484,7 @@
           </div>
           <div id="teamBalanceInfo" class="muted" style="margin-top:8px"></div>
         </div>
+        <div id="teamReviewPanel" class="team-review-panel hidden"></div>
         <div id="teamList" style="margin-top:10px"></div>
       </div>
       <div class="card" id="attendanceAdminCard"><h2 class="sectiontitle">Présents / inscrits de la compétition sélectionnée</h2><div id="attendanceList"></div></div>
@@ -728,7 +729,7 @@
 
   <section id="publicView" class="hidden">
     <header class="top">
-      <h1 class="public-title"><img src="./favicon.png?v=4204" class="brand-mark" alt="SWÉ"><span id="publicWorkspaceName">SWÉ TOURNAMENT 5/5</span></h1>
+      <h1 class="public-title"><img src="./favicon.png?v=4205" class="brand-mark" alt="SWÉ"><span id="publicWorkspaceName">SWÉ TOURNAMENT 5/5</span></h1>
       <div class="public-sub">Consultation publique • lecture seule</div>
     </header>
 
@@ -842,5 +843,5 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
-<script src="./app.js?v=4204" defer></script>
-</body></html>
+<script src="./app.js?v=4206" defer></script>
+<footer id="platformFooter" class="platform-footer hidden"><div class="platform-footer-inner"><div><b id="platformFooterCompany">SWÉ Tournament</b><div id="platformFooterText"></div></div><div id="platformFooterLinks"></div></div></footer></body></html>

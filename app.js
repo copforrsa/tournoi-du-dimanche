@@ -29,7 +29,7 @@ window.addEventListener('error', (e) => {
   if(t){t.textContent='Erreur de chargement de l’application. Recharge la page.';t.style.display='block';}
 });
 
-const S={session:null,adminProfile:null,isSuperAdmin:false,superWorkspaces:[],workspace:null,members:[],coorgs:[],coorgCount:0,workspaceFeatures:{max_coorganizers:3,max_coorganizers_cap:100,rankings_enabled:true,league_enabled:true,tournaments_enabled:true,third_half_enabled:false,player_ratings_enabled:false,max_players_cap:35,payments_enabled:true,top_player_enabled:false,match_ratings_enabled:false},commercialAccess:{subscription_plan:'free',special_access_enabled:false,upgrade_requested_at:null},billingStatus:null,coorgPurchaseConfirming:false,myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null},myRatings:[],lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],skillAggregates:[],teamCodes:[],seasons:[],leagues:[],leaguePlayers:[],activeLeague:null,tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matchAssignments:[],matches:[],goals:[],teamBalanceScores:[],rankMode:'season',channel:null,goalTeamSelections:{},sportsComplexes:[],sportsPitches:[],publicMode:false,publicToken:null,editingTournamentId:null,teamCompetitionId:null,lastView:null,coorgQuotaRequest:null,superCoorgQuotaRequests:[],myLinkedPlayerId:null,playerDashboard:null,playerDirectory:[],organizerSettings:null,playerRequests:[],platformSettings:{consent_gate_enabled:false},thirdHalfFunds:[]};
+const S={session:null,adminProfile:null,isSuperAdmin:false,superWorkspaces:[],workspace:null,members:[],coorgs:[],coorgCount:0,workspaceFeatures:{max_coorganizers:3,max_coorganizers_cap:100,rankings_enabled:true,league_enabled:true,tournaments_enabled:true,third_half_enabled:false,player_ratings_enabled:false,max_players_cap:35,payments_enabled:true,top_player_enabled:false,match_ratings_enabled:false,team_review_enabled:false},commercialAccess:{subscription_plan:'free',special_access_enabled:false,upgrade_requested_at:null},billingStatus:null,coorgPurchaseConfirming:false,myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null},myRatings:[],lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],skillAggregates:[],teamCodes:[],seasons:[],leagues:[],leaguePlayers:[],activeLeague:null,tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matchAssignments:[],matches:[],goals:[],teamBalanceScores:[],rankMode:'season',channel:null,goalTeamSelections:{},sportsComplexes:[],sportsPitches:[],publicMode:false,publicToken:null,editingTournamentId:null,teamCompetitionId:null,lastView:null,coorgQuotaRequest:null,superCoorgQuotaRequests:[],myLinkedPlayerId:null,playerDashboard:null,playerDirectory:[],organizerSettings:null,playerRequests:[],platformSettings:{consent_gate_enabled:false},thirdHalfFunds:[],teamReviewState:null};
 
 let safeSyncTimer=null;
 let safeSyncBusy=false;
@@ -345,7 +345,7 @@ function friendlyAuthError(error){
   return error?.message||'Une erreur est survenue.';
 }
 async function authState(){
-  try{const cfg=await sb.rpc('get_platform_public_settings');if(!cfg.error&&cfg.data)S.platformSettings={...S.platformSettings,...cfg.data};}catch(_e){}
+  try{const cfg=await sb.rpc('get_platform_public_settings');if(!cfg.error&&cfg.data)S.platformSettings={...S.platformSettings,...cfg.data};renderPlatformFooter();}catch(_e){}
   const consentEnabled=!!S.platformSettings.consent_gate_enabled;
   $('#signupConsentRow')?.classList.toggle('hidden',!consentEnabled);
   if(paymentShortCodeFromUrl){
@@ -498,7 +498,7 @@ function renderSuperAdminVenues(){
     d.innerHTML=
       '<div class="grid g3">'+
         '<input data-complex-name value="'+esc(c.name)+'" placeholder="Nom du complexe">'+
-        '<input data-complex-city value="'+esc(c.city||'')+'" placeholder="Ville / commune">'+
+        '<input data-complex-city value="'+esc(c.city||'')+'" placeholder="Ville / commune">'+'<div class="grid g2"><input data-complex-sunday type="number" min="0" step="0.5" value="'+(Number(c.onsite_sunday_price_cents||0)/100)+'" placeholder="Dimanche €"><input data-complex-weekday type="number" min="0" step="0.5" value="'+(Number(c.onsite_weekday_price_cents||0)/100)+'" placeholder="Semaine €"></div>'+
         '<label class="player row" style="justify-content:flex-start"><input data-complex-active type="checkbox" style="width:auto" '+(c.active!==false?'checked':'')+'><span>Actif</span></label>'+
       '</div>'+
       (venueMeta(c)?'<div class="muted" style="margin-top:7px;padding:8px 10px;background:#f7fbf8;border-radius:10px"><b>'+esc(venueMeta(c).type)+'</b> • '+esc(venueMeta(c).hours)+'</div>':'')+
@@ -538,7 +538,7 @@ function renderSuperAdminVenues(){
   });
 }
 async function loadSuperAdminWorkspaces(){
-  const {data,error}=await sb.rpc('super_admin_get_workspaces_v3');
+  const {data,error}=await sb.rpc('super_admin_get_workspaces_v4');
   if(error){toast(error.message);return}
   S.superWorkspaces=Array.isArray(data)?data:[];
   const commercial=await sb.rpc('super_admin_get_commercial_access');
@@ -550,7 +550,7 @@ async function loadSuperAdminWorkspaces(){
   const signupRequests=await sb.rpc('super_admin_get_player_signup_requests');
   S.superSignupRequests=signupRequests.error?[]:(Array.isArray(signupRequests.data)?signupRequests.data:[]);
   const platform=await sb.rpc('super_admin_get_platform_settings');
-  if(!platform.error&&platform.data)S.platformSettings={...S.platformSettings,...platform.data};
+  if(!platform.error&&platform.data)S.platformSettings={...S.platformSettings,...platform.data};[['saFooterCompany','footer_company_name'],['saFooterEmail','footer_contact_email'],['saFooterLegalText','footer_legal_text'],['saFooterLegalUrl','footer_legal_url'],['saFooterPrivacyUrl','footer_privacy_url'],['saFooterTermsUrl','footer_terms_url']].forEach(([i,k])=>{if($('#'+i))$('#'+i).value=S.platformSettings[k]||''});if($('#saFooterEnabled'))$('#saFooterEnabled').checked=S.platformSettings.footer_enabled!==false;renderPlatformFooter();
   const consentToggle=$('#saConsentGateEnabled');if(consentToggle)consentToggle.checked=!!S.platformSettings.consent_gate_enabled;
   const consentLabel=$('#saConsentGateLabel');if(consentLabel)consentLabel.textContent=S.platformSettings.consent_gate_enabled?'Visible / obligatoire':'Masqué';
   renderSuperAdminWorkspaces();
@@ -669,11 +669,12 @@ function renderSuperAdminWorkspaces(){
         '<div class="sa-linked-options">'+
           '<div class="sa-linked-option top"><span>⭐</span><div><b>Top Player & notes de match</b><small>Inclus avec STANDARD et PRO. Requiert un module compétition actif.</small></div><strong data-sa-top-status>'+(w.top_player_enabled?'ACTIF':'INACTIF')+'</strong></div>'+
           '<div class="sa-linked-option third"><span>🍻</span><div><b>3e mi-temps</b><small>Incluse avec PRO. Requiert un module compétition actif.</small></div><strong data-sa-third-status>'+(w.third_half_enabled?'ACTIF':'INACTIF')+'</strong></div>'+
+          '<div class="sa-linked-option review"><span>🗳️</span><div><b>Validation collaborative des équipes</b><small>Incluse avec STANDARD/PRO. Les co-gestionnaires présents peuvent valider ou demander un nouveau tirage pendant 2 h.</small></div><strong>'+(w.team_review_enabled?'ACTIF':'INACTIF')+'</strong></div>'+
         '</div>'+
       '</div>'+
       '<div class="sa-commercial-block">'+
         '<div class="sa-block-title"><div><b>💎 Offre commerciale</b><span>Le choix de l’offre pilote automatiquement les modules premium.</span></div><span class="sa-plan-chip '+esc(String(w.subscription_plan||'free'))+'">'+esc(String(w.subscription_plan||'free').toUpperCase())+'</span></div>'+
-        '<div class="grid g2" style="margin-top:12px"><label><span class="muted">Offre</span><select data-sa-plan><option value="free" '+((w.subscription_plan||'free')==='free'?'selected':'')+'>FREE — Gestion essentielle</option><option value="standard" '+(w.subscription_plan==='standard'?'selected':'')+'>STANDARD — Top Player inclus</option><option value="pro" '+(w.subscription_plan==='pro'?'selected':'')+'>PRO — Top Player + 3e mi-temps</option></select></label><label class="sa-special-toggle"><input data-sa-special-access type="checkbox" '+(w.special_access_enabled?'checked':'')+'><span><b>🎁 Accès spécial</b><small>Débloque les options premium pour démo / ambassadeur.</small></span></label></div>'+
+        '<div class="grid g2" style="margin-top:12px"><label><span class="muted">Offre</span><select data-sa-plan><option value="free" '+((w.subscription_plan||'free')==='free'?'selected':'')+'>FREE — Gestion essentielle</option><option value="standard" '+(w.subscription_plan==='standard'?'selected':'')+'>STANDARD — Top Player inclus</option><option value="pro" '+(w.subscription_plan==='pro'?'selected':'')+'>PRO — Top Player + 3e mi-temps</option></select></label><label class="sa-special-toggle"><input data-sa-special-access type="checkbox" '+(w.special_access_enabled?'checked':'')+'><span><b>🎁 Accès spécial</b><small>Débloque les options premium pour démo / ambassadeur.</small></span></label></div><label class="sa-special-toggle team-review-gift"><input data-sa-team-review-gift type="checkbox" '+(w.team_review_gifted?'checked':'')+'><span><b>🗳️ Offrir validation du tirage</b><small>Active uniquement cette option même sans abonnement payant.</small></span></label>'+
         '<div class="sa-offer-map"><span>FREE <b>Base</b></span><span>STANDARD <b>+ Top Player</b></span><span>PRO <b>+ Top Player + 3e mi-temps</b></span></div>'+
         (w.upgrade_requested_at?'<div class="sa-upgrade-alert"><b>🔔 Demande d’upgrade reçue</b><span>'+new Date(w.upgrade_requested_at).toLocaleString('fr-FR')+'</span></div>':'')+
       '</div>'+ 
@@ -729,6 +730,7 @@ function renderSuperAdminWorkspaces(){
         p_rankings_enabled:d.querySelector('[data-sa-rankings]').checked,
         p_public_enabled:d.querySelector('[data-sa-public]').checked
       });
+      if(!r.error)r=await sb.rpc('super_admin_set_team_review_gift',{p_workspace_id:w.workspace_id,p_enabled:!!d.querySelector('[data-sa-team-review-gift]')?.checked});
       if(!r.error)r=await sb.rpc('super_admin_grant_coorganizer_slots',{p_workspace_id:w.workspace_id,p_base_max_coorganizers:max});
       save.disabled=false;if(r.error)return toast(r.error.message);
       toast('Espace mis à jour ✅');await loadSuperAdminWorkspaces();
@@ -846,7 +848,7 @@ function refreshWorkspaceDependencyUI(card){
 document.addEventListener('change',async e=>{
   if(e.target?.id==='tourComplex')renderTournamentPitchChoices();
   if(e.target?.id==='leagueSessionComplex')renderLeaguePitchSelect();
-  if(e.target?.id==='saConsentGateEnabled'){const enabled=e.target.checked;const {error}=await sb.rpc('super_admin_set_consent_gate',{p_enabled:enabled});if(error){e.target.checked=!enabled;return toast(error.message)}S.platformSettings.consent_gate_enabled=enabled;const l=$('#saConsentGateLabel');if(l)l.textContent=enabled?'Visible / obligatoire':'Masqué';toast(enabled?'Consentement affiché aux joueurs ✅':'Consentement masqué pour les joueurs.');}
+  if(e.target?.id==='saSaveFooter'){const b=e.target;b.disabled=true;const q={p_enabled:$('#saFooterEnabled')?.checked!==false,p_company_name:$('#saFooterCompany')?.value.trim()||null,p_legal_text:$('#saFooterLegalText')?.value.trim()||null,p_contact_email:$('#saFooterEmail')?.value.trim()||null,p_legal_url:$('#saFooterLegalUrl')?.value.trim()||null,p_privacy_url:$('#saFooterPrivacyUrl')?.value.trim()||null,p_terms_url:$('#saFooterTermsUrl')?.value.trim()||null};const {error}=await sb.rpc('super_admin_save_footer',q);b.disabled=false;if(error)return toast(error.message);S.platformSettings={...S.platformSettings,footer_enabled:q.p_enabled,footer_company_name:q.p_company_name,footer_legal_text:q.p_legal_text,footer_contact_email:q.p_contact_email,footer_legal_url:q.p_legal_url,footer_privacy_url:q.p_privacy_url,footer_terms_url:q.p_terms_url};renderPlatformFooter();toast('Pied de page mis à jour ✅');return;}if(e.target?.id==='saPreviewFooter'){const b=$('#saFooterPreview');b.classList.toggle('hidden');b.innerHTML='<div class="readonly-note"><b>Structure conseillée :</b> raison sociale + contact + liens Mentions légales / Confidentialité / CGU-CGV. Garde le texte court et renvoie vers des pages dédiées.</div>';return;}if(e.target?.id==='saConsentGateEnabled'){const enabled=e.target.checked;const {error}=await sb.rpc('super_admin_set_consent_gate',{p_enabled:enabled});if(error){e.target.checked=!enabled;return toast(error.message)}S.platformSettings.consent_gate_enabled=enabled;const l=$('#saConsentGateLabel');if(l)l.textContent=enabled?'Visible / obligatoire':'Masqué';toast(enabled?'Consentement affiché aux joueurs ✅':'Consentement masqué pour les joueurs.');}
   if(['saTournamentEnabled','saLeagueEnabled','saNewPlan'].includes(e.target?.id))refreshSuperAdminCreateDependencies();
   if(e.target?.matches?.('[data-sa-tournament],[data-sa-league],[data-sa-plan],[data-sa-special-access]'))refreshWorkspaceDependencyUI(e.target.closest('.sa-workspace-card'));
 });
@@ -980,7 +982,7 @@ function renderMyPlayerHub(){
   const reqs=Array.isArray(d.requests)?d.requests:[];
   if($('#myPlayerRequests'))$('#myPlayerRequests').innerHTML=reqs.length?reqs.map(r=>'<div class="player"><div class="row" style="justify-content:space-between;gap:10px;flex-wrap:wrap"><div><b>'+esc(r.workspace_name)+' • '+esc(r.tournament_name||'Swé')+'</b><div class="muted">'+esc(r.tournament_date||'')+(r.start_time?' • '+esc(String(r.start_time).slice(0,5)):'')+'</div></div><span class="guest-badge">'+(r.status==='pending'?'EN ATTENTE':r.status==='accepted'?'ACCEPTÉE':'REFUSÉE')+'</span></div>'+(r.message?'<div class="small" style="margin-top:6px">'+esc(r.message)+'</div>':'')+(r.registration_status==='payment_pending'?'<div class="row" style="margin-top:9px">'+playerPaymentButton(r)+'</div>':'')+'</div>').join(''):'<div class="muted">Aucune demande envoyée.</div>';
   const focusSwe=new URLSearchParams(location.search).get('joinSwe');const opp=(Array.isArray(d.upcoming_swes)?[...d.upcoming_swes]:[]).sort((a,b)=>String(a.tournament_id)===String(focusSwe)?-1:String(b.tournament_id)===String(focusSwe)?1:0);
-  if($('#myPlayerOpportunities'))$('#myPlayerOpportunities').innerHTML=opp.length?opp.map(o=>{const mode=o.discovery_mode==='public'?'PUBLIC • INSCRIPTION DIRECTE':'SUR DEMANDE';const fee=Number(o.entry_fee_cents||0);const payment=o.external_payment_required?'<div class="player-opportunity-price">💳 '+(fee?euroCents(fee)+' + frais SWÉ':'Paiement requis')+'</div>':'<div class="player-opportunity-price free">✓ Aucun paiement en ligne imposé au joueur externe</div>';const third=o.third_half_enabled?'<label class="player-pledge"><span>🧊 3e mi-temps</span><input type="number" min="0" step="0.50" data-pledge-for="'+o.tournament_id+'" placeholder="Contribution €" value="'+(Number(o.cooler_suggested_cents||0)/100||'')+'"></label>':'';return '<div class="player player-opportunity"><span class="guest-badge">'+esc(mode)+'</span><h3>'+esc(o.workspace_name)+' • '+esc(o.tournament_name||'Swé')+'</h3><div class="muted">📅 '+esc(o.tournament_date||'')+(o.start_time?' • '+esc(String(o.start_time).slice(0,5)):'')+'</div><div class="muted">📍 '+esc(o.venue||'Lieu à confirmer')+' • '+Number(o.remaining_places||0)+' place(s) restante(s)</div>'+payment+third+(o.discovery_mode==='public'?'<button class="primary" data-player-direct-join="'+o.tournament_id+'" style="margin-top:10px">⚡ Je participe</button>':'<textarea data-request-message-for="'+o.tournament_id+'" rows="2" placeholder="Message à l’organisateur (facultatif)" style="margin-top:10px"></textarea><button class="primary" data-player-request-join="'+o.tournament_id+'" style="margin-top:8px">🙋 Demander à participer</button>')+'</div>'}).join(''):'<div class="muted">Aucun nouveau Swé à afficher pour le moment.</div>';
+  if($('#myPlayerOpportunities'))$('#myPlayerOpportunities').innerHTML=opp.length?opp.map(o=>{const mode=o.discovery_mode==='public'?'PUBLIC • INSCRIPTION DIRECTE':'SUR DEMANDE';const fee=Number(o.entry_fee_cents||0);const payment=o.external_payment_required?'<div class="player-opportunity-price">💳 Paiement en ligne requis • confirmation automatique</div>':'<div class="player-opportunity-price free">✓ Aucun paiement en ligne imposé au joueur externe</div>';const third=o.third_half_enabled?'<label class="player-pledge"><span>🧊 3e mi-temps</span><input type="number" min="0" step="0.50" data-pledge-for="'+o.tournament_id+'" placeholder="Contribution €" value="'+(Number(o.cooler_suggested_cents||0)/100||'')+'"></label>':'';return '<div class="player player-opportunity"><span class="guest-badge">'+esc(mode)+'</span><h3>'+esc(o.workspace_name)+' • '+esc(o.tournament_name||'Swé')+'</h3><div class="muted">📅 '+esc(o.tournament_date||'')+(o.start_time?' • '+esc(String(o.start_time).slice(0,5)):'')+'</div><div class="muted">📍 '+esc(o.venue||'Lieu à confirmer')+' • '+Number(o.remaining_places||0)+' place(s) restante(s)</div>'+payment+third+(o.discovery_mode==='public'?'<button class="primary" data-player-direct-join="'+o.tournament_id+'" style="margin-top:10px">⚡ Je participe</button>':'<textarea data-request-message-for="'+o.tournament_id+'" rows="2" placeholder="Message à l’organisateur (facultatif)" style="margin-top:10px"></textarea><button class="primary" data-player-request-join="'+o.tournament_id+'" style="margin-top:8px">🙋 Demander à participer</button>')+'</div>'}).join(''):'<div class="muted">Aucun nouveau Swé à afficher pour le moment.</div>';
 }
 function renderPlayerDirectoryCard(){
   const card=$('#playerDirectoryCard');if(!card)return;
@@ -1069,9 +1071,9 @@ async function loadAll(){
   }
   r=await sb.from('workspace_members').select('user_id,role,active').eq('workspace_id',w);S.members=r.data||[];
   r=await sb.rpc('get_workspace_coorganizer_count',{p_workspace_id:w});S.coorgCount=Number(r.data||0);
-  r=await sb.rpc('get_workspace_features',{p_workspace_id:w});
+  r=await sb.rpc('get_workspace_features_v2',{p_workspace_id:w});
   if(r.error){
-    console.error('get_workspace_features',r.error);
+    console.error('get_workspace_features_v2',r.error);
     toast('Impossible de vérifier les modules de cet espace. Recharge la page.');
   }else{
     const f=Array.isArray(r.data)?r.data[0]:r.data;
@@ -1079,7 +1081,7 @@ async function loadAll(){
   }
   const commercial=await sb.rpc('get_workspace_commercial_access',{p_workspace_id:w});
   if(!commercial.error){const c=Array.isArray(commercial.data)?commercial.data[0]:commercial.data;if(c)S.commercialAccess={...S.commercialAccess,...c};}
-  if(S.commercialAccess.special_access_enabled){S.workspaceFeatures={...S.workspaceFeatures,tournaments_enabled:true,league_enabled:true,rankings_enabled:true,third_half_enabled:true,player_ratings_enabled:true,top_player_enabled:true,match_ratings_enabled:true};}
+  if(S.commercialAccess.special_access_enabled){S.workspaceFeatures={...S.workspaceFeatures,tournaments_enabled:true,league_enabled:true,rankings_enabled:true,third_half_enabled:true,player_ratings_enabled:true,top_player_enabled:true,match_ratings_enabled:true,team_review_enabled:true};}
   S.billingStatus=null;S.organizerSettings=null;S.playerRequests=[];
   if(isAdmin()){
     r=await sb.rpc('get_workspace_billing_status',{p_workspace_id:w});
@@ -1151,7 +1153,7 @@ async function loadAll(){
   if(!editingReview)renderAll();
 }
 async function loadTournament(){
-  const t=currentTour();if(!t){S.tPlayers=[];S.teams=[];S.teamPlayers=[];S.matchAssignments=[];S.matches=[];S.goals=[];S.teamBalanceScores=[];return}let r;
+  const t=currentTour();if(!t){S.tPlayers=[];S.teams=[];S.teamPlayers=[];S.matchAssignments=[];S.matches=[];S.goals=[];S.teamBalanceScores=[];S.teamReviewState=null;return}let r;
   r=await sb.from('tournament_players').select('*').eq('tournament_id',t.id);S.tPlayers=r.data||[];
   r=await sb.from('teams').select('*').eq('tournament_id',t.id).order('created_at');S.teams=r.data||[];
   const tids=S.teams.map(x=>x.id);if(tids.length){r=await sb.from('team_players').select('*').in('team_id',tids);S.teamPlayers=r.data||[]}else S.teamPlayers=[];
@@ -1163,6 +1165,11 @@ async function loadTournament(){
   }else{S.goals=[];S.matchAssignments=[];}
   const scoreRes=await sb.rpc('get_tournament_team_balance_scores',{p_tournament_id:t.id});
   S.teamBalanceScores=scoreRes.error?[]:(scoreRes.data||[]);
+  S.teamReviewState=null;
+  if(t.format!=='league'&&S.workspaceFeatures.team_review_enabled){
+    const reviewRes=await sb.rpc('get_tournament_team_review_state',{p_tournament_id:t.id});
+    if(!reviewRes.error)S.teamReviewState=reviewRes.data||null;
+  }
   renderMatchPitchSelect();
 }
 const THIRD_HALF_PAYMENT_MODES={
@@ -1347,7 +1354,7 @@ function renderStripeBilling(){
   if($('#organizerLegalStatus'))$('#organizerLegalStatus').value=os.legal_status||'individual';
   if($('#organizerWhatsappPhone')&&document.activeElement!==$('#organizerWhatsappPhone'))$('#organizerWhatsappPhone').value=os.whatsapp_contact_phone||'';
   if($('#organizerWhatsappGroup')&&document.activeElement!==$('#organizerWhatsappGroup'))$('#organizerWhatsappGroup').value=os.whatsapp_group_url||'';
-  if($('#organizerPaymentEligibility')){$('#organizerPaymentEligibility').textContent=os.external_payment_ready?'✅ Paiement externe autorisé':'⚠️ Paiement externe non disponible';$('#organizerPaymentEligibility').style.background=os.external_payment_ready?'#dcfce7':'#fff3cd';}
+  if($('#organizerPaymentEligibility')){$('#organizerPaymentEligibility').textContent=os.external_payment_ready?'✅ Organisateur PRO • paiement en ligne autorisé':'👤 Particulier • paiement sur place uniquement';$('#organizerPaymentEligibility').style.background=os.external_payment_ready?'#dcfce7':'#eef2f7';const host=$('#organizerPaymentEligibility').parentElement?.parentElement;if(host&&os.external_payment_ready&&!host.querySelector('.pro-payment-warning')){const n=document.createElement('div');n.className='pro-payment-warning';n.innerHTML='<b>⚠️ Engagement organisateur PRO</b><div>Les inscriptions réalisées via SWÉ doivent être régularisées conformément aux conditions du complexe. Un impayé ou litige confirmé peut entraîner la suspension temporaire des fonctions de paiement jusqu’à régularisation. Les incidents Stripe sont traités selon les procédures Stripe applicables.</div>';host.appendChild(n);}}
   const extPay=$('#tourExternalPaymentRequired');if(extPay){extPay.disabled=!os.external_payment_ready;if(!os.external_payment_ready)extPay.checked=false;}
   const extNote=$('#tourExternalPaymentNote');if(extNote)extNote.textContent=os.external_payment_ready?'Ton profil permet d’exiger le paiement des joueurs externes.':'Pour exiger un paiement externe : profil Auto-entrepreneur + module Paiements + Stripe Connect opérationnel.';
   const toggle=$('#stripePaymentsToggle'),details=$('#stripeBillingDetails');
@@ -2410,8 +2417,8 @@ function renderTournaments(){
       const dm=document.createElement('select');dm.innerHTML='<option value="unlisted">Non répertorié</option><option value="request">Sur demande</option><option value="public">Public • inscription directe</option>';dm.value=t.discovery_mode||'unlisted';
       const ext=document.createElement('label');ext.className='row';ext.style.gap='6px';const extCb=document.createElement('input');extCb.type='checkbox';extCb.style.width='auto';extCb.checked=!!t.allow_external_players;ext.append(extCb,document.createTextNode('Joueurs externes'));
       const pay=document.createElement('label');pay.className='row';pay.style.gap='6px';const payCb=document.createElement('input');payCb.type='checkbox';payCb.style.width='auto';payCb.checked=!!t.external_payment_required;payCb.disabled=!S.organizerSettings?.external_payment_ready;pay.append(payCb,document.createTextNode('Paiement externe requis'));
-      const saveDiscovery=document.createElement('button');saveDiscovery.textContent='Enregistrer visibilité';saveDiscovery.onclick=async()=>{if(dm.value!=='unlisted'&&!extCb.checked)return toast('Active les joueurs externes pour rendre ce Swé visible.');if(payCb.checked&&Number(t.entry_fee_cents||0)<=0)return toast('Indique d’abord un prix par participant.');const {error}=await sb.from('tournaments').update({discovery_mode:dm.value,allow_external_players:extCb.checked,external_payment_required:payCb.checked&&!!S.organizerSettings?.external_payment_ready}).eq('id',t.id);if(error)return toast(error.message);await loadAll();toast('Visibilité du Swé mise à jour ✅');};
-      discovery.append(dm,ext,pay,saveDiscovery);reg.appendChild(discovery);
+      const online=document.createElement('label');online.className='row';const onlineCb=document.createElement('input');onlineCb.type='checkbox';onlineCb.style.width='auto';onlineCb.checked=!!t.online_payment_enabled;onlineCb.disabled=!S.organizerSettings?.external_payment_ready;online.append(onlineCb,document.createTextNode('💳 Collecte en ligne'));const third=document.createElement('label');third.className='row';const thirdCb=document.createElement('input');thirdCb.type='checkbox';thirdCb.style.width='auto';thirdCb.checked=!!t.third_half_active;thirdCb.disabled=!S.workspaceFeatures.third_half_enabled;third.append(thirdCb,document.createTextNode('🧊 Glacière'));const saveDiscovery=document.createElement('button');saveDiscovery.textContent='Enregistrer les options';saveDiscovery.onclick=async()=>{if(dm.value!=='unlisted'&&!extCb.checked)return toast('Active les joueurs externes pour rendre ce Swé visible.');if(payCb.checked&&Number(t.entry_fee_cents||0)<=0)return toast('Indique d’abord un prix par participant.');const {error}=await sb.from('tournaments').update({discovery_mode:dm.value,allow_external_players:extCb.checked,external_payment_required:payCb.checked&&!!S.organizerSettings?.external_payment_ready,online_payment_enabled:onlineCb.checked&&!!S.organizerSettings?.external_payment_ready,third_half_active:thirdCb.checked&&!!S.workspaceFeatures.third_half_enabled}).eq('id',t.id);if(error)return toast(error.message);await loadAll();toast('Visibilité du Swé mise à jour ✅');};
+      discovery.append(dm,ext,pay,online,third,saveDiscovery);reg.appendChild(discovery);
 
       const editDetails=document.createElement('div');
       editDetails.style.marginTop='10px';
@@ -2846,7 +2853,7 @@ $('#createTournament').onclick=async()=>{
       reservation_reference:$('#tourReservationRef')?.value.trim()||null,
       discovery_mode:$('#tourDiscoveryMode')?.value||'unlisted',
       allow_external_players:!!$('#tourAllowExternal')?.checked,
-      external_payment_required:!!$('#tourExternalPaymentRequired')?.checked && !!S.organizerSettings?.external_payment_ready
+      external_payment_required:!!$('#tourExternalPaymentRequired')?.checked && !!S.organizerSettings?.external_payment_ready,online_payment_enabled:!!$('#tourOnlinePaymentEnabled')?.checked && !!S.organizerSettings?.external_payment_ready,third_half_active:!!S.workspaceFeatures.third_half_enabled&&!!$('#tourThirdHalfActive')?.checked
     };
     if(row.discovery_mode!=='unlisted'&&!row.allow_external_players)throw new Error('Active « Accepter des joueurs externes » pour rendre ce Swé visible aux joueurs solo.');
     if(row.external_payment_required&&row.entry_fee_cents<=0)throw new Error('Indique un prix par participant avant d’exiger un paiement en ligne.');
@@ -2870,6 +2877,44 @@ $('#createTournament').onclick=async()=>{
 };
 
 function presentIds(){return new Set(S.tPlayers.filter(x=>x.present&&x.registration_status!=='waitlist').map(x=>x.player_id))} function teamPlayerIds(teamId){return S.teamPlayers.filter(x=>x.team_id===teamId).map(x=>x.player_id)}
+function teamReviewStatusLabel(status){
+  return ({not_started:'Pas démarrée',pending:'Avis en cours',redraw_requested:'Nouveau tirage demandé',approved:'Composition validée',cancelled:'Création annulée'})[status]||status||'—';
+}
+function renderTeamReviewPanel(t){
+  const box=$('#teamReviewPanel');if(!box)return;
+  if(!t||t.format==='league'||!S.workspaceFeatures.team_review_enabled){box.classList.add('hidden');box.innerHTML='';return;}
+  const r=S.teamReviewState||{status:t.team_review_status||'not_started',max_redraws:Number(t.max_team_redraws||1),redraws_used:Number(t.team_redraws_used||0),eligible_count:0,validate_votes:0,redraw_votes:0};
+  const deadline=r.deadline?new Date(r.deadline):null;
+  const deadlineText=deadline&&!Number.isNaN(deadline.getTime())?deadline.toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
+  const remaining=Math.max(0,Number(r.redraws_remaining ?? (Number(r.max_redraws||0)-Number(r.redraws_used||0))));
+  const statusClass=String(r.status||'not_started').replace(/_/g,'-');
+  let html='<div class="team-review-head"><div><b>🗳️ Validation collaborative du tirage</b><div class="muted">Les co-gestionnaires inscrits à ce Swé disposent de 2 heures pour donner leur avis. Les équipes restent masquées sur le lien public jusqu’à validation.</div></div><span class="team-review-status '+statusClass+'">'+esc(teamReviewStatusLabel(r.status))+'</span></div>'+
+    '<div class="team-review-stats"><span>👥 '+Number(r.eligible_count||0)+' co-gestionnaire(s) concerné(s)</span><span>✅ '+Number(r.validate_votes||0)+' valider</span><span>🔄 '+Number(r.redraw_votes||0)+' refaire</span><span>♻️ '+Number(r.redraws_used||0)+' / '+Number(r.max_redraws||0)+' nouveau(x) tirage(s)</span></div>';
+  if(r.status==='pending')html+='<div class="team-review-deadline">⏳ Avis possibles jusqu’au <b>'+esc(deadlineText)+'</b>.</div>';
+  if(isAdmin()){
+    html+='<div class="team-review-admin"><label><span>Nombre maximum de nouveaux tirages</span><input id="teamReviewMaxRedraws" type="number" min="0" max="10" value="'+Number(r.max_redraws ?? t.max_team_redraws ?? 1)+'"></label><button id="saveTeamReviewLimit">💾 Enregistrer la limite</button>'+
+      (r.status==='pending'?'<button id="approveTeamsNow" class="primary">✅ Valider maintenant</button>':'')+
+      (r.status==='redraw_requested'&&remaining>0?'<button id="applyTeamRedraw" class="primary">🔄 Refaire le tirage ('+remaining+' restant'+(remaining>1?'s':'')+')</button>':'')+
+      ((S.teams||[]).length?'<button id="cancelTeamGeneration" class="danger">↩ Annuler la création des équipes</button>':'')+'</div>';
+  }else if(isCoorg()){
+    if(r.status==='pending'&&r.my_eligible){
+      html+='<div class="team-review-vote"><b>Ton avis</b><div class="row"><button id="voteValidateTeams" class="'+(r.my_vote==='validate'?'primary':'')+'">✅ Valider</button><button id="voteRedrawTeams" class="'+(r.my_vote==='redraw'?'danger':'')+'">🔄 Refaire le tirage</button></div>'+(r.my_vote?'<div class="muted">Ton choix actuel : <b>'+(r.my_vote==='validate'?'Valider':'Refaire le tirage')+'</b>. Tu peux le modifier tant que les 2 heures ne sont pas écoulées.</div>':'')+'</div>';
+    }else if(r.status==='pending'&&!r.my_eligible){
+      html+='<div class="readonly-note">Le vote est réservé aux co-gestionnaires qui sont eux-mêmes inscrits à ce Swé.</div>';
+    }
+  }
+  if(r.status==='redraw_requested')html+='<div class="readonly-note"><b>🔄 La majorité demande un nouveau tirage.</b> L’administrateur peut appliquer le prochain tirage dans la limite autorisée.</div>';
+  if(r.status==='approved')html+='<div class="readonly-note success-note"><b>✅ Composition validée.</b> Les équipes peuvent maintenant apparaître sur le lien d’invitation.</div>';
+  box.innerHTML=html;box.classList.remove('hidden');
+  const save=$('#saveTeamReviewLimit');if(save)save.onclick=async()=>{const max=Math.max(0,Math.min(10,Number($('#teamReviewMaxRedraws').value)||0));save.disabled=true;const {error}=await sb.rpc('admin_configure_tournament_team_review',{p_tournament_id:t.id,p_max_redraws:max});save.disabled=false;if(error)return toast(error.message);await loadTournament();renderTeams();toast('Limite de nouveaux tirages enregistrée ✅');};
+  const approve=$('#approveTeamsNow');if(approve)approve.onclick=async()=>{if(!confirm('Valider cette composition maintenant ? Elle deviendra visible sur le lien public.'))return;approve.disabled=true;const {error}=await sb.rpc('admin_approve_tournament_team_review',{p_tournament_id:t.id});approve.disabled=false;if(error)return toast(error.message);await loadTournament();renderTeams();toast('Composition validée ✅');};
+  const redraw=$('#applyTeamRedraw');if(redraw)redraw.onclick=()=>runSmartTeamGeneration(true);
+  const cancel=$('#cancelTeamGeneration');if(cancel)cancel.onclick=async()=>{if(!confirm('Annuler la création des équipes ?\n\nLes équipes générées, les matchs associés et la phase de validation seront supprimés. Les équipes préformées restent conservées.'))return;cancel.disabled=true;const {error}=await sb.rpc('admin_cancel_tournament_team_generation',{p_tournament_id:t.id});cancel.disabled=false;if(error)return toast(error.message);await loadAll();S.activeTour=t.id;await loadTournament();renderAll();toast('Création des équipes annulée.');};
+  const vote=async decision=>{const {error}=await sb.rpc('vote_tournament_team_review',{p_tournament_id:t.id,p_decision:decision});if(error)return toast(error.message);await loadTournament();renderTeams();toast(decision==='validate'?'Avis enregistré : valider ✅':'Avis enregistré : refaire le tirage 🔄');};
+  const vb=$('#voteValidateTeams');if(vb)vb.onclick=()=>vote('validate');
+  const rb=$('#voteRedrawTeams');if(rb)rb.onclick=()=>vote('redraw');
+}
+
 function renderTeams(){
   const t=S.teamCompetitionId?S.tournaments.find(x=>String(x.id)===String(S.teamCompetitionId))||null:null,att=$('#attendanceList'),box=$('#teamList');
   const note=$('#teamNoCreatePermission'),controls=$('#teamManagementControls');
@@ -2922,11 +2967,13 @@ function renderTeams(){
 
   const ppt=$('#playersPerTeam');
   if(ppt)ppt.classList.toggle('hidden',t.format!=='league');
+  renderTeamReviewPanel(t);
 
   const canGenerate=hasAdminOps()||(isCoorg()&&S.myPermissions.can_generate_teams);
   const canFullEdit=hasAdminOps();
 
   if(controls)controls.classList.toggle('hidden',!canGenerate);
+  const genBtn=$('#smartAutoTeams');if(genBtn&&t.format!=='league'&&S.workspaceFeatures.team_review_enabled&&Number(t.generated_team_count||0)>0){genBtn.disabled=true;genBtn.title='Le tirage initial existe déjà. Utilise la validation collaborative ou annule la création.';}else if(genBtn){genBtn.disabled=false;genBtn.title='';}
 
   if(!canFullEdit){
     att.innerHTML='<div class="readonly-note">Tu peux consulter les joueurs inscrits et les équipes de cette compétition. La modification manuelle des présences reste réservée à l’administrateur.</div>';
@@ -3071,42 +3118,38 @@ $('#addTeam').onclick=async()=>{
   $('#teamName').value='';
   await loadTournament();renderTeams();toast('Équipe créée pour « '+(t.name||t.tournament_date)+' » ✅');
 };
-$('#smartAutoTeams').onclick=async()=>{
+async function runSmartTeamGeneration(isRedraw=false){
+  if(isRedraw&&!isAdmin())return toast('Seul l’administrateur peut appliquer un nouveau tirage.');
   if(isCoorg()&&!hasTemporaryAdmin()&&!S.myPermissions.can_generate_teams)return toast('Tu n’es pas autorisé à générer les équipes.');
   const t=currentTour();if(!t)return toast('Choisis d’abord le tournoi ou le Swé de Ligue concerné.');
+  if(!isRedraw&&t.format!=='league'&&S.workspaceFeatures.team_review_enabled&&Number(t.generated_team_count||0)>0)return toast('Un tirage existe déjà. Utilise la validation collaborative ou annule la création avant de repartir de zéro.');
+  if(isRedraw&&S.teamReviewState?.status!=='redraw_requested')return toast('Aucun nouveau tirage n’a été demandé.');
   const confirmed=S.tPlayers.filter(tp=>tp.present&&tp.registration_status!=='waitlist').length;
   if(t.format!=='league'&&confirmed<10)return toast('Il faut au moins 10 joueurs confirmés pour créer 2 équipes.');
   if(t.format==='league'&&confirmed<4)return toast('Il faut au moins 4 joueurs confirmés.');
   const perTeam=Math.max(2,Math.min(11,Number($('#playersPerTeam').value)||5));
-  if((S.matches.length||S.teams.length)&&!confirm('Générer les équipes ?\n\n• Les équipes préformées complètes restent intactes.\n• Les joueurs ayant déjà accepté leur équipe restent verrouillés.\n• Les invitations non confirmées et les inscrits en équipe aléatoire sont redistribués.\n• Les places libres des équipes incomplètes sont complétées en recherchant le meilleur équilibre.\n• Les anciens matchs/buts liés à une ancienne répartition seront supprimés.'))return;
-  const btn=$('#smartAutoTeams');btn.disabled=true;btn.textContent='Génération…';
+  const message=isRedraw?'Appliquer un nouveau tirage ?\n\nCe tirage consommera 1 des nouveaux tirages autorisés pour ce tournoi et relancera une fenêtre d’avis de 2 heures.':'Générer les équipes ?\n\n• Les équipes préformées complètes restent intactes.\n• Les joueurs ayant déjà accepté leur équipe restent verrouillés.\n• Les invitations non confirmées et les inscrits en équipe aléatoire sont redistribués.\n• Les places libres sont complétées en recherchant le meilleur équilibre.\n• Les anciens matchs/buts liés à une ancienne répartition seront supprimés.';
+  if((isRedraw||S.matches.length||S.teams.length)&&!confirm(message))return;
+  const btn=isRedraw?$('#applyTeamRedraw'):$('#smartAutoTeams');if(btn){btn.disabled=true;btn.textContent=isRedraw?'Nouveau tirage…':'Génération…';}
   try{
-    const call=t.format==='league'
-      ? sb.rpc('generate_balanced_teams',{p_tournament_id:t.id,p_players_per_team:perTeam})
-      : sb.rpc('generate_swe_tournament_teams',{p_tournament_id:t.id});
-    const {data,error}=await call;
-    if(error)throw error;
-    await loadAll();
-    S.activeTour=t.id;
-    await loadTournament();
-    renderAll();
-    const n=Number(data?.team_count||S.teams.length||0);
-    if(t.format==='league'){
-      $('#teamBalanceInfo').textContent=n+' équipes générées automatiquement selon les niveaux privés définis par l’administrateur.';
-    }else{
-      const subs=Number(data?.substitute_count||0),pitches=Number(data?.pitch_count||1);
-      const scores=(data?.team_scores||[]).map(x=>x.team_name+' '+Number(x.score||0).toFixed(1)+'/5 • '+x.mention).join(' · ');
-      $('#teamBalanceInfo').innerHTML='<b>'+n+' équipes • '+pitches+' terrain'+(pitches>1?'s':'')+'</b>'+
-        (subs?' • '+subs+' remplaçant'+(subs>1?'s':'')+' parmi les derniers inscrits':'')+
-        '<br>🔒 Les équipes complètes et les joueurs ayant accepté leur place ont été conservés. Les autres joueurs ont été répartis dans les places libres pour équilibrer les niveaux.'+
-        (scores?'<br><b>⚖️ Indice équipes :</b> '+esc(scores):'')+
-        '<br>Règle automatique : '+(data?.odd_team_rule?'2 buts d’écart = l’équipe dehors rentre, sinon 10 min maximum.':'matchs de 10 min.')+
-        (subs?' <br><b>🟠 '+subs+' remplaçant'+(subs>1?'s':'')+' commun'+(subs>1?'s':'')+'</b> : ils peuvent jouer pour n’importe quelle équipe du tournoi.':'');
+    const call=t.format==='league'?sb.rpc('generate_balanced_teams',{p_tournament_id:t.id,p_players_per_team:perTeam}):sb.rpc('generate_swe_tournament_teams',{p_tournament_id:t.id});
+    const {data,error}=await call;if(error)throw error;
+    if(t.format!=='league'&&S.workspaceFeatures.team_review_enabled){
+      const review=await sb.rpc('start_tournament_team_review',{p_tournament_id:t.id,p_is_redraw:!!isRedraw});
+      if(review.error)throw review.error;
     }
-    toast(n+' équipes générées et format du tournoi configuré ✅');
+    await loadAll();S.activeTour=t.id;await loadTournament();renderAll();
+    const n=Number(data?.team_count||S.teams.length||0);
+    if(t.format==='league')$('#teamBalanceInfo').textContent=n+' équipes générées automatiquement selon les niveaux privés définis par l’administrateur.';
+    else{
+      const subs=Number(data?.substitute_count||0),pitches=Number(data?.pitch_count||1),scores=(data?.team_scores||[]).map(x=>x.team_name+' '+Number(x.score||0).toFixed(1)+'/5 • '+x.mention).join(' · ');
+      $('#teamBalanceInfo').innerHTML='<b>'+n+' équipes • '+pitches+' terrain'+(pitches>1?'s':'')+'</b>'+(subs?' • '+subs+' remplaçant'+(subs>1?'s':'')+' parmi les derniers inscrits':'')+'<br>🔒 Les équipes complètes et les joueurs ayant accepté leur place ont été conservés. Les autres joueurs ont été répartis dans les places libres pour équilibrer les niveaux.'+(scores?'<br><b>⚖️ Note moyenne équipes :</b> '+esc(scores):'')+'<br>Règle automatique : '+(data?.odd_team_rule?'2 buts d’écart = l’équipe dehors rentre, sinon 10 min maximum.':'matchs de 10 min.')+(S.workspaceFeatures.team_review_enabled?'<br><b>🗳️ Validation :</b> les équipes restent masquées du lien public pendant la fenêtre d’avis des co-gestionnaires présents.':'');
+    }
+    toast(isRedraw?'Nouveau tirage créé. Nouvelle fenêtre d’avis de 2 heures ouverte ✅':n+' équipes générées ✅');
   }catch(e){toast(e.message||'Impossible de générer les équipes')}
-  finally{btn.disabled=false;btn.textContent='⚡ Générer équipes équilibrées'}
-};
+  finally{if(btn){btn.disabled=false;btn.textContent=isRedraw?'🔄 Refaire le tirage':'⚡ Générer équipes équilibrées';}}
+}
+$('#smartAutoTeams').onclick=()=>runSmartTeamGeneration(false);
 
 function matchOptions(){return '<option value="">Choisir</option>'+S.teams.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')}
 function buildMatchPlayerManager(match,home,away){
@@ -4280,6 +4323,8 @@ async function bootPublic(token){
   let players=P.players||[],seasons=P.seasons||[],leagues=P.leagues||[],leaguePlayers=P.league_players||[],tournaments=(P.tournaments||[]).sort((a,b)=>String(b.tournament_date).localeCompare(String(a.tournament_date)));
   let teams=P.teams||[],teamPlayers=P.team_players||[],teamInvitations=P.team_player_invitations||[],matches=P.matches||[],goals=P.goals||[],matchAssignments=P.match_player_assignments||[];
   const publicPlayerRatingsEnabled=!!P.features?.player_ratings_enabled&&!!P.features?.top_player_enabled;
+  const publicTeamReviewEnabled=!!P.features?.team_review_enabled;
+  const publicTeamReviewStates=P.team_review_states||[];
   S.sportsComplexes=P.sports_complexes||[];
   S.sportsPitches=P.sports_pitches||[];
   let registrations=P.tournament_players||[];
@@ -4741,7 +4786,7 @@ async function bootPublic(token){
       (regTour.format!=='league'?(()=>{const plan=tournamentAutoPlan(confirmed);return '<div style="margin-top:7px;font-weight:800">⚙️ Scénario actuel : '+(plan.teams?plan.teams+' équipe'+(plan.teams>1?'s':'')+' • '+plan.pitches+' terrain'+(plan.pitches>1?'s':'')+(plan.subs?' • '+plan.subs+' remplaçant'+(plan.subs>1?'s':'')+' commun'+(plan.subs>1?'s':''):''):'moins de 10 joueurs — équipes non générables')+'</div>'})():'')+
       (regTour.registration_deadline?'<div style="margin-top:8px;padding:9px 11px;border-radius:10px;background:#f0fdf4;border:1px solid #bbf7d0"><b>⏱️ Compte à rebours des inscriptions</b><div data-registration-deadline="'+esc(regTour.registration_deadline)+'" style="margin-top:4px"></div><div class="muted">Fin des inscriptions : '+new Date(regTour.registration_deadline).toLocaleString('fr-FR',{timeZone:'America/Martinique',dateStyle:'short',timeStyle:'short'})+'</div></div>':'')+'</div>'+
       (regTour.format!=='league'
-        ? '<div class="player" style="margin-top:12px;background:#eef8f2;border:1px solid #b7dfc4"><b>📍 Infos pratiques</b><div class="muted" style="margin-top:6px;line-height:1.7">Complexe / terrains : <b>'+esc(publicTerrainLabel)+'</b><br>Heure de réservation : <b>'+esc(publicTime)+'</b><br>Prix : <b>'+esc(publicFee)+' € / participant</b>'+(regTour.reservation_reference?'<br>Réservation : <b>'+esc(regTour.reservation_reference)+'</b>':'')+'</div><div class="muted" style="margin-top:8px;line-height:1.7"><b>Programme :</b><br>8h45 : arrivée, paiement + échauffement<br>9h00 : début du tournoi — les premières équipes arrivées commencent<br>11h00 : 3e mi-temps</div></div>'
+        ? '<div class="player" style="margin-top:12px;background:#eef8f2;border:1px solid #b7dfc4"><b>📍 Infos pratiques</b><div class="muted" style="margin-top:6px;line-height:1.7">Complexe / terrains : <b>'+esc(publicTerrainLabel)+'</b><br>Heure de réservation : <b>'+esc(publicTime)+'</b><br>Prix : <b>'+esc(publicFee)+' € / participant</b>'+(regTour.reservation_reference?'<br>Réservation : <b>'+esc(regTour.reservation_reference)+'</b>':'')+'</div><div class="muted" style="margin-top:8px;line-height:1.7"><b>Programme :</b><br>8h45 : arrivée, paiement + échauffement<br>9h00 : début du tournoi — les premières équipes arrivées commencent'+(regTour.third_half_active?'<br>11h00 : 3e mi-temps':'')+'</div></div>'
         : '')+
       (publicAutoPlan&&confirmed>=10?'<div class="player" style="margin-top:12px;background:#eef8f2;border:1px solid #b7dfc4"><b>⚙️ Format prévu avec '+confirmed+' inscrits</b><div class="muted" style="margin-top:5px;line-height:1.6">'+publicAutoPlan.teams+' équipes • '+publicAutoPlan.pitches+' terrain'+(publicAutoPlan.pitches>1?'s':'')+(publicAutoPlan.subs?' • '+publicAutoPlan.subs+' remplaçant'+(publicAutoPlan.subs>1?'s':'')+' commun'+(publicAutoPlan.subs>1?'s':''):'')+'.'+(publicAutoPlan.subs?' Les remplaçants pourront jouer pour n’importe quelle équipe.':'')+'</div></div>':'')+
       '<div class="player" style="margin-top:12px;background:#f8fbf9"><b>✅ Inscription</b><div class="muted" style="margin-top:6px;line-height:1.6">Inscris-toi en cliquant sur <b>« Je participe »</b>. Si tu viens accompagné, indique le nom de tes invités. Chaque membre peut ajouter jusqu’à <b>5 invités maximum</b>.</div></div>'+
@@ -4770,10 +4815,10 @@ async function bootPublic(token){
       ['publicJoin','publicAddGuest','publicNewPlayerJoin'].forEach(id=>{const b=$('#'+id);if(b)b.disabled=true;});
     }
 
-    if(publicThirdHalf){
-      const donorCard=document.createElement('div');
+    if(publicThirdHalf&&regTour.third_half_active){document.querySelectorAll('#publicThirdHalfDonorCard').forEach(x=>x.remove());
+      const donorCard=document.createElement('div');donorCard.id='publicThirdHalfDonorCard';
       donorCard.className='card';
-      donorCard.innerHTML='<h2 class="sectiontitle">🧊 Top donateurs de la 3e mi-temps</h2><p class="muted">Le classement apparaîtra ici dès que les participations à la glacière seront enregistrées. Les paiements en ligne seront raccordés à Stripe dans une prochaine étape.</p><div id="publicCoolerDonors"></div>';
+      donorCard.innerHTML='<h2 class="sectiontitle">🧊 Top donateurs de la 3e mi-temps</h2><p class="muted">Le classement apparaîtra ici dès que les participations à la glacière seront enregistrées par l’organisateur.</p><div id="publicCoolerDonors"></div>';
       regBox.parentElement?.insertBefore(donorCard,regBox.nextSibling);
     }
 
@@ -4895,7 +4940,7 @@ async function bootPublic(token){
           publicPaymentCache={playerId:pid,status:st,html,bg:'#fff8e8',border:'1px solid #f2d18a'};applyPublicPaymentView(box,html,publicPaymentCache.bg,publicPaymentCache.border);
           return;
         }
-        if(st.reason==='free'||Number(st.entry_fee_cents||0)<=0){box.className='hidden';box.innerHTML='';return;}
+        if(st.reason==='online_disabled'){box.className='hidden';box.innerHTML='';return;}if(st.reason==='free'||Number(st.entry_fee_cents||0)<=0){box.className='hidden';box.innerHTML='';return;}
         if(st.payment_status==='paid'){
           const html='<b>✅ Participation payée en ligne</b><div class="muted" style="margin-top:5px">Paiement confirmé par Stripe'+(st.paid_at?' • '+new Date(st.paid_at).toLocaleString('fr-FR',{timeZone:'America/Martinique',dateStyle:'short',timeStyle:'short'}):'')+'.</div>';
           publicPaymentCache={playerId:pid,status:st,html,bg:'#eef8f2',border:'1px solid #b7dfc4'};applyPublicPaymentView(box,html,publicPaymentCache.bg,publicPaymentCache.border);
@@ -4908,7 +4953,7 @@ async function bootPublic(token){
           return;
         }
         if(choice.payment_preference==='onsite'){
-          const html='<b>🏟️ Paiement sur place choisi</b><div style="margin-top:7px">À régler au complexe : <b style="font-size:1.05rem">'+publicMoney(st.entry_fee_cents)+'</b></div><div class="muted" style="margin-top:5px">Ton inscription est enregistrée. Le complexe confirmera ton paiement lorsqu’il le recevra.</div><button id="publicSwitchOnline" style="width:100%;margin-top:10px">💳 Finalement payer en ligne</button>';
+          const html='<b>🏟️ Paiement sur place choisi</b><div style="margin-top:7px">Tarif public sur place : <b style="font-size:1.05rem">'+publicMoney(onsiteStandardPriceCents(regTour))+'</b></div><div class="muted" style="margin-top:5px">Ton inscription est enregistrée. Le complexe confirmera ton paiement lorsqu’il le recevra.</div><button id="publicSwitchOnline" style="width:100%;margin-top:10px">💳 Finalement payer en ligne</button>';
           publicPaymentCache={playerId:pid,status:st,html,bg:'#fff8e8',border:'1px solid #f2d18a'};applyPublicPaymentView(box,html,publicPaymentCache.bg,publicPaymentCache.border);
           $('#publicSwitchOnline').onclick=async()=>{await sb.rpc('public_set_tournament_payment_preference',{p_token:token,p_tournament_id:regTour.id,p_player_id:pid,p_preference:'online'});publicPaymentCache={playerId:null,status:null,html:null,bg:null,border:null};await renderPublicPaymentBox({skipStripeReconcile:true});};
           return;
@@ -4926,8 +4971,8 @@ async function bootPublic(token){
         }
         const html='<div><b style="font-size:1.02rem">💶 Comment veux-tu payer ?</b><div class="muted" style="margin-top:5px">Choisis ton mode de paiement pour cette inscription.</div></div>'+ 
           '<div class="grid g2" style="gap:9px;margin-top:12px">'+
-            '<button id="publicPayEntry" class="primary" style="min-height:64px"><span style="font-size:1.05rem">💳 Payer en ligne</span><br><span style="font-size:.76rem;font-weight:700">'+publicMoney(st.total_cents)+' • sécurisé par Stripe</span></button>'+ 
-            '<button id="publicPayOnsite" style="min-height:64px;background:#fff;border:2px solid #178a43;color:#126b34"><span style="font-size:1.05rem">🏟️ Payer sur place</span><br><span style="font-size:.76rem;font-weight:700">'+publicMoney(st.entry_fee_cents)+' au complexe</span></button>'+ 
+            '<button id="publicPayEntry" class="primary" style="min-height:64px"><span style="font-size:1.05rem">💳 Payer en ligne</span><br><span style="font-size:.76rem;font-weight:700">Gagner du temps • sécurisé par Stripe</span></button>'+ 
+            '<button id="publicPayOnsite" style="min-height:64px;background:#fff;border:2px solid #178a43;color:#126b34"><span style="font-size:1.05rem">🏟️ Payer sur place</span><br><span style="font-size:.76rem;font-weight:700">'+publicMoney(onsiteStandardPriceCents(regTour))+' tarif public</span></button>'+ 
           '</div>'+ 
           '<div style="margin-top:12px;padding:10px;border-radius:12px;background:#fff;border:1px solid #e4e8ee"><div style="font-weight:850;font-size:.88rem">Paiement en ligne accepté</div><div class="muted" style="font-size:.70rem;line-height:1.35;margin:3px 0 8px">Selon ton appareil, ton navigateur et les moyens de paiement disponibles sur Stripe.</div><div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px">'+
             '<div style="border:1px solid #dfe4ea;border-radius:10px;padding:8px 5px;text-align:center;background:#fff"><div style="display:flex;align-items:center;justify-content:center;gap:6px;height:28px"><span style="font-weight:950;font-size:.72rem;background:#1434CB;color:#fff;border-radius:4px;padding:3px 5px;font-style:italic">VISA</span><span aria-label="Mastercard" style="display:inline-flex;align-items:center"><i style="display:inline-block;width:15px;height:15px;border-radius:50%;background:#EB001B;margin-right:-5px"></i><i style="display:inline-block;width:15px;height:15px;border-radius:50%;background:#F79E1B;opacity:.92"></i></span></div><div class="muted" style="font-size:.67rem">Carte bancaire</div></div>'+
@@ -4936,7 +4981,7 @@ async function bootPublic(token){
             '<div style="border:1px solid #dfe4ea;border-radius:10px;padding:8px 5px;text-align:center;background:#fff"><div style="height:28px;display:flex;align-items:center;justify-content:center"><img src="https://upload.wikimedia.org/wikipedia/commons/7/73/Revolut_logo.svg" alt="Revolut Pay" style="display:block;max-width:72px;max-height:22px;width:auto;height:auto"></div><div class="muted" style="font-size:.67rem">Revolut Pay</div></div>'+
           '</div></div>'+ 
           (pending?'<div class="muted" style="margin-top:8px">Un paiement en ligne a déjà été commencé mais n’est pas encore confirmé.</div>':'')+
-          '<div class="muted" style="margin-top:8px;font-size:.76rem;text-align:center">✨ Choisis librement : sur place, tu règles uniquement ta participation au complexe ; en ligne, tu profites d’un paiement sécurisé et confirmé automatiquement par SWÉ.</div>';
+          '<div class="muted" style="margin-top:8px;font-size:.76rem;text-align:center">✨ Paiement en ligne pour gagner du temps, ou paiement sur place au tarif public du complexe.</div>';
         publicPaymentCache={playerId:pid,status:st,html,bg:'#f8fbff',border:'1px solid #cbdcf5'};
         applyPublicPaymentView(box,html,publicPaymentCache.bg,publicPaymentCache.border);
         $('#publicPayEntry').onclick=async()=>{
@@ -5703,8 +5748,8 @@ async function bootPublic(token){
       const playersHtml=teamPlayers.filter(tp=>tp.team_id===team.id).map(tp=>{const pl=pmap.get(tp.player_id);return pl?'<div class="public-team-player">'+esc(pl.name)+(pl.is_group_member===false?' <span class="guest-badge">Guest</span>':'')+'</div>':''}).join('');
       const crown=team.id===championTeamId?'👑 ':'';
       const champ=team.id===championTeamId?'<div class="public-team-shirt">🏆 Équipe victorieuse</div>':'';
-      return '<div class="public-team-card"><div class="public-team-head" style="background:'+bg+';color:'+fg+'"><div>'+crown+esc(team.name)+'</div>'+champ+(!colorNamed?'<div class="public-team-shirt">👕 Maillots : '+esc(label)+'</div>':'')+'</div><div class="public-team-players">'+(playersHtml||'<div class="muted">Aucun joueur</div>')+'</div></div>';
-    }).join('')||'<p class="muted">Aucune équipe.</p>';
+      const avg=Number(team.team_score||0)>0?'<div class="public-team-average">⚖️ Note moyenne : <b>'+Number(team.team_score).toFixed(1)+'/5</b>'+(team.mention?' • '+esc(team.mention):'')+'</div>':'';return '<div class="public-team-card"><div class="public-team-head" style="background:'+bg+';color:'+fg+'"><div>'+crown+esc(team.name)+'</div>'+champ+(!colorNamed?'<div class="public-team-shirt">👕 Maillots : '+esc(label)+'</div>':'')+'</div>'+avg+'<div class="public-team-players">'+(playersHtml||'<div class="muted">Aucun joueur</div>')+'</div></div>';
+    }).join('')||(publicTeamReviewEnabled&&['pending','redraw_requested'].includes(publicTeamReviewStates.find(x=>String(x.tournament_id)===String(latest.id))?.status)?'<div class="public-review-wait"><b>🗳️ Composition en validation</b><div>Les co-gestionnaires présents disposent de 2 heures pour donner leur avis. Les équipes seront publiées dès validation.</div></div>':'<p class="muted">Aucune équipe.</p>');
     $('#publicResults').innerHTML=lm.map((m,i)=>{
       const mg=goals.filter(g=>g.match_id===m.id);
       const goalBlock=(teamId)=>{
