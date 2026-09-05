@@ -950,7 +950,19 @@ function renderMyPlayerHub(){
   const rating=st.rating==null?'—':Number(st.rating).toFixed(1)+'/5';
   if($('#myPlayerStats'))$('#myPlayerStats').innerHTML=[['🏟️','Groupes',st.groups||0],['🏆','Swés joués',st.tournaments||0],['⚽','Matchs',st.matches||0],['✅','Victoires',st.wins||0],['🥅','Buts',st.goals||0],['🎯','Passes',st.assists||0],['⭐','Note',rating]].map(x=>'<div><span>'+x[0]+'</span><small>'+x[1]+'</small><b>'+x[2]+'</b></div>').join('');
   const groups=Array.isArray(d.groups)?d.groups:[];
-  if($('#myPlayerGroups'))$('#myPlayerGroups').innerHTML=groups.length?groups.map(g=>'<div class="player"><b>'+esc(g.workspace_name)+'</b><div class="muted">Profil local : '+esc(g.player_name)+(g.is_group_member?' • membre':' • invité')+'</div></div>').join(''):'<div class="muted">Aucun profil de groupe relié pour le moment.</div>';
+  if($('#myPlayerGroups')){
+    let groupHtml=groups.length?groups.map(g=>'<div class="player"><b>'+esc(g.workspace_name)+'</b><div class="muted">Profil local : '+esc(g.player_name)+(g.is_group_member?' • membre':' • invité')+'</div></div>').join(''):'<div class="muted">Aucun profil de groupe relié pour le moment.</div>';
+    if(S.workspace&&(isAdmin()||isCoorg())){
+      const linkedPlayer=(S.players||[]).find(x=>String(x.id)===String(S.myLinkedPlayerId||''));
+      if(linkedPlayer){
+        groupHtml='<div class="player swe-self-link-ok"><div><b>🪪 '+esc(S.workspace.name||'Groupe actuel')+'</b><div class="muted">Ton compte organisateur est lié au membre <b>'+esc(linkedPlayer.name)+'</b>. Ses tournois, stats et notes utilisent maintenant le même ID SWÉ <b>'+esc(p.public_player_id)+'</b>.</div></div><span class="guest-badge">LIÉ</span></div>'+groupHtml;
+      }else{
+        const candidates=(S.players||[]).filter(x=>x.active!==false&&x.is_group_member!==false);
+        groupHtml='<div class="player swe-self-link-card"><div style="flex:1"><b>🔗 Relier mon compte organisateur à mon membre joueur</b><div class="muted">Choisis ton nom dans ce groupe. Ton ID SWÉ '+esc(p.public_player_id)+' suivra alors automatiquement tes inscriptions aux tournois en cours et futurs.</div><div class="row" style="margin-top:8px;gap:8px"><select id="myPlayerSelfMember" style="flex:1"><option value="">Choisir mon profil membre…</option>'+candidates.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.name)+'</option>').join('')+'</select><button id="myPlayerSelfLink" class="primary">C’est moi</button></div></div></div>'+groupHtml;
+      }
+    }
+    $('#myPlayerGroups').innerHTML=groupHtml;
+  }
   const invites=Array.isArray(d.invites)?d.invites:[];
   if($('#myPlayerInvites'))$('#myPlayerInvites').innerHTML=invites.length?invites.map(i=>'<div class="player"><div class="row" style="justify-content:space-between;gap:8px;flex-wrap:wrap"><div><b>'+esc(i.workspace_name)+' • '+esc(i.tournament_name||'Swé')+'</b><div class="muted">'+esc(i.tournament_date||'')+(i.start_time?' • '+esc(String(i.start_time).slice(0,5)):'')+(i.venue?' • '+esc(i.venue):'')+'</div>'+(i.message?'<div class="small" style="margin-top:5px">'+esc(i.message)+'</div>':'')+'</div><span class="guest-badge">'+esc(String(i.status||'pending').toUpperCase())+'</span></div>'+(i.status==='pending'?'<div class="row" style="margin-top:8px"><button class="primary" data-player-invite-accept="'+i.id+'">✅ Accepter</button><button data-player-invite-decline="'+i.id+'">Refuser</button></div>':'')+'</div>').join(''):'<div class="muted">Aucune invitation.</div>';
   const mySwes=Array.isArray(d.my_swes)?d.my_swes:[];
@@ -1777,6 +1789,13 @@ document.addEventListener('click',async e=>{
   if(e.target?.id==='myPlayerClaimLink'){
     const code=$('#myPlayerLinkCode').value.trim();if(!code)return toast('Saisis le code de liaison fourni par ton groupe.');
     e.target.disabled=true;const {data,error}=await sb.rpc('claim_player_link_code',{p_code:code});e.target.disabled=false;if(error)return toast(error.message);$('#myPlayerLinkCode').value='';await loadMyPlayerDashboard();if(S.workspace)await loadAll();toast('Profil « '+(data?.player_name||'joueur')+' » relié à ton ID SWÉ ✅');return;
+  }
+  if(e.target?.id==='myPlayerSelfLink'){
+    const playerId=$('#myPlayerSelfMember')?.value;if(!playerId)return toast('Choisis ton profil membre dans la liste.');
+    const player=(S.players||[]).find(x=>String(x.id)===String(playerId));
+    if(!confirm('Relier définitivement ton compte SWÉ au membre « '+(player?.name||'sélectionné')+' » dans ce groupe ?'))return;
+    e.target.disabled=true;const {data,error}=await sb.rpc('link_my_member_player_to_swe',{p_workspace_id:S.workspace.id,p_player_id:playerId});e.target.disabled=false;
+    if(error)return toast(error.message);await loadAll();await loadMyPlayerDashboard();toast('Compte lié à « '+(data?.player_name||player?.name||'membre')+' » • ID '+(data?.public_player_id||'SWÉ')+' ✅');return;
   }
   if(e.target?.id==='myPlayerRefresh'){await loadMyPlayerDashboard();toast('Profil actualisé ✅');return;}
   const accept=e.target?.closest?.('[data-player-invite-accept]');if(accept){accept.disabled=true;const {data,error}=await sb.rpc('respond_global_player_tournament_invite',{p_invite_id:accept.dataset.playerInviteAccept,p_accept:true});accept.disabled=false;if(error)return toast(error.message);await loadMyPlayerDashboard();toast(data?.status==='waitlist'?'Invitation acceptée • tu es actuellement remplaçant.':'Invitation acceptée ✅');return;}
@@ -3887,12 +3906,12 @@ $('#shareWhatsapp').onclick=async()=>{const text=$('#shareText').value;if(naviga
 function subscribeRealtime(){if(S.channel)sb.removeChannel(S.channel);let timer;const reload=()=>{clearTimeout(timer);timer=setTimeout(async()=>await loadAll(),250)};S.channel=sb.channel('tournoi-manager').on('postgres_changes',{event:'*',schema:'public',table:'players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'seasons'},reload).on('postgres_changes',{event:'*',schema:'public',table:'tournaments'},reload).on('postgres_changes',{event:'*',schema:'public',table:'tournament_players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'teams'},reload).on('postgres_changes',{event:'*',schema:'public',table:'team_players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'matches'},reload).on('postgres_changes',{event:'*',schema:'public',table:'goals'},reload).on('postgres_changes',{event:'*',schema:'public',table:'match_player_assignments'},reload).subscribe()}
 
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('./sw.js?v=4202',{updateViaCache:'none'})
+  navigator.serviceWorker.register('./sw.js?v=4203',{updateViaCache:'none'})
     .then(reg=>{
       reg.update().catch(()=>{});
       navigator.serviceWorker.addEventListener('controllerchange',()=>{
-        if(sessionStorage.getItem('SW_BUILD_RELOAD_4202'))return;
-        sessionStorage.setItem('SW_BUILD_RELOAD_4202','1');
+        if(sessionStorage.getItem('SW_BUILD_RELOAD_4203'))return;
+        sessionStorage.setItem('SW_BUILD_RELOAD_4203','1');
         location.reload();
       },{once:true});
       return reg;
