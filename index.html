@@ -14,7 +14,7 @@
   <title>SWÉ TOURNAMENT 5/5 • V42.8</title>
 <link rel="icon" type="image/png" href="./favicon.png?v=4208">
 <link rel="apple-touch-icon" href="./icon-192.png?v=4112">
-  <link rel="stylesheet" href="./styles.css?v=4211">
+  <link rel="stylesheet" href="./styles.css?v=4214">
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -30,7 +30,7 @@
 </div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1><img src="./favicon.png?v=4208" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V42.11</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1><img src="./favicon.png?v=4208" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V42.14</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -76,7 +76,7 @@
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1><img src="./favicon.png?v=4208" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V42.11</span></h1><div id="workspaceName" class="muted"></div><div class="build-badge" title="Version installée">MAJ 42.11</div></div>
+        <div><h1><img src="./favicon.png?v=4208" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V42.14</span></h1><div id="workspaceName" class="muted"></div><div class="build-badge" title="Version installée">MAJ 42.14</div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -167,6 +167,7 @@
           <div class="sa-section-head"><div><span class="sa-section-icon">✉️</span><div><h2>Demandes d’inscription joueurs</h2><p>Les joueurs inscrits par e-mail sur swetournament.fr apparaissent ici. Tu peux leur transmettre leur lien d’activation par e-mail ou WhatsApp.</p></div></div><span class="sa-help-pill" id="saSignupRequestsCount">0 en attente</span></div>
           <div id="saSignupRequestsList" style="margin-top:12px"></div>
         </div>
+        <div class="card sa-identity-disputes-card"><div class="sa-section-head"><div><span class="sa-section-icon">⚠️</span><div><h2>Conflits d’identité joueur</h2><p>Lorsqu’un même membre est revendiqué par deux comptes, les deux identités sont mises en vérification jusqu’à décision du Super Admin.</p></div></div><span class="sa-help-pill" id="saIdentityDisputeCount">0 litige</span></div><div id="saIdentityDisputesList" style="margin-top:12px"></div></div>
         <div class="card sa-players-card">
           <div class="sa-section-head"><div><span class="sa-section-icon">👤</span><div><h2>Joueurs SWÉ</h2><p>Base centrale des comptes joueurs, administrateurs et co-gestionnaires rattachés à un ID SWÉ par leur adresse e-mail.</p></div></div><span class="sa-help-pill" id="saPlayersCountPill">0 profils</span></div>
           <div class="sa-player-stats" id="saPlayerStats"></div>
@@ -208,7 +209,7 @@
           <button id="myPlayerSave" class="primary" style="margin-top:12px">💾 Enregistrer mon profil</button>
         </div>
         <div class="card"><h2 class="sectiontitle">📊 Mes performances tous groupes confondus</h2><div id="myPlayerStats" class="player-global-stats"></div></div>
-        <div class="card"><h2 class="sectiontitle">🔗 Relier un profil de groupe</h2><p class="muted">Demande au responsable du groupe ton <b>code de liaison SWÉ</b>, puis saisis-le ici. Tes statistiques de ce groupe seront rattachées à ton ID personnel.</p><div class="row"><input id="myPlayerLinkCode" placeholder="Ex. LINK-A1B2C3D4E5" style="flex:1;text-transform:uppercase"><button id="myPlayerClaimLink" class="primary">Relier ce profil</button></div></div>
+        <div class="card swe-history-link-card"><h2 class="sectiontitle">🔎 Retrouver un Swé auquel j’ai déjà participé</h2><p class="muted">Tes statistiques deviennent personnelles uniquement lorsque ton compte SWÉ est relié au bon joueur. Saisis l’<b>ID du tournoi</b> ou l’<b>ID SWÉ de la ligue</b>, puis sélectionne ton nom dans la liste des participants.</p><div class="row swe-history-search"><input id="mySweHistoryCode" placeholder="Ex. ABC123 ou LIG-A1B2C3D4" style="flex:1;text-transform:uppercase"><button id="mySweHistorySearch" class="primary">Rechercher</button></div><div id="mySweHistoryResult" style="margin-top:12px"></div><div class="identity-warning">⚠️ Une identité joueur ne doit jamais être revendiquée par une autre personne. Si deux comptes revendiquent le même membre, les deux profils sont automatiquement placés en vérification jusqu’au contrôle de l’équipe SWÉ.</div></div>
         <div class="grid g2 player-hub-grid">
           <div class="card"><h2 class="sectiontitle">🏟️ Mes groupes liés</h2><div id="myPlayerGroups"></div></div>
           <div class="card"><h2 class="sectiontitle">📩 Mes invitations</h2><div id="myPlayerInvites"></div></div>
@@ -843,5 +844,5 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
-<script src="./app.js?v=4211" defer></script>
+<script src="./app.js?v=4214" defer></script>
 <footer id="platformFooter" class="platform-footer hidden"><div class="platform-footer-inner"><div><b id="platformFooterCompany">SWÉ Tournament</b><div id="platformFooterText"></div></div><div id="platformFooterLinks"></div></div></footer></body></html>
