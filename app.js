@@ -1696,7 +1696,7 @@ function renderPlayers(){
       meta+=aggregate&&Number(aggregate.voter_count)>0?' • Moyenne '+Number(aggregate.avg_rating).toFixed(1)+'/5 • '+aggregate.voter_count+' votant'+(Number(aggregate.voter_count)>1?'s':''):' • Aucun avis';
     }else if(isCoorg()){
       const aggregate=playerSkillAggregate(x.id);
-      if(aggregate&&Number(aggregate.voter_count)>0)meta+=' • Consensus des co-gestionnaires : '+Number(aggregate.avg_rating).toFixed(1)+'/5';
+      if(aggregate&&Number(aggregate.voter_count)>0)meta+=' • Moyenne SWÉ tous groupes : '+Number(aggregate.avg_rating).toFixed(1)+'/5';
     }
     info.innerHTML='<b>'+esc(x.name)+'</b>'+(x.is_group_member===false?'<span class="guest-badge">Guest</span>':'')+
       '<div class="muted">'+meta+'</div>';
@@ -1850,7 +1850,7 @@ function renderPlayers(){
       const existing=S.myRatings.find(r=>r.player_id===x.id);
       const rate=document.createElement('div');rate.className='player-skill-review';rate.style.cssText='margin-top:8px;padding:9px 10px;border:1px solid #dce9e1;border-radius:13px;background:#f8fcfa';
       const aggregate=playerSkillAggregate(x.id);
-      const aggText=aggregate&&Number(aggregate.voter_count)>0?(isCoorg()?'<div style="margin-top:5px"><b>📊 Note du consensus des co-gestionnaires du groupe : '+Number(aggregate.avg_rating).toFixed(1)+'/5</b></div>':'<div style="margin-top:5px"><b>📊 Moyenne actuelle : '+Number(aggregate.avg_rating).toFixed(1)+'/5</b> • '+aggregate.voter_count+' votant'+(Number(aggregate.voter_count)>1?'s':'')+'</div>'):'<div style="margin-top:5px">📊 Pas encore assez d’avis pour une moyenne.</div>';
+      const aggText=aggregate&&Number(aggregate.voter_count)>0?(isCoorg()?'<div style="margin-top:5px"><b>🌍 Moyenne SWÉ tous groupes : '+Number(aggregate.avg_rating).toFixed(1)+'/5</b></div>':'<div style="margin-top:5px"><b>🌍 Moyenne SWÉ tous groupes : '+Number(aggregate.avg_rating).toFixed(1)+'/5</b> • '+aggregate.voter_count+' évaluation'+(Number(aggregate.voter_count)>1?'s':'')+'</div>'):'<div style="margin-top:5px">📊 Pas encore assez d’avis pour une moyenne.</div>';
       const title=document.createElement('div');title.innerHTML='<b>⚽ Mon évaluation confidentielle</b><div class="muted small">1 = à renforcer • 2 = moyen • 3 = bon • 4 = très bon • 5 = excellent.</div>'+aggText;
       const criteria=document.createElement('div');criteria.style.cssText='display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:8px';
       const values={};
