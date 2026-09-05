@@ -29,7 +29,7 @@ window.addEventListener('error', (e) => {
   if(t){t.textContent='Erreur de chargement de l’application. Recharge la page.';t.style.display='block';}
 });
 
-const S={session:null,adminProfile:null,isSuperAdmin:false,superWorkspaces:[],workspace:null,members:[],coorgs:[],coorgCount:0,workspaceFeatures:{max_coorganizers:3,max_coorganizers_cap:100,rankings_enabled:true,league_enabled:true,tournaments_enabled:true,third_half_enabled:false,player_ratings_enabled:false,max_players_cap:35,payments_enabled:true,top_player_enabled:false,match_ratings_enabled:false,team_review_enabled:false},commercialAccess:{subscription_plan:'free',special_access_enabled:false,upgrade_requested_at:null},billingStatus:null,coorgPurchaseConfirming:false,myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null},myRatings:[],lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],skillAggregates:[],teamCodes:[],seasons:[],leagues:[],leaguePlayers:[],activeLeague:null,tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matchAssignments:[],matches:[],goals:[],teamBalanceScores:[],rankMode:'season',channel:null,goalTeamSelections:{},sportsComplexes:[],sportsPitches:[],publicMode:false,publicToken:null,tournamentCreateOpen:false,seasonAdminOpen:false,editingTournamentId:null,teamCompetitionId:null,lastView:null,coorgQuotaRequest:null,superCoorgQuotaRequests:[],myLinkedPlayerId:null,playerDashboard:null,playerDirectory:[],organizerSettings:null,playerRequests:[],platformSettings:{consent_gate_enabled:false},thirdHalfFunds:[],teamReviewState:null};
+const S={session:null,adminProfile:null,isSuperAdmin:false,superWorkspaces:[],workspace:null,members:[],coorgs:[],coorgCount:0,workspaceFeatures:{max_coorganizers:3,max_coorganizers_cap:100,rankings_enabled:true,league_enabled:true,tournaments_enabled:true,third_half_enabled:false,player_ratings_enabled:false,max_players_cap:35,payments_enabled:true,top_player_enabled:false,match_ratings_enabled:false,team_review_enabled:false},commercialAccess:{subscription_plan:'free',special_access_enabled:false,upgrade_requested_at:null},billingStatus:null,coorgPurchaseConfirming:false,myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null},myRatings:[],lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],skillAggregates:[],teamCodes:[],seasons:[],leagues:[],leaguePlayers:[],activeLeague:null,tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matchAssignments:[],matches:[],goals:[],teamBalanceScores:[],rankMode:'season',channel:null,goalTeamSelections:{},sportsComplexes:[],sportsPitches:[],publicMode:false,publicToken:null,tournamentCreateOpen:false,seasonAdminOpen:false,editingTournamentId:null,teamCompetitionId:null,lastView:null,coorgQuotaRequest:null,superCoorgQuotaRequests:[],myLinkedPlayerId:null,playerDashboard:null,playerDirectory:[],organizerSettings:null,playerRequests:[],platformSettings:{consent_gate_enabled:false},thirdHalfFunds:[],teamReviewState:null,onboardingStatus:null,memberships:[],organizerAccess:null};
 
 let safeSyncTimer=null;
 let safeSyncBusy=false;
@@ -297,6 +297,12 @@ function applyPermissions(){
   const admin=isAdmin();
   const coorg=isCoorg();
   const adminOps=hasAdminOps();
+  const organizerLocked=!!S.organizerAccess?.requires_subscription;
+  if(organizerLocked){
+    document.querySelectorAll('.tabs .tab').forEach(el=>{const v=el.dataset.view;el.style.display=(v==='home'||v==='myplayer')?'':'none';});
+    document.querySelectorAll('[data-go]').forEach(el=>{const v=el.dataset.go;if(v&&v!=='home'&&v!=='myplayer')el.style.display='none';});
+    return;
+  }
   const canCreateTournament=adminOps||(coorg&&S.myPermissions.can_create_tournaments);
   const seasonCard=$('#seasonAdminCard');if(seasonCard)seasonCard.classList.toggle('hidden',!adminOps||!S.seasonAdminOpen);
   const tournamentCard=$('#tournamentAdminCard');if(tournamentCard)tournamentCard.classList.toggle('hidden',!canCreateTournament||!S.tournamentCreateOpen);
@@ -477,7 +483,7 @@ $('#signup').onclick=async()=>{
 $('#authGoogle').onclick=()=>startSocialAuth('google');
 $('#authApple').onclick=()=>startSocialAuth('apple');
 async function startSocialAuth(provider){
-  const redirectTo=APP_URL+'?start=player&oauth=done';
+  const redirectTo=APP_URL+'?oauth=done';
   const {error}=await sb.auth.signInWithOAuth({provider,options:{redirectTo}});
   if(error)toast('Connexion '+(provider==='google'?'Google':'Apple')+' indisponible pour le moment : '+friendlyAuthError(error));
 }
@@ -1045,41 +1051,124 @@ function renderAdminPlayerRequests(){
   const rows=S.playerRequests||[];if(!rows.length){box.innerHTML='<div class="muted">Aucune demande de participation pour le moment.</div>';return;}
   box.innerHTML=rows.map(r=>'<div class="player request-row"><div class="row" style="justify-content:space-between;gap:10px;flex-wrap:wrap"><div><div class="row" style="justify-content:flex-start;gap:7px;flex-wrap:wrap"><b>'+esc(r.display_name)+'</b><span class="player-id-mini">'+esc(r.public_player_id)+'</span></div><div class="muted">'+esc(r.home_area||'Zone non renseignée')+' • '+esc(r.tournament_name||'Swé')+' • '+esc(r.tournament_date||'')+'</div></div><span class="guest-badge">'+(r.status==='pending'?'EN ATTENTE':r.status==='accepted'?'ACCEPTÉE':'REFUSÉE')+'</span></div>'+(r.message?'<div class="small" style="margin-top:7px">💬 '+esc(r.message)+'</div>':'')+(Number(r.third_half_pledge_cents||0)>0?'<div class="small" style="margin-top:5px">🧊 Contribution annoncée : '+euroCents(r.third_half_pledge_cents)+'</div>':'')+(r.external_payment_required?'<div class="small" style="margin-top:5px">💳 Paiement exigé : '+euroCents(r.entry_fee_cents)+(r.payment_ready?' • prêt':' • configuration requise')+'</div>':'')+(r.status==='pending'?'<div class="row" style="margin-top:9px"><button class="primary" data-request-accept="'+r.request_id+'">✅ Accepter</button><button data-request-decline="'+r.request_id+'">Refuser</button></div>':'')+'</div>').join('');
 }
+function renderWorkspaceSwitcher(){
+  const sel=$('#workspaceSwitcher');if(!sel)return;
+  const rows=S.memberships||[];
+  sel.classList.toggle('hidden',rows.length<2);
+  if(rows.length<2){sel.innerHTML='';return;}
+  sel.innerHTML=rows.map(r=>'<option value="'+esc(r.workspace_id)+'"'+(String(r.workspace_id)===String(S.workspace?.id)?' selected':'')+'>'+esc(r.workspaces?.name||'Espace SWÉ')+' • '+(r.role==='admin'?'Admin':'Co-gestionnaire')+'</option>').join('');
+}
+function renderOrganizerAccessBanner(){
+  const box=$('#organizerAccessBanner');if(!box)return;
+  const a=S.organizerAccess;
+  if(!S.workspace||!a){box.classList.add('hidden');box.innerHTML='';return;}
+  if(a.trial_active){
+    box.classList.remove('hidden','expired');
+    box.innerHTML='<div><b>🎁 Essai organisateur • '+Number(a.days_remaining||0)+' jour'+(Number(a.days_remaining||0)>1?'s':'')+' restant'+(Number(a.days_remaining||0)>1?'s':'')+'</b><span>Toutes les options sont débloquées pendant 60 jours. Ensuite, choisis un abonnement pour continuer à organiser.</span></div><button type="button" data-go="home">Voir mon espace</button>';
+    return;
+  }
+  if(a.requires_subscription){
+    box.classList.remove('hidden');box.classList.add('expired');
+    box.innerHTML='<div><b>⏳ Ton essai organisateur est terminé</b><span>Tes données sont conservées en lecture seule. Choisis une formule SWÉ pour reprendre l’organisation.</span></div><button type="button" id="trialChoosePlan" class="primary">Voir les formules SWÉ</button>';
+    return;
+  }
+  box.classList.add('hidden');box.innerHTML='';
+}
+async function loadOnboardingStatus(){
+  const r=await sb.rpc('get_my_onboarding_status');
+  S.onboardingStatus=r.error?null:(r.data||null);
+  return S.onboardingStatus;
+}
+function openOrganizerSetup(type='group'){
+  $('#accountOnboarding')?.classList.add('hidden');
+  $('#workspaceSetup')?.classList.remove('hidden');
+  const radio=document.querySelector('input[name="organizerType"][value="'+(type==='pro'?'pro':'group')+'"]');if(radio)radio.checked=true;
+  const inp=$('#newWorkspace');if(inp&&!inp.value)inp.value=type==='pro'?'Mon organisation SWÉ':'Mon groupe SWÉ';
+  setTimeout(()=>inp?.focus(),50);
+}
+function showAccountOnboarding(){
+  $('#accountOnboarding')?.classList.remove('hidden');
+  $('#workspaceSetup')?.classList.add('hidden');
+}
+function renderCoorgOrganizerCta(){
+  const card=$('#coorgOrganizerCta');if(!card)return;
+  card.classList.toggle('hidden',!isCoorg());
+}
+
 async function boot(){
   await loadInvites();
   if(await initSuperAdmin())return;
   const currentUserId=S.session?.user?.id;
   if(!currentUserId)return toast('Session utilisateur introuvable.');
+  await loadOnboardingStatus();
   const {data,error}=await sb.from('workspace_members')
     .select('workspace_id,role,workspaces(name,public_token,public_enabled)')
     .eq('user_id',currentUserId)
     .eq('active',true)
-    .limit(10);
+    .limit(50);
   if(error)return toast(error.message);
-  if(!data?.length){
-    S.workspace=null;
-    $('#workspaceSetup').classList.remove('hidden');
+  S.memberships=Array.isArray(data)?data:[];
+  if(!S.memberships.length){
+    S.workspace=null;S.organizerAccess=null;
+    renderWorkspaceSwitcher();renderOrganizerAccessBanner();
     await loadMyPlayerDashboard();
     document.querySelectorAll('.tabs .tab').forEach(t=>t.style.display=t.dataset.view==='myplayer'?'':'none');
     setView('myplayer');
-    $('#workspaceName').textContent='Mon espace joueur SWÉ';
+    $('#workspaceName').textContent='Mon profil joueur SWÉ';
+    if(S.onboardingStatus?.completed){
+      $('#accountOnboarding')?.classList.add('hidden');
+      $('#workspaceSetup')?.classList.add('hidden');
+    }else showAccountOnboarding();
     return;
   }
-  S.workspace={id:data[0].workspace_id,name:data[0].workspaces?.name||'SWÉ Tournament 5/5',role:data[0].role,public_token:data[0].workspaces?.public_token||null,public_enabled:data[0].workspaces?.public_enabled!==false};
-  $('#workspaceSetup').classList.add('hidden');
+  const stored=localStorage.getItem('swe_workspace_id');
+  const chosen=S.memberships.find(x=>String(x.workspace_id)===String(stored))||S.memberships[0];
+  S.workspace={id:chosen.workspace_id,name:chosen.workspaces?.name||'SWÉ Tournament 5/5',role:chosen.role,public_token:chosen.workspaces?.public_token||null,public_enabled:chosen.workspaces?.public_enabled!==false};
+  localStorage.setItem('swe_workspace_id',S.workspace.id);
+  $('#workspaceSetup').classList.add('hidden');$('#accountOnboarding')?.classList.add('hidden');
+  const access=await sb.rpc('get_workspace_organizer_access',{p_workspace_id:S.workspace.id});
+  S.organizerAccess=access.error?null:(access.data||null);
+  renderWorkspaceSwitcher();renderOrganizerAccessBanner();
   await loadSportsVenues();
   await loadAll();
   await loadMyPlayerDashboard();
   $('#workspaceName').textContent=S.workspace.name+' • '+(S.workspace.role==='admin'?'Administrateur':(hasTemporaryAdmin()?'Co-organisateur • Admin temporaire':'Co-organisateur'));
-  applyPermissions(); subscribeRealtime(); startSafeAppSync();
+  applyPermissions();renderCoorgOrganizerCta();subscribeRealtime();startSafeAppSync();
   const startMode=new URLSearchParams(location.search).get('start');if(startMode==='player')setView('myplayer');
 }
 $('#createWorkspace').onclick=async()=>{
-  const btn=$('#createWorkspace');btn.disabled=true;btn.textContent='Création…';
-  try{await ensureWorkspace();toast('Espace créé ✅');await boot()}
-  catch(error){toast(friendlyAuthError(error))}
-  finally{btn.disabled=false;btn.textContent="Créer l'espace"}
+  const btn=$('#createWorkspace');const name=$('#newWorkspace')?.value.trim();
+  if(!name)return toast('Indique le nom de ton groupe ou de ton organisation.');
+  const type=document.querySelector('input[name="organizerType"]:checked')?.value||'group';
+  btn.disabled=true;btn.textContent='Création…';
+  try{
+    const {data:workspaceId,error}=await sb.rpc('create_organizer_workspace_trial',{p_name:name,p_organizer_type:type});
+    if(error)throw error;if(!workspaceId)throw new Error('Impossible de créer l’espace.');
+    localStorage.setItem('swe_workspace_id',workspaceId);
+    toast('Espace créé • tes 2 mois d’essai commencent maintenant 🎁');
+    await boot();setView('home');
+  }catch(error){toast(friendlyAuthError(error))}
+  finally{btn.disabled=false;btn.textContent="Créer mon espace et démarrer l’essai"}
 };
+$('#cancelWorkspaceSetup')?.addEventListener('click',()=>{
+  $('#workspaceSetup')?.classList.add('hidden');
+  if(!S.workspace&&!S.onboardingStatus?.completed)showAccountOnboarding();
+});
+$('#workspaceSwitcher')?.addEventListener('change',e=>{localStorage.setItem('swe_workspace_id',e.target.value);location.reload();});
+
+
+document.addEventListener('click',async e=>{
+  const intent=e.target?.closest?.('[data-onboarding-intent]')?.dataset.onboardingIntent;
+  if(intent==='player'){
+    const b=e.target.closest('[data-onboarding-intent]');b.disabled=true;
+    const {error}=await sb.rpc('complete_my_onboarding',{p_intent:'player'});b.disabled=false;
+    if(error)return toast(error.message);S.onboardingStatus={...(S.onboardingStatus||{}),completed:true,primary_intent:'player'};
+    $('#accountOnboarding')?.classList.add('hidden');$('#workspaceSetup')?.classList.add('hidden');setView('myplayer');toast('Profil joueur activé ⚽');return;
+  }
+  if(intent==='organizer'){openOrganizerSetup('group');return;}
+  if(e.target?.id==='becomeOrganizer'||e.target?.id==='coorgCreateOwnWorkspace'){openOrganizerSetup('group');$('#workspaceSetup')?.scrollIntoView({behavior:'smooth',block:'start'});return;}
+  if(e.target?.id==='trialChoosePlan'){setView('home');setTimeout(()=>$('#homeEcosystemCard')?.scrollIntoView({behavior:'smooth',block:'start'}),100);return;}
+});
 
 async function loadInvites(){
   const box=$('#inviteList');box.innerHTML='';
@@ -1116,6 +1205,7 @@ async function loadAll(){
   }
   r=await sb.from('workspace_members').select('user_id,role,active').eq('workspace_id',w);S.members=r.data||[];
   r=await sb.rpc('get_workspace_coorganizer_count',{p_workspace_id:w});S.coorgCount=Number(r.data||0);
+  const oa=await sb.rpc('get_workspace_organizer_access',{p_workspace_id:w});if(!oa.error)S.organizerAccess=oa.data||null;renderOrganizerAccessBanner();
   r=await sb.rpc('get_workspace_features_v2',{p_workspace_id:w});
   if(r.error){
     console.error('get_workspace_features_v2',r.error);
@@ -1688,6 +1778,7 @@ function renderEcosystemCommercial(){
 
 function renderHome(){
   renderEcosystemCommercial();
+  renderCoorgOrganizerCta();
   setTimeout(confirmCoorgCheckoutFromUrl,0);
   const ongoingTournaments=S.tournaments.filter(x=>x.format!=='league'&&x.status!=='finished').length;
   const ongoingLeagues=S.leagues.filter(x=>x.status!=='finished').length;
@@ -1979,7 +2070,7 @@ function renderPlayers(){
       meta+=aggregate&&Number(aggregate.voter_count)>0?' • Moyenne '+Number(aggregate.avg_rating).toFixed(1)+'/5 • '+aggregate.voter_count+' votant'+(Number(aggregate.voter_count)>1?'s':''):' • Aucun avis';
     }else if(S.workspaceFeatures.player_ratings_enabled&&isCoorg()){
       const aggregate=playerSkillAggregate(x.id);
-      if(aggregate&&Number(aggregate.voter_count)>0)meta+=' • Moyenne SWÉ tous groupes : '+Number(aggregate.avg_rating).toFixed(1)+'/5';
+      if(aggregate&&Number(aggregate.voter_count)>0)meta+=' • Verdict des co-gestionnaires : '+Number(aggregate.avg_rating).toFixed(1)+'/5';
     }
     info.innerHTML='<b>'+esc(x.name)+'</b>'+(x.is_group_member===false?'<span class="guest-badge">Guest</span>':'')+
       '<div class="muted">'+meta+'</div>';
@@ -2138,7 +2229,7 @@ function renderPlayers(){
       const existing=S.myRatings.find(r=>r.player_id===x.id);
       const rate=document.createElement('div');rate.className='player-skill-review';rate.style.cssText='margin-top:8px;padding:9px 10px;border:1px solid #dce9e1;border-radius:13px;background:#f8fcfa';
       const aggregate=playerSkillAggregate(x.id);
-      const aggText=aggregate&&Number(aggregate.voter_count)>0?(isCoorg()?'<div style="margin-top:5px"><b>🌍 Moyenne SWÉ tous groupes : '+Number(aggregate.avg_rating).toFixed(1)+'/5</b></div>':'<div style="margin-top:5px"><b>🌍 Moyenne SWÉ tous groupes : '+Number(aggregate.avg_rating).toFixed(1)+'/5</b> • '+aggregate.voter_count+' évaluation'+(Number(aggregate.voter_count)>1?'s':'')+'</div>'):'<div style="margin-top:5px">📊 Pas encore assez d’avis pour une moyenne.</div>';
+      const aggText=aggregate&&Number(aggregate.voter_count)>0?(isCoorg()?'<div style="margin-top:5px"><b>🕵️ Verdict des co-gestionnaires : '+Number(aggregate.avg_rating).toFixed(1)+'/5</b></div>':'<div style="margin-top:5px"><b>🕵️ Verdict des co-gestionnaires : '+Number(aggregate.avg_rating).toFixed(1)+'/5</b> • '+aggregate.voter_count+' évaluation'+(Number(aggregate.voter_count)>1?'s':'')+'</div>'):'<div style="margin-top:5px">📊 Pas encore assez d’avis pour une moyenne.</div>';
       const title=document.createElement('div');title.innerHTML='<b>⚽ Mon évaluation confidentielle</b><div class="muted small">1 = à renforcer • 2 = moyen • 3 = bon • 4 = très bon • 5 = excellent.</div>'+aggText;
       const criteria=document.createElement('div');criteria.style.cssText='display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:8px';
       const values={};
@@ -2183,7 +2274,7 @@ function renderPlayers(){
 async function ensureWorkspace(){
   if(S.workspace)return S.workspace;
   const name=$('#newWorkspace').value.trim()||'SWÉ Tournament 5/5';
-  const {data:workspaceId,error}=await sb.rpc('create_workspace',{p_name:name});
+  const {data:workspaceId,error}=await sb.rpc('create_organizer_workspace_trial',{p_name:name,p_organizer_type:'group'});
   if(error)throw error;
   if(!workspaceId)throw new Error('Impossible de créer l’espace.');
   S.workspace={id:workspaceId,name,role:'admin'};
@@ -4319,7 +4410,7 @@ async function bootPaymentDesk(token){
   $('#main').classList.add('hidden');
   $('#publicView').classList.remove('hidden');
   const root=$('#publicView');
-  root.innerHTML='<header class="top"><h1 class="public-title"><img src="./favicon.png?v=4217" class="brand-mark" alt="SWÉ">Suivi des paiements sur place</h1><div class="public-sub">SWÉ TOURNAMENT 5/5 • saisie manuelle uniquement</div></header><div class="card"><div id="paymentDeskContent"><p class="muted">Chargement de la liste des inscrits…</p></div></div>';
+  root.innerHTML='<header class="top"><h1 class="public-title"><img src="./favicon.png?v=4218" class="brand-mark" alt="SWÉ">Suivi des paiements sur place</h1><div class="public-sub">SWÉ TOURNAMENT 5/5 • saisie manuelle uniquement</div></header><div class="card"><div id="paymentDeskContent"><p class="muted">Chargement de la liste des inscrits…</p></div></div>';
   let snapshot=null;
   const collectorStorageKey='swe_payment_collector_name';
   const rememberedCollector=()=>{try{return (localStorage.getItem(collectorStorageKey)||'').trim();}catch(e){return ''}};

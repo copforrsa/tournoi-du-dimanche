@@ -14,7 +14,7 @@
   <title>SWÉ TOURNAMENT 5/5 • V42.8</title>
 <link rel="icon" type="image/png" href="./favicon.png?v=4208">
 <link rel="apple-touch-icon" href="./icon-192.png?v=4112">
-  <link rel="stylesheet" href="./styles.css?v=4217">
+  <link rel="stylesheet" href="./styles.css?v=4219">
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -30,7 +30,7 @@
 </div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1><img src="./favicon.png?v=4208" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V42.17</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1><img src="./favicon.png?v=4208" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V42.19</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -76,10 +76,11 @@
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1><img src="./favicon.png?v=4208" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V42.17</span></h1><div id="workspaceName" class="muted"></div><div class="build-badge" title="Version installée">MAJ 42.17</div></div>
+        <div><h1><img src="./favicon.png?v=4208" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V42.19</span></h1><div class="workspace-head-line"><div id="workspaceName" class="muted"></div><select id="workspaceSwitcher" class="workspace-switcher hidden" aria-label="Changer d’espace"></select></div><div class="build-badge" title="Version installée">MAJ 42.19</div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
+    <div id="organizerAccessBanner" class="hidden organizer-access-banner"></div>
 
 
     <div id="superAdminPanel" class="hidden super-admin-shell">
@@ -177,11 +178,24 @@
       </div>
     </div>
 
-    <div id="workspaceSetup" class="card hidden">
-      <h2 class="sectiontitle">Créer ton espace</h2>
-      <input id="newWorkspace" value="SWÉ Tournament 5/5">
-      <div class="space"></div>
-      <button id="createWorkspace" class="primary">Créer l'espace</button>
+    <div id="accountOnboarding" class="card hidden onboarding-shell">
+      <div class="sa-eyebrow">BIENVENUE SUR SWÉ TOURNAMENT</div>
+      <h2 class="sectiontitle">Que veux-tu faire aujourd’hui ?</h2>
+      <p class="muted">Un seul compte SWÉ peut servir à jouer, suivre tes statistiques et organiser un ou plusieurs groupes.</p>
+      <div class="onboarding-choice-grid">
+        <button type="button" class="onboarding-choice" data-onboarding-intent="player"><span class="onboarding-emoji">⚽</span><b>Je veux jouer et retrouver mes stats</b><small>Retrouve tes Swés, rattache tes anciens matchs à ton ID SWÉ et conserve tes performances dans tous les groupes.</small></button>
+        <button type="button" class="onboarding-choice featured" data-onboarding-intent="organizer"><span class="onboarding-emoji">🏆</span><b>Je veux organiser des Swés</b><small>Crée ton groupe, une saison, un tournoi ou une ligue. Toutes les fonctions organisateur sont offertes pendant 2 mois.</small></button>
+      </div>
+    </div>
+
+    <div id="workspaceSetup" class="card hidden organizer-setup-card">
+      <div class="row" style="justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap"><div><div class="sa-eyebrow">CRÉER MON ESPACE ORGANISATEUR</div><h2 class="sectiontitle">À toi d’organiser 🏆</h2><p class="muted">Pendant 60 jours, toutes les options organisateur sont disponibles. Ensuite, un abonnement sera nécessaire pour continuer à organiser ; tes données resteront conservées.</p></div><span class="trial-pill">🎁 2 mois offerts</span></div>
+      <div class="grid g2 organizer-type-grid" style="margin-top:12px">
+        <label class="organizer-type-choice"><input type="radio" name="organizerType" value="group" checked><span><b>👥 Mon groupe / mes amis</b><small>Swés réguliers, équipes, stats, classements, paiements et co-gestionnaires.</small></span></label>
+        <label class="organizer-type-choice"><input type="radio" name="organizerType" value="pro"><span><b>🏟️ Club / association / organisateur Pro</b><small>Saisons, tournois, ligues, catégories et suivi d’un volume plus important de joueurs.</small></span></label>
+      </div>
+      <label style="display:block;margin-top:12px"><span class="muted">Nom de ton groupe / organisation</span><input id="newWorkspace" value="" placeholder="Ex. Les Swés du dimanche"></label>
+      <div class="row" style="margin-top:12px"><button id="createWorkspace" class="primary">Créer mon espace et démarrer l’essai</button><button id="cancelWorkspaceSetup" type="button">Annuler</button></div>
     </div>
 
     <div id="inviteBox" class="card hidden"><h2 class="sectiontitle">Invitation reçue</h2><div id="inviteList"></div></div>
@@ -208,6 +222,7 @@
           </div>
           <button id="myPlayerSave" class="primary" style="margin-top:12px">💾 Enregistrer mon profil</button>
         </div>
+        <div id="playerOrganizerCta" class="card organizer-conversion-card"><div><span class="organizer-conversion-kicker">🏆 À TON TOUR D’ORGANISER ?</span><h3>Crée ton propre espace SWÉ</h3><p>Crée ton groupe et laisse SWÉ t’aider à organiser des confrontations plus équilibrées et plus intéressantes.</p><small>🎁 Toutes les fonctions organisateur sont disponibles pendant 2 mois.</small></div><button id="becomeOrganizer" class="primary">Organiser mon propre Swé →</button></div>
         <div class="card"><h2 class="sectiontitle">📊 Mes performances tous groupes confondus</h2><div id="myPlayerStats" class="player-global-stats"></div></div>
         <div class="card swe-history-link-card"><h2 class="sectiontitle">🔎 Retrouver un Swé auquel j’ai déjà participé</h2><p class="muted">Tes statistiques deviennent personnelles uniquement lorsque ton compte SWÉ est relié au bon joueur. Saisis l’<b>ID du tournoi</b> ou l’<b>ID SWÉ de la ligue</b>, puis sélectionne ton nom dans la liste des participants.</p><div class="row swe-history-search"><input id="mySweHistoryCode" placeholder="Ex. ABC123 ou LIG-A1B2C3D4" style="flex:1;text-transform:uppercase"><button id="mySweHistorySearch" class="primary">Rechercher</button></div><div id="mySweHistoryResult" style="margin-top:12px"></div><div class="identity-warning">⚠️ Une identité joueur ne doit jamais être revendiquée par une autre personne. Si deux comptes revendiquent le même membre, les deux profils sont automatiquement placés en vérification jusqu’au contrôle de l’équipe SWÉ.</div></div>
         <div class="grid g2 player-hub-grid">
@@ -231,6 +246,7 @@
         </div>
         <div id="coorgMyRights" class="hidden" style="margin-top:12px"></div>
       </div>
+      <div id="coorgOrganizerCta" class="card hidden coorg-organizer-cta"><div><span>👀</span><div><b>Ça serait pas mal dans ton groupe aussi, non ?</b><p>Tu connais déjà SWÉ. Crée ton propre espace organisateur et teste toutes les fonctions pendant 2 mois.</p></div></div><button id="coorgCreateOwnWorkspace" class="primary">Créer mon espace organisateur →</button></div>
       <div class="card hidden" id="homeStripeWarning" style="border:2px solid #e58a00;background:#fff4dc;box-shadow:0 8px 24px rgba(166,92,0,.12)">
         <div class="row" style="justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
           <div style="flex:1;min-width:240px">
@@ -850,5 +866,5 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
-<script src="./app.js?v=4217" defer></script>
+<script src="./app.js?v=4219" defer></script>
 <footer id="platformFooter" class="platform-footer hidden"><div class="platform-footer-inner"><div><b id="platformFooterCompany">SWÉ Tournament</b><div id="platformFooterText"></div></div><div id="platformFooterLinks"></div></div></footer></body></html>
