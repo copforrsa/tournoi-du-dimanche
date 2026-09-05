@@ -1,0 +1,14 @@
+/*
+  Referrer-Policy: no-referrer
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(self)
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Cross-Origin-Opener-Policy: same-origin
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://upload.wikimedia.org; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self' https://checkout.stripe.com; frame-src https://js.stripe.com https://hooks.stripe.com; frame-ancestors 'none'; upgrade-insecure-requests
+
+/index.html
+  Cache-Control: no-store, max-age=0
+
+/sw.js
+  Cache-Control: no-store, max-age=0

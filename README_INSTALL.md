@@ -1,29 +1,12 @@
-# Tournoi du Dimanche — PWA
+# SWÉ TOURNAMENT 5/5 — V41.01 HOTFIX VISUELS
 
-Ce dossier est prêt à être publié tel quel.
+## Important
+Cette version nécessite que **index.html, styles.css, app.js, sw.js et manifest.webmanifest** soient tous présents **à la racine du dépôt GitHub Pages**.
 
-## Publication GitHub Pages
-1. Crée un nouveau dépôt GitHub, par exemple `tournoi-du-dimanche`.
-2. Ajoute à la racine tous les fichiers de ce dossier.
-3. Dans GitHub : Settings > Pages.
-4. Source : Deploy from a branch.
-5. Branch : `main` / dossier `/root`.
-6. Enregistre.
-7. GitHub te donnera une URL publique en HTTPS.
+Si `styles.css` manque, l'application s'affiche sans design (police serif, boutons HTML bruts).
+Si `app.js` manque, les fonctions interactives ne se chargent plus.
 
-## Installation iPhone
-Ouvre l’URL dans Safari > Partager > Sur l’écran d’accueil.
+Après upload des fichiers, faire un rafraîchissement forcé (Ctrl+F5).
+Le Service Worker utilise maintenant le cache `swe-tournament-5v5-v41-01`.
 
-## Installation Android
-Ouvre l’URL dans Chrome > menu > Installer l’application / Ajouter à l’écran d’accueil.
-
-## Backend
-L’application est déjà configurée avec le projet Supabase `tournoi-dimanche`.
-La clé utilisée est une clé publishable prévue pour le frontend. Les données sont protégées par RLS.
-
-
-## Mise à jour mot de passe oublié
-- Bouton « Mot de passe oublié ? » sur l'écran de connexion.
-- Envoi du lien Supabase vers l'URL GitHub Pages.
-- Écran intégré pour saisir et confirmer le nouveau mot de passe après le clic sur le lien reçu.
-- Cache PWA passé en v2 pour récupérer correctement les mises à jour.
+Les dossiers SQL et `supabase/functions` restent séparés du déploiement GitHub Pages et servent aux migrations / Edge Functions Supabase.

@@ -32,11 +32,6 @@ Deno.serve(async(req)=>{
     const {data:member,error:memberError}=await admin.from('workspace_members').select('role,active').eq('workspace_id',workspaceId).eq('user_id',user.id).maybeSingle();
     if(memberError||!member||member.active!==true||member.role!=='admin') throw new Error('ACCESS_DENIED');
 
-    const {data:ent,error:entErr}=await admin.from('workspace_entitlements').select('max_coorganizers,max_coorganizers_cap').eq('workspace_id',workspaceId).maybeSingle();
-    if(entErr) throw entErr;
-    const current=Number(ent?.max_coorganizers||0),cap=Number(ent?.max_coorganizers_cap||100);
-    if(current+quantity>cap) throw new Error('LIMIT_EXCEEDED');
-
     const appUrl=(Deno.env.get('SWE_APP_URL')||'').trim().replace(/\/$/,'');
     if(!/^https:\/\//.test(appUrl)) throw new Error('SECURITY_CONFIG_MISSING');
     const successUrl=`${appUrl}/?coorg=success`;

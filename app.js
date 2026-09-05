@@ -510,7 +510,6 @@ function renderSuperAdminWorkspaces(){
           '<div class="muted" style="margin-top:4px">👤 Administrateur : <b>'+esc(([w.admin_first_name,w.admin_last_name].filter(Boolean).join(' ')||w.owner_email||'Non renseigné'))+'</b></div>'+
           '<div class="muted">📧 '+esc(w.owner_email||'Email indisponible')+(w.admin_phone?' • 📱 '+esc(w.admin_phone):'')+'</div>'+
           '<div class="muted">Créé le '+esc(created)+'</div>'+
-          (S.superCoorgQuotaRequests.find(r=>String(r.workspace_id)===String(w.workspace_id)&&r.status==='pending')?(()=>{const qr=S.superCoorgQuotaRequests.find(r=>String(r.workspace_id)===String(w.workspace_id)&&r.status==='pending');return '<div class="player" style="margin-top:9px;background:#fff8e8;border-color:#f2d18a"><b>🔔 Demande de co-gestionnaires</b><div class="muted" style="margin:4px 0 7px">Actuel : '+Number(qr.current_limit)+' • demandé : <b>'+Number(qr.requested_limit)+'</b></div><div class="row"><button class="primary" data-sa-approve-coorg-request="'+qr.id+'">✅ Accepter</button><button class="danger" data-sa-reject-coorg-request="'+qr.id+'">Refuser</button></div></div>'})():'')+
         '</span>'+
       '</div>'+
       '<div class="grid g3" style="margin-top:12px">'+
@@ -530,8 +529,8 @@ function renderSuperAdminWorkspaces(){
       '</div>'+
       '<div class="row" style="margin-top:8px"><button data-sa-save-profile>💾 Enregistrer nom / prénom</button><span class="muted">Modifie uniquement l’identité affichée de l’administrateur, sans changer son compte de connexion.</span></div>'+
       '<div class="grid g3" style="margin-top:10px">'+
-        '<label><span class="muted">Co-organisateurs autorisés</span><input data-sa-max type="number" min="0" max="'+Number(w.max_coorganizers_cap||100)+'" value="'+Number(w.max_coorganizers||0)+'"></label>'+
-        '<label><span class="muted">Plafond commercial</span><input data-sa-cap type="number" min="0" max="100" value="'+Number(w.max_coorganizers_cap||100)+'"></label>'+
+        '<label><span class="muted">Co-gestionnaires inclus / offerts</span><input data-sa-max type="number" min="0" max="1000" value="'+Number((w.base_max_coorganizers ?? w.max_coorganizers) || 0)+'"></label>'+
+        '<div class="player" style="background:#f0fdf4;border-color:#bbf7d0"><b>♾️ Aucun plafond commercial</b><div class="muted" style="margin-top:4px">Les accès supplémentaires achetés s’ajoutent automatiquement après paiement Stripe.</div></div>'+
         '<label class="player row" style="justify-content:flex-start"><input data-sa-public type="checkbox" style="width:auto" '+(w.public_enabled?'checked':'')+'><span><b>Espace actif</b></span></label>'+
       '</div>'+
       '<div class="grid g3" style="margin-top:10px">'+
@@ -577,10 +576,8 @@ function renderSuperAdminWorkspaces(){
     const save=document.createElement('button');save.className='primary';save.textContent='💾 Enregistrer';
     save.onclick=async()=>{
       const max=Number(d.querySelector('[data-sa-max]').value)||0;
-      const cap=Number(d.querySelector('[data-sa-cap]').value)||0;
       const name=d.querySelector('[data-sa-name]').value.trim();
       if(!name)return toast('Le nom de l’espace est obligatoire.');
-      if(max>cap)return toast('Le nombre autorisé ne peut pas dépasser le plafond commercial.');
       save.disabled=true;
       let r=await sb.rpc('super_admin_rename_workspace',{p_workspace_id:w.workspace_id,p_name:name});
       if(!r.error)r=await sb.rpc('super_admin_update_admin_profile',{
@@ -592,7 +589,7 @@ function renderSuperAdminWorkspaces(){
       if(!r.error)r=await sb.rpc('super_admin_set_workspace_options',{
         p_workspace_id:w.workspace_id,
         p_max_coorganizers:max,
-        p_max_coorganizers_cap:cap,
+        p_max_coorganizers_cap:Number(w.max_coorganizers_cap||100),
         p_tournaments_enabled:d.querySelector('[data-sa-tournament]').checked,
         p_league_enabled:d.querySelector('[data-sa-league]').checked,
         p_rankings_enabled:d.querySelector('[data-sa-rankings]').checked,
@@ -998,7 +995,7 @@ function renderAccess(){
   const fmt=d=>d?new Date(d).toLocaleDateString('fr-FR'):'';
 
   const lim=Number(S.workspaceFeatures.max_coorganizers||0),cap=Number(S.workspaceFeatures.max_coorganizers_cap||100);
-  box.innerHTML='<div class="player" style="background:#f7fbf8"><b>Limite de co-gestionnaires</b><div class="muted" style="margin-top:5px">Autorisation actuelle : <b>'+activeCo.length+' / '+lim+'</b>. Cette limite est définie par le Super Admin.</div>'+(S.coorgQuotaRequest?.status==='pending'?'<div class="muted" style="margin-top:6px;color:#b45309">⏳ Demande en attente pour passer à <b>'+Number(S.coorgQuotaRequest.requested_limit||lim)+'</b>.</div>':'<div class="muted" style="margin-top:6px">Pour augmenter cette limite, utilise le bouton de demande depuis l’accueil.</div>')+'</div>'+
+  box.innerHTML='<div class="player" style="background:#f7fbf8"><b>Limite de co-gestionnaires</b><div class="muted" style="margin-top:5px">Autorisation actuelle : <b>'+activeCo.length+' / '+lim+'</b>. Les accès inclus et les accès achetés sont cumulés automatiquement.</div>'+(S.coorgQuotaRequest?.status==='pending'?'<div class="muted" style="margin-top:6px;color:#b45309">⏳ Demande en attente pour passer à <b>'+Number(S.coorgQuotaRequest.requested_limit||lim)+'</b>.</div>':'<div class="muted" style="margin-top:6px">Besoin de plus d’accès ? Ajoute-les directement depuis l’accueil : activation automatique après paiement.</div>')+'</div>'+
     '<div class="muted" style="margin-bottom:8px"><b>'+activeCo.length+' / '+lim+' co-organisateur'+(activeCo.length>1?'s':'')+' actif'+(activeCo.length>1?'s':'')+'</b> • '+suspendedCo.length+' suspendu'+(suspendedCo.length>1?'s':'')+' • '+pending.length+' invitation'+(pending.length>1?'s':'')+' en attente</div>';
 
   S.coorgs.forEach(c=>{
@@ -1295,9 +1292,12 @@ function coorgTierUnitCents(qty){
 }
 function euroCents(c){return (Number(c||0)/100).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €'}
 function refreshCoorgPurchasePrice(){
-  const q=Number($('#homeCoorgQty')?.value||1),unit=coorgTierUnitCents(q),total=unit*q;
-  const u=$('#homeCoorgUnitPrice');if(u)u.innerHTML=euroCents(unit)+'<span class="muted" style="font-size:.72rem;font-weight:600"> / mois / accès</span>';
-  const t=$('#homeCoorgTotal');if(t)t.innerHTML='<b>'+euroCents(total)+'/mois</b><div class="muted" style="font-size:11px">'+q+' × '+euroCents(unit)+'</div>';
+  const input=$('#homeCoorgQty');
+  let q=Math.max(1,Math.min(100,Number(input?.value||1)||1));if(input)input.value=q;
+  const unit=coorgTierUnitCents(q),total=unit*q;
+  const u=$('#homeCoorgUnitPrice');if(u)u.textContent=euroCents(unit)+' / mois / accès';
+  const t=$('#homeCoorgTotal');if(t)t.innerHTML='<b>'+euroCents(total)+'/mois</b><div class="muted">'+q+' × '+euroCents(unit)+'</div>';
+  const b=$('#homeBuyCoorg');if(b)b.innerHTML='💳 Ajouter '+q+' co-gestionnaire'+(q>1?'s':'')+' — '+euroCents(total)+'/mois <span>→</span>';
 }
 async function confirmCoorgCheckoutFromUrl(){
   const p=new URLSearchParams(location.search);
@@ -1391,10 +1391,11 @@ document.addEventListener('click',async e=>{
 });
 
 document.addEventListener('click',async e=>{
+  const stepBtn=e.target?.closest?.('[data-coorg-step]');
+  if(stepBtn){const input=$('#homeCoorgQty');if(input){input.value=Math.max(1,Math.min(1000,Number(input.value||1)+Number(stepBtn.dataset.coorgStep||0)));refreshCoorgPurchasePrice();}return;}
   if(e.target?.id==='homeBuyCoorg'){
     if(!isAdmin())return toast('Réservé à l’administrateur.');
-    const qty=Math.max(1,Number($('#homeCoorgQty')?.value||1)),current=Number(S.workspaceFeatures.max_coorganizers||0),cap=Number(S.workspaceFeatures.max_coorganizers_cap||100);
-    if(current>=cap||current+qty>cap)return toast('Cette commande dépasserait le plafond de '+cap+' co-gestionnaires.');
+    const qty=Math.max(1,Number($('#homeCoorgQty')?.value||1));
     const unit=coorgTierUnitCents(qty),total=unit*qty;
     if(!confirm('Ajouter '+qty+' accès co-gestionnaire(s) pour '+euroCents(total)+' / mois ?\n\nActivation automatique après paiement Stripe.'))return;
     const b=e.target;b.disabled=true;b.textContent='Ouverture du paiement…';
@@ -1412,6 +1413,7 @@ document.addEventListener('click',async e=>{
 
 
 document.addEventListener('change',e=>{if(e.target?.id==='homeCoorgQty')refreshCoorgPurchasePrice();});
+document.addEventListener('input',e=>{if(e.target?.id==='homeCoorgQty')refreshCoorgPurchasePrice();});
 $('#sendInvite').onclick=async()=>{
   if(!S.workspace)return;
   if(!(isAdmin()||(isCoorg()&&S.myPermissions.can_invite_coorganizers)))return toast('Tu n’es pas autorisé à inviter un co-organisateur.');
@@ -4453,7 +4455,7 @@ async function bootPublic(token){
             '<div style="border:1px solid #dfe4ea;border-radius:10px;padding:8px 5px;text-align:center;background:#fff"><div style="height:28px;display:flex;align-items:center;justify-content:center"><img src="https://upload.wikimedia.org/wikipedia/commons/7/73/Revolut_logo.svg" alt="Revolut Pay" style="display:block;max-width:72px;max-height:22px;width:auto;height:auto"></div><div class="muted" style="font-size:.67rem">Revolut Pay</div></div>'+
           '</div></div>'+ 
           (pending?'<div class="muted" style="margin-top:8px">Un paiement en ligne a déjà été commencé mais n’est pas encore confirmé.</div>':'')+
-          '<div class="muted" style="margin-top:8px;font-size:.76rem;text-align:center">Le paiement sur place ne comprend pas les frais de paiement en ligne SWÉ.</div>';
+          '<div class="muted" style="margin-top:8px;font-size:.76rem;text-align:center">✨ Choisis librement : sur place, tu règles uniquement ta participation au complexe ; en ligne, tu profites d’un paiement sécurisé et confirmé automatiquement par SWÉ.</div>';
         publicPaymentCache={playerId:pid,status:st,html,bg:'#f8fbff',border:'1px solid #cbdcf5'};
         applyPublicPaymentView(box,html,publicPaymentCache.bg,publicPaymentCache.border);
         $('#publicPayEntry').onclick=async()=>{
