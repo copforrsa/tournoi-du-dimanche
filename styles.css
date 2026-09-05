@@ -342,3 +342,13 @@ select{background-color:#fff} textarea{resize:vertical}
 .directory-player{display:flex;align-items:center;gap:12px;justify-content:space-between;margin-bottom:8px;background:#fbfdfc}
 @media(max-width:900px){.player-privacy-grid{grid-template-columns:1fr 1fr}.player-opportunity-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:620px){.player-hub-title{align-items:flex-start}.player-hub-avatar{width:52px;height:52px;border-radius:16px;font-size:28px}.player-privacy-grid,.player-opportunity-grid{grid-template-columns:1fr}.player-global-stats{grid-template-columns:repeat(7,105px)}.directory-player{align-items:flex-start;flex-direction:column}.directory-player button{width:100%}}
+
+
+/* V41.12 — joueurs solo, découverte et demandes */
+.organizer-settings-panel{margin-top:10px;padding:14px;border:1px solid #dce8e1;border-radius:16px;background:linear-gradient(135deg,#fbfffd,#f4faf6)}
+.discovery-settings{background:linear-gradient(135deg,#f4f9ff,#f7fff9);border:1px solid #cfe0ee}
+.player-opportunity-price{margin-top:8px;padding:8px 10px;border-radius:10px;background:#fff7e7;color:#7a4a00;font-weight:800;font-size:.84rem}.player-opportunity-price.free{background:#edf9f1;color:#17683a}
+.player-pledge{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:9px;padding:9px 10px;border:1px solid #e6e0d3;border-radius:11px;background:#fffdf7}.player-pledge input{max-width:135px;margin:0}
+.request-row{border-left:4px solid #3b82f6}.player-opportunity{border-top:4px solid #17a766}.player-opportunity textarea{width:100%;resize:vertical}
+@media(max-width:650px){.player-pledge{align-items:flex-start;flex-direction:column}.player-pledge input{max-width:none;width:100%}}
+.tournament-discovery-admin{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:10px;border:1px solid #dce6e0;border-radius:12px;background:#f8fbf9}.tournament-discovery-admin select{max-width:230px}.tournament-discovery-admin label{font-size:.82rem;font-weight:800;color:#4a5b51}

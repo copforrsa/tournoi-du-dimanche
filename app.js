@@ -29,7 +29,7 @@ window.addEventListener('error', (e) => {
   if(t){t.textContent='Erreur de chargement de l’application. Recharge la page.';t.style.display='block';}
 });
 
-const S={session:null,adminProfile:null,isSuperAdmin:false,superWorkspaces:[],workspace:null,members:[],coorgs:[],coorgCount:0,workspaceFeatures:{max_coorganizers:3,max_coorganizers_cap:100,rankings_enabled:true,league_enabled:true,tournaments_enabled:true,third_half_enabled:false,player_ratings_enabled:false,max_players_cap:35,payments_enabled:true,top_player_enabled:false,match_ratings_enabled:false},commercialAccess:{subscription_plan:'free',special_access_enabled:false,upgrade_requested_at:null},billingStatus:null,coorgPurchaseConfirming:false,myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null},myRatings:[],lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],skillAggregates:[],teamCodes:[],seasons:[],leagues:[],leaguePlayers:[],activeLeague:null,tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matchAssignments:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},sportsComplexes:[],sportsPitches:[],publicMode:false,publicToken:null,editingTournamentId:null,teamCompetitionId:null,lastView:null,coorgQuotaRequest:null,superCoorgQuotaRequests:[],myLinkedPlayerId:null,playerDashboard:null,playerDirectory:[]};
+const S={session:null,adminProfile:null,isSuperAdmin:false,superWorkspaces:[],workspace:null,members:[],coorgs:[],coorgCount:0,workspaceFeatures:{max_coorganizers:3,max_coorganizers_cap:100,rankings_enabled:true,league_enabled:true,tournaments_enabled:true,third_half_enabled:false,player_ratings_enabled:false,max_players_cap:35,payments_enabled:true,top_player_enabled:false,match_ratings_enabled:false},commercialAccess:{subscription_plan:'free',special_access_enabled:false,upgrade_requested_at:null},billingStatus:null,coorgPurchaseConfirming:false,myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null},myRatings:[],lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],skillAggregates:[],teamCodes:[],seasons:[],leagues:[],leaguePlayers:[],activeLeague:null,tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matchAssignments:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},sportsComplexes:[],sportsPitches:[],publicMode:false,publicToken:null,editingTournamentId:null,teamCompetitionId:null,lastView:null,coorgQuotaRequest:null,superCoorgQuotaRequests:[],myLinkedPlayerId:null,playerDashboard:null,playerDirectory:[],organizerSettings:null,playerRequests:[]};
 
 let safeSyncTimer=null;
 let safeSyncBusy=false;
@@ -773,18 +773,20 @@ document.addEventListener('click',async e=>{
 
 async function loadMyPlayerDashboard(){
   if(!S.session){S.playerDashboard=null;return null;}
-  const {data,error}=await sb.rpc('get_my_global_player_dashboard');
+  const {data,error}=await sb.rpc('get_my_global_player_dashboard_v2');
   if(error){console.warn('global player dashboard',error);S.playerDashboard=null;return null;}
   S.playerDashboard=data||null;
   renderMyPlayerHub();
   return S.playerDashboard;
 }
+function playerPaymentButton(o){
+  if(!o?.player_id||!o?.public_token)return '';
+  return '<button class="primary" data-player-pay="1" data-player-id="'+esc(o.player_id)+'" data-public-token="'+esc(o.public_token)+'" data-tournament-id="'+esc(o.tournament_id)+'">💳 Payer et confirmer</button>';
+}
 function renderMyPlayerHub(){
   const create=$('#myPlayerCreateCard'),dash=$('#myPlayerDashboard'),identity=$('#myPlayerIdentity');
-  if(!create||!dash)return;
-  const d=S.playerDashboard;
-  create.classList.toggle('hidden',!!d?.profile);
-  dash.classList.toggle('hidden',!d?.profile);
+  if(!create||!dash)return;const d=S.playerDashboard;
+  create.classList.toggle('hidden',!!d?.profile);dash.classList.toggle('hidden',!d?.profile);
   if(!d?.profile){if(identity){identity.classList.add('hidden');identity.innerHTML='';}return;}
   const p=d.profile,st=d.stats||{};
   if(identity){identity.classList.remove('hidden');identity.innerHTML='<span class="player-id-badge">'+esc(p.public_player_id)+'</span><span class="muted">ID joueur permanent</span>';}
@@ -793,15 +795,19 @@ function renderMyPlayerHub(){
   if($('#myPlayerArea')&&document.activeElement!==$('#myPlayerArea'))$('#myPlayerArea').value=p.home_area||'';
   if($('#myPlayerPublic'))$('#myPlayerPublic').checked=!!p.is_public;
   if($('#myPlayerDiscoverable')){$('#myPlayerDiscoverable').checked=!!p.discoverable;$('#myPlayerDiscoverable').disabled=!p.is_public;}
-  if($('#myPlayerNotify')){$('#myPlayerNotify').checked=!!p.notify_upcoming_swes;$('#myPlayerNotify').disabled=!p.is_public;}
+  if($('#myPlayerNotify')){$('#myPlayerNotify').checked=!!p.notify_upcoming_swes;$('#myPlayerNotify').disabled=false;}
   const rating=st.rating==null?'—':Number(st.rating).toFixed(1)+'/5';
   if($('#myPlayerStats'))$('#myPlayerStats').innerHTML=[['🏟️','Groupes',st.groups||0],['🏆','Swés joués',st.tournaments||0],['⚽','Matchs',st.matches||0],['✅','Victoires',st.wins||0],['🥅','Buts',st.goals||0],['🎯','Passes',st.assists||0],['⭐','Note',rating]].map(x=>'<div><span>'+x[0]+'</span><small>'+x[1]+'</small><b>'+x[2]+'</b></div>').join('');
   const groups=Array.isArray(d.groups)?d.groups:[];
   if($('#myPlayerGroups'))$('#myPlayerGroups').innerHTML=groups.length?groups.map(g=>'<div class="player"><b>'+esc(g.workspace_name)+'</b><div class="muted">Profil local : '+esc(g.player_name)+(g.is_group_member?' • membre':' • invité')+'</div></div>').join(''):'<div class="muted">Aucun profil de groupe relié pour le moment.</div>';
   const invites=Array.isArray(d.invites)?d.invites:[];
   if($('#myPlayerInvites'))$('#myPlayerInvites').innerHTML=invites.length?invites.map(i=>'<div class="player"><div class="row" style="justify-content:space-between;gap:8px;flex-wrap:wrap"><div><b>'+esc(i.workspace_name)+' • '+esc(i.tournament_name||'Swé')+'</b><div class="muted">'+esc(i.tournament_date||'')+(i.start_time?' • '+esc(String(i.start_time).slice(0,5)):'')+(i.venue?' • '+esc(i.venue):'')+'</div>'+(i.message?'<div class="small" style="margin-top:5px">'+esc(i.message)+'</div>':'')+'</div><span class="guest-badge">'+esc(String(i.status||'pending').toUpperCase())+'</span></div>'+(i.status==='pending'?'<div class="row" style="margin-top:8px"><button class="primary" data-player-invite-accept="'+i.id+'">✅ Accepter</button><button data-player-invite-decline="'+i.id+'">Refuser</button></div>':'')+'</div>').join(''):'<div class="muted">Aucune invitation.</div>';
-  const opp=Array.isArray(d.upcoming_swes)?d.upcoming_swes:[];
-  if($('#myPlayerOpportunities'))$('#myPlayerOpportunities').innerHTML=opp.length?opp.map(o=>{const link=APP_URL+'?public='+encodeURIComponent(o.public_token)+'&view=tournament&tournament='+encodeURIComponent(o.tournament_id);return '<div class="player player-opportunity"><span class="guest-badge">'+esc(o.workspace_name)+'</span><h3>'+esc(o.tournament_name||'Swé')+'</h3><div class="muted">📅 '+esc(o.tournament_date||'')+(o.start_time?' • '+esc(String(o.start_time).slice(0,5)):'')+'</div><div class="muted">📍 '+esc(o.venue||'Lieu à confirmer')+'</div><button class="primary" data-open-player-opportunity="'+esc(link)+'" style="margin-top:10px">Voir le Swé →</button></div>'}).join(''):'<div class="muted">Aucun nouveau Swé à afficher pour le moment.</div>';
+  const mySwes=Array.isArray(d.my_swes)?d.my_swes:[];
+  if($('#myPlayerMySwes'))$('#myPlayerMySwes').innerHTML=mySwes.length?mySwes.map(o=>'<div class="player"><div class="row" style="justify-content:space-between;gap:10px;flex-wrap:wrap"><div><b>'+esc(o.workspace_name)+' • '+esc(o.tournament_name||'Swé')+'</b><div class="muted">📅 '+esc(o.tournament_date||'')+(o.start_time?' • '+esc(String(o.start_time).slice(0,5)):'')+' • 📍 '+esc(o.venue||'Lieu à confirmer')+'</div></div><span class="guest-badge">'+esc(String(o.registration_status||'confirmé').replace('_',' ').toUpperCase())+'</span></div>'+(o.registration_status==='payment_pending'?'<div class="row" style="margin-top:9px">'+playerPaymentButton(o)+'</div>':'')+(Number(o.third_half_pledge_cents||0)>0?'<div class="muted" style="margin-top:6px">🧊 Contribution 3e mi-temps annoncée : '+euroCents(o.third_half_pledge_cents)+'</div>':'')+'</div>').join(''):'<div class="muted">Aucun Swé à venir.</div>';
+  const reqs=Array.isArray(d.requests)?d.requests:[];
+  if($('#myPlayerRequests'))$('#myPlayerRequests').innerHTML=reqs.length?reqs.map(r=>'<div class="player"><div class="row" style="justify-content:space-between;gap:10px;flex-wrap:wrap"><div><b>'+esc(r.workspace_name)+' • '+esc(r.tournament_name||'Swé')+'</b><div class="muted">'+esc(r.tournament_date||'')+(r.start_time?' • '+esc(String(r.start_time).slice(0,5)):'')+'</div></div><span class="guest-badge">'+(r.status==='pending'?'EN ATTENTE':r.status==='accepted'?'ACCEPTÉE':'REFUSÉE')+'</span></div>'+(r.message?'<div class="small" style="margin-top:6px">'+esc(r.message)+'</div>':'')+(r.registration_status==='payment_pending'?'<div class="row" style="margin-top:9px">'+playerPaymentButton(r)+'</div>':'')+'</div>').join(''):'<div class="muted">Aucune demande envoyée.</div>';
+  const focusSwe=new URLSearchParams(location.search).get('joinSwe');const opp=(Array.isArray(d.upcoming_swes)?[...d.upcoming_swes]:[]).sort((a,b)=>String(a.tournament_id)===String(focusSwe)?-1:String(b.tournament_id)===String(focusSwe)?1:0);
+  if($('#myPlayerOpportunities'))$('#myPlayerOpportunities').innerHTML=opp.length?opp.map(o=>{const mode=o.discovery_mode==='public'?'PUBLIC • INSCRIPTION DIRECTE':'SUR DEMANDE';const fee=Number(o.entry_fee_cents||0);const payment=o.external_payment_required?'<div class="player-opportunity-price">💳 '+(fee?euroCents(fee)+' + frais SWÉ':'Paiement requis')+'</div>':'<div class="player-opportunity-price free">✓ Aucun paiement en ligne imposé au joueur externe</div>';const third=o.third_half_enabled?'<label class="player-pledge"><span>🧊 3e mi-temps</span><input type="number" min="0" step="0.50" data-pledge-for="'+o.tournament_id+'" placeholder="Contribution €" value="'+(Number(o.cooler_suggested_cents||0)/100||'')+'"></label>':'';return '<div class="player player-opportunity"><span class="guest-badge">'+esc(mode)+'</span><h3>'+esc(o.workspace_name)+' • '+esc(o.tournament_name||'Swé')+'</h3><div class="muted">📅 '+esc(o.tournament_date||'')+(o.start_time?' • '+esc(String(o.start_time).slice(0,5)):'')+'</div><div class="muted">📍 '+esc(o.venue||'Lieu à confirmer')+' • '+Number(o.remaining_places||0)+' place(s) restante(s)</div>'+payment+third+(o.discovery_mode==='public'?'<button class="primary" data-player-direct-join="'+o.tournament_id+'" style="margin-top:10px">⚡ Je participe</button>':'<textarea data-request-message-for="'+o.tournament_id+'" rows="2" placeholder="Message à l’organisateur (facultatif)" style="margin-top:10px"></textarea><button class="primary" data-player-request-join="'+o.tournament_id+'" style="margin-top:8px">🙋 Demander à participer</button>')+'</div>'}).join(''):'<div class="muted">Aucun nouveau Swé à afficher pour le moment.</div>';
 }
 function renderPlayerDirectoryCard(){
   const card=$('#playerDirectoryCard');if(!card)return;
@@ -814,6 +820,11 @@ function renderPlayerDirectoryCard(){
   box.innerHTML=rows.map(r=>'<div class="player directory-player"><div style="flex:1"><div class="row" style="justify-content:flex-start;gap:8px;flex-wrap:wrap"><b>'+esc(r.display_name)+'</b><span class="player-id-mini">'+esc(r.public_player_id)+'</span></div><div class="muted">'+esc(r.home_area||'Zone non renseignée')+' • '+Number(r.groups_count||0)+' groupe(s) • '+Number(r.tournaments_count||0)+' Swé(s)</div><div class="small" style="margin-top:4px">⚽ '+Number(r.matches_count||0)+' matchs • 🥅 '+Number(r.goals_count||0)+' buts • 🎯 '+Number(r.assists_count||0)+' passes'+(r.rating!=null?' • ⭐ '+Number(r.rating).toFixed(1)+'/5':'')+'</div></div><button class="primary" data-directory-invite="'+r.global_player_id+'">Inviter au Swé</button></div>').join('');
 }
 
+function renderAdminPlayerRequests(){
+  const card=$('#playerParticipationRequestsCard'),box=$('#playerParticipationRequests');if(!card||!box)return;card.classList.toggle('hidden',!isAdmin());if(!isAdmin())return;
+  const rows=S.playerRequests||[];if(!rows.length){box.innerHTML='<div class="muted">Aucune demande de participation pour le moment.</div>';return;}
+  box.innerHTML=rows.map(r=>'<div class="player request-row"><div class="row" style="justify-content:space-between;gap:10px;flex-wrap:wrap"><div><div class="row" style="justify-content:flex-start;gap:7px;flex-wrap:wrap"><b>'+esc(r.display_name)+'</b><span class="player-id-mini">'+esc(r.public_player_id)+'</span></div><div class="muted">'+esc(r.home_area||'Zone non renseignée')+' • '+esc(r.tournament_name||'Swé')+' • '+esc(r.tournament_date||'')+'</div></div><span class="guest-badge">'+(r.status==='pending'?'EN ATTENTE':r.status==='accepted'?'ACCEPTÉE':'REFUSÉE')+'</span></div>'+(r.message?'<div class="small" style="margin-top:7px">💬 '+esc(r.message)+'</div>':'')+(Number(r.third_half_pledge_cents||0)>0?'<div class="small" style="margin-top:5px">🧊 Contribution annoncée : '+euroCents(r.third_half_pledge_cents)+'</div>':'')+(r.external_payment_required?'<div class="small" style="margin-top:5px">💳 Paiement exigé : '+euroCents(r.entry_fee_cents)+(r.payment_ready?' • prêt':' • configuration requise')+'</div>':'')+(r.status==='pending'?'<div class="row" style="margin-top:9px"><button class="primary" data-request-accept="'+r.request_id+'">✅ Accepter</button><button data-request-decline="'+r.request_id+'">Refuser</button></div>':'')+'</div>').join('');
+}
 async function boot(){
   await loadInvites();
   if(await initSuperAdmin())return;
@@ -841,6 +852,7 @@ async function boot(){
   await loadMyPlayerDashboard();
   $('#workspaceName').textContent=S.workspace.name+' • '+(S.workspace.role==='admin'?'Administrateur':(hasTemporaryAdmin()?'Co-organisateur • Admin temporaire':'Co-organisateur'));
   applyPermissions(); subscribeRealtime(); startSafeAppSync();
+  const startMode=new URLSearchParams(location.search).get('start');if(startMode==='player')setView('myplayer');
 }
 $('#createWorkspace').onclick=async()=>{
   const btn=$('#createWorkspace');btn.disabled=true;btn.textContent='Création…';
@@ -889,10 +901,12 @@ async function loadAll(){
   const commercial=await sb.rpc('get_workspace_commercial_access',{p_workspace_id:w});
   if(!commercial.error){const c=Array.isArray(commercial.data)?commercial.data[0]:commercial.data;if(c)S.commercialAccess={...S.commercialAccess,...c};}
   if(S.commercialAccess.special_access_enabled){S.workspaceFeatures={...S.workspaceFeatures,tournaments_enabled:true,league_enabled:true,rankings_enabled:true,third_half_enabled:true,player_ratings_enabled:true,top_player_enabled:true,match_ratings_enabled:true};}
-  S.billingStatus=null;
+  S.billingStatus=null;S.organizerSettings=null;S.playerRequests=[];
   if(isAdmin()){
     r=await sb.rpc('get_workspace_billing_status',{p_workspace_id:w});
     if(!r.error){const b=Array.isArray(r.data)?r.data[0]:r.data;S.billingStatus=b||null;}
+    r=await sb.rpc('get_my_organizer_settings',{p_workspace_id:w});if(!r.error)S.organizerSettings=r.data||null;
+    r=await sb.rpc('list_workspace_player_requests',{p_workspace_id:w});if(!r.error)S.playerRequests=Array.isArray(r.data)?r.data:[];
   }
   S.myRatings=[];
   if(isAdmin()){
@@ -1141,8 +1155,14 @@ function renderStripeBilling(){
   const card=$('#stripeBillingCard');if(!card)return;
   card.classList.toggle('hidden',!isAdmin());
   if(!isAdmin())return;
-  const b=S.billingStatus||{};
+  const b=S.billingStatus||{},os=S.organizerSettings||{};
   const connected=!!b.stripe_connect_account_id,ready=!!b.connect_charges_enabled;
+  if($('#organizerLegalStatus'))$('#organizerLegalStatus').value=os.legal_status||'individual';
+  if($('#organizerWhatsappPhone')&&document.activeElement!==$('#organizerWhatsappPhone'))$('#organizerWhatsappPhone').value=os.whatsapp_contact_phone||'';
+  if($('#organizerWhatsappGroup')&&document.activeElement!==$('#organizerWhatsappGroup'))$('#organizerWhatsappGroup').value=os.whatsapp_group_url||'';
+  if($('#organizerPaymentEligibility')){$('#organizerPaymentEligibility').textContent=os.external_payment_ready?'✅ Paiement externe autorisé':'⚠️ Paiement externe non disponible';$('#organizerPaymentEligibility').style.background=os.external_payment_ready?'#dcfce7':'#fff3cd';}
+  const extPay=$('#tourExternalPaymentRequired');if(extPay){extPay.disabled=!os.external_payment_ready;if(!os.external_payment_ready)extPay.checked=false;}
+  const extNote=$('#tourExternalPaymentNote');if(extNote)extNote.textContent=os.external_payment_ready?'Ton profil permet d’exiger le paiement des joueurs externes.':'Pour exiger un paiement externe : profil Auto-entrepreneur + module Paiements + Stripe Connect opérationnel.';
   const toggle=$('#stripePaymentsToggle'),details=$('#stripeBillingDetails');
   if(toggle){ if(connected) toggle.checked=true; details?.classList.toggle('hidden',!toggle.checked); }
   const badge=$('#stripeStatusBadge');
@@ -1284,7 +1304,7 @@ function renderAll(){
   renderHome();
   renderRegisteredPlayersAdmin().catch(e=>console.error('registered players',e));
   renderPlayers();
-  renderPlayerDirectoryCard();
+  renderPlayerDirectoryCard();renderAdminPlayerRequests();
   renderMyPlayerHub();
   renderPermissions();
   renderStripeBilling();
@@ -1536,7 +1556,7 @@ document.addEventListener('change',e=>{
   if(e.target?.id==='myPlayerPublic'){
     const on=e.target.checked;
     if($('#myPlayerDiscoverable')){ $('#myPlayerDiscoverable').disabled=!on; if(!on)$('#myPlayerDiscoverable').checked=false; }
-    if($('#myPlayerNotify')){ $('#myPlayerNotify').disabled=!on; if(!on)$('#myPlayerNotify').checked=false; }
+    if($('#myPlayerNotify'))$('#myPlayerNotify').disabled=false;
   }
 });
 document.addEventListener('click',async e=>{
@@ -1555,10 +1575,13 @@ document.addEventListener('click',async e=>{
   if(e.target?.id==='myPlayerRefresh'){await loadMyPlayerDashboard();toast('Profil actualisé ✅');return;}
   const accept=e.target?.closest?.('[data-player-invite-accept]');if(accept){accept.disabled=true;const {data,error}=await sb.rpc('respond_global_player_tournament_invite',{p_invite_id:accept.dataset.playerInviteAccept,p_accept:true});accept.disabled=false;if(error)return toast(error.message);await loadMyPlayerDashboard();toast(data?.status==='waitlist'?'Invitation acceptée • tu es actuellement remplaçant.':'Invitation acceptée ✅');return;}
   const decline=e.target?.closest?.('[data-player-invite-decline]');if(decline){decline.disabled=true;const {error}=await sb.rpc('respond_global_player_tournament_invite',{p_invite_id:decline.dataset.playerInviteDecline,p_accept:false});decline.disabled=false;if(error)return toast(error.message);await loadMyPlayerDashboard();toast('Invitation refusée.');return;}
+  const direct=e.target?.closest?.('[data-player-direct-join]');if(direct){const tid=direct.dataset.playerDirectJoin;const pledgeEl=document.querySelector('[data-pledge-for="'+tid+'"]');const pledge=Math.round(Math.max(0,Number(pledgeEl?.value||0))*100);direct.disabled=true;const {data,error}=await sb.rpc('join_discoverable_tournament',{p_tournament_id:tid,p_third_half_pledge_cents:pledge});direct.disabled=false;if(error)return toast(error.message);if(data?.payment_required){const {data:pay,error:pe}=await sb.functions.invoke('stripe-create-entry-checkout',{body:{public_token:data.public_token,tournament_id:tid,player_id:data.player_id,payer_email:S.session?.user?.email||null,success_url:APP_URL+'?playerPayment=success',cancel_url:APP_URL+'?playerPayment=cancel'}});if(pe||pay?.error)return toast(pay?.error||pe?.message||'Impossible d’ouvrir le paiement.');if(pay?.url){location.href=pay.url;return;}}await loadMyPlayerDashboard();toast(data?.status==='waitlist'?'Inscription enregistrée • tu es remplaçant.':'Inscription confirmée ✅');return;}
+  const requestJoin=e.target?.closest?.('[data-player-request-join]');if(requestJoin){const tid=requestJoin.dataset.playerRequestJoin;const pledgeEl=document.querySelector('[data-pledge-for="'+tid+'"]');const msgEl=document.querySelector('[data-request-message-for="'+tid+'"]');const pledge=Math.round(Math.max(0,Number(pledgeEl?.value||0))*100);requestJoin.disabled=true;const {error}=await sb.rpc('request_discoverable_tournament',{p_tournament_id:tid,p_message:msgEl?.value.trim()||null,p_third_half_pledge_cents:pledge});requestJoin.disabled=false;if(error)return toast(error.message);await loadMyPlayerDashboard();toast('Demande envoyée à l’organisateur ✅');return;}
+  const payBtn=e.target?.closest?.('[data-player-pay]');if(payBtn){payBtn.disabled=true;const {data,error}=await sb.functions.invoke('stripe-create-entry-checkout',{body:{public_token:payBtn.dataset.publicToken,tournament_id:payBtn.dataset.tournamentId,player_id:payBtn.dataset.playerId,payer_email:S.session?.user?.email||null,success_url:APP_URL+'?playerPayment=success',cancel_url:APP_URL+'?playerPayment=cancel'}});payBtn.disabled=false;if(error||data?.error)return toast(data?.error||error?.message||'Impossible d’ouvrir le paiement.');if(data?.url)location.href=data.url;return;}
   const open=e.target?.closest?.('[data-open-player-opportunity]');if(open){location.href=open.dataset.openPlayerOpportunity;return;}
   if(e.target?.id==='playerDirectoryBtn'){
     if(!isAdmin())return toast('Réservé à l’administrateur.');
-    e.target.disabled=true;const {data,error}=await sb.rpc('search_public_global_players',{p_workspace_id:S.workspace.id,p_query:$('#playerDirectorySearch').value.trim()||null,p_limit:50});e.target.disabled=false;if(error)return toast(error.message);S.playerDirectory=Array.isArray(data)?data:[];renderPlayerDirectoryCard();return;
+    e.target.disabled=true;const {data,error}=await sb.rpc('search_public_global_players',{p_workspace_id:S.workspace.id,p_query:$('#playerDirectorySearch').value.trim()||null,p_limit:50});e.target.disabled=false;if(error)return toast(error.message);S.playerDirectory=Array.isArray(data)?data:[];renderPlayerDirectoryCard();renderAdminPlayerRequests();return;
   }
   const invite=e.target?.closest?.('[data-directory-invite]');if(invite){
     const tid=$('#playerDirectoryTournament').value;if(!tid)return toast('Choisis d’abord le Swé à compléter.');
@@ -1566,6 +1589,13 @@ document.addEventListener('click',async e=>{
     if(!confirm('Inviter '+(row?.display_name||'ce joueur')+' à rejoindre ce Swé ?'))return;
     invite.disabled=true;const {error}=await sb.rpc('invite_public_player_to_tournament',{p_workspace_id:S.workspace.id,p_tournament_id:tid,p_global_player_id:invite.dataset.directoryInvite,p_message:'Ton profil public correspond à un besoin pour compléter ce Swé.'});invite.disabled=false;if(error)return toast(error.message);toast('Invitation envoyée dans son espace joueur SWÉ ✅');return;
   }
+});
+
+document.addEventListener('click',async e=>{
+  if(e.target?.id==='saveOrganizerSettings'){if(!isAdmin())return;const b=e.target;b.disabled=true;const {data,error}=await sb.rpc('update_my_organizer_settings',{p_workspace_id:S.workspace.id,p_legal_status:$('#organizerLegalStatus').value,p_whatsapp_group_url:$('#organizerWhatsappGroup').value.trim()||null,p_whatsapp_contact_phone:$('#organizerWhatsappPhone').value.trim()||null});b.disabled=false;if(error)return toast(error.message);S.organizerSettings=data||null;renderStripeBilling();toast('Profil organisateur mis à jour ✅');return;}
+  if(e.target?.id==='refreshPlayerRequests'){const {data,error}=await sb.rpc('list_workspace_player_requests',{p_workspace_id:S.workspace.id});if(error)return toast(error.message);S.playerRequests=Array.isArray(data)?data:[];renderAdminPlayerRequests();toast('Demandes actualisées ✅');return;}
+  const a=e.target?.closest?.('[data-request-accept]');if(a){if(!confirm('Accepter cette demande de participation ?'))return;a.disabled=true;const {data,error}=await sb.rpc('respond_global_player_participation_request',{p_request_id:a.dataset.requestAccept,p_accept:true});a.disabled=false;if(error)return toast(error.message);await loadAll();renderAdminPlayerRequests();toast(data?.status==='payment_pending'?'Demande acceptée • le joueur doit maintenant payer sa place.':'Demande acceptée ✅');return;}
+  const d=e.target?.closest?.('[data-request-decline]');if(d){if(!confirm('Refuser cette demande ?'))return;d.disabled=true;const {error}=await sb.rpc('respond_global_player_participation_request',{p_request_id:d.dataset.requestDecline,p_accept:false});d.disabled=false;if(error)return toast(error.message);await loadAll();renderAdminPlayerRequests();toast('Demande refusée.');return;}
 });
 
 $('#sendInvite').onclick=async()=>{
@@ -2099,7 +2129,10 @@ function renderTournaments(){
       '</div>';
     const open=document.createElement('button');open.textContent=t.id===S.activeTour?'Actif':'Ouvrir';if(t.id===S.activeTour)open.className='green';
     open.onclick=async()=>{S.activeTour=t.id;await loadTournament();renderAll();toast('Tournoi sélectionné')};
-    top.appendChild(open);d.appendChild(top);
+    top.appendChild(open);
+    const waShare=document.createElement('button');waShare.textContent='🟢 Partager WhatsApp';waShare.onclick=()=>{const front='https://swetournament.fr/?swe='+encodeURIComponent(t.id);const mode=t.discovery_mode==='public'?'inscriptions directes':t.discovery_mode==='request'?'participation sur demande':'accès par lien';const msg='⚽ '+(t.name||'Nouveau Swé')+' • '+t.tournament_date+(t.start_time?' à '+String(t.start_time).slice(0,5):'')+'\n📍 '+(t.venue||'Lieu à confirmer')+'\n'+mode+'\n👉 '+front;window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank','noopener');};top.appendChild(waShare);
+    if(S.organizerSettings?.whatsapp_group_url){const wg=document.createElement('button');wg.textContent='💬 Groupe WhatsApp';wg.onclick=()=>window.open(S.organizerSettings.whatsapp_group_url,'_blank','noopener');top.appendChild(wg);}
+    d.appendChild(top);
 
     if(hasAdminOps()){
       const reg=document.createElement('div');reg.className='player tournament-admin-block';reg.style.marginTop='12px';
@@ -2127,7 +2160,12 @@ function renderTournaments(){
         row.appendChild(extend);
       }
       reg.appendChild(row);
-
+      const discovery=document.createElement('div');discovery.className='tournament-discovery-admin';discovery.style.marginTop='10px';
+      const dm=document.createElement('select');dm.innerHTML='<option value="unlisted">Non répertorié</option><option value="request">Sur demande</option><option value="public">Public • inscription directe</option>';dm.value=t.discovery_mode||'unlisted';
+      const ext=document.createElement('label');ext.className='row';ext.style.gap='6px';const extCb=document.createElement('input');extCb.type='checkbox';extCb.style.width='auto';extCb.checked=!!t.allow_external_players;ext.append(extCb,document.createTextNode('Joueurs externes'));
+      const pay=document.createElement('label');pay.className='row';pay.style.gap='6px';const payCb=document.createElement('input');payCb.type='checkbox';payCb.style.width='auto';payCb.checked=!!t.external_payment_required;payCb.disabled=!S.organizerSettings?.external_payment_ready;pay.append(payCb,document.createTextNode('Paiement externe requis'));
+      const saveDiscovery=document.createElement('button');saveDiscovery.textContent='Enregistrer visibilité';saveDiscovery.onclick=async()=>{if(dm.value!=='unlisted'&&!extCb.checked)return toast('Active les joueurs externes pour rendre ce Swé visible.');if(payCb.checked&&Number(t.entry_fee_cents||0)<=0)return toast('Indique d’abord un prix par participant.');const {error}=await sb.from('tournaments').update({discovery_mode:dm.value,allow_external_players:extCb.checked,external_payment_required:payCb.checked&&!!S.organizerSettings?.external_payment_ready}).eq('id',t.id);if(error)return toast(error.message);await loadAll();toast('Visibilité du Swé mise à jour ✅');};
+      discovery.append(dm,ext,pay,saveDiscovery);reg.appendChild(discovery);
 
       const editDetails=document.createElement('div');
       editDetails.style.marginTop='10px';
@@ -2556,8 +2594,13 @@ $('#createTournament').onclick=async()=>{
       venue,
       start_time:startTime,
       entry_fee_cents:Math.round(Number(feeRaw)*100),
-      reservation_reference:$('#tourReservationRef')?.value.trim()||null
+      reservation_reference:$('#tourReservationRef')?.value.trim()||null,
+      discovery_mode:$('#tourDiscoveryMode')?.value||'unlisted',
+      allow_external_players:!!$('#tourAllowExternal')?.checked,
+      external_payment_required:!!$('#tourExternalPaymentRequired')?.checked && !!S.organizerSettings?.external_payment_ready
     };
+    if(row.discovery_mode!=='unlisted'&&!row.allow_external_players)throw new Error('Active « Accepter des joueurs externes » pour rendre ce Swé visible aux joueurs solo.');
+    if(row.external_payment_required&&row.entry_fee_cents<=0)throw new Error('Indique un prix par participant avant d’exiger un paiement en ligne.');
     if(S.workspaceFeatures.third_half_enabled)row.cooler_suggested_cents=Math.round(Math.max(0,Number($('#tourCoolerSuggested')?.value)||0)*100);
     const {data,error}=await sb.from('tournaments').insert(row).select().single();
     if(error)throw error;
