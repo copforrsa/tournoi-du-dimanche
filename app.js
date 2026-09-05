@@ -574,11 +574,9 @@ function renderSuperAdminVenues(){
   });
 }
 async function loadSuperAdminWorkspaces(){
-  const {data,error}=await sb.rpc('super_admin_get_workspaces_v4');
+  const {data,error}=await sb.rpc('super_admin_get_workspaces_v5');
   if(error){toast(error.message);return}
   S.superWorkspaces=Array.isArray(data)?data:[];
-  const commercial=await sb.rpc('super_admin_get_commercial_access');
-  if(!commercial.error){const map=new Map((Array.isArray(commercial.data)?commercial.data:[]).map(x=>[String(x.workspace_id),x]));S.superWorkspaces=S.superWorkspaces.map(w=>({...w,...(map.get(String(w.workspace_id))||{})}));}
   const requests=await sb.rpc('super_admin_get_coorganizer_quota_requests');
   S.superCoorgQuotaRequests=requests.error?[]:(Array.isArray(requests.data)?requests.data:[]);
   const players=await sb.rpc('super_admin_get_players_directory_v3');
@@ -653,23 +651,54 @@ function renderSuperAdminPlayers(){
 function renderSuperAdminWorkspaces(){
   const box=$('#saWorkspaceList');if(!box)return;
   const q=($('#saSearchWorkspace')?.value||'').trim().toLowerCase();
-  const rows=(S.superWorkspaces||[]).filter(w=>!q||
+  const mode=$('#saWorkspaceFilter')?.value||'all';
+  const all=S.superWorkspaces||[];
+  const matchesMode=w=>{
+    const paid=['standard','pro'].includes(String(w.subscription_plan||'free'))||!!w.special_access_enabled;
+    const trial=!!w.trial_ends_at&&new Date(w.trial_ends_at)>new Date();
+    if(mode==='paid')return paid;
+    if(mode==='trial')return trial&&!paid;
+    if(mode==='free')return !paid;
+    if(mode==='multi')return Number(w.owner_owned_spaces||0)>1||Number(w.owner_admin_memberships||0)>1;
+    if(mode==='suspended')return !w.public_enabled;
+    return true;
+  };
+  const rows=all.filter(w=>matchesMode(w)&&(!q||
     String(w.workspace_name||'').toLowerCase().includes(q)||
     String(w.owner_email||'').toLowerCase().includes(q)||
     String(w.admin_first_name||'').toLowerCase().includes(q)||
     String(w.admin_last_name||'').toLowerCase().includes(q)||
-    String(w.admin_phone||'').toLowerCase().includes(q));
+    String(w.admin_phone||'').toLowerCase().includes(q)));
 
-  const all=S.superWorkspaces||[];
+  const owners=new Map();all.forEach(w=>owners.set(String(w.owner_user_id),w));
   if($('#saTotalSpaces'))$('#saTotalSpaces').textContent=all.length;
   if($('#saActiveSpaces'))$('#saActiveSpaces').textContent=all.filter(w=>w.public_enabled).length;
   if($('#saSuspendedSpaces'))$('#saSuspendedSpaces').textContent=all.filter(w=>!w.public_enabled).length;
   if($('#saTotalPlayers'))$('#saTotalPlayers').textContent=all.reduce((n,w)=>n+Number(w.active_players||0),0);
   if($('#saTotalCompetitions'))$('#saTotalCompetitions').textContent=all.reduce((n,w)=>n+Number(w.tournament_count||0)+Number(w.league_count||0),0);
   if($('#saPaidSpaces'))$('#saPaidSpaces').textContent=all.filter(w=>['standard','pro'].includes(String(w.subscription_plan||'free'))||w.special_access_enabled).length;
+  if($('#saTotalOrganizers'))$('#saTotalOrganizers').textContent=owners.size;
+  if($('#saMultiOrganizers'))$('#saMultiOrganizers').textContent=[...owners.values()].filter(w=>Number(w.owner_owned_spaces||0)>1||Number(w.owner_admin_memberships||0)>1).length;
 
   box.innerHTML='';
-  if(!rows.length){box.innerHTML='<p class="muted">'+(q?'Aucun espace ne correspond à la recherche.':'Aucun espace client.')+'</p>';return}
+  if(!rows.length){box.innerHTML='<p class="muted">'+(q?'Aucun espace ne correspond à la recherche.':'Aucun espace dans ce filtre.')+'</p>';return}
+
+  const ownerBodies=new Map();
+  const ensureOwnerGroup=w=>{
+    const key=String(w.owner_user_id||w.owner_email||'unknown');
+    if(ownerBodies.has(key))return ownerBodies.get(key);
+    const owned=Number(w.owner_owned_spaces||0),adminCount=Number(w.owner_admin_memberships||0),limit=Number(w.owner_free_workspace_limit||1);
+    const g=document.createElement('details');g.className='sa-owner-group';g.open=!!q||mode==='multi';
+    const display=([w.admin_first_name,w.admin_last_name].filter(Boolean).join(' ')||w.owner_email||'Organisateur');
+    g.innerHTML='<summary><span><b>👤 '+esc(display)+'</b><small>'+esc(w.owner_email||'')+'</small></span><span class="sa-owner-badges"><em>'+owned+' espace'+(owned>1?'s':'')+' créé'+(owned>1?'s':'')+'</em><em>'+adminCount+' groupe'+(adminCount>1?'s':'')+' administré'+(adminCount>1?'s':'')+'</em><em class="'+(limit>1?'special':'')+'">Gratuit : '+limit+' max</em></span></summary><div class="sa-owner-tools"><div><b>Limite de groupes gratuits</b><div class="muted small">Par défaut : 1. Augmente uniquement pour un test, ambassadeur ou autorisation spéciale.</div></div><input data-owner-limit type="number" min="1" max="100" value="'+limit+'"><input data-owner-note value="'+esc(w.owner_limit_note||'')+'" placeholder="Motif / note interne"><button data-owner-save>💾 Autoriser</button></div><div class="sa-owner-workspaces"></div>';
+    const body=g.querySelector('.sa-owner-workspaces');
+    g.querySelector('[data-owner-save]').onclick=async()=>{
+      const btn=g.querySelector('[data-owner-save]'),val=Math.max(1,Number(g.querySelector('[data-owner-limit]').value)||1),note=g.querySelector('[data-owner-note]').value.trim();
+      btn.disabled=true;const {error}=await sb.rpc('super_admin_set_organizer_free_workspace_limit',{p_user_id:w.owner_user_id,p_limit:val,p_note:note||null});btn.disabled=false;
+      if(error)return toast(error.message);toast('Limite organisateur mise à jour ✅');await loadSuperAdminWorkspaces();
+    };
+    box.appendChild(g);ownerBodies.set(key,body);return body;
+  };
 
   rows.forEach(w=>{
     const d=document.createElement('div');d.className='sa-workspace-card';
@@ -843,7 +872,7 @@ function renderSuperAdminWorkspaces(){
       toast('Espace supprimé définitivement.');await loadSuperAdminWorkspaces();
     };
 
-    actions.append(save,copy,toggle,del);d.appendChild(actions);box.appendChild(d);
+    actions.append(save,copy,toggle,del);d.appendChild(actions);ensureOwnerGroup(w).appendChild(d);
   });
 }
 async function initSuperAdmin(){
@@ -865,6 +894,7 @@ document.addEventListener('input',e=>{
   if(e.target?.id==='saSearchWorkspace')renderSuperAdminWorkspaces();
   if(e.target?.id==='saSearchPlayer')renderSuperAdminPlayers();
 });
+document.addEventListener('change',e=>{if(e.target?.id==='saWorkspaceFilter')renderSuperAdminWorkspaces();});
 document.addEventListener('click',async e=>{
   const rb=e.target?.closest?.('[data-resolve-identity]');if(rb){const label=rb.dataset.resolveIdentity==='existing_valid'?'garder le compte déjà lié':rb.dataset.resolveIdentity==='claimant_valid'?'attribuer le joueur au nouveau demandeur':'lever le blocage sans modifier la liaison';if(!confirm('Confirmer : '+label+' ?'))return;rb.disabled=true;const {error}=await sb.rpc('super_admin_resolve_identity_dispute',{p_claim_id:rb.dataset.claimId,p_resolution:rb.dataset.resolveIdentity});rb.disabled=false;if(error)return toast(error.message);toast('Conflit d’identité traité ✅');await loadSuperAdminWorkspaces();return;}
   if(!e.target?.matches?.('[data-sa-unlink-staff]'))return;
@@ -898,6 +928,7 @@ document.addEventListener('change',async e=>{
   if(['saTournamentEnabled','saLeagueEnabled','saNewPlan'].includes(e.target?.id))refreshSuperAdminCreateDependencies();
   if(e.target?.matches?.('[data-sa-tournament],[data-sa-league],[data-sa-plan],[data-sa-special-access]'))refreshWorkspaceDependencyUI(e.target.closest('.sa-workspace-card'));
 });
+document.addEventListener('change',e=>{if(e.target?.id==='saWorkspaceFilter')renderSuperAdminWorkspaces();});
 document.addEventListener('click',async e=>{
   const saTab=e.target?.closest?.('[data-sa-tab]');
   if(saTab){
@@ -974,6 +1005,7 @@ function renderThirdHalfFunds(){
   if(!rows.length){box.innerHTML='<div class="muted">Aucun Swé actif à administrer pour la glacière.</div>';return;}
   box.innerHTML=rows.map((r,i)=>{const target=Number(r.target_amount_cents||0),collected=Number(r.collected_amount_cents||0),pct=target?Math.min(100,Math.round(collected/target*100)):0;return '<div class="cooler-fund" data-cooler-row="'+esc(r.tournament_id)+'"><div class="cooler-fund-head"><div><b>'+esc(r.tournament_name||'Swé')+'</b><div class="muted">📅 '+esc(r.tournament_date||'')+' • '+(r.format==='league'?'Swé de Ligue':'Tournoi')+'</div></div><span class="cooler-status '+esc(r.status||'draft')+'">'+esc(String(r.status||'draft').toUpperCase())+'</span></div><div class="cooler-progress"><span style="width:'+pct+'%"></span></div><div class="muted small" style="margin-top:5px">Collecté : <b>'+euroCents(collected)+'</b>'+(target?' / objectif '+euroCents(target):' • aucun objectif défini')+'</div><div class="grid g2"><label><span class="muted">Statut</span><select data-cooler-status><option value="draft" '+(r.status==='draft'?'selected':'')+'>Brouillon</option><option value="open" '+(r.status==='open'?'selected':'')+'>Ouverte</option><option value="paused" '+(r.status==='paused'?'selected':'')+'>En pause</option><option value="closed" '+(r.status==='closed'?'selected':'')+'>Clôturée</option></select></label><label><span class="muted">Solution de cagnotte</span><select data-cooler-provider><option value="">Choisir</option>'+['Revolut','Leetchi','PayPal','Sumeria','Autre'].map(x=>'<option '+(r.provider===x?'selected':'')+'>'+x+'</option>').join('')+'</select></label><label><span class="muted">Lien de cagnotte</span><input data-cooler-link type="url" placeholder="https://..." value="'+esc(r.payment_link||'')+'"></label><label><span class="muted">Participation conseillée (€)</span><input data-cooler-suggested type="number" min="0" step="0.50" value="'+(Number(r.suggested_amount_cents||0)/100)+'"></label><label><span class="muted">Objectif (€)</span><input data-cooler-target type="number" min="0" step="0.50" value="'+(target/100)+'"></label><label><span class="muted">Montant collecté (€)</span><input data-cooler-collected type="number" min="0" step="0.50" value="'+(collected/100)+'"></label></div><label style="margin-top:10px"><span class="muted">Note admin</span><textarea data-cooler-notes rows="2" placeholder="Ex. boissons, glace, repas...">'+esc(r.notes||'')+'</textarea></label><label class="player row" style="justify-content:flex-start;margin-top:10px"><input data-cooler-share type="checkbox" style="width:auto" '+(r.share_enabled?'checked':'')+'><span><b>Partager le lien aux joueurs</b><div class="muted">Le partage n’est possible que si un lien HTTPS est renseigné.</div></span></label>'+(r.payment_link?'<div class="cooler-link-preview" style="margin-top:7px">🔗 '+esc(r.payment_link)+'</div>':'')+'<div class="row" style="margin-top:10px"><button class="primary" data-save-cooler>💾 Enregistrer</button>'+(r.payment_link?'<button data-copy-cooler-link>Copier le lien</button>':'')+'</div></div>'}).join('');
 }
+document.addEventListener('change',e=>{if(e.target?.id==='saWorkspaceFilter')renderSuperAdminWorkspaces();});
 document.addEventListener('click',async e=>{
   if(e.target?.id==='refreshCoolerFunds'){await loadThirdHalfFunds();return;}
   const row=e.target?.closest?.('[data-cooler-row]');if(!row)return;
@@ -1157,6 +1189,7 @@ $('#cancelWorkspaceSetup')?.addEventListener('click',()=>{
 $('#workspaceSwitcher')?.addEventListener('change',e=>{localStorage.setItem('swe_workspace_id',e.target.value);location.reload();});
 
 
+document.addEventListener('change',e=>{if(e.target?.id==='saWorkspaceFilter')renderSuperAdminWorkspaces();});
 document.addEventListener('click',async e=>{
   const intent=e.target?.closest?.('[data-onboarding-intent]')?.dataset.onboardingIntent;
   if(intent==='player'){
@@ -1801,6 +1834,7 @@ function renderHome(){
   renderHomeCoorgVotes();
 }
 
+document.addEventListener('change',e=>{if(e.target?.id==='saWorkspaceFilter')renderSuperAdminWorkspaces();});
 document.addEventListener('click',async e=>{
   if(e.target?.id==='homeRequestMoreCoorg'){
     const n=Number($('#homeRequestedCoorgLimit')?.value||0);
@@ -1883,6 +1917,7 @@ async function openCoorgOptionsManager(){
   });
 }
 
+document.addEventListener('change',e=>{if(e.target?.id==='saWorkspaceFilter')renderSuperAdminWorkspaces();});
 document.addEventListener('click',async e=>{
   const stepBtn=e.target?.closest?.('[data-coorg-step]');
   if(stepBtn){const input=$('#homeCoorgQty');if(input){input.value=Math.max(1,Math.min(1000,Number(input.value||1)+Number(stepBtn.dataset.coorgStep||0)));refreshCoorgPurchasePrice();}return;}
@@ -1931,6 +1966,7 @@ document.addEventListener('change',e=>{
     if($('#myPlayerNotify'))$('#myPlayerNotify').disabled=false;
   }
 });
+document.addEventListener('change',e=>{if(e.target?.id==='saWorkspaceFilter')renderSuperAdminWorkspaces();});
 document.addEventListener('click',async e=>{
   if(e.target?.id==='myPlayerCreate'){
     const name=$('#myPlayerCreateName').value.trim();if(!name)return toast('Indique ton nom ou ton pseudo joueur.');
@@ -1977,6 +2013,7 @@ document.addEventListener('click',async e=>{
   }
 });
 
+document.addEventListener('change',e=>{if(e.target?.id==='saWorkspaceFilter')renderSuperAdminWorkspaces();});
 document.addEventListener('click',async e=>{
   if(e.target?.id==='saveOrganizerSettings'){if(!isAdmin())return;const b=e.target;b.disabled=true;const {data,error}=await sb.rpc('update_my_organizer_settings',{p_workspace_id:S.workspace.id,p_legal_status:$('#organizerLegalStatus').value,p_whatsapp_group_url:$('#organizerWhatsappGroup').value.trim()||null,p_whatsapp_contact_phone:$('#organizerWhatsappPhone').value.trim()||null});b.disabled=false;if(error)return toast(error.message);S.organizerSettings=data||null;renderStripeBilling();toast('Profil organisateur mis à jour ✅');return;}
   if(e.target?.id==='refreshPlayerRequests'){const {data,error}=await sb.rpc('list_workspace_player_requests',{p_workspace_id:S.workspace.id});if(error)return toast(error.message);S.playerRequests=Array.isArray(data)?data:[];renderAdminPlayerRequests();toast('Demandes actualisées ✅');return;}

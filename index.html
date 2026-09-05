@@ -14,7 +14,7 @@
   <title>SWÉ TOURNAMENT 5/5 • V42.8</title>
 <link rel="icon" type="image/png" href="./favicon.png?v=4208">
 <link rel="apple-touch-icon" href="./icon-192.png?v=4112">
-  <link rel="stylesheet" href="./styles.css?v=4219">
+  <link rel="stylesheet" href="./styles.css?v=4220">
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -30,7 +30,7 @@
 </div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1><img src="./favicon.png?v=4208" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V42.19</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1><img src="./favicon.png?v=4208" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V42.20</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -76,7 +76,7 @@
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1><img src="./favicon.png?v=4208" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V42.19</span></h1><div class="workspace-head-line"><div id="workspaceName" class="muted"></div><select id="workspaceSwitcher" class="workspace-switcher hidden" aria-label="Changer d’espace"></select></div><div class="build-badge" title="Version installée">MAJ 42.19</div></div>
+        <div><h1><img src="./favicon.png?v=4208" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V42.20</span></h1><div class="workspace-head-line"><div id="workspaceName" class="muted"></div><select id="workspaceSwitcher" class="workspace-switcher hidden" aria-label="Changer d’espace"></select></div><div class="build-badge" title="Version installée">MAJ 42.20</div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -100,6 +100,8 @@
         <div class="sa-stat info"><span>👥</span><div><small>Joueurs actifs</small><b id="saTotalPlayers">0</b></div></div>
         <div class="sa-stat violet"><span>🏆</span><div><small>Compétitions</small><b id="saTotalCompetitions">0</b></div></div>
         <div class="sa-stat gold"><span>💎</span><div><small>Offres payantes</small><b id="saPaidSpaces">0</b></div></div>
+        <div class="sa-stat"><span>🧑‍💼</span><div><small>Organisateurs</small><b id="saTotalOrganizers">0</b></div></div>
+        <div class="sa-stat violet"><span>🗂️</span><div><small>Multi-groupes</small><b id="saMultiOrganizers">0</b></div></div>
       </div>
 
       <div class="sa-admin-tabs"><button type="button" class="active" data-sa-tab="spaces">🏢 Espaces & offres</button><button type="button" data-sa-tab="players">👤 Joueurs SWÉ</button></div>
@@ -157,7 +159,7 @@
           <button id="saRefresh">Actualiser</button>
         </div>
         <div class="space"></div>
-        <input id="saSearchWorkspace" placeholder="🔎 Rechercher par espace, admin, email ou téléphone">
+        <div class="sa-workspace-filters"><input id="saSearchWorkspace" placeholder="🔎 Rechercher par espace, admin, email ou téléphone"><select id="saWorkspaceFilter" aria-label="Filtrer les espaces"><option value="all">Tous les organisateurs</option><option value="trial">Essais gratuits en cours</option><option value="free">Gratuits / sans abonnement</option><option value="paid">Abonnements / accès spéciaux</option><option value="multi">Administrateurs multi-groupes</option><option value="suspended">Espaces suspendus</option></select></div>
         <div class="space"></div>
         <div id="saWorkspaceList"></div>
       </div>
@@ -866,5 +868,5 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
-<script src="./app.js?v=4219" defer></script>
+<script src="./app.js?v=4220" defer></script>
 <footer id="platformFooter" class="platform-footer hidden"><div class="platform-footer-inner"><div><b id="platformFooterCompany">SWÉ Tournament</b><div id="platformFooterText"></div></div><div id="platformFooterLinks"></div></div></footer></body></html>
