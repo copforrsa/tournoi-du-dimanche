@@ -14,7 +14,7 @@
   <title>SWÉ TOURNAMENT 5/5 • V41.12</title>
 <link rel="icon" type="image/png" href="./favicon.png?v=4112">
 <link rel="apple-touch-icon" href="./icon-192.png?v=4112">
-  <link rel="stylesheet" href="./styles.css?v=4112">
+  <link rel="stylesheet" href="./styles.css?v=4113">
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -387,7 +387,15 @@
         </div>
       </div>
       <div class="card" id="tournamentAdminCard">
-        <h2 class="sectiontitle">Créer un tournoi</h2><p class="muted">La <b>date et l’heure de fin des inscriptions sont obligatoires</b>. Elles alimentent le compte à rebours affiché aux joueurs. Par défaut, l’application propose la veille à 17h. La capacité par défaut est de 35 joueurs. Après la génération des équipes, l’application adapte automatiquement le nombre d’équipes et de terrains : 10 joueurs = 2 équipes / 1 terrain, 15 = 3 / 1, 20 = 4 / 2, 25 = 5 / 2, 30 = 6 / 3 et 35 = 7 / 3.</p>
+        <div class="tour-create-hero">
+          <div class="tour-create-icon">🏆</div>
+          <div class="tour-create-copy"><span class="tour-create-eyebrow">NOUVEL ÉVÉNEMENT</span><h2>Créer un tournoi</h2><p>Configure ton Swé en quelques étapes. SWÉ gère ensuite les inscriptions, la capacité, les équipes et les terrains.</p></div>
+        </div>
+        <div class="tour-create-guide">
+          <div><span>⏱️</span><b>Clôture obligatoire</b><small>La date et l’heure alimentent automatiquement le compte à rebours joueur. Par défaut : la veille à 17h.</small></div>
+          <div><span>👥</span><b>Jusqu’à 35 joueurs</b><small>La capacité reste modifiable. Les remplaçants sont gérés automatiquement selon le nombre d’inscrits.</small></div>
+          <div><span>⚡</span><b>Format automatique</b><small>10 → 2 équipes / 1 terrain · 20 → 4 / 2 · 30 → 6 / 3 · 35 → 7 / 3.</small></div>
+        </div>
         <div class="grid g2"><label><span class="muted">Date du tournoi *</span><input id="tourDate" type="date" required></label><label><span class="muted">Format *</span><select id="tourFormat"><option value="classic">Classique</option><option value="king_of_pitch">Roi du terrain</option></select></label></div><div class="space"></div><label class="player" style="display:block;background:#eef8f2;border-color:#b7dfc4"><span class="muted">⏱️ Fin des inscriptions *</span><input id="tourRegistrationDeadline" type="datetime-local" required><div class="muted" style="margin-top:5px">Le compte à rebours sera affiché systématiquement sur le lien d’inscription jusqu’à cette date.</div></label>
         <div class="space"></div><input id="tourName" placeholder="Nom facultatif"><div class="space"></div>
         <div class="player" style="background:#f8fbf9">
@@ -796,5 +804,5 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
-<script src="./app.js?v=4112" defer></script>
+<script src="./app.js?v=4113" defer></script>
 </body></html>

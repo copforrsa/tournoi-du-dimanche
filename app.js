@@ -29,7 +29,7 @@ window.addEventListener('error', (e) => {
   if(t){t.textContent='Erreur de chargement de l’application. Recharge la page.';t.style.display='block';}
 });
 
-const S={session:null,adminProfile:null,isSuperAdmin:false,superWorkspaces:[],workspace:null,members:[],coorgs:[],coorgCount:0,workspaceFeatures:{max_coorganizers:3,max_coorganizers_cap:100,rankings_enabled:true,league_enabled:true,tournaments_enabled:true,third_half_enabled:false,player_ratings_enabled:false,max_players_cap:35,payments_enabled:true,top_player_enabled:false,match_ratings_enabled:false},commercialAccess:{subscription_plan:'free',special_access_enabled:false,upgrade_requested_at:null},billingStatus:null,coorgPurchaseConfirming:false,myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null},myRatings:[],lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],skillAggregates:[],teamCodes:[],seasons:[],leagues:[],leaguePlayers:[],activeLeague:null,tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matchAssignments:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},sportsComplexes:[],sportsPitches:[],publicMode:false,publicToken:null,editingTournamentId:null,teamCompetitionId:null,lastView:null,coorgQuotaRequest:null,superCoorgQuotaRequests:[],myLinkedPlayerId:null,playerDashboard:null,playerDirectory:[],organizerSettings:null,playerRequests:[]};
+const S={session:null,adminProfile:null,isSuperAdmin:false,superWorkspaces:[],workspace:null,members:[],coorgs:[],coorgCount:0,workspaceFeatures:{max_coorganizers:3,max_coorganizers_cap:100,rankings_enabled:true,league_enabled:true,tournaments_enabled:true,third_half_enabled:false,player_ratings_enabled:false,max_players_cap:35,payments_enabled:true,top_player_enabled:false,match_ratings_enabled:false},commercialAccess:{subscription_plan:'free',special_access_enabled:false,upgrade_requested_at:null},billingStatus:null,coorgPurchaseConfirming:false,myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null},myRatings:[],lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],skillAggregates:[],teamCodes:[],seasons:[],leagues:[],leaguePlayers:[],activeLeague:null,tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matchAssignments:[],matches:[],goals:[],teamBalanceScores:[],rankMode:'season',channel:null,goalTeamSelections:{},sportsComplexes:[],sportsPitches:[],publicMode:false,publicToken:null,editingTournamentId:null,teamCompetitionId:null,lastView:null,coorgQuotaRequest:null,superCoorgQuotaRequests:[],myLinkedPlayerId:null,playerDashboard:null,playerDirectory:[],organizerSettings:null,playerRequests:[]};
 
 let safeSyncTimer=null;
 let safeSyncBusy=false;
@@ -236,6 +236,7 @@ const paymentDeskTokenFromUrl=(()=>{
   return '';
 })();
 const shortCodeFromUrl=(urlParams.get('s')||'').trim().toUpperCase();
+const paymentShortCodeFromUrl=(urlParams.get('pay')||'').trim().toUpperCase();
 const inviteIdFromUrl=urlParams.get('invite');
 const inviteEmailFromUrl=(urlParams.get('email')||'').trim().toLowerCase();
 function isAdmin(){return S.workspace?.role==='admin'}
@@ -335,6 +336,18 @@ function friendlyAuthError(error){
   return error?.message||'Une erreur est survenue.';
 }
 async function authState(){
+  if(paymentShortCodeFromUrl){
+    try{
+      const {data,error}=await sb.rpc('resolve_payment_desk_short_link',{p_code:paymentShortCodeFromUrl});
+      if(error)throw error;
+      if(!data?.token)throw new Error('Lien d’encaissement invalide ou expiré.');
+      await bootPaymentDesk(data.token);
+    }catch(e){
+      $('#auth').classList.add('hidden');$('#main').classList.add('hidden');$('#publicView').classList.remove('hidden');
+      $('#publicView').innerHTML='<header class="top"><h1><img src="./favicon.png?v=4100" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5</h1></header><div class="card"><h2>Lien d’encaissement indisponible</h2><p class="muted">'+esc(e.message||e)+'</p></div>';
+    }
+    return;
+  }
   if(paymentDeskTokenFromUrl){
     await bootPaymentDesk(paymentDeskTokenFromUrl);
     return;
@@ -966,7 +979,7 @@ async function loadAll(){
   if(!editingReview)renderAll();
 }
 async function loadTournament(){
-  const t=currentTour();if(!t){S.tPlayers=[];S.teams=[];S.teamPlayers=[];S.matchAssignments=[];S.matches=[];S.goals=[];return}let r;
+  const t=currentTour();if(!t){S.tPlayers=[];S.teams=[];S.teamPlayers=[];S.matchAssignments=[];S.matches=[];S.goals=[];S.teamBalanceScores=[];return}let r;
   r=await sb.from('tournament_players').select('*').eq('tournament_id',t.id);S.tPlayers=r.data||[];
   r=await sb.from('teams').select('*').eq('tournament_id',t.id).order('created_at');S.teams=r.data||[];
   const tids=S.teams.map(x=>x.id);if(tids.length){r=await sb.from('team_players').select('*').in('team_id',tids);S.teamPlayers=r.data||[]}else S.teamPlayers=[];
@@ -976,6 +989,8 @@ async function loadTournament(){
     r=await sb.from('goals').select('*').in('match_id',mids).order('created_at');S.goals=r.data||[];
     r=await sb.from('match_player_assignments').select('*').in('match_id',mids);S.matchAssignments=r.data||[];
   }else{S.goals=[];S.matchAssignments=[];}
+  const scoreRes=await sb.rpc('get_tournament_team_balance_scores',{p_tournament_id:t.id});
+  S.teamBalanceScores=scoreRes.error?[]:(scoreRes.data||[]);
   renderMatchPitchSelect();
 }
 const THIRD_HALF_PAYMENT_MODES={
@@ -2369,25 +2384,28 @@ function renderTournaments(){
       };
       linkRow.append(linkInput,copyBtn,waBtn);shareBox.appendChild(linkRow);reg.appendChild(shareBox);
 
-      const deskBox=document.createElement('div');deskBox.style.marginTop='10px';
-      const deskUrl=t.payment_validation_token?APP_URL+'?paydesk='+encodeURIComponent(t.payment_validation_token):'';
-      deskBox.innerHTML='<div class="muted" style="margin-bottom:6px"><b>💶 Lien encaissement du complexe</b><br>Lien privé à transmettre au complexe pour voir qui a payé et confirmer les paiements reçus sur place.</div>';
-      const deskRow=document.createElement('div');deskRow.className='row';
-      const deskInput=document.createElement('input');deskInput.readOnly=true;deskInput.value=deskUrl||'Migration paiement sur place à installer';deskInput.style.flex='1';
-      const deskCopy=document.createElement('button');deskCopy.textContent='Copier le lien encaissement';deskCopy.disabled=!deskUrl;
-      deskCopy.onclick=async()=>{try{await navigator.clipboard.writeText(deskInput.value);toast('Lien encaissement copié ✅')}catch(e){deskInput.focus();deskInput.select();toast('Lien sélectionné : copie-le.')}};
-      deskRow.append(deskInput,deskCopy);
+      const deskBox=document.createElement('div');deskBox.className='payment-link-card';deskBox.style.marginTop='10px';
+      const deskUrl=t.payment_short_code?APP_URL+'?pay='+encodeURIComponent(String(t.payment_short_code).toUpperCase()):'';
+      deskBox.innerHTML='<div class="payment-link-head"><span>💶</span><div><b>Lien d’encaissement</b><small>Distinct du lien d’inscription. À transmettre uniquement au complexe ou à la personne qui valide les paiements sur place.</small></div><em>PRIVÉ</em></div>';
+      const deskRow=document.createElement('div');deskRow.className='payment-link-row';
+      const deskInput=document.createElement('input');deskInput.readOnly=true;deskInput.value=deskUrl||'Lien en cours de création';deskInput.className='short-link-input';
+      const deskCopy=document.createElement('button');deskCopy.textContent='📋 Copier';deskCopy.disabled=!deskUrl;
+      deskCopy.onclick=async()=>{try{await navigator.clipboard.writeText(deskInput.value);toast('Lien d’encaissement copié ✅')}catch(e){deskInput.focus();deskInput.select();toast('Lien sélectionné : copie-le.')}};
+      const deskCode=document.createElement('span');deskCode.className='short-code-badge';deskCode.textContent=t.payment_short_code?'Code : '+String(t.payment_short_code).toUpperCase():'Code indisponible';
+      deskRow.append(deskInput,deskCopy,deskCode);
       if(isAdmin()){
-        const rotate=document.createElement('button');rotate.textContent='🔐 Régénérer le lien';rotate.className='secondary';
-        rotate.title='Invalide immédiatement l’ancien lien du complexe';
+        const rotate=document.createElement('button');rotate.textContent='🔐 Régénérer';rotate.className='secondary';
+        rotate.title='Invalide immédiatement l’ancien lien d’encaissement';
         rotate.onclick=async()=>{
           if(!confirm('Régénérer le lien d’encaissement ? L’ancien lien cessera immédiatement de fonctionner.'))return;
           rotate.disabled=true;
-          const {data,error}=await sb.rpc('rotate_tournament_payment_validation_token',{p_tournament_id:t.id});
+          const {data,error}=await sb.rpc('rotate_tournament_payment_access',{p_tournament_id:t.id});
           rotate.disabled=false;if(error)return toast(error.message);
-          t.payment_validation_token=data;
-          deskInput.value=APP_URL+'?paydesk='+encodeURIComponent(data);
-          toast('Nouveau lien sécurisé généré ✅');
+          t.payment_validation_token=data?.token||t.payment_validation_token;
+          t.payment_short_code=data?.short_code||t.payment_short_code;
+          deskInput.value=APP_URL+'?pay='+encodeURIComponent(String(t.payment_short_code).toUpperCase());
+          deskCode.textContent='Code : '+String(t.payment_short_code).toUpperCase();
+          toast('Nouveau lien court d’encaissement généré ✅');
         };
         deskRow.appendChild(rotate);
       }
@@ -2755,7 +2773,15 @@ function renderTeams(){
   S.teams.forEach(team=>{
     const d=document.createElement('div');d.className='team';
     const head=document.createElement('div');head.className='row';head.style.justifyContent='space-between';
-    const title=document.createElement('b');title.textContent=team.name;head.appendChild(title);
+    const titleWrap=document.createElement('div');
+    const title=document.createElement('b');title.textContent=team.name;titleWrap.appendChild(title);
+    const score=S.teamBalanceScores.find(x=>String(x.team_id)===String(team.id));
+    if(score){
+      const meta=document.createElement('div');meta.className='team-balance-badges';
+      meta.innerHTML='<span>⚖️ '+Number(score.team_score||0).toFixed(1)+'/5</span><span class="team-mention">'+esc(score.mention||'Équilibrée')+'</span>'+(Number(score.free_slots||0)>0?'<span class="team-free">'+Number(score.free_slots)+' place'+(Number(score.free_slots)>1?'s':'')+' libre'+(Number(score.free_slots)>1?'s':'')+'</span>':'<span class="team-locked">Équipe complète</span>');
+      titleWrap.appendChild(meta);
+    }
+    head.appendChild(titleWrap);
 
     if(canFullEdit){
       const del=document.createElement('button');del.textContent='Supprimer';del.className='danger';
@@ -2821,7 +2847,7 @@ $('#smartAutoTeams').onclick=async()=>{
   if(t.format!=='league'&&confirmed<10)return toast('Il faut au moins 10 joueurs confirmés pour créer 2 équipes.');
   if(t.format==='league'&&confirmed<4)return toast('Il faut au moins 4 joueurs confirmés.');
   const perTeam=Math.max(2,Math.min(11,Number($('#playersPerTeam').value)||5));
-  if((S.matches.length||S.teams.length)&&!confirm('La génération va remplacer les équipes actuelles et supprimer les matchs/buts associés. Continuer ?'))return;
+  if((S.matches.length||S.teams.length)&&!confirm('Générer les équipes ?\n\n• Les équipes préformées complètes restent intactes.\n• Les joueurs ayant déjà accepté leur équipe restent verrouillés.\n• Les invitations non confirmées et les inscrits en équipe aléatoire sont redistribués.\n• Les places libres des équipes incomplètes sont complétées en recherchant le meilleur équilibre.\n• Les anciens matchs/buts liés à une ancienne répartition seront supprimés.'))return;
   const btn=$('#smartAutoTeams');btn.disabled=true;btn.textContent='Génération…';
   try{
     const call=t.format==='league'
@@ -2838,8 +2864,11 @@ $('#smartAutoTeams').onclick=async()=>{
       $('#teamBalanceInfo').textContent=n+' équipes générées automatiquement selon les niveaux privés définis par l’administrateur.';
     }else{
       const subs=Number(data?.substitute_count||0),pitches=Number(data?.pitch_count||1);
+      const scores=(data?.team_scores||[]).map(x=>x.team_name+' '+Number(x.score||0).toFixed(1)+'/5 • '+x.mention).join(' · ');
       $('#teamBalanceInfo').innerHTML='<b>'+n+' équipes • '+pitches+' terrain'+(pitches>1?'s':'')+'</b>'+
         (subs?' • '+subs+' remplaçant'+(subs>1?'s':'')+' parmi les derniers inscrits':'')+
+        '<br>🔒 Les équipes complètes et les joueurs ayant accepté leur place ont été conservés. Les autres joueurs ont été répartis dans les places libres pour équilibrer les niveaux.'+
+        (scores?'<br><b>⚖️ Indice équipes :</b> '+esc(scores):'')+
         '<br>Règle automatique : '+(data?.odd_team_rule?'2 buts d’écart = l’équipe dehors rentre, sinon 10 min maximum.':'matchs de 10 min.')+
         (subs?' <br><b>🟠 '+subs+' remplaçant'+(subs>1?'s':'')+' commun'+(subs>1?'s':'')+'</b> : ils peuvent jouer pour n’importe quelle équipe du tournoi.':'');
     }
@@ -3730,6 +3759,10 @@ function makeVisualTeams(ctx,t){
     vRoundRect(ctx,70,y,940,cardH,24,'#ffffff');
     vRoundRect(ctx,90,y+24,160,48,15,'#dff6e8');
     vText(ctx,team.name,170,y+58,130,'800 25px Arial','#0c6b3d','center');
+    const balance=S.teamBalanceScores.find(x=>String(x.team_id)===String(team.id));
+    if(balance){
+      vText(ctx,'⚖ '+Number(balance.team_score||0).toFixed(1)+'/5 · '+String(balance.mention||'Équilibrée'),930,y+58,290,'700 20px Arial','#0c6b3d','right');
+    }
     let tx=285,ty=y+50;
     names.forEach((name,i)=>{
       const col=i%2,row=Math.floor(i/2);
