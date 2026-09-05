@@ -9,18 +9,18 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Tournoi Foot">
-  <link rel="apple-touch-icon" href="./icon-192.png?v=4110">
+  <link rel="apple-touch-icon" href="./icon-192.png?v=4111">
   <link rel="manifest" href="./manifest.webmanifest">
-  <title>SWÉ TOURNAMENT 5/5 • V41.10</title>
-<link rel="icon" type="image/png" href="./favicon.png?v=4110">
-<link rel="apple-touch-icon" href="./icon-192.png?v=4110">
-  <link rel="stylesheet" href="./styles.css?v=4110">
+  <title>SWÉ TOURNAMENT 5/5 • V41.11</title>
+<link rel="icon" type="image/png" href="./favicon.png?v=4111">
+<link rel="apple-touch-icon" href="./icon-192.png?v=4111">
+  <link rel="stylesheet" href="./styles.css?v=4111">
 </head>
 <body>
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1><img src="./favicon.png?v=4110" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V41.10</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1><img src="./favicon.png?v=4111" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V41.11</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -63,7 +63,7 @@
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1><img src="./favicon.png?v=4110" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V41.10</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1><img src="./favicon.png?v=4111" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V41.11</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -154,6 +154,38 @@
     </div>
 
     <div id="inviteBox" class="card hidden"><h2 class="sectiontitle">Invitation reçue</h2><div id="inviteList"></div></div>
+
+
+    <div id="view-myplayer" class="view">
+      <div class="card player-hub-hero">
+        <div class="player-hub-title"><div class="player-hub-avatar">⚽</div><div><div class="sa-eyebrow">IDENTITÉ JOUEUR SWÉ</div><h2>Mon profil joueur</h2><p>Un seul identifiant pour retrouver tes performances dans tous les groupes SWÉ auxquels tu participes.</p></div></div>
+        <div id="myPlayerIdentity" class="hidden"></div>
+      </div>
+      <div id="myPlayerCreateCard" class="card hidden">
+        <h2 class="sectiontitle">Créer mon ID joueur SWÉ</h2>
+        <p class="muted">Ton ID SWÉ est personnel et permanent. Tu pourras ensuite relier les profils que différents groupes ont déjà créés pour toi.</p>
+        <div class="grid g2"><input id="myPlayerCreateName" placeholder="Ton nom / pseudo joueur"><button id="myPlayerCreate" class="primary">Créer mon ID SWÉ</button></div>
+      </div>
+      <div id="myPlayerDashboard" class="hidden">
+        <div class="card">
+          <div class="row" style="justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap"><div><h2 class="sectiontitle">👤 Mon identité</h2><div class="muted">Choisis ce que les autres organisateurs peuvent voir.</div></div><span id="myPlayerPublicId" class="player-id-badge">SWE---------</span></div>
+          <div class="grid g2" style="margin-top:12px"><label><span class="muted">Nom / pseudo public</span><input id="myPlayerName"></label><label><span class="muted">Zone / commune (facultatif)</span><input id="myPlayerArea" placeholder="Ex. Fort-de-France"></label></div>
+          <div class="player-privacy-grid">
+            <label><input id="myPlayerPublic" type="checkbox"><span><b>Profil public</b><small>Autorise l’affichage de ton profil joueur SWÉ.</small></span></label>
+            <label><input id="myPlayerDiscoverable" type="checkbox"><span><b>Disponible dans l’annuaire</b><small>Les administrateurs peuvent te proposer de compléter un Swé.</small></span></label>
+            <label><input id="myPlayerNotify" type="checkbox"><span><b>M’informer des prochains Swés</b><small>Affiche les Swés ouverts organisés par d’autres groupes.</small></span></label>
+          </div>
+          <button id="myPlayerSave" class="primary" style="margin-top:12px">💾 Enregistrer mon profil</button>
+        </div>
+        <div class="card"><h2 class="sectiontitle">📊 Mes performances tous groupes confondus</h2><div id="myPlayerStats" class="player-global-stats"></div></div>
+        <div class="card"><h2 class="sectiontitle">🔗 Relier un profil de groupe</h2><p class="muted">Demande au responsable du groupe ton <b>code de liaison SWÉ</b>, puis saisis-le ici. Tes statistiques de ce groupe seront rattachées à ton ID personnel.</p><div class="row"><input id="myPlayerLinkCode" placeholder="Ex. LINK-A1B2C3D4E5" style="flex:1;text-transform:uppercase"><button id="myPlayerClaimLink" class="primary">Relier ce profil</button></div></div>
+        <div class="grid g2 player-hub-grid">
+          <div class="card"><h2 class="sectiontitle">🏟️ Mes groupes liés</h2><div id="myPlayerGroups"></div></div>
+          <div class="card"><h2 class="sectiontitle">📩 Mes invitations</h2><div id="myPlayerInvites"></div></div>
+        </div>
+        <div class="card"><div class="row" style="justify-content:space-between;gap:10px;flex-wrap:wrap"><div><h2 class="sectiontitle">🌍 Swés à découvrir</h2><div class="muted">Visible uniquement si ton profil est public et si tu as activé les informations sur les prochains Swés.</div></div><button id="myPlayerRefresh">Actualiser</button></div><div id="myPlayerOpportunities" class="player-opportunity-grid" style="margin-top:12px"></div></div>
+      </div>
+    </div>
 
     <div id="view-home" class="view active">
       <div class="card" id="hostWelcomeCard">
@@ -284,6 +316,12 @@
         <div class="space"></div>
         <button id="addPlayers" class="primary">Enregistrer les joueurs</button>
         <p class="muted">Un Guest reste dans les statistiques mais sera grisé dans les classements. Tu peux aussi préciser de quel membre il est l’invité.</p>
+      </div>
+      <div class="card hidden" id="playerDirectoryCard">
+        <div class="row" style="justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap"><div><h2 class="sectiontitle">🌍 Annuaire joueurs SWÉ</h2><div class="muted">Trouve des joueurs ayant choisi de rendre leur profil public pour compléter un Swé.</div></div><span class="guest-badge">Profils volontaires uniquement</span></div>
+        <div class="grid g2" style="margin-top:12px"><input id="playerDirectorySearch" placeholder="Nom, ID SWÉ ou commune"><select id="playerDirectoryTournament"><option value="">Choisir le Swé à compléter…</option></select></div>
+        <div class="row" style="margin-top:8px"><button id="playerDirectoryBtn" class="primary">🔎 Rechercher des joueurs</button></div>
+        <div id="playerDirectoryResults" style="margin-top:12px"></div>
       </div>
       <div class="card"><div class="muted" style="margin-bottom:8px">💡 Administrateur et co-gestionnaires utilisent la même évaluation confidentielle : Cardio, Dribble, Collectif, Frappe et rôle de prédilection. Les moyennes servent uniquement à améliorer l’équilibrage des équipes.</div><div id="playersList"></div></div>
     </div>
@@ -606,6 +644,7 @@
 
     <nav class="tabs">
       <button class="tab active" data-view="home">Accueil</button>
+      <button class="tab" data-view="myplayer">Mon profil joueur</button>
       <button class="tab" data-view="players">Joueurs</button>
       <button class="tab admin-permissions-tab hidden" data-view="permissions">Autorisations</button>
       <button class="tab" data-view="tournaments">Tournois</button>
@@ -618,7 +657,7 @@
 
   <section id="publicView" class="hidden">
     <header class="top">
-      <h1 class="public-title"><img src="./favicon.png?v=4110" class="brand-mark" alt="SWÉ"><span id="publicWorkspaceName">SWÉ TOURNAMENT 5/5</span></h1>
+      <h1 class="public-title"><img src="./favicon.png?v=4111" class="brand-mark" alt="SWÉ"><span id="publicWorkspaceName">SWÉ TOURNAMENT 5/5</span></h1>
       <div class="public-sub">Consultation publique • lecture seule</div>
     </header>
 
@@ -732,5 +771,5 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
-<script src="./app.js?v=4110" defer></script>
+<script src="./app.js?v=4111" defer></script>
 </body></html>

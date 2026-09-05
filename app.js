@@ -29,7 +29,7 @@ window.addEventListener('error', (e) => {
   if(t){t.textContent='Erreur de chargement de l’application. Recharge la page.';t.style.display='block';}
 });
 
-const S={session:null,adminProfile:null,isSuperAdmin:false,superWorkspaces:[],workspace:null,members:[],coorgs:[],coorgCount:0,workspaceFeatures:{max_coorganizers:3,max_coorganizers_cap:100,rankings_enabled:true,league_enabled:true,tournaments_enabled:true,third_half_enabled:false,player_ratings_enabled:false,max_players_cap:35,payments_enabled:true,top_player_enabled:false,match_ratings_enabled:false},commercialAccess:{subscription_plan:'free',special_access_enabled:false,upgrade_requested_at:null},billingStatus:null,coorgPurchaseConfirming:false,myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null},myRatings:[],lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],skillAggregates:[],teamCodes:[],seasons:[],leagues:[],leaguePlayers:[],activeLeague:null,tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matchAssignments:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},sportsComplexes:[],sportsPitches:[],publicMode:false,publicToken:null,editingTournamentId:null,teamCompetitionId:null,lastView:null,coorgQuotaRequest:null,superCoorgQuotaRequests:[],myLinkedPlayerId:null};
+const S={session:null,adminProfile:null,isSuperAdmin:false,superWorkspaces:[],workspace:null,members:[],coorgs:[],coorgCount:0,workspaceFeatures:{max_coorganizers:3,max_coorganizers_cap:100,rankings_enabled:true,league_enabled:true,tournaments_enabled:true,third_half_enabled:false,player_ratings_enabled:false,max_players_cap:35,payments_enabled:true,top_player_enabled:false,match_ratings_enabled:false},commercialAccess:{subscription_plan:'free',special_access_enabled:false,upgrade_requested_at:null},billingStatus:null,coorgPurchaseConfirming:false,myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null},myRatings:[],lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],skillAggregates:[],teamCodes:[],seasons:[],leagues:[],leaguePlayers:[],activeLeague:null,tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matchAssignments:[],matches:[],goals:[],rankMode:'season',channel:null,goalTeamSelections:{},sportsComplexes:[],sportsPitches:[],publicMode:false,publicToken:null,editingTournamentId:null,teamCompetitionId:null,lastView:null,coorgQuotaRequest:null,superCoorgQuotaRequests:[],myLinkedPlayerId:null,playerDashboard:null,playerDirectory:[]};
 
 let safeSyncTimer=null;
 let safeSyncBusy=false;
@@ -476,7 +476,7 @@ function renderSuperAdminVenues(){
   });
 }
 async function loadSuperAdminWorkspaces(){
-  const {data,error}=await sb.rpc('super_admin_get_workspaces_v2');
+  const {data,error}=await sb.rpc('super_admin_get_workspaces_v3');
   if(error){toast(error.message);return}
   S.superWorkspaces=Array.isArray(data)?data:[];
   const commercial=await sb.rpc('super_admin_get_commercial_access');
@@ -520,7 +520,7 @@ function renderSuperAdminWorkspaces(){
       '</div>'+
       '<div class="grid g3" style="margin-top:12px">'+
         '<div class="player"><div class="muted">Membres actifs</div><b>'+Number(w.active_players||0)+'</b></div>'+
-        '<div class="player"><div class="muted">Co-organisateurs</div><b>'+Number(w.active_coorganizers||0)+' / '+Number(w.max_coorganizers||0)+'</b></div>'+
+        '<div class="player"><div class="muted">Co-gestionnaires</div><b>'+Number(w.active_coorganizers||0)+' / '+Number(w.max_coorganizers||0)+'</b><div class="muted small">'+Number(w.base_max_coorganizers||0)+' offert(s) + '+Number(w.paid_coorganizers||0)+' acheté(s)</div></div>'+
         '<div class="player"><div class="muted">Compétitions</div><b>'+Number(w.tournament_count||0)+' tournoi(x) • '+Number(w.league_count||0)+' ligue(s)</b></div>'+
       '</div>'+
       '<div style="height:1px;background:#e8ecef;margin:14px 0"></div>'+
@@ -535,8 +535,8 @@ function renderSuperAdminWorkspaces(){
       '</div>'+
       '<div class="row" style="margin-top:8px"><button data-sa-save-profile>💾 Enregistrer nom / prénom</button><span class="muted">Modifie uniquement l’identité affichée de l’administrateur, sans changer son compte de connexion.</span></div>'+
       '<div class="grid g3" style="margin-top:10px">'+
-        '<label><span class="muted">Co-gestionnaires inclus / offerts</span><input data-sa-max type="number" min="0" max="1000" value="'+Number((w.base_max_coorganizers ?? w.max_coorganizers) || 0)+'"></label>'+
-        '<div class="player" style="background:#f0fdf4;border-color:#bbf7d0"><b>♾️ Aucun plafond commercial</b><div class="muted" style="margin-top:4px">Les accès supplémentaires achetés s’ajoutent automatiquement après paiement Stripe.</div></div>'+
+        '<label><span class="muted">Co-gestionnaires offerts par le Super Admin</span><input data-sa-max type="number" min="0" max="1000" value="'+Number((w.base_max_coorganizers ?? 0) || 0)+'"><small class="muted">S’ajoutent aux accès achetés par le client.</small></label>'+
+        '<div class="player" style="background:#f0fdf4;border-color:#bbf7d0"><b>🎁 '+Number(w.base_max_coorganizers||0)+' offert(s) • 💳 '+Number(w.paid_coorganizers||0)+' acheté(s)</b><div class="muted" style="margin-top:4px">Capacité totale calculée automatiquement : '+Number(w.max_coorganizers||0)+' co-gestionnaire(s).</div></div>'+
         '<label class="player row" style="justify-content:flex-start"><input data-sa-public type="checkbox" style="width:auto" '+(w.public_enabled?'checked':'')+'><span><b>Espace actif</b></span></label>'+
       '</div>'+
       '<div class="sa-settings-block">'+
@@ -602,13 +602,14 @@ function renderSuperAdminWorkspaces(){
       if(!r.error)r=await sb.rpc('super_admin_set_commercial_access_v2',{p_workspace_id:w.workspace_id,p_subscription_plan:d.querySelector('[data-sa-plan]').value,p_special_access_enabled:d.querySelector('[data-sa-special-access]').checked});
       if(!r.error)r=await sb.rpc('super_admin_set_workspace_options_v2',{
         p_workspace_id:w.workspace_id,
-        p_max_coorganizers:max,
-        p_max_coorganizers_cap:Number(w.max_coorganizers_cap||100),
+        p_max_coorganizers:Number(w.max_coorganizers||0),
+        p_max_coorganizers_cap:Number(w.max_coorganizers_cap||1000),
         p_tournaments_enabled:d.querySelector('[data-sa-tournament]').checked,
         p_league_enabled:d.querySelector('[data-sa-league]').checked,
         p_rankings_enabled:d.querySelector('[data-sa-rankings]').checked,
         p_public_enabled:d.querySelector('[data-sa-public]').checked
       });
+      if(!r.error)r=await sb.rpc('super_admin_grant_coorganizer_slots',{p_workspace_id:w.workspace_id,p_base_max_coorganizers:max});
       save.disabled=false;if(r.error)return toast(r.error.message);
       toast('Espace mis à jour ✅');await loadSuperAdminWorkspaces();
     };
@@ -760,12 +761,58 @@ document.addEventListener('click',async e=>{
     if(profile.error){b.disabled=false;return toast('Espace créé, mais fiche administrateur à compléter : '+profile.error.message)}
     const plan=$('#saNewPlan')?.value||'free';
     let commercial=await sb.rpc('super_admin_set_commercial_access_v2',{p_workspace_id:created.data,p_subscription_plan:plan,p_special_access_enabled:false});
-    if(!commercial.error)commercial=await sb.rpc('super_admin_set_workspace_options_v2',{p_workspace_id:created.data,p_max_coorganizers:Math.max(0,Math.min(1000,Number($('#saMaxCoorg').value)||0)),p_max_coorganizers_cap:1000,p_tournaments_enabled:$('#saTournamentEnabled').checked,p_league_enabled:$('#saLeagueEnabled').checked,p_rankings_enabled:$('#saRankingsEnabled').checked,p_public_enabled:true});
+    const gifted=Math.max(0,Math.min(1000,Number($('#saMaxCoorg').value)||0));
+    if(!commercial.error)commercial=await sb.rpc('super_admin_set_workspace_options_v2',{p_workspace_id:created.data,p_max_coorganizers:gifted,p_max_coorganizers_cap:1000,p_tournaments_enabled:$('#saTournamentEnabled').checked,p_league_enabled:$('#saLeagueEnabled').checked,p_rankings_enabled:$('#saRankingsEnabled').checked,p_public_enabled:true});
+    if(!commercial.error)commercial=await sb.rpc('super_admin_grant_coorganizer_slots',{p_workspace_id:created.data,p_base_max_coorganizers:gifted});
     b.disabled=false;if(commercial.error)return toast('Espace créé, mais configuration commerciale à vérifier : '+commercial.error.message);
     $('#saWorkspaceName').value='';$('#saOwnerEmail').value='';$('#saOwnerFirstName').value='';$('#saOwnerLastName').value='';$('#saOwnerPhone').value='';
     toast('Espace administrateur créé ✅');await loadSuperAdminWorkspaces();
   }
 });
+
+
+async function loadMyPlayerDashboard(){
+  if(!S.session){S.playerDashboard=null;return null;}
+  const {data,error}=await sb.rpc('get_my_global_player_dashboard');
+  if(error){console.warn('global player dashboard',error);S.playerDashboard=null;return null;}
+  S.playerDashboard=data||null;
+  renderMyPlayerHub();
+  return S.playerDashboard;
+}
+function renderMyPlayerHub(){
+  const create=$('#myPlayerCreateCard'),dash=$('#myPlayerDashboard'),identity=$('#myPlayerIdentity');
+  if(!create||!dash)return;
+  const d=S.playerDashboard;
+  create.classList.toggle('hidden',!!d?.profile);
+  dash.classList.toggle('hidden',!d?.profile);
+  if(!d?.profile){if(identity){identity.classList.add('hidden');identity.innerHTML='';}return;}
+  const p=d.profile,st=d.stats||{};
+  if(identity){identity.classList.remove('hidden');identity.innerHTML='<span class="player-id-badge">'+esc(p.public_player_id)+'</span><span class="muted">ID joueur permanent</span>';}
+  if($('#myPlayerPublicId'))$('#myPlayerPublicId').textContent=p.public_player_id;
+  if($('#myPlayerName')&&document.activeElement!==$('#myPlayerName'))$('#myPlayerName').value=p.display_name||'';
+  if($('#myPlayerArea')&&document.activeElement!==$('#myPlayerArea'))$('#myPlayerArea').value=p.home_area||'';
+  if($('#myPlayerPublic'))$('#myPlayerPublic').checked=!!p.is_public;
+  if($('#myPlayerDiscoverable')){$('#myPlayerDiscoverable').checked=!!p.discoverable;$('#myPlayerDiscoverable').disabled=!p.is_public;}
+  if($('#myPlayerNotify')){$('#myPlayerNotify').checked=!!p.notify_upcoming_swes;$('#myPlayerNotify').disabled=!p.is_public;}
+  const rating=st.rating==null?'—':Number(st.rating).toFixed(1)+'/5';
+  if($('#myPlayerStats'))$('#myPlayerStats').innerHTML=[['🏟️','Groupes',st.groups||0],['🏆','Swés joués',st.tournaments||0],['⚽','Matchs',st.matches||0],['✅','Victoires',st.wins||0],['🥅','Buts',st.goals||0],['🎯','Passes',st.assists||0],['⭐','Note',rating]].map(x=>'<div><span>'+x[0]+'</span><small>'+x[1]+'</small><b>'+x[2]+'</b></div>').join('');
+  const groups=Array.isArray(d.groups)?d.groups:[];
+  if($('#myPlayerGroups'))$('#myPlayerGroups').innerHTML=groups.length?groups.map(g=>'<div class="player"><b>'+esc(g.workspace_name)+'</b><div class="muted">Profil local : '+esc(g.player_name)+(g.is_group_member?' • membre':' • invité')+'</div></div>').join(''):'<div class="muted">Aucun profil de groupe relié pour le moment.</div>';
+  const invites=Array.isArray(d.invites)?d.invites:[];
+  if($('#myPlayerInvites'))$('#myPlayerInvites').innerHTML=invites.length?invites.map(i=>'<div class="player"><div class="row" style="justify-content:space-between;gap:8px;flex-wrap:wrap"><div><b>'+esc(i.workspace_name)+' • '+esc(i.tournament_name||'Swé')+'</b><div class="muted">'+esc(i.tournament_date||'')+(i.start_time?' • '+esc(String(i.start_time).slice(0,5)):'')+(i.venue?' • '+esc(i.venue):'')+'</div>'+(i.message?'<div class="small" style="margin-top:5px">'+esc(i.message)+'</div>':'')+'</div><span class="guest-badge">'+esc(String(i.status||'pending').toUpperCase())+'</span></div>'+(i.status==='pending'?'<div class="row" style="margin-top:8px"><button class="primary" data-player-invite-accept="'+i.id+'">✅ Accepter</button><button data-player-invite-decline="'+i.id+'">Refuser</button></div>':'')+'</div>').join(''):'<div class="muted">Aucune invitation.</div>';
+  const opp=Array.isArray(d.upcoming_swes)?d.upcoming_swes:[];
+  if($('#myPlayerOpportunities'))$('#myPlayerOpportunities').innerHTML=opp.length?opp.map(o=>{const link=APP_URL+'?public='+encodeURIComponent(o.public_token)+'&view=tournament&tournament='+encodeURIComponent(o.tournament_id);return '<div class="player player-opportunity"><span class="guest-badge">'+esc(o.workspace_name)+'</span><h3>'+esc(o.tournament_name||'Swé')+'</h3><div class="muted">📅 '+esc(o.tournament_date||'')+(o.start_time?' • '+esc(String(o.start_time).slice(0,5)):'')+'</div><div class="muted">📍 '+esc(o.venue||'Lieu à confirmer')+'</div><button class="primary" data-open-player-opportunity="'+esc(link)+'" style="margin-top:10px">Voir le Swé →</button></div>'}).join(''):'<div class="muted">Aucun nouveau Swé à afficher pour le moment.</div>';
+}
+function renderPlayerDirectoryCard(){
+  const card=$('#playerDirectoryCard');if(!card)return;
+  card.classList.toggle('hidden',!isAdmin());
+  if(!isAdmin())return;
+  const sel=$('#playerDirectoryTournament');if(sel){const keep=sel.value;const tours=(S.tournaments||[]).filter(t=>t.status!=='finished');sel.innerHTML='<option value="">Choisir le Swé à compléter…</option>'+tours.map(t=>'<option value="'+t.id+'">'+esc(t.name||t.tournament_date)+' • '+esc(t.tournament_date)+'</option>').join('');if([...sel.options].some(o=>o.value===keep))sel.value=keep;}
+  const box=$('#playerDirectoryResults');if(!box)return;
+  const rows=S.playerDirectory||[];
+  if(!rows.length){box.innerHTML='<div class="muted">Lance une recherche pour consulter les joueurs publics disponibles.</div>';return;}
+  box.innerHTML=rows.map(r=>'<div class="player directory-player"><div style="flex:1"><div class="row" style="justify-content:flex-start;gap:8px;flex-wrap:wrap"><b>'+esc(r.display_name)+'</b><span class="player-id-mini">'+esc(r.public_player_id)+'</span></div><div class="muted">'+esc(r.home_area||'Zone non renseignée')+' • '+Number(r.groups_count||0)+' groupe(s) • '+Number(r.tournaments_count||0)+' Swé(s)</div><div class="small" style="margin-top:4px">⚽ '+Number(r.matches_count||0)+' matchs • 🥅 '+Number(r.goals_count||0)+' buts • 🎯 '+Number(r.assists_count||0)+' passes'+(r.rating!=null?' • ⭐ '+Number(r.rating).toFixed(1)+'/5':'')+'</div></div><button class="primary" data-directory-invite="'+r.global_player_id+'">Inviter au Swé</button></div>').join('');
+}
 
 async function boot(){
   await loadInvites();
@@ -778,17 +825,26 @@ async function boot(){
     .eq('active',true)
     .limit(10);
   if(error)return toast(error.message);
-  if(!data?.length){$('#workspaceSetup').classList.remove('hidden');return}
+  if(!data?.length){
+    S.workspace=null;
+    $('#workspaceSetup').classList.remove('hidden');
+    await loadMyPlayerDashboard();
+    document.querySelectorAll('.tabs .tab').forEach(t=>t.style.display=t.dataset.view==='myplayer'?'':'none');
+    setView('myplayer');
+    $('#workspaceName').textContent='Mon espace joueur SWÉ';
+    return;
+  }
   S.workspace={id:data[0].workspace_id,name:data[0].workspaces?.name||'SWÉ Tournament 5/5',role:data[0].role,public_token:data[0].workspaces?.public_token||null,public_enabled:data[0].workspaces?.public_enabled!==false};
   $('#workspaceSetup').classList.add('hidden');
   await loadSportsVenues();
   await loadAll();
+  await loadMyPlayerDashboard();
   $('#workspaceName').textContent=S.workspace.name+' • '+(S.workspace.role==='admin'?'Administrateur':(hasTemporaryAdmin()?'Co-organisateur • Admin temporaire':'Co-organisateur'));
   applyPermissions(); subscribeRealtime(); startSafeAppSync();
 }
 $('#createWorkspace').onclick=async()=>{
   const btn=$('#createWorkspace');btn.disabled=true;btn.textContent='Création…';
-  try{await ensureWorkspace();toast('Espace créé ✅');await loadAll();subscribeRealtime();startSafeAppSync()}
+  try{await ensureWorkspace();toast('Espace créé ✅');await boot()}
   catch(error){toast(friendlyAuthError(error))}
   finally{btn.disabled=false;btn.textContent="Créer l'espace"}
 };
@@ -1228,6 +1284,8 @@ function renderAll(){
   renderHome();
   renderRegisteredPlayersAdmin().catch(e=>console.error('registered players',e));
   renderPlayers();
+  renderPlayerDirectoryCard();
+  renderMyPlayerHub();
   renderPermissions();
   renderStripeBilling();
   renderTournaments();
@@ -1473,6 +1531,43 @@ document.addEventListener('click',async e=>{
 
 document.addEventListener('change',e=>{if(e.target?.id==='homeCoorgQty')refreshCoorgPurchasePrice();});
 document.addEventListener('input',e=>{if(e.target?.id==='homeCoorgQty')refreshCoorgPurchasePrice();});
+
+document.addEventListener('change',e=>{
+  if(e.target?.id==='myPlayerPublic'){
+    const on=e.target.checked;
+    if($('#myPlayerDiscoverable')){ $('#myPlayerDiscoverable').disabled=!on; if(!on)$('#myPlayerDiscoverable').checked=false; }
+    if($('#myPlayerNotify')){ $('#myPlayerNotify').disabled=!on; if(!on)$('#myPlayerNotify').checked=false; }
+  }
+});
+document.addEventListener('click',async e=>{
+  if(e.target?.id==='myPlayerCreate'){
+    const name=$('#myPlayerCreateName').value.trim();if(!name)return toast('Indique ton nom ou ton pseudo joueur.');
+    e.target.disabled=true;const {error}=await sb.rpc('ensure_my_global_player_profile',{p_display_name:name});e.target.disabled=false;if(error)return toast(error.message);await loadMyPlayerDashboard();toast('Ton ID joueur SWÉ est créé ✅');return;
+  }
+  if(e.target?.id==='myPlayerSave'){
+    const name=$('#myPlayerName').value.trim();if(!name)return toast('Ton nom joueur est obligatoire.');
+    e.target.disabled=true;const {error}=await sb.rpc('update_my_global_player_profile',{p_display_name:name,p_is_public:$('#myPlayerPublic').checked,p_discoverable:$('#myPlayerDiscoverable').checked,p_notify_upcoming_swes:$('#myPlayerNotify').checked,p_home_area:$('#myPlayerArea').value.trim()||null});e.target.disabled=false;if(error)return toast(error.message);await loadMyPlayerDashboard();toast('Profil joueur mis à jour ✅');return;
+  }
+  if(e.target?.id==='myPlayerClaimLink'){
+    const code=$('#myPlayerLinkCode').value.trim();if(!code)return toast('Saisis le code de liaison fourni par ton groupe.');
+    e.target.disabled=true;const {data,error}=await sb.rpc('claim_player_link_code',{p_code:code});e.target.disabled=false;if(error)return toast(error.message);$('#myPlayerLinkCode').value='';await loadMyPlayerDashboard();if(S.workspace)await loadAll();toast('Profil « '+(data?.player_name||'joueur')+' » relié à ton ID SWÉ ✅');return;
+  }
+  if(e.target?.id==='myPlayerRefresh'){await loadMyPlayerDashboard();toast('Profil actualisé ✅');return;}
+  const accept=e.target?.closest?.('[data-player-invite-accept]');if(accept){accept.disabled=true;const {data,error}=await sb.rpc('respond_global_player_tournament_invite',{p_invite_id:accept.dataset.playerInviteAccept,p_accept:true});accept.disabled=false;if(error)return toast(error.message);await loadMyPlayerDashboard();toast(data?.status==='waitlist'?'Invitation acceptée • tu es actuellement remplaçant.':'Invitation acceptée ✅');return;}
+  const decline=e.target?.closest?.('[data-player-invite-decline]');if(decline){decline.disabled=true;const {error}=await sb.rpc('respond_global_player_tournament_invite',{p_invite_id:decline.dataset.playerInviteDecline,p_accept:false});decline.disabled=false;if(error)return toast(error.message);await loadMyPlayerDashboard();toast('Invitation refusée.');return;}
+  const open=e.target?.closest?.('[data-open-player-opportunity]');if(open){location.href=open.dataset.openPlayerOpportunity;return;}
+  if(e.target?.id==='playerDirectoryBtn'){
+    if(!isAdmin())return toast('Réservé à l’administrateur.');
+    e.target.disabled=true;const {data,error}=await sb.rpc('search_public_global_players',{p_workspace_id:S.workspace.id,p_query:$('#playerDirectorySearch').value.trim()||null,p_limit:50});e.target.disabled=false;if(error)return toast(error.message);S.playerDirectory=Array.isArray(data)?data:[];renderPlayerDirectoryCard();return;
+  }
+  const invite=e.target?.closest?.('[data-directory-invite]');if(invite){
+    const tid=$('#playerDirectoryTournament').value;if(!tid)return toast('Choisis d’abord le Swé à compléter.');
+    const row=(S.playerDirectory||[]).find(r=>String(r.global_player_id)===String(invite.dataset.directoryInvite));
+    if(!confirm('Inviter '+(row?.display_name||'ce joueur')+' à rejoindre ce Swé ?'))return;
+    invite.disabled=true;const {error}=await sb.rpc('invite_public_player_to_tournament',{p_workspace_id:S.workspace.id,p_tournament_id:tid,p_global_player_id:invite.dataset.directoryInvite,p_message:'Ton profil public correspond à un besoin pour compléter ce Swé.'});invite.disabled=false;if(error)return toast(error.message);toast('Invitation envoyée dans son espace joueur SWÉ ✅');return;
+  }
+});
+
 $('#sendInvite').onclick=async()=>{
   if(!S.workspace)return;
   if(!(isAdmin()||(isCoorg()&&S.myPermissions.can_invite_coorganizers)))return toast('Tu n’es pas autorisé à inviter un co-organisateur.');
@@ -1615,6 +1710,17 @@ function renderPlayers(){
         reviewBox.innerHTML='<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><b>📊 Synthèse des évaluations</b><span><b>'+avg.toFixed(1)+'/5</b> • '+count+' votant'+(count>1?'s':'')+'</span></div>'+chips+'<div class="small muted" style="margin-top:5px">Survole une note ⓘ pour voir son détail.</div><div class="small" style="margin-top:2px">'+voters+'</div>';
       }
       d.appendChild(reviewBox);
+
+      const identityBox=document.createElement('div');identityBox.className='player-link-box';
+      if(x.global_player_id){
+        identityBox.innerHTML='<div><b>🪪 Identité SWÉ liée</b><div class="muted small">Ce profil est déjà rattaché au compte joueur global.</div></div><span class="linked-ok">✓ LIÉ</span>';
+      }else{
+        const left=document.createElement('div');left.innerHTML='<b>🪪 Relier au compte joueur SWÉ</b><div class="muted small">Génère un code temporaire à transmettre au joueur. Il le saisira dans « Mon profil joueur ».</div>';
+        const gen=document.createElement('button');gen.textContent='Générer le code';gen.className='secondary';
+        gen.onclick=async()=>{gen.disabled=true;const {data,error}=await sb.rpc('issue_player_link_code',{p_workspace_id:S.workspace.id,p_player_id:x.id});gen.disabled=false;if(error)return toast(error.message);try{await navigator.clipboard.writeText(data)}catch(_e){}gen.textContent='Code copié : '+data;toast('Code de liaison copié ✅ • valable 30 jours');};
+        identityBox.append(left,gen);
+      }
+      d.appendChild(identityBox);
 
       const edit=document.createElement('div');edit.className='row';edit.style.marginTop='8px';edit.style.flexWrap='wrap';
       const nameInput=document.createElement('input');nameInput.style.flex='1';nameInput.value=x.name||'';nameInput.placeholder='Nom du joueur';
