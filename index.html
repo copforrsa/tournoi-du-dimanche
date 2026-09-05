@@ -11,10 +11,10 @@
   <meta name="apple-mobile-web-app-title" content="Tournoi Foot">
   <link rel="apple-touch-icon" href="./icon-192.png?v=4112">
   <link rel="manifest" href="./manifest.webmanifest">
-  <title>SWÉ TOURNAMENT 5/5 • V41.17</title>
-<link rel="icon" type="image/png" href="./favicon.png?v=4112">
+  <title>SWÉ TOURNAMENT 5/5 • V42.1</title>
+<link rel="icon" type="image/png" href="./favicon.png?v=4201">
 <link rel="apple-touch-icon" href="./icon-192.png?v=4112">
-  <link rel="stylesheet" href="./styles.css?v=4117">
+  <link rel="stylesheet" href="./styles.css?v=4201">
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -30,7 +30,7 @@
 </div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1><img src="./favicon.png?v=4112" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V41.17</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1><img src="./favicon.png?v=4201" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V42.1</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -74,7 +74,7 @@
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1><img src="./favicon.png?v=4112" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V41.17</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1><img src="./favicon.png?v=4201" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V42.1</span></h1><div id="workspaceName" class="muted"></div><div class="build-badge" title="Version installée">MAJ 42.1</div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -100,6 +100,7 @@
       </div>
 
       <div class="sa-admin-tabs"><button type="button" class="active" data-sa-tab="spaces">🏢 Espaces & offres</button><button type="button" data-sa-tab="players">👤 Joueurs SWÉ</button></div>
+      <div class="card sa-consent-control" id="saConsentControl"><div class="row" style="justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap"><div><b>🛡️ Consentement joueurs</b><div class="muted" style="margin-top:4px">Tu peux préparer le dispositif sans l’afficher aux joueurs. Tant qu’il est masqué, aucune fenêtre de régularisation n’est imposée aux comptes bêta.</div></div><label class="sa-switch-line"><input id="saConsentGateEnabled" type="checkbox"><span><b id="saConsentGateLabel">Masqué</b><small>Activation globale</small></span></label></div></div>
       <div id="saSpacesSection">
       <div class="card sa-create-card">
         <div class="sa-section-head"><div><span class="sa-section-icon">＋</span><div><h2>Créer un espace client</h2><p>Le compte administrateur doit déjà exister dans SWÉ.</p></div></div><span class="sa-help-pill">Configuration guidée</span></div>
@@ -656,6 +657,13 @@
       </div>
     </div>
 
+    <div id="view-cooler" class="view">
+      <div class="card cooler-hero">
+        <div><span class="cooler-kicker">MODULE 3E MI-TEMPS</span><h2 class="sectiontitle">🧊 Glacière & cagnotte</h2><p class="muted">Réservé à l’administrateur. Pilote la cagnotte de chaque Swé, son statut et le lien externe utilisé pour collecter les participations.</p></div>
+      </div>
+      <div class="card"><div class="row" style="justify-content:space-between;gap:10px;flex-wrap:wrap"><div><h2 class="sectiontitle">Cagnottes actives</h2><p class="muted">Revolut, Leetchi, PayPal, Sumeria ou tout autre lien HTTPS peuvent être utilisés. SWÉ ne détient pas les fonds : il centralise le suivi et le partage du lien.</p></div><button id="refreshCoolerFunds">Actualiser</button></div><div id="coolerFundsList" style="margin-top:12px"></div></div>
+    </div>
+
     <div id="view-ranking" class="view">
       <div class="card"><div class="row"><button class="rankMode" data-mode="day">Tournoi</button><button class="rankMode primary" data-mode="season">Saison</button></div><p class="muted">Le classement Saison cumule uniquement les statistiques des tournois rattachés à la saison sélectionnée. Un tournoi « Hors saison » conserve ses buts et ses passes décisives dans son propre historique, sans les ajouter au classement de saison.</p></div>
       <div class="grid g2">
@@ -707,13 +715,14 @@
       <button class="tab" data-view="teams">Équipes</button>
       <button class="tab" data-view="matches">Matchs</button>
       <button class="tab" data-view="league">Ligue</button>
+      <button class="tab hidden" data-view="cooler" id="coolerTab">Glacière</button>
       <button class="tab" data-view="ranking">Classement</button>
     </nav>
   </section>
 
   <section id="publicView" class="hidden">
     <header class="top">
-      <h1 class="public-title"><img src="./favicon.png?v=4112" class="brand-mark" alt="SWÉ"><span id="publicWorkspaceName">SWÉ TOURNAMENT 5/5</span></h1>
+      <h1 class="public-title"><img src="./favicon.png?v=4201" class="brand-mark" alt="SWÉ"><span id="publicWorkspaceName">SWÉ TOURNAMENT 5/5</span></h1>
       <div class="public-sub">Consultation publique • lecture seule</div>
     </header>
 
@@ -827,5 +836,5 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
-<script src="./app.js?v=4117" defer></script>
+<script src="./app.js?v=4201" defer></script>
 </body></html>
