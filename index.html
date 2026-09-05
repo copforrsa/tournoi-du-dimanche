@@ -14,7 +14,7 @@
   <title>SWÉ TOURNAMENT 5/5 • V41.12</title>
 <link rel="icon" type="image/png" href="./favicon.png?v=4112">
 <link rel="apple-touch-icon" href="./icon-192.png?v=4112">
-  <link rel="stylesheet" href="./styles.css?v=4115">
+  <link rel="stylesheet" href="./styles.css?v=4116">
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -303,7 +303,7 @@
 
     <div id="view-players" class="view">
       <div class="card">
-        <h2 class="sectiontitle">Joueurs</h2><p class="muted">Les co-organisateurs peuvent consulter les joueurs et donner <b>un avis par joueur</b> sur leur niveau. <b>Seul l’administrateur peut suspendre, réactiver ou supprimer un joueur du groupe.</b></p>
+        <h2 class="sectiontitle" id="playersViewTitle">Joueurs</h2><p class="muted" id="playersViewIntro">Consulte et gère les membres du groupe selon tes autorisations.</p>
         <textarea id="playersInput" rows="3" placeholder="Charly, Mika, Miguel..."></textarea>
         <div class="space"></div>
         <div class="grid g2">
@@ -329,7 +329,7 @@
         <div class="row" style="justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap"><div><h2 class="sectiontitle">🙋 Demandes de participation</h2><div class="muted">Les joueurs solo peuvent solliciter une place sur tes Swés configurés « Sur demande ».</div></div><button id="refreshPlayerRequests">Actualiser</button></div>
         <div id="playerParticipationRequests" style="margin-top:12px"></div>
       </div>
-      <div class="card"><div class="muted" style="margin-bottom:8px">💡 Administrateur et co-gestionnaires utilisent la même évaluation confidentielle : Cardio, Dribble, Collectif, Frappe et rôle de prédilection. Les moyennes servent uniquement à améliorer l’équilibrage des équipes.</div><div id="playersList"></div></div>
+      <div class="card"><div id="playersRatingIntro" class="muted hidden" style="margin-bottom:8px">💡 Administrateur et co-gestionnaires utilisent la même évaluation confidentielle : Cardio, Dribble, Collectif, Frappe et rôle de prédilection. Les moyennes servent uniquement à améliorer l’équilibrage des équipes.</div><div id="playersList"></div></div>
     </div>
 
     <div id="view-permissions" class="view">
@@ -678,7 +678,7 @@
     <nav class="tabs">
       <button class="tab active" data-view="home">Accueil</button>
       <button class="tab" data-view="myplayer">Mon profil joueur</button>
-      <button class="tab" data-view="players">Joueurs</button>
+      <button class="tab" data-view="players" id="playersTabLabel">Joueurs</button>
       <button class="tab admin-permissions-tab hidden" data-view="permissions">Autorisations</button>
       <button class="tab" data-view="tournaments">Tournois</button>
       <button class="tab" data-view="teams">Équipes</button>
@@ -804,5 +804,5 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
-<script src="./app.js?v=4115" defer></script>
+<script src="./app.js?v=4116" defer></script>
 </body></html>

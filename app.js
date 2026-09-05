@@ -308,15 +308,22 @@ function applyPermissions(){
   document.querySelectorAll('.tab[data-view="tournaments"]').forEach(el=>el.style.display=S.workspaceFeatures.tournaments_enabled?'':'none');
   document.querySelectorAll('.tab[data-view="league"]').forEach(el=>el.style.display=S.workspaceFeatures.league_enabled?'':'none');
   document.querySelectorAll('.tab[data-view="ranking"]').forEach(el=>el.style.display=S.workspaceFeatures.rankings_enabled?'':'none');
+  const ratingsEnabled=!!S.workspaceFeatures.player_ratings_enabled;
   document.querySelectorAll('.tab[data-view="players"]').forEach(el=>{
     const visible=admin||hasTemporaryAdmin()||(coorg&&S.myPermissions.can_view_players);
     el.style.display=visible?'':'none';
+    el.textContent=ratingsEnabled?'Joueurs / Notes':'Joueurs';
   });
+  const playersTitle=$('#playersViewTitle');if(playersTitle)playersTitle.textContent=ratingsEnabled?'Joueurs / Notes':'Joueurs';
+  const playersIntro=$('#playersViewIntro');if(playersIntro)playersIntro.innerHTML=ratingsEnabled
+    ?'Consulte les membres du groupe et leurs évaluations. <b>Administrateur et co-gestionnaires</b> peuvent noter les joueurs ; la moyenne suit le joueur grâce à son ID SWÉ.'
+    :'Liste des membres du groupe. Les actions de modification ou suppression dépendent des droits accordés par l’administrateur.';
+  $('#playersRatingIntro')?.classList.toggle('hidden',!ratingsEnabled);
   document.querySelectorAll('[data-go="tournaments"]').forEach(b=>{b.textContent=(adminOps||(coorg&&S.myPermissions.can_create_tournaments))?'📅 Nouveau tournoi':'📅 Tournois / historique'});
   document.querySelectorAll('[data-go="players"]').forEach(b=>{
     const visible=admin||hasTemporaryAdmin()||(coorg&&S.myPermissions.can_view_players);
     b.style.display=visible?'':'none';
-    b.textContent=admin?'👥 Gérer les joueurs':'👥 Joueurs et avis';
+    b.textContent=ratingsEnabled?'👥 Joueurs / Notes':'👥 Joueurs';
   });
 }
 
@@ -932,15 +939,19 @@ async function loadAll(){
     if(r.error)console.error('permissions coorganisateur',r.error);
     const mp=Array.isArray(r.data)?(r.data[0]||null):r.data;
     S.myPermissions={can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,can_generate_team_codes:false,can_edit_player_personal_info:false,temporary_admin_until:null,...(mp||{})};
-    r=await sb.rpc('get_my_player_skill_ratings',{p_workspace_id:w});
-    if(!r.error)S.myRatings=Array.isArray(r.data)?r.data:[];
+    if(S.workspaceFeatures.player_ratings_enabled){
+      r=await sb.rpc('get_my_player_skill_ratings',{p_workspace_id:w});
+      if(!r.error)S.myRatings=Array.isArray(r.data)?r.data:[];
+    }
   }else{S.invites=[];S.coorgs=[];}
   if(isAdmin()){
     r=await sb.rpc('get_admin_workspace_players',{p_workspace_id:w});S.players=r.data||[];
     r=await sb.rpc('get_manager_player_contacts',{p_workspace_id:w});S.contacts=r.error?[]:(r.data||[]);
-    r=await sb.rpc('get_admin_player_skill_reviews',{p_workspace_id:w});S.skillReviews=r.data||[];
+    if(S.workspaceFeatures.player_ratings_enabled){
+      r=await sb.rpc('get_admin_player_skill_reviews',{p_workspace_id:w});S.skillReviews=r.error?[]:(r.data||[]);
+      r=await sb.rpc('get_my_player_skill_ratings',{p_workspace_id:w});if(!r.error)S.myRatings=Array.isArray(r.data)?r.data:[];
+    }else{S.skillReviews=[];S.myRatings=[];}
     r=await sb.rpc('get_manager_player_team_codes',{p_workspace_id:w});S.teamCodes=r.error?[]:(r.data||[]);
-    r=await sb.rpc('get_my_player_skill_ratings',{p_workspace_id:w});if(!r.error)S.myRatings=Array.isArray(r.data)?r.data:[];
   }else{
     if(isCoorg()){
       r=await sb.rpc('get_workspace_players_safe',{p_workspace_id:w});
@@ -956,8 +967,10 @@ async function loadAll(){
     S.skillReviews=[];
   }
   if(isAdmin()||isCoorg()){
-    r=await sb.rpc('get_player_skill_aggregates',{p_workspace_id:w});
-    S.skillAggregates=r.error?[]:(Array.isArray(r.data)?r.data:[]);
+    if(S.workspaceFeatures.player_ratings_enabled){
+      r=await sb.rpc('get_player_skill_aggregates',{p_workspace_id:w});
+      S.skillAggregates=r.error?[]:(Array.isArray(r.data)?r.data:[]);
+    }else S.skillAggregates=[];
     r=await sb.rpc('get_my_linked_player_id',{p_workspace_id:w});
     S.myLinkedPlayerId=r.error?null:(r.data||null);
   }else {S.skillAggregates=[];S.myLinkedPlayerId=null;}
@@ -1722,7 +1735,9 @@ function renderPlayers(){
   const box=$('#playersList');box.innerHTML='';
   if(isCoorg()){
     const info=document.createElement('div');info.className='readonly-note';
-    info.innerHTML='👥 <b>'+S.players.length+' joueur'+(S.players.length>1?'s':'')+'</b> accessible'+(S.players.length>1?'s':'')+'. Tu peux donner ton évaluation pour chaque joueur.<div style="margin-top:7px;padding:8px 10px;border-radius:10px;background:#fff3cd;color:#6b4f00"><b>🔒 Confidentiel :</b> les évaluations sont croisées de manière indépendante. La note affichée correspond au consensus des co-gestionnaires du groupe, sans révéler combien de personnes ont voté ni leurs notes individuelles.</div>';
+    info.innerHTML=S.workspaceFeatures.player_ratings_enabled
+      ?'👥 <b>'+S.players.length+' joueur'+(S.players.length>1?'s':'')+'</b> accessible'+(S.players.length>1?'s':'')+'. Tu peux consulter les critères et donner ton évaluation pour chaque joueur.<div style="margin-top:7px;padding:8px 10px;border-radius:10px;background:#fff3cd;color:#6b4f00"><b>🔒 Confidentiel :</b> les évaluations sont croisées de manière indépendante et suivent l’ID SWÉ du joueur.</div>'
+      :'👥 <b>'+S.players.length+' joueur'+(S.players.length>1?'s':'')+'</b> dans le groupe. Le module Notation est désactivé : seules les informations joueurs et les actions autorisées sont disponibles.';
     box.appendChild(info);
   }
   refreshGuestOfSelect();
@@ -1732,10 +1747,10 @@ function renderPlayers(){
     const info=document.createElement('span');info.style.flex='1';
     const g=guestLabel(x);
     let meta=(x.active?'Actif':'Inactif')+(g?' • '+esc(g):' • Membre du groupe');
-    if(isAdmin()){
+    if(S.workspaceFeatures.player_ratings_enabled&&isAdmin()){
       const aggregate=playerSkillAggregate(x.id);
       meta+=aggregate&&Number(aggregate.voter_count)>0?' • Moyenne '+Number(aggregate.avg_rating).toFixed(1)+'/5 • '+aggregate.voter_count+' votant'+(Number(aggregate.voter_count)>1?'s':''):' • Aucun avis';
-    }else if(isCoorg()){
+    }else if(S.workspaceFeatures.player_ratings_enabled&&isCoorg()){
       const aggregate=playerSkillAggregate(x.id);
       if(aggregate&&Number(aggregate.voter_count)>0)meta+=' • Moyenne SWÉ tous groupes : '+Number(aggregate.avg_rating).toFixed(1)+'/5';
     }
@@ -1771,7 +1786,7 @@ function renderPlayers(){
     }else top.append(info);
     d.appendChild(top);
 
-    if(isAdmin()){
+    if(isAdmin()&&S.workspaceFeatures.player_ratings_enabled){
       const summary=playerSkillReviewSummary(x);
       const aggregate=playerSkillAggregate(x.id);
       const reviewBox=document.createElement('div');reviewBox.style.cssText='margin-top:8px;padding:10px 12px;border:1px solid #dbe8df;border-radius:13px;background:#f8fbf9';
@@ -1796,7 +1811,9 @@ function renderPlayers(){
         reviewBox.innerHTML='<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><b>📊 Synthèse des évaluations</b><span><b>'+avg.toFixed(1)+'/5</b> • '+count+' votant'+(count>1?'s':'')+'</span></div>'+chips+'<div class="small muted" style="margin-top:5px">Survole une note ⓘ pour voir son détail.</div><div class="small" style="margin-top:2px">'+voters+'</div>';
       }
       d.appendChild(reviewBox);
+    }
 
+    if(isAdmin()){
       const identityBox=document.createElement('div');identityBox.className='player-link-box';
       if(x.global_player_id){
         identityBox.innerHTML='<div><b>🪪 Identité SWÉ liée</b><div class="muted small">Ce profil est déjà rattaché au compte joueur global.</div></div><span class="linked-ok">✓ LIÉ</span>';
@@ -1872,6 +1889,12 @@ function renderPlayers(){
       saveInfo.onclick=async()=>{const isMember=status.value==='member';saveInfo.disabled=true;const {error}=await sb.rpc('manager_update_player_personal_info',{p_player_id:x.id,p_name:nameInput.value.trim(),p_is_group_member:isMember,p_guest_of_player_id:isMember?null:(host.value||null),p_phone_number:phone.value.trim()||null});saveInfo.disabled=false;if(error)return toast(error.message);x.name=nameInput.value.trim();x.is_group_member=isMember;x.guest_of_player_id=isMember?null:(host.value||null);const found=S.contacts.find(c=>c.player_id===x.id);if(found)found.phone_number=phone.value.trim()||null;else S.contacts.push({player_id:x.id,phone_number:phone.value.trim()||null});toast('Informations mises à jour ✅');};
       edit.append(nameInput,status,host,phone,saveInfo);d.appendChild(edit);
     }
+    if(isCoorg()&&S.myPermissions.can_delete_members){
+      const deleteRow=document.createElement('div');deleteRow.className='row';deleteRow.style.cssText='margin-top:8px;justify-content:flex-end';
+      const del=document.createElement('button');del.textContent='🗑 Supprimer du groupe';del.className='danger smallbtn';
+      del.onclick=async()=>{if(!confirm('Supprimer '+x.name+' du groupe ?\n\nSon historique sportif sera conservé si nécessaire.'))return;del.disabled=true;const {data,error}=await sb.rpc('remove_player_member',{p_player_id:x.id});del.disabled=false;if(error)return toast(error.message);await loadAll();toast(data==='archived'?'Joueur suspendu : historique conservé.':'Joueur supprimé.');};
+      deleteRow.appendChild(del);d.appendChild(deleteRow);
+    }
     if(isCoorg()&&S.myPermissions.can_generate_team_codes&&x.is_group_member!==false){
       const codeRow=document.createElement('div');codeRow.className='row';codeRow.style.cssText='margin-top:8px;flex-wrap:wrap;padding:10px;background:#fffaf0;border:1px solid #f3dfae;border-radius:14px';
       const existingCode=S.teamCodes.find(c=>c.player_id===x.id);
@@ -1882,12 +1905,12 @@ function renderPlayers(){
       if(existingCode){const tog=document.createElement('button');tog.textContent=existingCode.enabled?'Désactiver':'Réactiver';tog.className=existingCode.enabled?'player-action-disable':'player-action-enable';tog.onclick=async()=>{const {error}=await sb.rpc('admin_set_player_team_code_enabled',{p_player_id:x.id,p_enabled:!existingCode.enabled});if(error)return toast(error.message);existingCode.enabled=!existingCode.enabled;renderPlayers();};codeRow.appendChild(tog);}
       d.appendChild(codeRow);
     }
-    if(isCoorg()&&S.myLinkedPlayerId&&String(S.myLinkedPlayerId)===String(x.id)){
+    if(S.workspaceFeatures.player_ratings_enabled&&isCoorg()&&S.myLinkedPlayerId&&String(S.myLinkedPlayerId)===String(x.id)){
       const selfNote=document.createElement('div');selfNote.style.cssText='margin-top:8px;padding:9px 10px;border-radius:12px;background:#f3f4f6;color:#4b5563;border:1px solid #e5e7eb';
       selfNote.innerHTML='<b>👤 Ton profil</b><div class="small">On te connaît 😏 : pas question de te mettre 5/5 partout ! Ton propre profil est donc hors vote 😂.</div>';
       d.appendChild(selfNote);
     }
-    if((isAdmin()||isCoorg())&&!(isCoorg()&&S.myLinkedPlayerId&&String(S.myLinkedPlayerId)===String(x.id))){
+    if(S.workspaceFeatures.player_ratings_enabled&&(isAdmin()||isCoorg())&&!(isCoorg()&&S.myLinkedPlayerId&&String(S.myLinkedPlayerId)===String(x.id))){
       const existing=S.myRatings.find(r=>r.player_id===x.id);
       const rate=document.createElement('div');rate.className='player-skill-review';rate.style.cssText='margin-top:8px;padding:9px 10px;border:1px solid #dce9e1;border-radius:13px;background:#f8fcfa';
       const aggregate=playerSkillAggregate(x.id);
