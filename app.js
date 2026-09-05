@@ -55,6 +55,29 @@ window.addEventListener('pageshow',()=>setTimeout(safeAppSync,300));
 const $=s=>document.querySelector(s);
 const toast=t=>{const x=$('#toast');x.textContent=t;x.style.display='block';setTimeout(()=>x.style.display='none',2600)};
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function renderPlatformFooter(){
+  const footer=$('#platformFooter');
+  if(!footer)return;
+  const cfg=S.platformSettings||{};
+  const enabled=cfg.footer_enabled!==false;
+  footer.classList.toggle('hidden',!enabled);
+  if(!enabled)return;
+
+  const company=$('#platformFooterCompany');
+  const text=$('#platformFooterText');
+  const links=$('#platformFooterLinks');
+  if(company)company.textContent=cfg.footer_company_name||'SWÉ Tournament';
+  if(text)text.textContent=cfg.footer_legal_text||'';
+  if(links){
+    links.classList.add('platform-footer-links');
+    const items=[];
+    if(cfg.footer_contact_email)items.push('<a href=\"mailto:'+esc(cfg.footer_contact_email)+'\">Contact</a>');
+    if(cfg.footer_legal_url)items.push('<a href=\"'+esc(cfg.footer_legal_url)+'\" target=\"_blank\" rel=\"noopener noreferrer\">Mentions légales</a>');
+    if(cfg.footer_privacy_url)items.push('<a href=\"'+esc(cfg.footer_privacy_url)+'\" target=\"_blank\" rel=\"noopener noreferrer\">Confidentialité</a>');
+    if(cfg.footer_terms_url)items.push('<a href=\"'+esc(cfg.footer_terms_url)+'\" target=\"_blank\" rel=\"noopener noreferrer\">CGU / CGV</a>');
+    links.innerHTML=items.join('');
+  }
+}
 const today=()=>new Date().toISOString().slice(0,10); $('#tourDate').value=today();
 function defaultRegistrationDeadlineLocal(dateStr){
   if(!dateStr)return '';
