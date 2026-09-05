@@ -1520,6 +1520,53 @@ document.addEventListener('click',async e=>{
   }
 });
 
+
+function closeCoorgOptionsManager(){document.querySelector('.swe-option-modal-backdrop')?.remove();}
+function coorgSubPeriodEnd(ts){
+  if(!ts)return '';
+  try{return new Date(Number(ts)*1000).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'});}catch(_){return ''}
+}
+async function openCoorgOptionsManager(){
+  closeCoorgOptionsManager();
+  const trigger=$('#homeCancelCoorg');
+  if(trigger){trigger.disabled=true;trigger.textContent='Chargement des options…';}
+  const {data,error}=await sb.functions.invoke('stripe-cancel-coorganizer-subscription',{body:{workspace_id:S.workspace.id,action:'list'}});
+  if(trigger){trigger.disabled=false;trigger.textContent='Gérer / résilier mes options équipe';}
+  if(error||data?.error)return toast(data?.error||error?.message||'Impossible de charger tes options.');
+  const subs=Array.isArray(data?.subscriptions)?data.subscriptions:[];
+  const overlay=document.createElement('div');overlay.className='swe-option-modal-backdrop';
+  overlay.innerHTML='<div class="swe-option-modal" role="dialog" aria-modal="true" aria-labelledby="coorgOptionsTitle">'+
+    '<div class="swe-option-modal-head"><div><h3 id="coorgOptionsTitle">⚙️ Gérer mes options équipe</h3><p>Sélectionne uniquement les options que tu souhaites arrêter. Les autres restent actives.</p></div><button type="button" class="swe-option-modal-close" aria-label="Fermer">×</button></div>'+
+    '<div class="swe-option-modal-body">'+
+      (subs.length?'<div class="swe-option-list">'+subs.map((x,i)=>{
+        const annual=x.interval==='year',qty=Math.max(0,Number(x.quantity||0)),unit=Number(x.unit_amount_cents||0),total=qty*unit;
+        const end=coorgSubPeriodEnd(x.current_period_end);
+        const state=x.cancel_at_period_end?'Renouvellement déjà arrêté':(annual?'Annuel':'Mensuel');
+        return '<label class="swe-option-row"><input type="checkbox" data-cancel-sub="'+esc(x.subscription_id)+'" '+(x.cancel_at_period_end?'disabled':'')+'><div><div class="swe-option-row-title">'+qty+' accès équipe'+(qty>1?'s':'')+' · '+state+'</div><div class="swe-option-row-meta">'+(annual?'Facturation annuelle':'Facturation mensuelle')+(annual&&end?' · actif jusqu’au '+esc(end):'')+(x.cancel_at_period_end?' · aucune action nécessaire':'')+'</div></div><div class="swe-option-row-price">'+euroCents(total)+'<small>'+(annual?'/ an':'/ mois')+'</small></div></label>';
+      }).join('')+'</div>':'<div class="swe-option-modal-empty"><b>Aucune option équipe payante active.</b><div class="muted" style="margin-top:5px">Les accès inclus ou offerts dans ton espace SWÉ ne sont pas concernés.</div></div>')+
+      '<div class="swe-option-modal-note"><b>À savoir :</b> une option mensuelle sélectionnée est arrêtée immédiatement. Pour une option annuelle, seul le renouvellement est arrêté : les accès restent actifs jusqu’à la fin de la période déjà payée.</div>'+
+    '</div><div class="swe-option-modal-actions"><button type="button" class="secondary" data-close-options>Fermer</button><button type="button" class="primary swe-option-cancel-confirm" data-confirm-options disabled>Résilier la sélection</button></div></div>';
+  document.body.appendChild(overlay);
+  const update=()=>{const n=overlay.querySelectorAll('[data-cancel-sub]:checked').length;const b=overlay.querySelector('[data-confirm-options]');if(b){b.disabled=n===0;b.textContent=n?'Résilier '+n+' option'+(n>1?'s':''):'Résilier la sélection';}};
+  overlay.querySelectorAll('[data-cancel-sub]').forEach(x=>x.addEventListener('change',update));
+  overlay.querySelector('.swe-option-modal-close')?.addEventListener('click',closeCoorgOptionsManager);
+  overlay.querySelector('[data-close-options]')?.addEventListener('click',closeCoorgOptionsManager);
+  overlay.addEventListener('click',ev=>{if(ev.target===overlay)closeCoorgOptionsManager();});
+  overlay.querySelector('[data-confirm-options]')?.addEventListener('click',async ev=>{
+    const ids=[...overlay.querySelectorAll('[data-cancel-sub]:checked')].map(x=>x.dataset.cancelSub).filter(Boolean);
+    if(!ids.length)return;
+    const annualSelected=subs.some(x=>ids.includes(x.subscription_id)&&x.interval==='year');
+    const msg='Confirmer la résiliation de '+ids.length+' option'+(ids.length>1?'s':'')+' sélectionnée'+(ids.length>1?'s':'')+' ?'+(annualSelected?'\\n\\nLes options annuelles resteront actives jusqu’à la fin de leur période déjà payée.':'');
+    if(!confirm(msg))return;
+    const b=ev.currentTarget;b.disabled=true;b.textContent='Résiliation en cours…';
+    const {data:cancelData,error:cancelError}=await sb.functions.invoke('stripe-cancel-coorganizer-subscription',{body:{workspace_id:S.workspace.id,action:'cancel',subscription_ids:ids}});
+    if(cancelError||cancelData?.error){b.disabled=false;update();return toast(cancelData?.error||cancelError?.message||'Impossible de résilier la sélection.');}
+    closeCoorgOptionsManager();
+    await loadAll();renderHome();
+    toast(cancelData?.message||'Résiliation enregistrée ✅');
+  });
+}
+
 document.addEventListener('click',async e=>{
   const stepBtn=e.target?.closest?.('[data-coorg-step]');
   if(stepBtn){const input=$('#homeCoorgQty');if(input){input.value=Math.max(1,Math.min(1000,Number(input.value||1)+Number(stepBtn.dataset.coorgStep||0)));refreshCoorgPurchasePrice();}return;}
@@ -1533,13 +1580,7 @@ document.addEventListener('click',async e=>{
   }
   if(e.target?.id==='homeCancelCoorg'){
     if(!isAdmin())return toast('Réservé à l’administrateur.');
-    if(!confirm('Résilier les accès co-gestionnaires supplémentaires ?\n\n• Mensuel : arrêt immédiat des accès payants.\n• Annuel : renouvellement stoppé immédiatement ; les accès restent disponibles jusqu’à la fin de la période déjà payée.\n\nLes accès inclus ou offerts dans ton espace SWÉ ne sont pas supprimés.'))return;
-    const b=e.target;b.disabled=true;b.textContent='Résiliation en cours…';
-    const {data,error}=await sb.functions.invoke('stripe-cancel-coorganizer-subscription',{body:{workspace_id:S.workspace.id}});
-    b.disabled=false;b.textContent='Résilier mes accès supplémentaires';
-    if(error||data?.error)return toast(data?.error||error?.message||'Impossible de résilier les accès.');
-    await loadAll();renderHome();
-    toast(data?.message||'Résiliation enregistrée ✅');
+    await openCoorgOptionsManager();
     return;
   }
   if(e.target?.id==='homeBuyCoorg'){
