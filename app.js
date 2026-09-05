@@ -1295,10 +1295,11 @@ function refreshCoorgPurchasePrice(){
   let q=Math.max(1,Math.min(1000,Number(input?.value||1)||1));if(input)input.value=q;
   const period=coorgBillingPeriod(),unit=coorgUnitCents(period),total=unit*q;
   const suffix=period==='year'?'/an':'/mois';
-  const wording=period==='year'?'an':'mois';
-  const u=$('#homeCoorgUnitPrice');if(u)u.textContent=euroCents(unit)+' / '+wording+' / accès';
+  const periodLabel=period==='year'?'par an':'par mois';
+  const frequencyLabel=period==='year'?'facturation annuelle':'facturation mensuelle';
+  const u=$('#homeCoorgUnitPrice');if(u)u.textContent='Tarif unitaire : 1 accès équipe à '+euroCents(unit)+' '+periodLabel;
   const label=$('#homeCoorgTotalLabel');if(label)label.textContent=period==='year'?'Total annuel':'Total mensuel';
-  const t=$('#homeCoorgTotal');if(t)t.innerHTML='<b>'+euroCents(total)+suffix+'</b><div class="muted">'+q+' × '+euroCents(unit)+' / '+wording+'</div>';
+  const t=$('#homeCoorgTotal');if(t)t.innerHTML='<b>'+euroCents(total)+suffix+'</b><div class="muted">'+q+' accès × '+euroCents(unit)+' • '+frequencyLabel+'</div>';
   const b=$('#homeBuyCoorg');if(b)b.innerHTML='💳 Ajouter '+q+' accès équipe — '+euroCents(total)+suffix+' <span>→</span>';
 }
 async function confirmCoorgCheckoutFromUrl(){
@@ -1420,8 +1421,8 @@ document.addEventListener('click',async e=>{
     const billingPeriod=coorgBillingPeriod();
     const unit=coorgUnitCents(billingPeriod),total=unit*qty;
     const periodLabel=billingPeriod==='year'?'an':'mois';
-    const periodText=billingPeriod==='year'?'Facturation annuelle (19,90 € par co-gestionnaire).':'Facturation mensuelle (1,99 € par co-gestionnaire).';
-    if(!confirm('Activer '+qty+' accès équipe supplémentaire(s) pour '+euroCents(total)+' / '+periodLabel+' ?\n\n'+periodText+' Activation automatique après paiement Stripe.'))return;
+    const periodText=billingPeriod==='year'?'Facturation annuelle : 19,90 € par accès équipe, soit 1,66 € / mois.':'Facturation mensuelle : 1,99 € par accès équipe.';
+    if(!confirm('Activer '+qty+' accès équipe supplémentaire(s) pour '+euroCents(total)+' / '+periodLabel+' ?\n\n'+periodText+'\nRésiliable à tout moment depuis ton espace administrateur.\nActivation automatique après paiement Stripe.'))return;
     const b=e.target;b.disabled=true;b.textContent='Ouverture du paiement…';
     const requestId=crypto.randomUUID();
     const {data,error}=await sb.functions.invoke('stripe-create-coorganizer-checkout',{body:{workspace_id:S.workspace.id,quantity:qty,billing_period:billingPeriod,request_id:requestId}});

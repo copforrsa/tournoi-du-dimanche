@@ -201,14 +201,14 @@
           <div class="coorg-pricing-title"><span>🏷️</span><div><b>Choisis ton rythme de paiement</b><small>Le même accès équipe, au mois ou à l’année. L’annuel t’offre l’équivalent de 2 mois.</small></div></div>
           <input type="hidden" id="homeCoorgBillingPeriod" value="month">
           <div class="coorg-billing-options" aria-label="Période de facturation des accès co-gestionnaires">
-            <button type="button" class="coorg-billing-choice active" data-coorg-billing="month" aria-pressed="true"><span class="coorg-billing-label">Mensuel</span><b>1,99 €</b><small>/ mois / co-gestionnaire</small></button>
-            <button type="button" class="coorg-billing-choice" data-coorg-billing="year" aria-pressed="false"><em>2 mois offerts</em><span class="coorg-billing-label">Annuel</span><b>19,90 €</b><small>/ an / co-gestionnaire · soit 1,66 €/mois</small></button>
+            <button type="button" class="coorg-billing-choice active" data-coorg-billing="month" aria-pressed="true"><span class="coorg-billing-label">Mensuel</span><b>1,99 €</b><small>1 accès équipe • facturation mensuelle</small><span class="coorg-billing-note">Sans engagement</span></button>
+            <button type="button" class="coorg-billing-choice" data-coorg-billing="year" aria-pressed="false"><em>2 mois offerts</em><span class="coorg-billing-label">Annuel</span><b>19,90 €</b><small>1 accès équipe • facturation annuelle</small><span class="coorg-billing-note">Soit 1,66 € / mois</span></button>
           </div>
           <div class="coorg-order-box">
             <div class="coorg-qty"><span>Co-gestionnaires à ajouter</span><div class="coorg-stepper"><button type="button" data-coorg-step="-1" aria-label="Retirer un accès">−</button><input id="homeCoorgQty" type="number" min="1" max="1000" value="1" inputmode="numeric"><button type="button" data-coorg-step="1" aria-label="Ajouter un accès">+</button></div></div>
             <div class="coorg-total"><span id="homeCoorgTotalLabel">Total mensuel</span><div id="homeCoorgTotal"><b>1,99 €/mois</b><div class="muted">1 × 1,99 €</div></div></div>
           </div>
-          <div id="homeCoorgUnitPrice" class="coorg-unit-price">1,99 € / mois / accès</div>
+          <div id="homeCoorgUnitPrice" class="coorg-unit-price">Tarif unitaire : 1 accès équipe à 1,99 € / mois</div>
           <button id="homeBuyCoorg" class="primary coorg-buy-btn">💳 Ajouter 1 accès équipe — 1,99 €/mois <span>→</span></button>
           <div class="coorg-trust"><span>🔒 Paiement sécurisé par Stripe</span><span>✅ Activation automatique</span><span>🕊️ Sans engagement</span><span>🚀 Tarif de lancement</span></div>
           <div class="coorg-cancel-box"><div><b>Sans engagement, résiliable à tout moment</b><div class="muted">La résiliation se fait directement ici, sans demande au support. Les accès mensuels sont arrêtés immédiatement. En annuel, le renouvellement est stoppé immédiatement et les accès restent actifs jusqu’à la fin de la période déjà payée.</div></div><button type="button" id="homeCancelCoorg" class="secondary coorg-cancel-btn">Résilier mes accès supplémentaires</button></div>
