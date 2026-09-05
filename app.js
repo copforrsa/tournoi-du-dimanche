@@ -29,7 +29,7 @@ window.addEventListener('error', (e) => {
   if(t){t.textContent='Erreur de chargement de l’application. Recharge la page.';t.style.display='block';}
 });
 
-const S={session:null,adminProfile:null,isSuperAdmin:false,superWorkspaces:[],workspace:null,members:[],coorgs:[],coorgCount:0,workspaceFeatures:{max_coorganizers:3,max_coorganizers_cap:100,rankings_enabled:true,league_enabled:true,tournaments_enabled:true,third_half_enabled:false,player_ratings_enabled:false,max_players_cap:35,payments_enabled:true,top_player_enabled:false,match_ratings_enabled:false,team_review_enabled:false},commercialAccess:{subscription_plan:'free',special_access_enabled:false,upgrade_requested_at:null},billingStatus:null,coorgPurchaseConfirming:false,myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null},myRatings:[],lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],skillAggregates:[],teamCodes:[],seasons:[],leagues:[],leaguePlayers:[],activeLeague:null,tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matchAssignments:[],matches:[],goals:[],teamBalanceScores:[],rankMode:'season',channel:null,goalTeamSelections:{},sportsComplexes:[],sportsPitches:[],publicMode:false,publicToken:null,editingTournamentId:null,teamCompetitionId:null,lastView:null,coorgQuotaRequest:null,superCoorgQuotaRequests:[],myLinkedPlayerId:null,playerDashboard:null,playerDirectory:[],organizerSettings:null,playerRequests:[],platformSettings:{consent_gate_enabled:false},thirdHalfFunds:[],teamReviewState:null};
+const S={session:null,adminProfile:null,isSuperAdmin:false,superWorkspaces:[],workspace:null,members:[],coorgs:[],coorgCount:0,workspaceFeatures:{max_coorganizers:3,max_coorganizers_cap:100,rankings_enabled:true,league_enabled:true,tournaments_enabled:true,third_half_enabled:false,player_ratings_enabled:false,max_players_cap:35,payments_enabled:true,top_player_enabled:false,match_ratings_enabled:false,team_review_enabled:false},commercialAccess:{subscription_plan:'free',special_access_enabled:false,upgrade_requested_at:null},billingStatus:null,coorgPurchaseConfirming:false,myPermissions:{can_invite_coorganizers:false,can_enter_scores:false,can_add_members:false,can_delete_members:false,can_create_tournaments:false,can_view_players:true,can_generate_teams:false,temporary_admin_until:null},myRatings:[],lastCreatedInvite:null,invites:[],players:[],contacts:[],skillReviews:[],skillAggregates:[],teamCodes:[],seasons:[],leagues:[],leaguePlayers:[],activeLeague:null,tournaments:[],activeTour:null,tPlayers:[],teams:[],teamPlayers:[],matchAssignments:[],matches:[],goals:[],teamBalanceScores:[],rankMode:'season',channel:null,goalTeamSelections:{},sportsComplexes:[],sportsPitches:[],publicMode:false,publicToken:null,tournamentCreateOpen:false,seasonAdminOpen:false,editingTournamentId:null,teamCompetitionId:null,lastView:null,coorgQuotaRequest:null,superCoorgQuotaRequests:[],myLinkedPlayerId:null,playerDashboard:null,playerDirectory:[],organizerSettings:null,playerRequests:[],platformSettings:{consent_gate_enabled:false},thirdHalfFunds:[],teamReviewState:null};
 
 let safeSyncTimer=null;
 let safeSyncBusy=false;
@@ -108,6 +108,10 @@ const DEFAULT_VENUE_META={
 function venueMeta(c){return DEFAULT_VENUE_META[String(c?.name||'').trim().toLowerCase()]||null}
 async function ensureDefaultSportsVenues(){
   if(!S.isSuperAdmin)return;
+  // Les complexes sont désormais administrés par le Super Admin.
+  // On ne crée les lieux de démonstration que sur une installation totalement vide,
+  // afin qu'un complexe supprimé volontairement ne soit jamais recréé au prochain chargement.
+  if((S.sportsComplexes||[]).length)return;
   const wanted=[{name:'Mada football club',city:'Ducos',pitches:['Terrain 1','Terrain 2','Terrain 3']},{name:'Arena Martinique / Arena Play On',city:'Schœlcher',pitches:['Terrain 1','Terrain 2','Terrain 3','Terrain 4']}];
   let changed=false;
   for(const v of wanted){let c=(S.sportsComplexes||[]).find(x=>String(x.name||'').trim().toLowerCase()===v.name.toLowerCase());if(!c){const created=await sb.rpc('super_admin_manage_sports_complex',{p_action:'create',p_name:v.name,p_city:v.city,p_active:true});if(created.error){console.warn('seed complex',v.name,created.error);continue}changed=true;const rr=await sb.rpc('get_sports_venues');if(!rr.error){S.sportsComplexes=Array.isArray(rr.data?.complexes)?rr.data.complexes:[];S.sportsPitches=Array.isArray(rr.data?.pitches)?rr.data.pitches:[];}c=(S.sportsComplexes||[]).find(x=>String(x.name||'').trim().toLowerCase()===v.name.toLowerCase());}if(!c)continue;const current=(S.sportsPitches||[]).filter(p=>String(p.complex_id)===String(c.id));for(const pitch of v.pitches){if(!current.some(p=>String(p.name||'').trim().toLowerCase()===pitch.toLowerCase())){const rr=await sb.rpc('super_admin_manage_sports_pitch',{p_action:'create',p_complex_id:c.id,p_name:pitch,p_active:true});if(!rr.error)changed=true;}}}
@@ -293,8 +297,11 @@ function applyPermissions(){
   const admin=isAdmin();
   const coorg=isCoorg();
   const adminOps=hasAdminOps();
-  const seasonCard=$('#seasonAdminCard');if(seasonCard)seasonCard.classList.toggle('hidden',!adminOps);
-  const tournamentCard=$('#tournamentAdminCard');if(tournamentCard)tournamentCard.classList.toggle('hidden',!(adminOps||(coorg&&S.myPermissions.can_create_tournaments)));
+  const canCreateTournament=adminOps||(coorg&&S.myPermissions.can_create_tournaments);
+  const seasonCard=$('#seasonAdminCard');if(seasonCard)seasonCard.classList.toggle('hidden',!adminOps||!S.seasonAdminOpen);
+  const tournamentCard=$('#tournamentAdminCard');if(tournamentCard)tournamentCard.classList.toggle('hidden',!canCreateTournament||!S.tournamentCreateOpen);
+  const newTournamentToggle=$('#newTournamentToggle');if(newTournamentToggle)newTournamentToggle.classList.toggle('hidden',!canCreateTournament);
+  const seasonSettingsToggle=$('#seasonSettingsToggle');if(seasonSettingsToggle)seasonSettingsToggle.classList.toggle('hidden',!adminOps);
   const attendanceCard=$('#attendanceAdminCard');if(attendanceCard)attendanceCard.classList.toggle('hidden',!(adminOps||coorg));
   const teamsCard=$('#teamsAdminCard');if(teamsCard)teamsCard.classList.remove('hidden');
   const teamControls=$('#teamManagementControls');
@@ -2850,6 +2857,27 @@ async function showTournamentHistory(t){
 
 $('#newSeasonBtn').onclick=()=>$('#newSeasonBox').classList.toggle('hidden');
 $('#createSeason').onclick=async()=>{const name=$('#seasonName').value.trim();if(!name)return;const {error}=await sb.from('seasons').insert({workspace_id:S.workspace.id,name,starts_on:today(),is_active:true});if(error)return toast(error.message);$('#seasonName').value='';$('#newSeasonBox').classList.add('hidden');toast('Saison créée')};
+const newTournamentToggle=$('#newTournamentToggle');
+if(newTournamentToggle)newTournamentToggle.onclick=()=>{
+  S.tournamentCreateOpen=true;
+  S.seasonAdminOpen=false;
+  applyPermissions();
+  $('#tournamentAdminCard')?.scrollIntoView({behavior:'smooth',block:'start'});
+};
+const cancelTournamentCreate=$('#cancelTournamentCreate');
+if(cancelTournamentCreate)cancelTournamentCreate.onclick=()=>{
+  S.tournamentCreateOpen=false;
+  applyPermissions();
+  $('#tournamentList')?.scrollIntoView({behavior:'smooth',block:'start'});
+};
+const seasonSettingsToggle=$('#seasonSettingsToggle');
+if(seasonSettingsToggle)seasonSettingsToggle.onclick=()=>{
+  S.seasonAdminOpen=!S.seasonAdminOpen;
+  S.tournamentCreateOpen=false;
+  applyPermissions();
+  if(S.seasonAdminOpen)$('#seasonAdminCard')?.scrollIntoView({behavior:'smooth',block:'start'});
+};
+
 $('#createTournament').onclick=async()=>{
   if(isCoorg()&&!hasTemporaryAdmin()&&!S.myPermissions.can_create_tournaments)return toast('Tu n’es pas autorisé à créer un tournoi.');
   const btn=$('#createTournament');
@@ -2906,10 +2934,12 @@ $('#createTournament').onclick=async()=>{
     S.tournaments=[data,...S.tournaments.filter(t=>t.id!==data.id)].sort((a,b)=>String(b.tournament_date).localeCompare(String(a.tournament_date)));
     S.tPlayers=[];S.teams=[];S.teamPlayers=[];S.matches=[];S.goals=[];
     $('#tourName').value='';$('#tourReservationRef').value='';
+    S.tournamentCreateOpen=false;
     renderAll();
     setView('tournaments');
     await loadAll();
     setView('tournaments');
+    applyPermissions();
     toast('Nouveau tournoi créé ✅ Compte à rebours des inscriptions activé.');
   }catch(error){
     toast(error.message||'Impossible de créer le tournoi');
@@ -4254,7 +4284,7 @@ async function bootPaymentDesk(token){
   $('#main').classList.add('hidden');
   $('#publicView').classList.remove('hidden');
   const root=$('#publicView');
-  root.innerHTML='<header class="top"><h1 class="public-title"><img src="./favicon.png?v=4214" class="brand-mark" alt="SWÉ">Suivi des paiements sur place</h1><div class="public-sub">SWÉ TOURNAMENT 5/5 • saisie manuelle uniquement</div></header><div class="card"><div id="paymentDeskContent"><p class="muted">Chargement de la liste des inscrits…</p></div></div>';
+  root.innerHTML='<header class="top"><h1 class="public-title"><img src="./favicon.png?v=4215" class="brand-mark" alt="SWÉ">Suivi des paiements sur place</h1><div class="public-sub">SWÉ TOURNAMENT 5/5 • saisie manuelle uniquement</div></header><div class="card"><div id="paymentDeskContent"><p class="muted">Chargement de la liste des inscrits…</p></div></div>';
   let snapshot=null;
   async function loadDesk(){
     const content=$('#paymentDeskContent');

@@ -14,7 +14,7 @@
   <title>SWÉ TOURNAMENT 5/5 • V42.8</title>
 <link rel="icon" type="image/png" href="./favicon.png?v=4208">
 <link rel="apple-touch-icon" href="./icon-192.png?v=4112">
-  <link rel="stylesheet" href="./styles.css?v=4214">
+  <link rel="stylesheet" href="./styles.css?v=4215">
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -30,7 +30,7 @@
 </div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1><img src="./favicon.png?v=4208" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V42.14</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1><img src="./favicon.png?v=4208" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V42.15</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -76,7 +76,7 @@
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1><img src="./favicon.png?v=4208" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V42.14</span></h1><div id="workspaceName" class="muted"></div><div class="build-badge" title="Version installée">MAJ 42.14</div></div>
+        <div><h1><img src="./favicon.png?v=4208" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V42.15</span></h1><div id="workspaceName" class="muted"></div><div class="build-badge" title="Version installée">MAJ 42.15</div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -409,7 +409,13 @@
     </div>
 
     <div id="view-tournaments" class="view">
-      <div class="card" id="seasonAdminCard">
+      <div class="card tournament-home-actions">
+        <div class="tournament-home-copy">
+          <div><span class="tour-create-eyebrow">GESTION DES TOURNOIS</span><h2 class="sectiontitle" style="margin:5px 0 4px">Tes tournois</h2><p class="muted" style="margin:0">Accède d’abord aux Swés en cours. La création et les réglages avancés restent disponibles uniquement quand tu en as besoin.</p></div>
+          <div class="tournament-home-buttons"><button id="newTournamentToggle" class="primary">＋ Créer un nouveau tournoi</button><button id="seasonSettingsToggle">⚙️ Gérer les saisons</button></div>
+        </div>
+      </div>
+      <div class="card hidden" id="seasonAdminCard">
         <h2 class="sectiontitle">Saison</h2>
         <div class="row"><select id="seasonSelect" style="flex:1"></select><button id="newSeasonBtn">+ Saison</button></div>
         <div id="newSeasonBox" class="hidden" style="margin-top:10px">
@@ -417,7 +423,7 @@
           <button id="createSeason" class="primary">Créer</button>
         </div>
       </div>
-      <div class="card" id="tournamentAdminCard">
+      <div class="card hidden" id="tournamentAdminCard">
         <div class="tour-create-hero">
           <div class="tour-create-icon">🏆</div>
           <div class="tour-create-copy"><span class="tour-create-eyebrow">NOUVEL ÉVÉNEMENT</span><h2>Créer un tournoi</h2><p>Configure ton Swé en quelques étapes. SWÉ gère ensuite les inscriptions, la capacité, les équipes et les terrains.</p></div>
@@ -462,7 +468,7 @@
           <div class="muted" style="margin:5px 0 10px">Module 3e mi-temps actif. Tu peux suggérer une contribution à la cagnotte aux joueurs, y compris aux joueurs solo qui s’inscrivent ou demandent une place.</div>
           <label><span class="muted">Participation glacière conseillée (€)</span><input id="tourCoolerSuggested" type="number" min="0" step="0.50" value="0"></label>
         </div>
-        <div class="space"></div><button id="createTournament" class="primary">Créer le tournoi</button>
+        <div class="space"></div><div class="row"><button id="createTournament" class="primary">Créer le tournoi</button><button id="cancelTournamentCreate" type="button">Annuler</button></div>
       </div>
       <div class="card"><h2 class="sectiontitle">⚽ Tournois en cours</h2><p class="muted">Retrouve ici les informations essentielles de chaque tournoi. Les réglages administratifs sont séparés sous chaque fiche pour éviter les confusions.</p><div id="tournamentList"></div></div><div class="card"><h2 class="sectiontitle">🏆 Classements de la saison</h2><div id="seasonScorerSummary"></div></div>
     </div>
@@ -844,5 +850,5 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
-<script src="./app.js?v=4214" defer></script>
+<script src="./app.js?v=4215" defer></script>
 <footer id="platformFooter" class="platform-footer hidden"><div class="platform-footer-inner"><div><b id="platformFooterCompany">SWÉ Tournament</b><div id="platformFooterText"></div></div><div id="platformFooterLinks"></div></div></footer></body></html>
