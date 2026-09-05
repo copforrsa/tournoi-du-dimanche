@@ -9,18 +9,18 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Tournoi Foot">
-  <link rel="apple-touch-icon" href="./icon-192.png?v=4108">
+  <link rel="apple-touch-icon" href="./icon-192.png?v=4110">
   <link rel="manifest" href="./manifest.webmanifest">
-  <title>SWÉ TOURNAMENT 5/5 • V41.08</title>
-<link rel="icon" type="image/png" href="./favicon.png?v=4108">
-<link rel="apple-touch-icon" href="./icon-192.png?v=4108">
-  <link rel="stylesheet" href="./styles.css?v=4108">
+  <title>SWÉ TOURNAMENT 5/5 • V41.10</title>
+<link rel="icon" type="image/png" href="./favicon.png?v=4110">
+<link rel="apple-touch-icon" href="./icon-192.png?v=4110">
+  <link rel="stylesheet" href="./styles.css?v=4110">
 </head>
 <body>
 <div id="toast" class="toast"></div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1><img src="./favicon.png?v=4108" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V41.08</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1><img src="./favicon.png?v=4110" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V41.10</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -63,53 +63,55 @@
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1><img src="./favicon.png?v=4108" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V41.08</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1><img src="./favicon.png?v=4110" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V41.10</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
 
 
-    <div id="superAdminPanel" class="hidden">
-      <div class="card" style="border:2px solid #d9eadf">
-        <div class="row" style="justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
-          <div>
-            <h2 class="sectiontitle">🛡️ Super Administration • SWÉ TOURNAMENT 5/5</h2>
-            <p class="muted">Pilotage central des espaces clients, administrateurs, modules et limites commerciales.</p>
-          </div>
-          <span class="guest-badge" style="background:#111827;color:#fff">SUPER ADMIN</span>
+    <div id="superAdminPanel" class="hidden super-admin-shell">
+      <div class="sa-hero">
+        <div>
+          <div class="sa-eyebrow">CENTRE DE PILOTAGE</div>
+          <h2>🛡️ Super Administration SWÉ</h2>
+          <p>Gère les espaces clients, les offres commerciales, les modules et les accès depuis une vue unique.</p>
         </div>
+        <span class="sa-super-badge">SUPER ADMIN</span>
       </div>
 
-      <div class="grid g3" id="saSummaryCards">
-        <div class="card"><div class="muted">Espaces</div><div id="saTotalSpaces" style="font-size:1.8rem;font-weight:900">0</div></div>
-        <div class="card"><div class="muted">Espaces actifs</div><div id="saActiveSpaces" style="font-size:1.8rem;font-weight:900">0</div></div>
-        <div class="card"><div class="muted">Espaces suspendus</div><div id="saSuspendedSpaces" style="font-size:1.8rem;font-weight:900">0</div></div>
+      <div class="sa-stats-grid" id="saSummaryCards">
+        <div class="sa-stat"><span>🏢</span><div><small>Espaces</small><b id="saTotalSpaces">0</b></div></div>
+        <div class="sa-stat positive"><span>✅</span><div><small>Actifs</small><b id="saActiveSpaces">0</b></div></div>
+        <div class="sa-stat warning"><span>⏸️</span><div><small>Suspendus</small><b id="saSuspendedSpaces">0</b></div></div>
+        <div class="sa-stat info"><span>👥</span><div><small>Joueurs actifs</small><b id="saTotalPlayers">0</b></div></div>
+        <div class="sa-stat violet"><span>🏆</span><div><small>Compétitions</small><b id="saTotalCompetitions">0</b></div></div>
+        <div class="sa-stat gold"><span>💎</span><div><small>Offres payantes</small><b id="saPaidSpaces">0</b></div></div>
       </div>
 
-      <div class="card">
-        <h2 class="sectiontitle">Créer un espace client</h2>
-        <p class="muted">Le compte administrateur doit déjà exister dans SWÉ TOURNAMENT 5/5. Son compte utilisateur reste indépendant de l’espace.</p>
+      <div class="card sa-create-card">
+        <div class="sa-section-head"><div><span class="sa-section-icon">＋</span><div><h2>Créer un espace client</h2><p>Le compte administrateur doit déjà exister dans SWÉ.</p></div></div><span class="sa-help-pill">Configuration guidée</span></div>
         <div class="grid g2">
-          <input id="saWorkspaceName" placeholder="Nom de l’espace">
-          <input id="saOwnerEmail" type="email" placeholder="Email de l’administrateur">
+          <label><span class="muted">Nom de l’espace</span><input id="saWorkspaceName" placeholder="Ex. SWÉ du dimanche"></label>
+          <label><span class="muted">Email administrateur</span><input id="saOwnerEmail" type="email" placeholder="admin@email.fr"></label>
         </div>
         <div class="space"></div>
         <div class="grid g3">
-          <input id="saOwnerFirstName" placeholder="Prénom de l’administrateur">
-          <input id="saOwnerLastName" placeholder="Nom de l’administrateur">
-          <input id="saOwnerPhone" type="tel" inputmode="tel" placeholder="Téléphone de l’administrateur">
+          <input id="saOwnerFirstName" placeholder="Prénom">
+          <input id="saOwnerLastName" placeholder="Nom">
+          <input id="saOwnerPhone" type="tel" inputmode="tel" placeholder="Téléphone">
         </div>
         <div class="space"></div>
-        <div class="grid g3">
-          <label class="player"><span class="muted">Co-organisateurs autorisés</span><input id="saMaxCoorg" type="number" min="0" max="100" value="3"></label>
-          <label class="player row" style="justify-content:flex-start"><input id="saTournamentEnabled" type="checkbox" style="width:auto" checked><span><b>Module Tournoi</b></span></label>
-          <label class="player row" style="justify-content:flex-start"><input id="saLeagueEnabled" type="checkbox" style="width:auto"><span><b>Module Ligue</b></span></label>
-          <label class="player row" style="justify-content:flex-start"><input id="saThirdHalfEnabled" type="checkbox" style="width:auto" disabled><span><b>Module 3e mi-temps</b><div class="muted">Préparé • activation backend/Stripe à venir</div></span></label>
+        <div class="sa-commercial-create">
+          <label><span class="muted">Offre commerciale</span><select id="saNewPlan"><option value="free">FREE — Gestion essentielle</option><option value="standard">STANDARD — Top Player inclus</option><option value="pro">PRO — Top Player + 3e mi-temps</option></select></label>
+          <label><span class="muted">Co-gestionnaires inclus / offerts</span><input id="saMaxCoorg" type="number" min="0" max="1000" value="3"></label>
         </div>
-        <div class="space"></div>
-        <label class="player row" style="justify-content:flex-start"><input id="saRankingsEnabled" type="checkbox" style="width:auto" checked><span><b>Classements buteurs / passeurs</b></span></label>
-        <div class="space"></div>
-        <button id="saCreateWorkspace" class="primary">+ Créer l’espace administrateur</button>
+        <div class="sa-module-create-grid">
+          <label class="sa-module-toggle"><input id="saTournamentEnabled" type="checkbox" checked><span><b>🏆 Tournoi</b><small>Création, matchs, équipes et historique.</small></span></label>
+          <label class="sa-module-toggle"><input id="saLeagueEnabled" type="checkbox"><span><b>🏁 Ligue</b><small>Swés récurrents et classement de ligue.</small></span></label>
+          <label class="sa-module-toggle dependent"><input id="saRankingsEnabled" type="checkbox" checked><span><b>⚽ Classements</b><small>Dépend d’au moins un module compétition.</small></span></label>
+        </div>
+        <div class="sa-plan-preview" id="saNewPlanPreview"><b>FREE</b><span>Top Player et 3e mi-temps non inclus.</span></div>
+        <button id="saCreateWorkspace" class="primary sa-main-action">+ Créer l’espace administrateur</button>
       </div>
 
       <div class="card">
@@ -574,7 +576,7 @@
           <button id="togglePlayerTrophyRank" type="button" class="hidden" style="margin-top:10px">Développer</button>
           <button id="sharePlayerTrophyRank" type="button" style="margin-top:10px">📲 Partager ce classement</button>
         </div>
-        <div class="card">
+        <div class="card" id="adminTopPlayerCard">
           <h2 class="sectiontitle">⭐ Top Player</h2>
           <p class="muted">Classement basé sur la moyenne des notes de match. Il reste distinct du classement des trophées remportés.</p>
           <div id="adminTopPlayerRank"></div>
@@ -616,7 +618,7 @@
 
   <section id="publicView" class="hidden">
     <header class="top">
-      <h1 class="public-title"><img src="./favicon.png?v=4108" class="brand-mark" alt="SWÉ"><span id="publicWorkspaceName">SWÉ TOURNAMENT 5/5</span></h1>
+      <h1 class="public-title"><img src="./favicon.png?v=4110" class="brand-mark" alt="SWÉ"><span id="publicWorkspaceName">SWÉ TOURNAMENT 5/5</span></h1>
       <div class="public-sub">Consultation publique • lecture seule</div>
     </header>
 
@@ -730,5 +732,5 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
-<script src="./app.js?v=4108" defer></script>
+<script src="./app.js?v=4110" defer></script>
 </body></html>

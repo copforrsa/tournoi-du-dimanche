@@ -277,7 +277,10 @@ function applyPermissions(){
   const canManageTeams=adminOps||(coorg&&S.myPermissions.can_generate_teams);
   if(teamControls)teamControls.classList.toggle('hidden',!canManageTeams);
   const matchCreateCard=$('#matchCreateAdminCard');if(matchCreateCard)matchCreateCard.classList.toggle('hidden',!adminOps);
-  const thirdHalf=!!S.workspaceFeatures.third_half_enabled;
+  const competitionEnabled=!!(S.workspaceFeatures.tournaments_enabled||S.workspaceFeatures.league_enabled);
+  const thirdHalf=competitionEnabled&&!!S.workspaceFeatures.third_half_enabled;
+  const topPlayerEnabled=competitionEnabled&&!!S.workspaceFeatures.player_ratings_enabled&&!!S.workspaceFeatures.top_player_enabled;
+  const topPlayerCard=$('#adminTopPlayerCard');if(topPlayerCard)topPlayerCard.classList.toggle('hidden',!topPlayerEnabled);
   $('#thirdHalfTournamentCreate')?.classList.toggle('hidden',!thirdHalf||!adminOps);
   $('#thirdHalfLeagueCreate')?.classList.toggle('hidden',!thirdHalf||!adminOps);
   $('#thirdHalfAdminCard')?.classList.toggle('hidden',!thirdHalf||!adminOps);
@@ -473,7 +476,7 @@ function renderSuperAdminVenues(){
   });
 }
 async function loadSuperAdminWorkspaces(){
-  const {data,error}=await sb.rpc('super_admin_get_workspaces');
+  const {data,error}=await sb.rpc('super_admin_get_workspaces_v2');
   if(error){toast(error.message);return}
   S.superWorkspaces=Array.isArray(data)?data:[];
   const commercial=await sb.rpc('super_admin_get_commercial_access');
@@ -496,12 +499,15 @@ function renderSuperAdminWorkspaces(){
   if($('#saTotalSpaces'))$('#saTotalSpaces').textContent=all.length;
   if($('#saActiveSpaces'))$('#saActiveSpaces').textContent=all.filter(w=>w.public_enabled).length;
   if($('#saSuspendedSpaces'))$('#saSuspendedSpaces').textContent=all.filter(w=>!w.public_enabled).length;
+  if($('#saTotalPlayers'))$('#saTotalPlayers').textContent=all.reduce((n,w)=>n+Number(w.active_players||0),0);
+  if($('#saTotalCompetitions'))$('#saTotalCompetitions').textContent=all.reduce((n,w)=>n+Number(w.tournament_count||0)+Number(w.league_count||0),0);
+  if($('#saPaidSpaces'))$('#saPaidSpaces').textContent=all.filter(w=>['standard','pro'].includes(String(w.subscription_plan||'free'))||w.special_access_enabled).length;
 
   box.innerHTML='';
   if(!rows.length){box.innerHTML='<p class="muted">'+(q?'Aucun espace ne correspond à la recherche.':'Aucun espace client.')+'</p>';return}
 
   rows.forEach(w=>{
-    const d=document.createElement('div');d.className='player';d.style.marginBottom='14px';d.style.padding='16px';
+    const d=document.createElement('div');d.className='sa-workspace-card';
     const created=w.created_at?new Date(w.created_at).toLocaleDateString('fr-FR'):'—';
     d.innerHTML=
       '<div class="row" style="align-items:flex-start;gap:12px;flex-wrap:wrap">'+
@@ -533,19 +539,25 @@ function renderSuperAdminWorkspaces(){
         '<div class="player" style="background:#f0fdf4;border-color:#bbf7d0"><b>♾️ Aucun plafond commercial</b><div class="muted" style="margin-top:4px">Les accès supplémentaires achetés s’ajoutent automatiquement après paiement Stripe.</div></div>'+
         '<label class="player row" style="justify-content:flex-start"><input data-sa-public type="checkbox" style="width:auto" '+(w.public_enabled?'checked':'')+'><span><b>Espace actif</b></span></label>'+
       '</div>'+
-      '<div class="grid g3" style="margin-top:10px">'+
-        '<label class="player row" style="justify-content:flex-start"><input data-sa-tournament type="checkbox" style="width:auto" '+(w.tournaments_enabled?'checked':'')+'><span><b>Tournoi</b></span></label>'+
-        '<label class="player row" style="justify-content:flex-start"><input data-sa-league type="checkbox" style="width:auto" '+(w.league_enabled?'checked':'')+'><span><b>Ligue</b></span></label>'+
-        '<label class="player row" style="justify-content:flex-start"><input data-sa-rankings type="checkbox" style="width:auto" '+(w.rankings_enabled?'checked':'')+'><span><b>Buteurs / passeurs</b></span></label>'+
+      '<div class="sa-settings-block">'+
+        '<div class="sa-block-title"><div><b>🧩 Modules & dépendances</b><span>Les options sont automatiquement coupées lorsqu’aucun module compétition n’est actif.</span></div></div>'+
+        '<div class="sa-module-grid">'+
+          '<label class="sa-module-toggle"><input data-sa-tournament type="checkbox" '+(w.tournaments_enabled?'checked':'')+'><span><b>🏆 Tournoi</b><small>Module compétition principal</small></span></label>'+
+          '<label class="sa-module-toggle"><input data-sa-league type="checkbox" '+(w.league_enabled?'checked':'')+'><span><b>🏁 Ligue</b><small>Module compétition récurrent</small></span></label>'+
+          '<label class="sa-module-toggle dependent"><input data-sa-rankings type="checkbox" '+(w.rankings_enabled?'checked':'')+'><span><b>⚽ Buteurs / passeurs</b><small>Requiert Tournoi ou Ligue</small></span></label>'+
+        '</div>'+
+        '<div class="sa-linked-options">'+
+          '<div class="sa-linked-option top"><span>⭐</span><div><b>Top Player & notes de match</b><small>Inclus avec STANDARD et PRO. Requiert un module compétition actif.</small></div><strong data-sa-top-status>'+(w.top_player_enabled?'ACTIF':'INACTIF')+'</strong></div>'+
+          '<div class="sa-linked-option third"><span>🍻</span><div><b>3e mi-temps</b><small>Incluse avec PRO. Requiert un module compétition actif.</small></div><strong data-sa-third-status>'+(w.third_half_enabled?'ACTIF':'INACTIF')+'</strong></div>'+
+        '</div>'+
       '</div>'+
-      '<div class="player" style="margin-top:10px;background:#fff8e8;border:1px solid #f2d18a">'+
-        '<label class="row" style="justify-content:flex-start"><input data-sa-player-ratings type="checkbox" style="width:auto" '+(w.player_ratings_enabled?'checked':'')+'><span><b>⭐ Module Top Player / notes de match</b><div class="muted">Victoire 6 • nul 5 • défaite 4 • +1/but • +0,5/passe • note max 10.</div></span></label>'+
-      '</div>'+
-      '<div class="player" style="margin-top:14px;background:#f5fbf7;border:1px solid #b7dfc4">'+
-        '<div class="row" style="justify-content:space-between;gap:10px;flex-wrap:wrap"><div><b>💎 Abonnement & accès commercial</b><div class="muted" style="margin-top:4px">Le Super Admin peut attribuer un plan ou une autorisation spéciale de démonstration.</div></div><span class="guest-badge">'+esc(String(w.subscription_plan||'free').toUpperCase())+'</span></div>'+
-        '<div class="grid g2" style="margin-top:10px"><label><span class="muted">Abonnement</span><select data-sa-plan><option value="free" '+((w.subscription_plan||'free')==='free'?'selected':'')+'>FREE</option><option value="standard" '+(w.subscription_plan==='standard'?'selected':'')+'>STANDARD</option><option value="pro" '+(w.subscription_plan==='pro'?'selected':'')+'>PRO</option></select></label><label class="player row" style="justify-content:flex-start;background:#fff"><input data-sa-special-access type="checkbox" style="width:auto" '+(w.special_access_enabled?'checked':'')+'><span><b>🎁 Autorisation spéciale</b><div class="muted">Débloque tous les modules, même sans upgrade. Idéal pour démonstration / ambassadeur.</div></span></label></div>'+
-        (w.upgrade_requested_at?'<div class="player" style="margin-top:9px;background:#fff8e8;border-color:#f2d18a"><b>🔔 Demande d’upgrade reçue</b><div class="muted">'+new Date(w.upgrade_requested_at).toLocaleString('fr-FR')+'</div></div>':'')+
+      '<div class="sa-commercial-block">'+
+        '<div class="sa-block-title"><div><b>💎 Offre commerciale</b><span>Le choix de l’offre pilote automatiquement les modules premium.</span></div><span class="sa-plan-chip '+esc(String(w.subscription_plan||'free'))+'">'+esc(String(w.subscription_plan||'free').toUpperCase())+'</span></div>'+
+        '<div class="grid g2" style="margin-top:12px"><label><span class="muted">Offre</span><select data-sa-plan><option value="free" '+((w.subscription_plan||'free')==='free'?'selected':'')+'>FREE — Gestion essentielle</option><option value="standard" '+(w.subscription_plan==='standard'?'selected':'')+'>STANDARD — Top Player inclus</option><option value="pro" '+(w.subscription_plan==='pro'?'selected':'')+'>PRO — Top Player + 3e mi-temps</option></select></label><label class="sa-special-toggle"><input data-sa-special-access type="checkbox" '+(w.special_access_enabled?'checked':'')+'><span><b>🎁 Accès spécial</b><small>Débloque les options premium pour démo / ambassadeur.</small></span></label></div>'+
+        '<div class="sa-offer-map"><span>FREE <b>Base</b></span><span>STANDARD <b>+ Top Player</b></span><span>PRO <b>+ Top Player + 3e mi-temps</b></span></div>'+
+        (w.upgrade_requested_at?'<div class="sa-upgrade-alert"><b>🔔 Demande d’upgrade reçue</b><span>'+new Date(w.upgrade_requested_at).toLocaleString('fr-FR')+'</span></div>':'')+
       '</div>'+ 
+
       '<div class="player" style="margin-top:14px;background:#fffaf0;border:1px solid #f2d79a">'+
         '<b>🔄 Transférer la gestion à un autre administrateur</b>'+
         '<div class="muted" style="margin:5px 0 10px">Le nouveau compte doit déjà exister. Après validation, il devient immédiatement administrateur principal de cet espace.</div>'+
@@ -556,6 +568,7 @@ function renderSuperAdminWorkspaces(){
         '<button data-sa-transfer class="danger" style="margin-top:10px">Transférer l’administration</button>'+
       '</div>';
 
+    refreshWorkspaceDependencyUI(d);
     const profileSave=d.querySelector('[data-sa-save-profile]');
     profileSave.onclick=async()=>{
       profileSave.disabled=true;
@@ -586,17 +599,16 @@ function renderSuperAdminWorkspaces(){
         p_last_name:d.querySelector('[data-sa-last-name]').value.trim()||null,
         p_phone:d.querySelector('[data-sa-phone]').value.trim()||null
       });
-      if(!r.error)r=await sb.rpc('super_admin_set_workspace_options',{
+      if(!r.error)r=await sb.rpc('super_admin_set_commercial_access_v2',{p_workspace_id:w.workspace_id,p_subscription_plan:d.querySelector('[data-sa-plan]').value,p_special_access_enabled:d.querySelector('[data-sa-special-access]').checked});
+      if(!r.error)r=await sb.rpc('super_admin_set_workspace_options_v2',{
         p_workspace_id:w.workspace_id,
         p_max_coorganizers:max,
         p_max_coorganizers_cap:Number(w.max_coorganizers_cap||100),
         p_tournaments_enabled:d.querySelector('[data-sa-tournament]').checked,
         p_league_enabled:d.querySelector('[data-sa-league]').checked,
         p_rankings_enabled:d.querySelector('[data-sa-rankings]').checked,
-        p_public_enabled:d.querySelector('[data-sa-public]').checked,
-        p_player_ratings_enabled:d.querySelector('[data-sa-player-ratings]').checked
+        p_public_enabled:d.querySelector('[data-sa-public]').checked
       });
-      if(!r.error)r=await sb.rpc('super_admin_set_commercial_access',{p_workspace_id:w.workspace_id,p_subscription_plan:d.querySelector('[data-sa-plan]').value,p_special_access_enabled:d.querySelector('[data-sa-special-access]').checked});
       save.disabled=false;if(r.error)return toast(r.error.message);
       toast('Espace mis à jour ✅');await loadSuperAdminWorkspaces();
     };
@@ -610,15 +622,14 @@ function renderSuperAdminWorkspaces(){
       const verb=w.public_enabled?'suspendre':'réactiver';
       if(!confirm('Confirmer : '+verb+' l’espace « '+w.workspace_name+' » ?'))return;
       toggle.disabled=true;
-      const {error}=await sb.rpc('super_admin_set_workspace_options',{
+      const {error}=await sb.rpc('super_admin_set_workspace_options_v2',{
         p_workspace_id:w.workspace_id,
         p_max_coorganizers:Number(w.max_coorganizers||0),
         p_max_coorganizers_cap:Number(w.max_coorganizers_cap||100),
         p_tournaments_enabled:!!w.tournaments_enabled,
         p_league_enabled:!!w.league_enabled,
         p_rankings_enabled:!!w.rankings_enabled,
-        p_public_enabled:!w.public_enabled,
-        p_player_ratings_enabled:!!w.player_ratings_enabled
+        p_public_enabled:!w.public_enabled
       });
       toggle.disabled=false;if(error)return toast(error.message);
       toast(w.public_enabled?'Espace suspendu.':'Espace réactivé ✅');await loadSuperAdminWorkspaces();
@@ -679,14 +690,33 @@ async function initSuperAdmin(){
   $('#workspaceName').textContent='Super administrateur de la plateforme';
   await loadSuperAdminWorkspaces();
   await loadSportsVenues();
+  refreshSuperAdminCreateDependencies();
   return true;
 }
 document.addEventListener('input',e=>{
   if(e.target?.id==='saSearchWorkspace')renderSuperAdminWorkspaces();
 });
+function refreshSuperAdminCreateDependencies(){
+  const competition=!!($('#saTournamentEnabled')?.checked||$('#saLeagueEnabled')?.checked);
+  const rankings=$('#saRankingsEnabled');if(rankings){rankings.disabled=!competition;if(!competition)rankings.checked=false;}
+  const plan=$('#saNewPlan')?.value||'free',preview=$('#saNewPlanPreview');
+  if(preview){const map={free:['FREE','Top Player et 3e mi-temps non inclus.'],standard:['STANDARD','Top Player & notes de match inclus.'],pro:['PRO','Top Player, notes de match et 3e mi-temps inclus.']};const m=map[plan];preview.innerHTML='<b>'+m[0]+'</b><span>'+m[1]+(competition?'':' Active Tournoi ou Ligue pour utiliser les options liées.')+'</span>';}
+}
+function refreshWorkspaceDependencyUI(card){
+  if(!card)return;
+  const competition=!!(card.querySelector('[data-sa-tournament]')?.checked||card.querySelector('[data-sa-league]')?.checked);
+  const rank=card.querySelector('[data-sa-rankings]');if(rank){rank.disabled=!competition;if(!competition)rank.checked=false;}
+  const plan=card.querySelector('[data-sa-plan]')?.value||'free',special=!!card.querySelector('[data-sa-special-access]')?.checked;
+  const topAllowed=competition&&(special||plan==='standard'||plan==='pro');
+  const thirdAllowed=competition&&(special||plan==='pro');
+  const top=card.querySelector('[data-sa-top-status]');if(top){top.textContent=topAllowed?'ACTIF':'INACTIF';top.classList.toggle('on',topAllowed);}
+  const third=card.querySelector('[data-sa-third-status]');if(third){third.textContent=thirdAllowed?'ACTIF':'INACTIF';third.classList.toggle('on',thirdAllowed);}
+}
 document.addEventListener('change',e=>{
   if(e.target?.id==='tourComplex')renderTournamentPitchChoices();
   if(e.target?.id==='leagueSessionComplex')renderLeaguePitchSelect();
+  if(['saTournamentEnabled','saLeagueEnabled','saNewPlan'].includes(e.target?.id))refreshSuperAdminCreateDependencies();
+  if(e.target?.matches?.('[data-sa-tournament],[data-sa-league],[data-sa-plan],[data-sa-special-access]'))refreshWorkspaceDependencyUI(e.target.closest('.sa-workspace-card'));
 });
 document.addEventListener('click',async e=>{
   if(e.target?.dataset?.saApproveCoorgRequest){
@@ -727,7 +757,11 @@ document.addEventListener('click',async e=>{
     const profile=await sb.rpc('super_admin_update_admin_profile',{
       p_workspace_id:created.data,p_first_name:first||null,p_last_name:last||null,p_phone:phone||null
     });
-    b.disabled=false;if(profile.error)return toast('Espace créé, mais fiche administrateur à compléter : '+profile.error.message);
+    if(profile.error){b.disabled=false;return toast('Espace créé, mais fiche administrateur à compléter : '+profile.error.message)}
+    const plan=$('#saNewPlan')?.value||'free';
+    let commercial=await sb.rpc('super_admin_set_commercial_access_v2',{p_workspace_id:created.data,p_subscription_plan:plan,p_special_access_enabled:false});
+    if(!commercial.error)commercial=await sb.rpc('super_admin_set_workspace_options_v2',{p_workspace_id:created.data,p_max_coorganizers:Math.max(0,Math.min(1000,Number($('#saMaxCoorg').value)||0)),p_max_coorganizers_cap:1000,p_tournaments_enabled:$('#saTournamentEnabled').checked,p_league_enabled:$('#saLeagueEnabled').checked,p_rankings_enabled:$('#saRankingsEnabled').checked,p_public_enabled:true});
+    b.disabled=false;if(commercial.error)return toast('Espace créé, mais configuration commerciale à vérifier : '+commercial.error.message);
     $('#saWorkspaceName').value='';$('#saOwnerEmail').value='';$('#saOwnerFirstName').value='';$('#saOwnerLastName').value='';$('#saOwnerPhone').value='';
     toast('Espace administrateur créé ✅');await loadSuperAdminWorkspaces();
   }
@@ -3809,7 +3843,7 @@ async function bootPublic(token){
   $('#publicView').classList.remove('hidden');
   let parsed;
   try{
-    const {data,error}=await sb.rpc('get_public_workspace_snapshot',{p_token:token});
+    const {data,error}=await sb.rpc('get_public_workspace_snapshot_v2',{p_token:token});
     if(error)throw error;
     if(!data)throw new Error('Lien public invalide ou désactivé.');
     parsed=data;
@@ -3823,7 +3857,7 @@ async function bootPublic(token){
   $('#publicWorkspaceName').textContent=P.workspace?.name||'SWÉ TOURNAMENT 5/5';
   let players=P.players||[],seasons=P.seasons||[],leagues=P.leagues||[],leaguePlayers=P.league_players||[],tournaments=(P.tournaments||[]).sort((a,b)=>String(b.tournament_date).localeCompare(String(a.tournament_date)));
   let teams=P.teams||[],teamPlayers=P.team_players||[],teamInvitations=P.team_player_invitations||[],matches=P.matches||[],goals=P.goals||[],matchAssignments=P.match_player_assignments||[];
-  const publicPlayerRatingsEnabled=!!P.features?.player_ratings_enabled;
+  const publicPlayerRatingsEnabled=!!P.features?.player_ratings_enabled&&!!P.features?.top_player_enabled;
   S.sportsComplexes=P.sports_complexes||[];
   S.sportsPitches=P.sports_pitches||[];
   let registrations=P.tournament_players||[];
@@ -4592,7 +4626,7 @@ async function bootPublic(token){
     async function refreshPublicRegistration(){
       const seq=++publicRefreshSeq;
       try{
-        const {data,error}=await sb.rpc('get_public_workspace_snapshot',{p_token:token});
+        const {data,error}=await sb.rpc('get_public_workspace_snapshot_v2',{p_token:token});
         if(error||!data||seq!==publicRefreshSeq)return;
         players=data.players||players;
         registrations=data.tournament_players||registrations;
@@ -4944,7 +4978,7 @@ async function bootPublic(token){
       window.__swePublicTeamEditing=false;
       $('#publicTeamCode').value='';$('#publicTeamName').value='';validatedTeamCode='';selectedTeamColor='';creatorSel.disabled=false;creatorSel.value='';$('#publicTeamFormAfterCode')?.classList.add('hidden');
       try{
-        const snap=await sb.rpc('get_public_workspace_snapshot',{p_token:token});
+        const snap=await sb.rpc('get_public_workspace_snapshot_v2',{p_token:token});
         if(!snap.error&&snap.data){
           players=snap.data.players||players;registrations=snap.data.tournament_players||registrations;
           teams=snap.data.teams||teams;teamPlayers=snap.data.team_players||teamPlayers;teamInvitations=snap.data.team_player_invitations||teamInvitations;
