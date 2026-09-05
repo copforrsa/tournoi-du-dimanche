@@ -435,3 +435,22 @@ select{background-color:#fff} textarea{resize:vertical}
 
 /* V42.15 — page Tournois simplifiée */
 .tournament-home-actions{padding:18px 20px}.tournament-home-copy{display:flex;align-items:center;justify-content:space-between;gap:18px}.tournament-home-buttons{display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end}.tournament-home-actions .sectiontitle{font-size:1.35rem}.tournament-home-actions .tour-create-eyebrow{font-size:.68rem}.tournament-home-actions .muted{max-width:720px}.tournament-home-actions button{white-space:nowrap}@media(max-width:760px){.tournament-home-copy{align-items:stretch;flex-direction:column}.tournament-home-buttons{justify-content:flex-start}.tournament-home-buttons button{flex:1 1 220px}}
+
+/* V42.17 — feuille de paiement & rapport imprimable */
+.payment-price-highlight{margin-top:8px;display:inline-block;padding:8px 12px;border-radius:10px;background:#eef7ff;border:1px solid #cfe3f7;font-size:1rem}
+.payment-walkin-card{margin-top:14px;padding:14px;border:1px dashed #b9c9d8;border-radius:14px;background:#fbfdff}
+.payment-print-host{display:none}
+@media print{
+  body > *:not(.payment-print-host){display:none !important}
+  .payment-print-host{display:block !important;position:static !important;background:#fff;color:#111;font-family:Arial,sans-serif}
+  .payment-print-sheet{padding:0;margin:0}
+  .payment-print-sheet h1{font-size:22px;margin:0 0 8px}
+  .payment-print-sheet p{font-size:12px;margin:4px 0 10px}
+  .payment-print-summary{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+  .payment-print-summary b{border:1px solid #bbb;padding:7px 10px;border-radius:6px}
+  .payment-print-sheet table{width:100%;border-collapse:collapse;margin-top:10px}
+  .payment-print-sheet th,.payment-print-sheet td{border:1px solid #bbb;padding:7px;text-align:left;font-size:11px;vertical-align:top}
+  .payment-print-sheet th{background:#eee}
+  .payment-print-sheet small{font-size:9px;color:#555}
+  .payment-print-foot{margin-top:16px !important;color:#666}
+}
