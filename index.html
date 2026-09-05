@@ -11,16 +11,26 @@
   <meta name="apple-mobile-web-app-title" content="Tournoi Foot">
   <link rel="apple-touch-icon" href="./icon-192.png?v=4112">
   <link rel="manifest" href="./manifest.webmanifest">
-  <title>SWÉ TOURNAMENT 5/5 • V41.12</title>
+  <title>SWÉ TOURNAMENT 5/5 • V41.17</title>
 <link rel="icon" type="image/png" href="./favicon.png?v=4112">
 <link rel="apple-touch-icon" href="./icon-192.png?v=4112">
-  <link rel="stylesheet" href="./styles.css?v=4116">
+  <link rel="stylesheet" href="./styles.css?v=4117">
 </head>
 <body>
 <div id="toast" class="toast"></div>
+<div id="consentGate" class="consent-gate hidden" role="dialog" aria-modal="true" aria-labelledby="consentGateTitle">
+  <div class="consent-panel">
+    <div class="consent-icon">🛡️</div>
+    <div class="sa-eyebrow">CONFIDENTIALITÉ & COMPTE SWÉ</div>
+    <h2 id="consentGateTitle">Valide les conditions pour continuer</h2>
+    <p>SWÉ Tournament utilise les données de ton compte pour créer ton ID joueur, relier tes groupes, gérer tes inscriptions et consolider tes statistiques.</p>
+    <label class="signup-consent consent-confirm"><input id="legacyConsentCheck" type="checkbox"><span><b>J’accepte les CGU et la politique de confidentialité SWÉ Tournament</b><small>Cette validation est enregistrée avec la version des conditions acceptées et la date d’acceptation.</small></span></label>
+    <div class="row consent-actions"><button id="acceptLegacyConsent" class="primary">Accepter et continuer</button><button id="consentLogout">Me déconnecter</button></div>
+  </div>
+</div>
 <div class="app">
   <section id="auth" class="auth">
-    <div class="top"><h1><img src="./favicon.png?v=4112" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V41.12</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
+    <div class="top"><h1><img src="./favicon.png?v=4112" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:600">V41.17</span></h1><p class="muted">Gestion partagée des tournois.</p></div>
     <div id="inviteLandingCard" class="card hidden">
       <h2 class="sectiontitle">🤝 Invitation co-organisateur</h2>
       <p id="inviteLandingText" class="muted">Tu as reçu une invitation pour rejoindre l’organisation du tournoi.</p>
@@ -40,13 +50,14 @@
       <div class="space"></div>
       <input id="password" type="password" placeholder="Mot de passe" autocomplete="current-password">
       <div class="space"></div>
+      <label class="signup-consent" id="signupConsentRow"><input id="signupConsent" type="checkbox"><span><b>J’accepte les conditions SWÉ Tournament</b><small>En créant mon compte, j’accepte les CGU, la politique de confidentialité et le traitement des données nécessaires au fonctionnement de mon profil, de mes inscriptions et de mes statistiques SWÉ.</small></span></label>
       <div class="row">
         <button id="login" class="primary">Se connecter</button>
         <button id="signup">Créer mon compte</button>
       </div>
       <div class="space"></div>
       <button id="forgotPassword" type="button">Mot de passe oublié ?</button>
-      <p class="muted">À la première inscription, confirme ton adresse email si Supabase te le demande.</p>
+      <p class="muted">La case d’acceptation est obligatoire uniquement pour créer un nouveau compte. Les comptes bêta existants devront valider les conditions lors d’une prochaine connexion.</p>
     </div>
 
     <div id="resetPasswordCard" class="card hidden">
@@ -63,7 +74,7 @@
   <section id="main" class="hidden">
     <header class="top">
       <div class="row" style="justify-content:space-between">
-        <div><h1><img src="./favicon.png?v=4112" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V41.12</span></h1><div id="workspaceName" class="muted"></div></div>
+        <div><h1><img src="./favicon.png?v=4112" class="brand-mark" alt="SWÉ">SWÉ TOURNAMENT 5/5 <span style="font-size:11px;opacity:.65;font-weight:700">V41.17</span></h1><div id="workspaceName" class="muted"></div></div>
         <button id="logout">Déconnexion</button>
       </div>
     </header>
@@ -88,6 +99,8 @@
         <div class="sa-stat gold"><span>💎</span><div><small>Offres payantes</small><b id="saPaidSpaces">0</b></div></div>
       </div>
 
+      <div class="sa-admin-tabs"><button type="button" class="active" data-sa-tab="spaces">🏢 Espaces & offres</button><button type="button" data-sa-tab="players">👤 Joueurs SWÉ</button></div>
+      <div id="saSpacesSection">
       <div class="card sa-create-card">
         <div class="sa-section-head"><div><span class="sa-section-icon">＋</span><div><h2>Créer un espace client</h2><p>Le compte administrateur doit déjà exister dans SWÉ.</p></div></div><span class="sa-help-pill">Configuration guidée</span></div>
         <div class="grid g2">
@@ -143,6 +156,16 @@
         <input id="saSearchWorkspace" placeholder="🔎 Rechercher par espace, admin, email ou téléphone">
         <div class="space"></div>
         <div id="saWorkspaceList"></div>
+      </div>
+      </div>
+
+      <div id="saPlayersSection" class="hidden">
+        <div class="card sa-players-card">
+          <div class="sa-section-head"><div><span class="sa-section-icon">👤</span><div><h2>Joueurs SWÉ</h2><p>Base centrale des comptes joueurs, administrateurs et co-gestionnaires rattachés à un ID SWÉ par leur adresse e-mail.</p></div></div><span class="sa-help-pill" id="saPlayersCountPill">0 profils</span></div>
+          <div class="sa-player-stats" id="saPlayerStats"></div>
+          <input id="saSearchPlayer" placeholder="🔎 Rechercher par nom, ID SWÉ, email, téléphone ou zone">
+          <div id="saPlayersList" style="margin-top:12px"></div>
+        </div>
       </div>
     </div>
 
@@ -804,5 +827,5 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
-<script src="./app.js?v=4116" defer></script>
+<script src="./app.js?v=4117" defer></script>
 </body></html>

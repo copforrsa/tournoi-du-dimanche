@@ -402,7 +402,19 @@ async function authState(){
   }
   $('#auth').classList.toggle('hidden',!!S.session);
   $('#main').classList.toggle('hidden',!S.session);
-  if(S.session){try{await boot()}catch(error){toast('Connexion OK, mais chargement impossible : '+(error?.message||error))}}
+  if(S.session){
+    try{
+      const consent=await sb.rpc('get_my_swe_consent_status');
+      if(!consent.error&&consent.data?.accepted!==true){
+        $('#main').classList.add('hidden');
+        $('#auth').classList.add('hidden');
+        $('#consentGate')?.classList.remove('hidden');
+        return;
+      }
+      await sb.rpc('ensure_my_global_player_profile',{p_display_name:null});
+      await boot();
+    }catch(error){toast('Connexion OK, mais chargement impossible : '+(error?.message||error))}
+  }
 }
 $('#login').onclick=async()=>{
   const email=$('#email').value.trim().toLowerCase();
@@ -412,11 +424,12 @@ $('#login').onclick=async()=>{
 };
 $('#signup').onclick=async()=>{
   const email=$('#email').value.trim().toLowerCase();
+  if(!$('#signupConsent')?.checked)return toast('Tu dois accepter les conditions SWÉ Tournament pour créer ton compte.');
   if(inviteEmailFromUrl&&email!==inviteEmailFromUrl)return toast('Utilise l’adresse e-mail indiquée dans l’invitation : '+inviteEmailFromUrl);
   const redirect=inviteIdFromUrl?APP_URL+'?invite='+encodeURIComponent(inviteIdFromUrl)+'&email='+encodeURIComponent(email):APP_URL;
-  const {data,error}=await sb.auth.signUp({email,password:$('#password').value,options:{emailRedirectTo:redirect}});
+  const {data,error}=await sb.auth.signUp({email,password:$('#password').value,options:{emailRedirectTo:redirect,data:{swe_consent_accepted:true,swe_terms_version:'2026-09-05-beta',swe_privacy_version:'2026-09-05-beta'}}});
   if(error)return toast(friendlyAuthError(error));
-  toast(data.session?'Compte créé.':'Compte créé : vérifie ton email puis reconnecte-toi avec la même adresse.');
+  toast(data.session?'Compte créé. Ton ID SWÉ est rattaché à ton email.':'Compte créé : vérifie ton email puis reconnecte-toi avec la même adresse. Ton ID SWÉ sera retrouvé automatiquement.');
 };
 $('#forgotPassword').onclick=async()=>{
   const email=$('#email').value.trim();
@@ -442,6 +455,15 @@ $('#updatePassword').onclick=async()=>{
   await authState();
 };
 $('#logout').onclick=async()=>{await sb.auth.signOut();location.reload()};
+$('#consentLogout').onclick=async()=>{await sb.auth.signOut();location.reload()};
+$('#acceptLegacyConsent').onclick=async()=>{
+  if(!$('#legacyConsentCheck')?.checked)return toast('Coche la case pour confirmer ton accord.');
+  const b=$('#acceptLegacyConsent');b.disabled=true;
+  const {error}=await sb.rpc('accept_current_swe_terms');
+  b.disabled=false;if(error)return toast(error.message);
+  $('#consentGate')?.classList.add('hidden');$('#main').classList.remove('hidden');
+  await boot();toast('Conditions acceptées ✅');
+};
 
 
 
@@ -503,8 +525,32 @@ async function loadSuperAdminWorkspaces(){
   if(!commercial.error){const map=new Map((Array.isArray(commercial.data)?commercial.data:[]).map(x=>[String(x.workspace_id),x]));S.superWorkspaces=S.superWorkspaces.map(w=>({...w,...(map.get(String(w.workspace_id))||{})}));}
   const requests=await sb.rpc('super_admin_get_coorganizer_quota_requests');
   S.superCoorgQuotaRequests=requests.error?[]:(Array.isArray(requests.data)?requests.data:[]);
+  const players=await sb.rpc('super_admin_get_players_directory');
+  S.superPlayers=players.error?[]:(Array.isArray(players.data)?players.data:[]);
   renderSuperAdminWorkspaces();
+  renderSuperAdminPlayers();
 }
+function renderSuperAdminPlayers(){
+  const box=$('#saPlayersList');if(!box)return;
+  const all=S.superPlayers||[];
+  const q=($('#saSearchPlayer')?.value||'').trim().toLowerCase();
+  const rows=all.filter(r=>!q||[r.display_name,r.public_player_id,r.email,r.phone_number,r.home_area].some(v=>String(v||'').toLowerCase().includes(q)));
+  const pill=$('#saPlayersCountPill');if(pill)pill.textContent=all.length+' profil'+(all.length>1?'s':'');
+  const stats=$('#saPlayerStats');if(stats)stats.innerHTML=
+    '<div><span>👤</span><b>'+all.length+'</b><small>Identités SWÉ</small></div>'+ 
+    '<div><span>✅</span><b>'+all.filter(r=>r.consent_accepted).length+'</b><small>Consentements à jour</small></div>'+ 
+    '<div><span>⏳</span><b>'+all.filter(r=>!r.consent_accepted).length+'</b><small>À régulariser</small></div>'+ 
+    '<div><span>🌍</span><b>'+all.filter(r=>r.discoverable).length+'</b><small>Disponibles annuaire</small></div>';
+  box.innerHTML='';
+  if(!rows.length){box.innerHTML='<div class="muted">Aucun joueur ne correspond à la recherche.</div>';return;}
+  box.innerHTML=rows.map(r=>'<div class="sa-player-row">'+
+    '<div class="sa-player-main"><div class="row" style="justify-content:flex-start;gap:7px;flex-wrap:wrap"><b>'+esc(r.display_name||'Joueur SWÉ')+'</b><span class="player-id-mini">'+esc(r.public_player_id||'—')+'</span><span class="guest-badge '+(r.consent_accepted?'consent-ok':'consent-pending')+'">'+(r.consent_accepted?'CONSENTEMENT OK':'À VALIDER')+'</span></div>'+ 
+    '<div class="muted">📧 '+esc(r.email||'—')+(r.phone_number?' • 📱 '+esc(r.phone_number):'')+(r.home_area?' • 📍 '+esc(r.home_area):'')+'</div></div>'+ 
+    '<div class="sa-player-meta"><span><b>'+Number(r.groups_count||0)+'</b> groupe(s)</span><span><b>'+Number(r.local_profiles_count||0)+'</b> profil(s) lié(s)</span><span>'+(r.is_public?'🌐 Public':'🔒 Privé')+'</span><span>'+(r.discoverable?'🔎 Annuaire':'Annuaire désactivé')+'</span></div>'+ 
+    (r.consent_accepted_at?'<div class="small muted">Consentement : '+new Date(r.consent_accepted_at).toLocaleString('fr-FR')+'</div>':'')+
+  '</div>').join('');
+}
+
 function renderSuperAdminWorkspaces(){
   const box=$('#saWorkspaceList');if(!box)return;
   const q=($('#saSearchWorkspace')?.value||'').trim().toLowerCase();
@@ -716,6 +762,7 @@ async function initSuperAdmin(){
 }
 document.addEventListener('input',e=>{
   if(e.target?.id==='saSearchWorkspace')renderSuperAdminWorkspaces();
+  if(e.target?.id==='saSearchPlayer')renderSuperAdminPlayers();
 });
 function refreshSuperAdminCreateDependencies(){
   const competition=!!($('#saTournamentEnabled')?.checked||$('#saLeagueEnabled')?.checked);
@@ -740,6 +787,12 @@ document.addEventListener('change',e=>{
   if(e.target?.matches?.('[data-sa-tournament],[data-sa-league],[data-sa-plan],[data-sa-special-access]'))refreshWorkspaceDependencyUI(e.target.closest('.sa-workspace-card'));
 });
 document.addEventListener('click',async e=>{
+  const saTab=e.target?.closest?.('[data-sa-tab]');
+  if(saTab){
+    const section=saTab.dataset.saTab;document.querySelectorAll('[data-sa-tab]').forEach(b=>b.classList.toggle('active',b===saTab));
+    $('#saSpacesSection')?.classList.toggle('hidden',section!=='spaces');$('#saPlayersSection')?.classList.toggle('hidden',section!=='players');
+    if(section==='players')renderSuperAdminPlayers();return;
+  }
   if(e.target?.dataset?.saApproveCoorgRequest){
     const b=e.target;b.disabled=true;
     const {error}=await sb.rpc('super_admin_resolve_coorganizer_quota_request',{p_request_id:b.dataset.saApproveCoorgRequest,p_approve:true});
@@ -3750,7 +3803,7 @@ $('#shareWhatsapp').onclick=async()=>{const text=$('#shareText').value;if(naviga
 function subscribeRealtime(){if(S.channel)sb.removeChannel(S.channel);let timer;const reload=()=>{clearTimeout(timer);timer=setTimeout(async()=>await loadAll(),250)};S.channel=sb.channel('tournoi-manager').on('postgres_changes',{event:'*',schema:'public',table:'players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'seasons'},reload).on('postgres_changes',{event:'*',schema:'public',table:'tournaments'},reload).on('postgres_changes',{event:'*',schema:'public',table:'tournament_players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'teams'},reload).on('postgres_changes',{event:'*',schema:'public',table:'team_players'},reload).on('postgres_changes',{event:'*',schema:'public',table:'matches'},reload).on('postgres_changes',{event:'*',schema:'public',table:'goals'},reload).on('postgres_changes',{event:'*',schema:'public',table:'match_player_assignments'},reload).subscribe()}
 
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('./sw.js?v=4100',{updateViaCache:'none'})
+  navigator.serviceWorker.register('./sw.js?v=4117',{updateViaCache:'none'})
     .then(reg=>reg.update())
     .catch(()=>{});
 }
