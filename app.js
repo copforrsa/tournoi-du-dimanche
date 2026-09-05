@@ -1403,6 +1403,17 @@ document.addEventListener('click',async e=>{
     refreshCoorgPurchasePrice();
     return;
   }
+  if(e.target?.id==='homeCancelCoorg'){
+    if(!isAdmin())return toast('Réservé à l’administrateur.');
+    if(!confirm('Résilier les accès co-gestionnaires supplémentaires ?\n\n• Mensuel : arrêt immédiat des accès payants.\n• Annuel : renouvellement stoppé immédiatement ; les accès restent disponibles jusqu’à la fin de la période déjà payée.\n\nLes accès inclus ou offerts dans ton espace SWÉ ne sont pas supprimés.'))return;
+    const b=e.target;b.disabled=true;b.textContent='Résiliation en cours…';
+    const {data,error}=await sb.functions.invoke('stripe-cancel-coorganizer-subscription',{body:{workspace_id:S.workspace.id}});
+    b.disabled=false;b.textContent='Résilier mes accès supplémentaires';
+    if(error||data?.error)return toast(data?.error||error?.message||'Impossible de résilier les accès.');
+    await loadAll();renderHome();
+    toast(data?.message||'Résiliation enregistrée ✅');
+    return;
+  }
   if(e.target?.id==='homeBuyCoorg'){
     if(!isAdmin())return toast('Réservé à l’administrateur.');
     const qty=Math.max(1,Number($('#homeCoorgQty')?.value||1));

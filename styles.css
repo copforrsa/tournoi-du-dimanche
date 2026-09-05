@@ -298,3 +298,12 @@ select{background-color:#fff} textarea{resize:vertical}
 .coorg-billing-choice small{grid-column:1;font-size:.75rem;color:#6d7871;white-space:nowrap}
 .coorg-billing-choice em{position:absolute;right:12px;top:-11px;background:#16a34a;color:#fff;border-radius:999px;padding:4px 9px;font-size:.68rem;font-style:normal;font-weight:900;white-space:nowrap}
 @media(max-width:650px){.coorg-billing-options{display:flex;overflow-x:auto;gap:9px;padding:0 14px 15px;scroll-snap-type:x proximity}.coorg-billing-choice{flex:0 0 245px;scroll-snap-align:start}.coorg-billing-choice small{white-space:normal}.coorg-billing-choice b{font-size:1.45rem}}
+
+
+/* V41.08 — option équipe sans engagement + résiliation directe */
+.coorg-cancel-box{margin-top:12px;padding:12px 14px;border:1px solid #d9e4dc;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.coorg-cancel-box b{color:#173d2b}
+.coorg-cancel-box .muted{margin-top:4px;font-size:12px;max-width:760px;line-height:1.45}
+.coorg-cancel-btn{white-space:nowrap;border-color:#cbd5d1;background:#fff;color:#385047}
+.coorg-cancel-btn:hover{background:#f6faf8}
+@media(max-width:700px){.coorg-cancel-btn{width:100%}}
